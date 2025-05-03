@@ -19,11 +19,14 @@ set(RAYLIB -lraylib -lopengl32 -lgdi32 -lwinmm)
 set(HEADERS 
 "include/enums.h"
 "include/game.h"
+"include/base/scene.h"
 "include/base/entity.h"
+"include/scenes/debug_field.h"
 )
 set(SOURCE
 "src/game.cpp"
 "src/base/entity.cpp"
+"src/scenes/debug_field.cpp"
 )
 
 add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})

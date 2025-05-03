@@ -1,5 +1,7 @@
 #pragma once
 #include <raylib.h>
+#include <memory>
+#include "base/scene.h"
 
 
 class Game {
@@ -15,6 +17,8 @@ public:
   static int target_framerate;
   static float time_scale;
 private:
+  std::unique_ptr<Scene> scene;
+
   RenderTexture canvas;
   Rectangle canvas_src;
   Rectangle canvas_dest;

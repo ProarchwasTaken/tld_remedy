@@ -1,7 +1,11 @@
+#include <cassert>
 #include <raylib.h>
+#include <memory>
 #include <plog/Log.h>
+#include "scenes/debug_field.h"
 #include "game.h"
 
+using std::make_unique;
 
 int Game::target_framerate = 60;
 float Game::time_scale = 1.0;
@@ -11,11 +15,13 @@ void Game::init() {
   SetTargetFPS(target_framerate);
   setupCanvas();
 
+  scene = make_unique<DebugField>();
   PLOGI << "Everything should be good to go!";
 }
 
 Game::~Game() {
   UnloadRenderTexture(canvas);
+  scene.reset();
   PLOGI << "Thanks for playing!";
 }
 
@@ -27,10 +33,15 @@ void Game::setupCanvas() {
 }
 
 void Game::start() {
+  assert(scene != nullptr);
+
   while (!WindowShouldClose()) {
+    scene->update();
+
     BeginTextureMode(canvas);
     {
       ClearBackground(WHITE);
+      scene->draw();
     }
     EndTextureMode();
 
