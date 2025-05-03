@@ -4,11 +4,14 @@
 #include "enums.h"
 
 
-/* An Entity is the root of every game object.*/
+/* The Entity abstract class is the root of every game object; Be it 
+ * Actors, Combatants, Projectiles, or Particle effects.*/
 class Entity {
   inline static std::unordered_set<int> existing_entities;
 public:
   Entity();
+  ~Entity();
+
   void assignID();
   void boundRectCorrection();
 

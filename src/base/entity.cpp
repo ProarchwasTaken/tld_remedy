@@ -1,3 +1,4 @@
+#include <cassert>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "base/entity.h"
@@ -6,6 +7,14 @@
 Entity::Entity() {
   assignID();
   PLOGI << "Entity [ID: " << entity_id << "] has been created.";
+}
+
+Entity::~Entity() {
+  PLOGI << "Clearing Entity [ID: " << entity_id << "] from memory.";
+
+
+  int erased = existing_entities.erase(entity_id);
+  assert(erased == 1);
 }
 
 void Entity::assignID() {

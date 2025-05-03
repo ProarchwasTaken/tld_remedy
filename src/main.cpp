@@ -23,6 +23,7 @@ void setupLogger() {
 int main(int argc, char *argv[]) {
   setupLogger();
   InitWindow(1280, 720, "Project Remedy");
+  SetTargetFPS(60);
 
   PLOGI << "Everything should be good to go!";
   while (!WindowShouldClose()) {
