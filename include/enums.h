@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum ActorType {
-  DECOR,
-  COMBATANT
+enum EntityType {
+  ACTOR,
+  COMBATANT,
 };

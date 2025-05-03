@@ -10,8 +10,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(RAYLIB -lraylib -lopengl32 -lgdi32 -lwinmm)
 set(HEADERS 
 "include/enums.h"
+"include/base/entity.h"
+)
+set(SOURCE
+"src/base/entity.cpp"
 )
 
-add_executable("remedy" src/main.cpp)
+add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
 target_link_libraries("remedy" ${RAYLIB})
 
