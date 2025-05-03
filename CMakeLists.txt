@@ -2,7 +2,15 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
-project("remedy")
+project("remedy" LANGUAGES CXX)
+option(BUILD_DEV "Build the game for development purposes." OFF)
+
+if(${BUILD_DEV})
+  message(STATUS "Using debug flags.")
+  set(COMPILE_OPTIONS --debug -O0)
+else()
+  set(COMPILE_OPTIONS -DNDEBUG)
+endif()
 
 include_directories("include")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -17,5 +25,6 @@ set(SOURCE
 )
 
 add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
-target_link_libraries("remedy" ${RAYLIB})
+target_link_libraries("remedy" PRIVATE ${RAYLIB})
+target_compile_options("remedy" PRIVATE ${COMPILE_OPTIONS})
 
