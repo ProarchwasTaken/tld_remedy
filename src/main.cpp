@@ -6,6 +6,7 @@
 #include <plog/Formatters/CsvFormatter.h>
 #include <plog/Formatters/TxtFormatter.h>
 #include <plog/Log.h>
+#include "game.h"
 
 using plog::ColorConsoleAppender, plog::RollingFileAppender, 
 plog::CsvFormatter, plog::TxtFormatter;
@@ -22,19 +23,14 @@ void setupLogger() {
 
 int main(int argc, char *argv[]) {
   setupLogger();
-  InitWindow(1280, 720, "Project Remedy");
-  SetTargetFPS(60);
+  Game remedy;
 
-  PLOGI << "Everything should be good to go!";
-  while (!WindowShouldClose()) {
-    BeginDrawing(); 
-    {
-      ClearBackground(WHITE);
-    }
-    EndDrawing();
-  }
+  PLOGI << "Initializing the game...";
+  remedy.init();
+
+  PLOGI << "Starting the game loop.";
+  remedy.start();
   
-  CloseWindow();
   return 0;
 }
 

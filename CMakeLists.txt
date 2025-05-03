@@ -18,9 +18,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(RAYLIB -lraylib -lopengl32 -lgdi32 -lwinmm)
 set(HEADERS 
 "include/enums.h"
+"include/game.h"
 "include/base/entity.h"
 )
 set(SOURCE
+"src/game.cpp"
 "src/base/entity.cpp"
 )
 
