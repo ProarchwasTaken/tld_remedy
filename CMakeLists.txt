@@ -21,6 +21,7 @@ set(HEADERS
 "include/game.h"
 "include/base/scene.h"
 "include/base/entity.h"
+"include/data/rect_ex.h"
 "include/scenes/debug_field.h"
 )
 set(SOURCE

@@ -1,6 +1,7 @@
 #pragma once
 #include <raylib.h>
 #include <unordered_set>
+#include "data/rect_ex.h"
 #include "enums.h"
 
 
@@ -13,16 +14,15 @@ public:
   ~Entity();
 
   void assignID();
-  void boundRectCorrection();
+  void rectExCorrection(RectEx &rect_ex);
 
+  virtual void update() = 0;
   virtual void draw() = 0;
   virtual void drawDebug();
 
   int entity_id;
   EntityType entity_type;
-  Vector2 position;
 
-  Rectangle bound;
-  Vector2 bound_scale;
-  Vector2 bound_offset;
+  Vector2 position;
+  RectEx bounding_box;
 };

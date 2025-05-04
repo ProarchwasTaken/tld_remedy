@@ -1,6 +1,7 @@
 #include <cassert>
 #include <raylib.h>
 #include <plog/Log.h>
+#include "data/rect_ex.h"
 #include "base/entity.h"
 
 
@@ -33,11 +34,11 @@ void Entity::assignID() {
   }
 }
 
-void Entity::boundRectCorrection() {
-  bound.x = position.x - bound_offset.x;
-  bound.y = position.y - bound_offset.y;
+void Entity::rectExCorrection(RectEx &rect_ex) {
+  rect_ex.rect.x = position.x - rect_ex.offset.x;
+  rect_ex.rect.y = position.y - rect_ex.offset.y;
 }
 
 void Entity::drawDebug() {
-  DrawRectangleLinesEx(bound, 2, BLUE);
+  DrawRectangleLinesEx(bounding_box.rect, 2, BLUE);
 }
