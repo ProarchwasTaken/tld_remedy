@@ -18,6 +18,8 @@ Entity::~Entity() {
 }
 
 void Entity::assignID() {
+  assert(existing_entities.find(entity_id) != existing_entities.end());
+
   int iteration = 0;
   bool assigned_id = false;
 

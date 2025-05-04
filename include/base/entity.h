@@ -20,7 +20,7 @@ public:
   virtual void draw() = 0;
   virtual void drawDebug();
 
-  const int entity_id = 0;
+  const int entity_id = -1;
   EntityType entity_type;
 
   Vector2 position;
