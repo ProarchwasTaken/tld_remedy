@@ -21,12 +21,14 @@ set(HEADERS
 "include/game.h"
 "include/base/scene.h"
 "include/base/entity.h"
+"include/base/actor.h"
 "include/data/rect_ex.h"
 "include/scenes/debug_field.h"
 )
 set(SOURCE
 "src/game.cpp"
 "src/base/entity.cpp"
+"src/base/actor.cpp"
 "src/scenes/debug_field.cpp"
 )
 
