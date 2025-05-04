@@ -13,7 +13,6 @@ Entity::Entity() {
 Entity::~Entity() {
   PLOGI << "Clearing Entity [ID: " << entity_id << "] from memory.";
 
-
   int erased = existing_entities.erase(entity_id);
   assert(erased == 1);
 }
@@ -29,7 +28,8 @@ void Entity::assignID() {
       iteration++;
     }
     else {
-      entity_id = iteration;
+      int &new_id = const_cast<int&>(entity_id);
+      new_id = iteration;
     }
   }
 }
