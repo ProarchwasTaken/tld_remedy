@@ -2,13 +2,18 @@
 #include <memory>
 #include <raylib.h>
 #include <plog/Log.h>
+#include "enums.h"
 #include "base/entity.h"
 #include "base/actor.h"
+#include "actors/player.h"
 #include "scenes/debug_field.h"
 
 using std::unique_ptr, std::make_unique;
 
 DebugField::DebugField() {
+  entities.push_back(
+    make_unique<PlayerActor>((Vector2){213, 120}, Direction::DOWN)
+  );
   PLOGI << "Initialized the DebugField Scene.";
 }
 
@@ -36,6 +41,7 @@ void DebugField::update() {
 void DebugField::draw() {
   for (unique_ptr<Entity> &entity : entities) {
     entity->draw();
+    entity->drawDebug();
   }
 }
  

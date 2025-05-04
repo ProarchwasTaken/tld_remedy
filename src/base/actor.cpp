@@ -23,8 +23,10 @@ Actor::Actor(string name, Vector2 position, enum Direction direction) {
 Actor::~Actor() {
   int erased = existing_actors.erase(this);
   assert(erased == 1);
+  PLOGI << "Removed actor: '" << name << "'";
 }
 
 void Actor::drawDebug() {
-  DrawRectangleLinesEx(collis_box.rect, 2, RED);
+  Entity::drawDebug();
+  DrawRectangleLinesEx(collis_box.rect, 1, RED);
 }

@@ -18,7 +18,7 @@ Entity::~Entity() {
 }
 
 void Entity::assignID() {
-  assert(existing_entities.find(entity_id) != existing_entities.end());
+  assert(existing_entities.find(entity_id) == existing_entities.end());
 
   int iteration = 0;
   bool assigned_id = false;
@@ -37,10 +37,13 @@ void Entity::assignID() {
 }
 
 void Entity::rectExCorrection(RectEx &rect_ex) {
-  rect_ex.rect.x = position.x - rect_ex.offset.x;
-  rect_ex.rect.y = position.y - rect_ex.offset.y;
+  rect_ex.rect.x = position.x + rect_ex.offset.x;
+  rect_ex.rect.y = position.y + rect_ex.offset.y;
+  rect_ex.rect.width = rect_ex.scale.x;
+  rect_ex.rect.height = rect_ex.scale.y;
 }
 
 void Entity::drawDebug() {
-  DrawRectangleLinesEx(bounding_box.rect, 2, BLUE);
+  DrawRectangleLinesEx(bounding_box.rect, 1, BLUE);
+  DrawCircleV(position, 1, BLUE);
 }

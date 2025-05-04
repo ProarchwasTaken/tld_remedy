@@ -3,7 +3,7 @@
 
 
 struct RectEx {
-  Rectangle rect;
   Vector2 scale;
   Vector2 offset;
+  Rectangle rect;
 };

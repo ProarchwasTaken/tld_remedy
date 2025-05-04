@@ -12,7 +12,7 @@ public:
   inline static std::unordered_set<int> existing_entities;
 
   Entity();
-  ~Entity();
+  virtual ~Entity();
 
   void assignID();
   void rectExCorrection(RectEx &rect_ex);

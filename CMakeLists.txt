@@ -24,12 +24,14 @@ set(HEADERS
 "include/base/actor.h"
 "include/data/rect_ex.h"
 "include/scenes/debug_field.h"
+"include/actors/player.h"
 )
 set(SOURCE
 "src/game.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
 "src/scenes/debug_field.cpp"
+"src/actors/player.cpp"
 )
 
 add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
