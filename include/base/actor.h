@@ -10,7 +10,7 @@
 /* Actors are basically the main players of the Field scene.*/
 class Actor : public Entity {
 public:
-  static std::set<Actor*> existing_actors;
+  inline static std::set<Actor*> existing_actors;
 
   Actor(std::string name, Vector2 position, enum Direction direction);
   ~Actor();
