@@ -8,8 +8,9 @@
 /* The Entity abstract class is the root of every game object; Be it 
  * Actors, Combatants, Projectiles, or Particle effects.*/
 class Entity {
-  inline static std::unordered_set<int> existing_entities;
 public:
+  inline static std::unordered_set<int> existing_entities;
+
   Entity();
   ~Entity();
 

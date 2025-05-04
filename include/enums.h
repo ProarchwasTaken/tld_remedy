@@ -8,8 +8,8 @@ enum EntityType {
 
 
 enum Direction {
-  RIGHT = 1,
+  UP = -2,
   LEFT = -1,
-  DOWN = 1,
-  UP = -1
+  RIGHT = 1,
+  DOWN = 2,
 };
