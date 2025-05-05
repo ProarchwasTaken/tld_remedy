@@ -22,7 +22,9 @@ set(HEADERS
 "include/base/scene.h"
 "include/base/entity.h"
 "include/base/actor.h"
+"include/data/keybinds.h"
 "include/data/rect_ex.h"
+"include/utils/input.h"
 "include/scenes/debug_field.h"
 "include/actors/player.h"
 )
@@ -30,6 +32,7 @@ set(SOURCE
 "src/game.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
+"src/utils/input.cpp"
 "src/scenes/debug_field.cpp"
 "src/actors/player.cpp"
 )
