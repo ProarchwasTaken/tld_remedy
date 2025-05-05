@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "game.h"
 #include "base/actor.h"
 #include "utils/input.h"
 #include "actors/player.h"
@@ -73,7 +74,7 @@ void PlayerActor::moveX() {
     x_direction = -1;
   }
 
-  position.x += movement_speed * x_direction;
+  position.x += (movement_speed * Game::deltaTime()) * x_direction;
 }
 
 void PlayerActor::moveY() {
@@ -90,7 +91,7 @@ void PlayerActor::moveY() {
     y_direction = -1;
   }
 
-  position.y += movement_speed * y_direction;
+  position.y += (movement_speed * Game::deltaTime()) * y_direction;
 }
 
 void PlayerActor::draw() {

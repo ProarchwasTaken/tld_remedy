@@ -6,9 +6,8 @@
 #include "game.h"
 
 using std::make_unique;
+const float Game::time_scale = 1.0;
 
-int Game::target_framerate = 60;
-float Game::time_scale = 1.0;
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, "Project Remedy");
@@ -16,6 +15,7 @@ void Game::init() {
   setupCanvas();
 
   scene = make_unique<DebugField>();
+  PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
 
@@ -56,3 +56,13 @@ void Game::start() {
   CloseWindow();
 }
 
+float Game::deltaTime() {
+  return (GetFrameTime() * target_framerate) * time_scale;
+}
+
+void Game::setTimeScale(float new_scale) {
+  float &scale = const_cast<float&>(time_scale);
+  scale = new_scale;
+
+  PLOGI << "Time scale has been changed: " << time_scale;
+}
