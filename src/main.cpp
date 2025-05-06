@@ -15,6 +15,7 @@ plog::CsvFormatter, plog::TxtFormatter;
 void setupLogger() {
   static RollingFileAppender<CsvFormatter> file("log.csv", 100000, 3);
   static ColorConsoleAppender<TxtFormatter> console;
+  
   plog::init(plog::debug, &file).addAppender(&console);
   
   PLOGI << "Logger Initialized.";
@@ -24,6 +25,10 @@ void setupLogger() {
 int main(int argc, char *argv[]) {
   setupLogger();
   Game remedy;
+
+  if (Game::devmode) {
+    PLOGD << "Detected that the program is running on Dev Mode.";
+  }
 
   PLOGI << "Initializing the game...";
   remedy.init();

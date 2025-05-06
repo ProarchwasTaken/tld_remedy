@@ -6,8 +6,8 @@
 #include "game.h"
 
 using std::make_unique;
-const float Game::time_scale = 1.0;
-
+float Game::time_scale = 1.0;
+bool Game::debug_info = false;
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, "Project Remedy");
@@ -36,6 +36,10 @@ void Game::start() {
   assert(scene != nullptr);
 
   while (!WindowShouldClose()) {
+    if (devmode && IsKeyPressed(KEY_F3)) {
+      toggleDebugInfo();
+    }
+
     scene->update();
 
     BeginTextureMode(canvas);
@@ -60,9 +64,16 @@ float Game::deltaTime() {
   return (GetFrameTime() * target_framerate) * time_scale;
 }
 
-void Game::setTimeScale(float new_scale) {
-  float &scale = const_cast<float&>(time_scale);
-  scale = new_scale;
+bool Game::debugInfo() {
+  return debug_info;
+}
 
+void Game::toggleDebugInfo() {
+  debug_info = !debug_info;
+  PLOGI << "Debug info has been toggled: " << debug_info;
+}
+
+void Game::setTimeScale(float new_scale) {
+  time_scale = new_scale;
   PLOGI << "Time scale has been changed: " << time_scale;
 }
