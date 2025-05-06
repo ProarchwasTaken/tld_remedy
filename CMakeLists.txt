@@ -25,6 +25,7 @@ set(HEADERS
 "include/data/keybinds.h"
 "include/data/rect_ex.h"
 "include/utils/input.h"
+"include/system/field_map.h"
 "include/scenes/debug_field.h"
 "include/actors/player.h"
 )
@@ -33,6 +34,7 @@ set(SOURCE
 "src/base/entity.cpp"
 "src/base/actor.cpp"
 "src/utils/input.cpp"
+"src/system/field_map.cpp"
 "src/scenes/debug_field.cpp"
 "src/actors/player.cpp"
 )

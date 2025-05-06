@@ -44,7 +44,7 @@ void Game::start() {
 
     BeginTextureMode(canvas);
     {
-      ClearBackground(WHITE);
+      ClearBackground(BLACK);
       scene->draw();
     }
     EndTextureMode();

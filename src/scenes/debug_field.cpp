@@ -11,6 +11,7 @@
 using std::unique_ptr, std::make_unique;
 
 DebugField::DebugField() {
+  field.loadMap("db_01");
   entities.push_back(
     make_unique<PlayerActor>((Vector2){213, 120}, Direction::DOWN)
   );
@@ -29,6 +30,10 @@ DebugField::~DebugField() {
 }
 
 void DebugField::update() {
+  if (!field.ready) {
+    return;
+  }
+
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
@@ -39,6 +44,12 @@ void DebugField::update() {
 }
 
 void DebugField::draw() {
+  if (!field.ready) {
+    return;
+  }
+
+  field.draw();
+
   for (unique_ptr<Entity> &entity : entities) {
     entity->draw();
     entity->drawDebug();
