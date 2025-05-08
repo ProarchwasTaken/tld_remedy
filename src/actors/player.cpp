@@ -15,8 +15,7 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   collis_box.scale = {8, 16};
   collis_box.offset = {-4, -12};
 
-  rectExCorrection(bounding_box);
-  rectExCorrection(collis_box);
+  rectExCorrection(bounding_box, collis_box);
 }
 
 void PlayerActor::behavior() {
@@ -56,8 +55,7 @@ void PlayerActor::movementInput(bool gamepad) {
 void PlayerActor::update() {
   moveX();
   moveY();
-  rectExCorrection(bounding_box);
-  rectExCorrection(collis_box);
+  rectExCorrection(bounding_box, collis_box);
 }
 
 void PlayerActor::moveX() {

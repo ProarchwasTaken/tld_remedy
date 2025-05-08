@@ -37,10 +37,15 @@ void Entity::assignID() {
 }
 
 void Entity::rectExCorrection(RectEx &rect_ex) {
-  rect_ex.rect.x = position.x + rect_ex.offset.x;
-  rect_ex.rect.y = position.y + rect_ex.offset.y;
-  rect_ex.rect.width = rect_ex.scale.x;
-  rect_ex.rect.height = rect_ex.scale.y;
+  rect_ex.position.x = position.x + rect_ex.offset.x;
+  rect_ex.position.y = position.y + rect_ex.offset.y;
+
+  rect_ex.rect = {
+    rect_ex.position.x, 
+    rect_ex.position.y,
+    rect_ex.scale.x,
+    rect_ex.scale.y
+  };
 }
 
 void Entity::drawDebug() {
