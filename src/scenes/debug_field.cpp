@@ -5,6 +5,7 @@
 #include "enums.h"
 #include "base/entity.h"
 #include "base/actor.h"
+#include "utils/camera.h"
 #include "actors/player.h"
 #include "scenes/debug_field.h"
 
@@ -15,6 +16,8 @@ DebugField::DebugField() {
   entities.push_back(
     make_unique<PlayerActor>((Vector2){213, 120}, Direction::DOWN)
   );
+
+  camera = CameraUtils::setupField();
   PLOGI << "Initialized the DebugField Scene.";
 }
 
@@ -48,11 +51,15 @@ void DebugField::draw() {
     return;
   }
 
-  field.draw();
+  BeginMode2D(camera); 
+  {
+    field.draw();
 
-  for (unique_ptr<Entity> &entity : entities) {
-    entity->draw();
-    entity->drawDebug();
+    for (unique_ptr<Entity> &entity : entities) {
+      entity->draw();
+      entity->drawDebug();
+    }
   }
+  EndMode2D();
 }
  
