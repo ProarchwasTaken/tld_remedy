@@ -15,6 +15,9 @@ public:
   void draw() override;
 private:
   FieldMap field;
+
   Camera2D camera;
+  Entity *camera_target;
+
   std::vector<std::unique_ptr<Entity>> entities;
 };

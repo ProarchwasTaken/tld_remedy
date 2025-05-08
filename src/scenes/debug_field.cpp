@@ -18,6 +18,7 @@ DebugField::DebugField() {
   );
 
   camera = CameraUtils::setupField();
+  camera_target = entities.begin()->get();
   PLOGI << "Initialized the DebugField Scene.";
 }
 
@@ -44,6 +45,8 @@ void DebugField::update() {
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
   }
+
+  CameraUtils::followFieldEntity(camera, camera_target);
 }
 
 void DebugField::draw() {
