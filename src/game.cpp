@@ -53,6 +53,7 @@ void Game::start() {
     {
       DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
                      WHITE);
+      if (debug_info) DrawFPS(24, 16);
     }
     EndDrawing();
   }
