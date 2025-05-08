@@ -18,7 +18,7 @@ DebugField::DebugField() {
   );
 
   camera = CameraUtils::setupField();
-  camera_target = entities.begin()->get();
+  camera_target = Actor::getActor(ActorType::PLAYER);
   PLOGI << "Initialized the DebugField Scene.";
 }
 

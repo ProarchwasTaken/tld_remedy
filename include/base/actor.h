@@ -11,14 +11,17 @@
 class Actor : public Entity {
 public:
   inline static std::set<Actor*> existing_actors;
+  static Actor* getActor(enum ActorType type);
 
-  Actor(std::string name, Vector2 position, enum Direction direction);
+  Actor(std::string name, enum ActorType actor_type, Vector2 position, 
+        enum Direction direction);
   ~Actor();
 
   virtual void behavior() = 0;
   virtual void drawDebug() override;
 
   std::string name;
+  ActorType actor_type;
   Direction direction;
   RectEx collis_box;
 };

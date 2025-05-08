@@ -6,6 +6,11 @@ enum EntityType {
   COMBATANT,
 };
 
+enum ActorType {
+  PLAYER,
+  COMPANION,
+  ENEMY,
+};
 
 enum Direction {
   UP = -2,

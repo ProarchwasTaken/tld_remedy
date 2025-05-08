@@ -8,7 +8,7 @@
 
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
-Actor("Mary", position, direction)
+Actor("Mary", ActorType::PLAYER, position, direction)
 {
   bounding_box.scale = {32, 32};
   bounding_box.offset = {-16, -28};
