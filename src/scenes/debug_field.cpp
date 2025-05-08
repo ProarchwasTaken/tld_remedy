@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "game.h"
 #include "base/entity.h"
 #include "base/actor.h"
 #include "utils/camera.h"
@@ -61,6 +62,10 @@ void DebugField::draw() {
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
       entity->drawDebug();
+    }
+
+    if (Game::debugInfo()) {
+      field.drawCollLines();
     }
   }
   EndMode2D();

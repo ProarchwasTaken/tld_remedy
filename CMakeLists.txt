@@ -24,6 +24,7 @@ set(HEADERS
 "include/base/actor.h"
 "include/data/keybinds.h"
 "include/data/rect_ex.h"
+"include/data/line.h"
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/system/field_map.h"
