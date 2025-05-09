@@ -17,7 +17,7 @@ public:
   void drawCollLines();
 
   bool ready = false;
+  static std::vector<Line> collision_lines;
 private:
   Texture base;
-  std::vector<Line> collision_lines;
 };

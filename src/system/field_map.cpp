@@ -12,6 +12,8 @@
 using std::string, std::ifstream, nlohmann::json, std::vector;
 
 
+vector<Line> FieldMap::collision_lines;
+
 FieldMap::~FieldMap() {
   UnloadTexture(base);
   collision_lines.clear();
@@ -90,7 +92,7 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
       continue;
     }
 
-    for (int index; index < (count - 1); index++) {
+    for (int index = 0; index < (count - 1); index++) {
       PLOGI << "Interation: " << index;
       int next_index = index + 1;
       Vector2 start = vertices[index];
