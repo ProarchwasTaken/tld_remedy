@@ -12,11 +12,11 @@
 using std::vector, std::sort;
 
 bool xCompare(Vector2 &a, Vector2 &b) {
-  return a.x < b.x;
+  return a.x > b.x;
 }
 
 bool yCompare(Vector2 &a, Vector2 &b) {
-  return a.y < a.y;
+  return a.y > a.y;
 }
 
 
@@ -29,17 +29,19 @@ bool Collision::checkX(Actor *actor, float magnitude, int x_direction,
   float half_scale_y = actor->collis_box.scale.y / 2;
 
   float center_x = actor->collis_box.position.x + half_scale_x;
-  float offset_x = half_scale_x * x_direction;
+  float offset_x = (half_scale_x + magnitude) * x_direction;
 
-  float y = actor->collis_box.position.y;
+  float center_y = actor->collis_box.position.y + half_scale_y;
+  float offset_y = half_scale_y - 1;
 
+  Vector2 start = {center_x, center_y};
+  Vector2 end = Vector2Add(start, {offset_x, 0});
   vector<Vector2> collision_points;
 
-  Vector2 start = {center_x + offset_x, y};
-  Vector2 end = start;
-  end.x += magnitude * x_direction;
+  for (int direction = -1; direction < 2; direction++) {
+    start.y = center_y + (offset_y * direction);
+    end.y = start.y;
 
-  for (int iter = 0; iter < 3; iter++) {
     Vector2 point;
     for (Line line : FieldMap::collision_lines) {
       if (CheckCollisionLines(start, end, line.start, line.end, &point)) {
@@ -47,9 +49,6 @@ bool Collision::checkX(Actor *actor, float magnitude, int x_direction,
         break;
       }
     }
-
-    start.y += half_scale_y;
-    end.y += half_scale_y;
   }
 
   if (collision_points.empty()) {
@@ -78,18 +77,20 @@ bool Collision::checkY(Actor *actor, float magnitude, int y_direction,
   float half_scale_x = actor->collis_box.scale.x / 2;
   float half_scale_y = actor->collis_box.scale.y / 2;
 
-  float x = actor->collis_box.position.x;
+  float center_x = actor->collis_box.position.x + half_scale_x;
+  float offset_x = half_scale_x - 1;
 
   float center_y = actor->collis_box.position.y + half_scale_y;
-  float offset_y = half_scale_y * y_direction;
+  float offset_y = (half_scale_y + magnitude) * y_direction;
 
+  Vector2 start = {center_x, center_y};
+  Vector2 end = Vector2Add(start, {0, offset_y});
   vector<Vector2> collision_points;
 
-  Vector2 start = {x, center_y + offset_y};
-  Vector2 end = start;
-  end.y += magnitude * y_direction;
+  for (int direction = -1; direction < 2; direction++) {
+    start.x = center_x + (offset_x * direction);
+    end.x = start.x;
 
-  for (int iter = 0; iter < 3; iter++) {
     Vector2 point;
     for (Line line : FieldMap::collision_lines) {
       if (CheckCollisionLines(start, end, line.start, line.end, &point)) {
@@ -97,9 +98,6 @@ bool Collision::checkY(Actor *actor, float magnitude, int y_direction,
         break;
       }
     }
-
-    start.x += half_scale_x;
-    end.x += half_scale_x;
   }
 
   if (collision_points.empty()) {

@@ -15,7 +15,7 @@ using std::unique_ptr, std::make_unique;
 DebugField::DebugField() {
   field.loadMap("db_01");
   entities.push_back(
-    make_unique<PlayerActor>((Vector2){213, 120}, Direction::DOWN)
+    make_unique<PlayerActor>((Vector2){64, 120}, Direction::DOWN)
   );
 
   camera = CameraUtils::setupField();
