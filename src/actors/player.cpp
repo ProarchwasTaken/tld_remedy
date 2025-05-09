@@ -4,6 +4,7 @@
 #include "game.h"
 #include "base/actor.h"
 #include "utils/input.h"
+#include "utils/collision.h"
 #include "actors/player.h"
 
 
@@ -72,7 +73,25 @@ void PlayerActor::moveX() {
     x_direction = -1;
   }
 
-  position.x += (movement_speed * Game::deltaTime()) * x_direction;
+  float magnitude = movement_speed * Game::deltaTime();
+  float collision_x;
+
+  if (!Collision::checkX(this, magnitude, x_direction, collision_x)) {
+    position.x += magnitude * x_direction;
+    return;
+  }
+
+  float half_scale_x = collis_box.scale.x / 2;
+  float collis_x;
+  if (x_direction == 1) {
+    collis_x = collis_box.position.x + collis_box.scale.x; 
+  }
+  else {
+    collis_x = collis_box.position.x;
+  }
+
+  float difference = position.x - collis_x;
+  position.x = collision_x + difference;
 }
 
 void PlayerActor::moveY() {
@@ -89,7 +108,25 @@ void PlayerActor::moveY() {
     y_direction = -1;
   }
 
-  position.y += (movement_speed * Game::deltaTime()) * y_direction;
+  float magnitude = movement_speed * Game::deltaTime();
+  float collision_y;
+  if (!Collision::checkY(this, magnitude, y_direction, collision_y)) {
+    position.y += magnitude * y_direction;
+    return;
+  }
+
+  float half_scale_y = collis_box.scale.y / 2;
+  float collis_y;
+
+  if (y_direction == 1) {
+    collis_y = collis_box.position.y + collis_box.scale.y;
+  }
+  else {
+    collis_y = collis_box.position.y;
+  }
+
+  float difference = position.y - collis_y;
+  position.y = collision_y + difference;
 }
 
 void PlayerActor::draw() {
