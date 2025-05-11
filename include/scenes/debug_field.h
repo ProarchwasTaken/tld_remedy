@@ -11,6 +11,8 @@ public:
   DebugField();
   ~DebugField();
 
+  void setupActors();
+
   void update() override;
   void draw() override;
 private:

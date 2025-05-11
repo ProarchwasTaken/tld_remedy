@@ -6,6 +6,7 @@
 #include "game.h"
 #include "base/entity.h"
 #include "base/actor.h"
+#include "data/actor.h"
 #include "utils/camera.h"
 #include "actors/player.h"
 #include "scenes/debug_field.h"
@@ -14,12 +15,11 @@ using std::unique_ptr, std::make_unique;
 
 DebugField::DebugField() {
   field.loadMap("db_01");
-  entities.push_back(
-    make_unique<PlayerActor>((Vector2){64, 120}, Direction::DOWN)
-  );
+  setupActors();
 
   camera = CameraUtils::setupField();
   camera_target = Actor::getActor(ActorType::PLAYER);
+  camera.target = camera_target->position;
   PLOGI << "Initialized the DebugField Scene.";
 }
 
@@ -32,6 +32,32 @@ DebugField::~DebugField() {
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the DebugField scene.";
+}
+
+void DebugField::setupActors() {
+  PLOGI << "Setting up field actors...";
+  for (ActorData data : field.actor_queue) {
+    Vector2 position = data.position;
+    Direction direction = data.direction;
+
+    unique_ptr<Entity> entity;
+
+    switch (data.type) {
+      case ActorType::PLAYER: {
+        entity = make_unique<PlayerActor>(position, direction);
+        break;
+      }
+      default: {
+
+      }
+    }
+
+    if (entity != nullptr) {
+      entities.push_back(std::move(entity));
+    }
+  }
+
+  field.actor_queue.clear();
 }
 
 void DebugField::update() {

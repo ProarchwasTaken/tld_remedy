@@ -106,22 +106,8 @@
          "name":"Spawn Points",
          "objects":[
                 {
-                 "id":39,
-                 "name":"Player",
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/Player Spawn.tx",
-                 "x":64,
-                 "y":128
-                }, 
-                {
-                 "id":40,
-                 "name":"Companion",
-                 "properties":[
-                        {
-                         "name":"actor_type",
-                         "propertytype":"ActorType",
-                         "type":"int",
-                         "value":1
-                        }],
+                 "id":42,
+                 "name":"Player Spawn",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/Player Spawn.tx",
                  "x":64,
                  "y":160
@@ -133,7 +119,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":41,
+ "nextobjectid":43,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
