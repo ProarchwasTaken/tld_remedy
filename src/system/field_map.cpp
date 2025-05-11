@@ -56,12 +56,12 @@ void FieldMap::parseMapData(string json_path) {
   PLOGI << "Parsing map data...";
   json map_data = json::parse(file);
 
-  for (auto layer : map_data["layers"]) {
+  for (basic_json layer : map_data["layers"]) {
     string layer_name = layer["name"];
-    if (layer_name == "Collision") {
+    if (layer_name == "Collisions") {
       retrieveCollLines(layer["objects"]);
     }
-    else if (layer_name == "Spawn Points") {
+    else if (layer_name == "Spawnpoints") {
       decideSpawnPoints(layer["objects"]);
     }
   }
@@ -73,7 +73,7 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
   PLOGI << "Loading collision lines...";
   collision_lines.clear();
 
-  for (auto object : layer_objects) {
+  for (basic_json object : layer_objects) {
     int object_id = object["id"];
     PLOGD << "Object ID:" << object_id;
 
@@ -83,7 +83,7 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
     vector<Vector2> vertices;
     PLOGD << "Retrieving line vertices...";
 
-    for (auto line : object["polyline"]) {
+    for (basic_json line : object["polyline"]) {
       float x = line["x"];
       float y = line["y"];
 
