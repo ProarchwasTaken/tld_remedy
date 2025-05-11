@@ -25,6 +25,7 @@ set(HEADERS
 "include/data/keybinds.h"
 "include/data/rect_ex.h"
 "include/data/line.h"
+"include/data/actor.h"
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/utils/collision.h"

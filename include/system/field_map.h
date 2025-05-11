@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <string>
 #include <vector>
+#include "data/actor.h"
 #include "data/line.h"
 
 
@@ -13,11 +14,14 @@ public:
   void parseMapData(std::string json_path);
   void retrieveCollLines(nlohmann::json &layer_objects);
 
+  void decideSpawnPoints(nlohmann::json &layer_objects);
+
   void draw();
   void drawCollLines();
 
   bool ready = false;
   static std::vector<Line> collision_lines;
+  std::vector<ActorData> actor_queue;
 private:
   Texture base;
 };

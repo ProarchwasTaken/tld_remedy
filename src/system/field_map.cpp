@@ -6,10 +6,13 @@
 #include <fstream>
 #include <vector>
 #include <plog/Log.h>
+#include "data/actor.h"
 #include "data/line.h"
+#include "enums.h"
 #include "system/field_map.h"
 
-using std::string, std::ifstream, nlohmann::json, std::vector;
+using std::string, std::ifstream, nlohmann::json, std::vector, 
+nlohmann::basic_json;
 
 
 vector<Line> FieldMap::collision_lines;
@@ -17,6 +20,7 @@ vector<Line> FieldMap::collision_lines;
 FieldMap::~FieldMap() {
   UnloadTexture(base);
   collision_lines.clear();
+  actor_queue.clear();
 }
 
 void FieldMap::loadMap(string map_name) {
@@ -56,6 +60,9 @@ void FieldMap::parseMapData(string json_path) {
     string layer_name = layer["name"];
     if (layer_name == "Collision") {
       retrieveCollLines(layer["objects"]);
+    }
+    else if (layer_name == "Spawn Points") {
+      decideSpawnPoints(layer["objects"]);
     }
   }
 
@@ -104,6 +111,17 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
   }
 
   PLOGI << "Finished. Lines created: " << collision_lines.size();
+}
+
+void FieldMap::decideSpawnPoints(json &layer_objects) {
+  PLOGI << "Deciding spawn points.";
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+
+    ActorData actor_data = {{x, y}, Direction::DOWN, ActorType::PLAYER};
+    actor_queue.push_back(actor_data);
+  }
 }
 
 void FieldMap::draw() {
