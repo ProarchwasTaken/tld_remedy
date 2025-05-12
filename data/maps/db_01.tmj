@@ -113,9 +113,8 @@
                 }, 
                 {
                  "id":45,
-                 "name":"",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_02",
+                 "type":"db_02-1",
                  "x":288,
                  "y":64
                 }],
