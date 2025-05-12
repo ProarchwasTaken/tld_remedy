@@ -10,8 +10,8 @@
 class FieldMap {
 public:
   ~FieldMap();
-  void loadMap(std::string map_name);
-  void parseMapData(std::string json_path);
+  void loadMap(std::string map_name, std::string *spawn_name = NULL);
+  void parseMapData(std::string json_path, std::string *spawn_name);
   void retrieveCollLines(nlohmann::json &layer_objects);
 
   void findSpawnpoints(nlohmann::json &layer_objects);

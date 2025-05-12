@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <cstddef>
 #include <plog/Log.h>
 #include "data/actor.h"
 #include "data/line.h"
@@ -23,7 +24,7 @@ FieldMap::~FieldMap() {
   actor_queue.clear();
 }
 
-void FieldMap::loadMap(string map_name) {
+void FieldMap::loadMap(string map_name, string *spawn_name) {
   PLOGI << "Loading map: '" << map_name << "'";
   float start_time = GetTime();
   ready = false;
@@ -44,14 +45,14 @@ void FieldMap::loadMap(string map_name) {
 
   UnloadTexture(base);
   base = LoadTexture(base_path.c_str());
-  parseMapData(json_path);
+  parseMapData(json_path, spawn_name);
 
   PLOGI << "Map: '" << map_name << "' has been loaded."; 
   PLOGD << "Load Time: " << GetTime() - start_time;
   ready = true;
 }
 
-void FieldMap::parseMapData(string json_path) {
+void FieldMap::parseMapData(string json_path, string *spawn_name) {
   ifstream file(json_path);
   PLOGI << "Parsing map data...";
   json map_data = json::parse(file);
@@ -62,7 +63,8 @@ void FieldMap::parseMapData(string json_path) {
       retrieveCollLines(layer["objects"]);
     }
     else if (layer_name == "Spawnpoints") {
-      findSpawnpoints(layer["objects"]);
+      if (spawn_name == NULL) findSpawnpoints(layer["objects"]);
+      else findSpawnpoints(layer["objects"], *spawn_name);
     }
   }
 
