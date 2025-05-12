@@ -62,7 +62,7 @@ void FieldMap::parseMapData(string json_path) {
       retrieveCollLines(layer["objects"]);
     }
     else if (layer_name == "Spawnpoints") {
-      decideSpawnPoints(layer["objects"]);
+      findSpawnpoints(layer["objects"]);
     }
   }
 
@@ -113,14 +113,23 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
   PLOGI << "Finished. Lines created: " << collision_lines.size();
 }
 
-void FieldMap::decideSpawnPoints(json &layer_objects) {
-  PLOGI << "Deciding spawn points.";
+void FieldMap::findSpawnpoints(json &layer_objects) {
+  PLOGI << "Finding initial spawn points.";
   for (basic_json object : layer_objects) {
+
     float x = object["x"];
     float y = object["y"];
+    Direction direction = Direction::DOWN;
+    ActorType actor_type = ActorType::PLAYER;
 
-    ActorData actor_data = {{x, y}, Direction::DOWN, ActorType::PLAYER};
-    actor_queue.push_back(actor_data);
+    if (object.find("properties") == object.end()) {
+      PLOGD << "Found initial player spawn point.";
+      PLOGD << "(X: " << x << ", Y: " << y << ")";
+      ActorData actor_data = {{x, y}, direction, actor_type};
+
+      actor_queue.push_back(actor_data);
+      break;
+    }
   }
 }
 

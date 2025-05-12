@@ -14,7 +14,7 @@ public:
   void parseMapData(std::string json_path);
   void retrieveCollLines(nlohmann::json &layer_objects);
 
-  void decideSpawnPoints(nlohmann::json &layer_objects);
+  void findSpawnpoints(nlohmann::json &layer_objects);
 
   void draw();
   void drawCollLines();
