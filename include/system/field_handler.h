@@ -19,6 +19,8 @@ public:
   static void raise(Args... event_args) {
     event_pool.push_back(std::make_unique<Event>(event_args...));
   }
+
+  static void clear();
 private:
   inline static EventPool<FieldEvent> event_pool;
 };
