@@ -18,6 +18,8 @@ public:
   void setupActors();
 
   void update() override;
+  void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
+
   void draw() override;
 private:
   FieldMap field;

@@ -8,6 +8,8 @@
 #include "base/entity.h"
 #include "base/actor.h"
 #include "data/actor.h"
+#include "data/field_event.h"
+#include "system/field_handler.h"
 #include "utils/camera.h"
 #include "actors/player.h"
 #include "scenes/debug_field.h"
@@ -74,6 +76,11 @@ void DebugField::setupActors() {
 }
 
 void DebugField::update() {
+  if (IsKeyPressed(KEY_E)) {
+    // TODO: Make sure to remove this later!
+    FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, "db_02", "db_01-1");
+  }
+
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
@@ -83,6 +90,33 @@ void DebugField::update() {
   }
 
   CameraUtils::followFieldEntity(camera, camera_target);
+
+  EventPool<FieldEvent> *event_pool = field_handler.get();
+  if (!event_pool->empty()) {
+    PLOGI << "Field Events raised: " << event_pool->size();
+    for (auto &event : *event_pool) {
+      fieldEventHandling(event);
+    }
+
+    FieldEventHandler::clear();
+  }
+}
+
+void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
+  switch (event->event_type) {
+    case FieldEventType::LOAD_MAP: {
+      PLOGD << "Event detected: LoadMapEvent";
+      auto *event_data = static_cast<LoadMapEvent*>(event.get());
+
+      string map_name = event_data->map_name;
+      string *spawn_name = &event_data->spawn_point;
+      PLOGD << "{Map Name: '" << map_name << "', Spawn Name: '" <<
+        *spawn_name << "'}";
+
+      mapLoadProcedure(map_name, spawn_name);
+      break;
+    }
+  }
 }
 
 void DebugField::draw() {
