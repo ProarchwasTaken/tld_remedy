@@ -18,3 +18,7 @@ enum Direction {
   RIGHT = 1,
   DOWN = 2,
 };
+
+enum FieldEventType {
+  LOAD_MAP
+};
