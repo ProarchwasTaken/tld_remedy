@@ -88,14 +88,7 @@
                 }, 
                 {
                  "id":6,
-                 "name":"From db_01",
-                 "properties":[
-                        {
-                         "name":"spawn_type",
-                         "propertytype":"SpawnType",
-                         "type":"int",
-                         "value":1
-                        }],
+                 "name":"",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01",
                  "x":48,

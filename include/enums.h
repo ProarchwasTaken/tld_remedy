@@ -12,11 +12,6 @@ enum ActorType {
   ENEMY,
 };
 
-enum SpawnType {
-  INITIAL,
-  TRANSITION
-};
-
 enum Direction {
   UP = -2,
   LEFT = -1,

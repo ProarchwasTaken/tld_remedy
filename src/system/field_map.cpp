@@ -116,13 +116,12 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
 void FieldMap::findSpawnpoints(json &layer_objects) {
   PLOGI << "Finding initial spawn points.";
   for (basic_json object : layer_objects) {
-
     float x = object["x"];
     float y = object["y"];
     Direction direction = Direction::DOWN;
     ActorType actor_type = ActorType::PLAYER;
 
-    if (object.find("properties") == object.end()) {
+    if (object.find("type") == object.end()) {
       PLOGD << "Found initial player spawn point.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
       ActorData actor_data = {{x, y}, direction, actor_type};
