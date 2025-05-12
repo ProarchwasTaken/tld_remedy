@@ -15,6 +15,8 @@ public:
   void retrieveCollLines(nlohmann::json &layer_objects);
 
   void findSpawnpoints(nlohmann::json &layer_objects);
+  void findSpawnpoints(nlohmann::json &layer_objects, 
+                       std::string spawn_name);
 
   void draw();
   void drawCollLines();

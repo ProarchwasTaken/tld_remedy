@@ -114,7 +114,9 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
 }
 
 void FieldMap::findSpawnpoints(json &layer_objects) {
-  PLOGI << "Finding initial spawn points.";
+  PLOGI << "Searching for initial spawn points.";
+
+  bool found_initial = false;
   for (basic_json object : layer_objects) {
     float x = object["x"];
     float y = object["y"];
@@ -122,13 +124,50 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
     ActorType actor_type = ActorType::PLAYER;
 
     if (object.find("type") == object.end()) {
-      PLOGD << "Found initial player spawn point.";
+      PLOGD << "Found initial spawn point for the player.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
       ActorData actor_data = {{x, y}, direction, actor_type};
 
       actor_queue.push_back(actor_data);
+      found_initial = true;
       break;
     }
+  }
+
+  assert(found_initial);
+}
+
+void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
+  PLOGI << "Searching for transition spawn points with the same class" <<
+    " as: '" << spawn_name << "'";
+
+  bool found_transition = false;
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+    Direction direction = Direction::DOWN;
+    ActorType actor_type = ActorType::PLAYER;
+
+    if (object.find("type") == object.end()) {
+      continue;
+    }
+
+    string type_value = object["type"];
+    if (type_value == spawn_name) {
+      PLOGD << "Found transition spawn point for the player.";
+      PLOGD << "(X: " << x << ", Y: " << y << ")";
+      ActorData actor_data = {{x, y}, direction, actor_type};
+      actor_queue.push_back(actor_data);
+
+      found_transition = true;
+      break;
+    }
+  }
+
+  if (!found_transition) {
+    PLOGE << "Failed to find transition spawn points!";
+    PLOGD << "Resorting to search for initial spawnpoints.";
+    findSpawnpoints(layer_objects);
   }
 }
 
