@@ -21,7 +21,6 @@ public:
   void draw();
   void drawCollLines();
 
-  bool ready = false;
   static std::vector<Line> collision_lines;
   std::vector<ActorData> actor_queue;
 private:

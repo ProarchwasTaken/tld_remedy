@@ -1,5 +1,6 @@
 #include <cassert>
 #include <memory>
+#include <string>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
@@ -11,27 +12,39 @@
 #include "actors/player.h"
 #include "scenes/debug_field.h"
 
-using std::unique_ptr, std::make_unique;
+using std::unique_ptr, std::make_unique, std::string;
 
 DebugField::DebugField() {
-  field.loadMap("db_01");
-  setupActors();
-
   camera = CameraUtils::setupField();
-  camera_target = Actor::getActor(ActorType::PLAYER);
-  camera.target = camera_target->position;
+  mapLoadProcedure("db_01");
   PLOGI << "Initialized the DebugField Scene.";
 }
 
 DebugField::~DebugField() {
-  for (unique_ptr<Entity> &entity : entities) {
-    entity.reset();
-  }
-  entities.clear();
+  Entity::clear(entities);
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the DebugField scene.";
+}
+
+void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
+  PLOGI << "Running map load procedure";
+  float start_time = GetTime();
+
+  if (!entities.empty()) {
+    Entity::clear(entities);
+  }
+
+  field.loadMap(map_name, spawn_name);
+  setupActors();
+
+  camera_target = Actor::getActor(ActorType::PLAYER);
+  camera.target = camera_target->position;
+
+  PLOGI << "Procedure complete.";
+  float elapsed_time = GetTime() - start_time;
+  PLOGI << "Loading Time: " << elapsed_time;
 }
 
 void DebugField::setupActors() {
@@ -61,10 +74,6 @@ void DebugField::setupActors() {
 }
 
 void DebugField::update() {
-  if (!field.ready) {
-    return;
-  }
-
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
@@ -77,10 +86,6 @@ void DebugField::update() {
 }
 
 void DebugField::draw() {
-  if (!field.ready) {
-    return;
-  }
-
   BeginMode2D(camera); 
   {
     field.draw();

@@ -26,8 +26,6 @@ FieldMap::~FieldMap() {
 
 void FieldMap::loadMap(string map_name, string *spawn_name) {
   PLOGI << "Loading map: '" << map_name << "'";
-  float start_time = GetTime();
-  ready = false;
 
   string base_path = "graphics/maps/" + map_name + ".png";
   string json_path = "data/maps/" + map_name + ".tmj";
@@ -47,9 +45,7 @@ void FieldMap::loadMap(string map_name, string *spawn_name) {
   base = LoadTexture(base_path.c_str());
   parseMapData(json_path, spawn_name);
 
-  PLOGI << "Map: '" << map_name << "' has been loaded."; 
-  PLOGD << "Load Time: " << GetTime() - start_time;
-  ready = true;
+  PLOGI << "Map: '" << map_name << "' has been loaded successfully."; 
 }
 
 void FieldMap::parseMapData(string json_path, string *spawn_name) {
