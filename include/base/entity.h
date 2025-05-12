@@ -1,6 +1,8 @@
 #pragma once
 #include <raylib.h>
 #include <unordered_set>
+#include <vector>
+#include <memory>
 #include "data/rect_ex.h"
 #include "enums.h"
 
@@ -12,6 +14,7 @@
 class Entity {
 public:
   inline static std::unordered_set<int> existing_entities;
+  static void clear(std::vector<std::unique_ptr<Entity>> &entity_list);
 
   Entity();
   virtual ~Entity();
