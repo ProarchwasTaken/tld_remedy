@@ -4,6 +4,7 @@
 enum EntityType {
   ACTOR,
   COMBATANT,
+  MAP_TRANSITION
 };
 
 enum ActorType {

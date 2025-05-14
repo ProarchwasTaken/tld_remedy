@@ -33,6 +33,7 @@ set(HEADERS
 "include/system/field_handler.h"
 "include/system/field_map.h"
 "include/scenes/debug_field.h"
+"include/entities/map_trans.h"
 "include/actors/player.h"
 )
 set(SOURCE
@@ -45,6 +46,7 @@ set(SOURCE
 "src/system/field_handler.cpp"
 "src/system/field_map.cpp"
 "src/scenes/debug_field.cpp"
+"src/entities/map_trans.cpp"
 "src/actors/player.cpp"
 )
 
