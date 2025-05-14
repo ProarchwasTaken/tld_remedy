@@ -19,6 +19,8 @@ public:
   void findSpawnpoints(nlohmann::json &layer_objects, 
                        std::string spawn_name);
 
+  void findMapTransitions(nlohmann::json &layer_objects);
+
   void draw();
   void drawCollLines();
 

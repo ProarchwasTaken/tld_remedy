@@ -88,6 +88,7 @@
                 }, 
                 {
                  "id":6,
+                 "name":"From db_01",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-1",
                  "x":48,
@@ -98,8 +99,19 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":5,
+         "name":"MapTransitions",
+         "objects":[],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":5,
+ "nextlayerid":6,
  "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",

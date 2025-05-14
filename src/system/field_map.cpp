@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <plog/Log.h>
 #include "data/actor.h"
+#include "data/entity.h"
 #include "data/line.h"
 #include "enums.h"
 #include "system/field_map.h"
@@ -56,12 +57,16 @@ void FieldMap::parseMapData(string json_path, string *spawn_name) {
 
   for (basic_json layer : map_data["layers"]) {
     string layer_name = layer["name"];
+
     if (layer_name == "Collisions") {
       retrieveCollLines(layer["objects"]);
     }
     else if (layer_name == "Spawnpoints") {
       if (spawn_name == NULL) findSpawnpoints(layer["objects"]);
       else findSpawnpoints(layer["objects"], *spawn_name);
+    }
+    else if (layer_name == "MapTransitions") {
+      findMapTransitions(layer["objects"]);
     }
   }
 
@@ -144,6 +149,7 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
   for (basic_json object : layer_objects) {
     float x = object["x"];
     float y = object["y"];
+
     Direction direction = Direction::DOWN;
     ActorType actor_type = ActorType::PLAYER;
 
@@ -167,6 +173,43 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
     PLOGE << "Failed to find transition spawn points!";
     PLOGD << "Resorting to search for initial spawnpoints.";
     findSpawnpoints(layer_objects);
+  }
+}
+
+void FieldMap::findMapTransitions(json &layer_objects) {
+  PLOGI << "Searching for map transition triggers...";
+  for (basic_json object : layer_objects) { 
+    float x = object["x"];
+    float y = object["y"];
+    float width = object["width"];
+    float height = object["height"];
+
+    Rectangle rect = {x, y, width, height};
+    if (object.find("properties") == object.end()) {
+      continue;
+    }
+
+    string map_dest;
+    string spawn_dest;
+    Direction direction;
+
+    for (basic_json property : object["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "map_dest") {
+        map_dest = property["value"];
+      }
+      else if (property_name == "spawn_dest") {
+        spawn_dest = property["value"];
+      }
+      else if (property_name == "direction") {
+        direction = static_cast<Direction>(property["value"]);
+      }
+    }
+
+    MapTransData data = {map_dest, spawn_dest, rect, direction};
+    PLOGD << "Trigger Data: {Map Destination: '" << map_dest <<
+      "' Spawnpoint: '" << spawn_dest << "' Direction: " << direction;
+    map_trans_queue.push_back(data);
   }
 }
 
