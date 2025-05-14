@@ -12,6 +12,7 @@
 #include "system/field_handler.h"
 #include "utils/camera.h"
 #include "actors/player.h"
+#include "entities/map_trans.h"
 #include "scenes/debug_field.h"
 
 using std::unique_ptr, std::make_unique, std::string;
@@ -40,6 +41,7 @@ void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
 
   field.loadMap(map_name, spawn_name);
   setupActors();
+  setupMapTransitions();
 
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
@@ -73,6 +75,18 @@ void DebugField::setupActors() {
   }
 
   field.actor_queue.clear();
+}
+
+
+void DebugField::setupMapTransitions() {
+  PLOGI << "Setting up map transition triggers...";
+  for (MapTransData data : field.map_trans_queue) {
+    unique_ptr<Entity> entity;
+
+    entity = make_unique<MapTransition>(data);
+  }
+
+  field.map_trans_queue.clear();
 }
 
 void DebugField::update() {

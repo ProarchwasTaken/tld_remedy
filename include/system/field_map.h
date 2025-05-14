@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "data/actor.h"
+#include "data/entity.h"
 #include "data/line.h"
 
 
@@ -23,6 +24,7 @@ public:
 
   static std::vector<Line> collision_lines;
   std::vector<ActorData> actor_queue;
+  std::vector<MapTransData> map_trans_queue;
 private:
   Texture base;
 };

@@ -16,6 +16,7 @@ public:
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupActors();
+  void setupMapTransitions();
 
   void update() override;
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);

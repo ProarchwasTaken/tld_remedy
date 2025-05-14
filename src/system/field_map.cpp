@@ -22,6 +22,7 @@ FieldMap::~FieldMap() {
   UnloadTexture(base);
   collision_lines.clear();
   actor_queue.clear();
+  map_trans_queue.clear();
 }
 
 void FieldMap::loadMap(string map_name, string *spawn_name) {

@@ -3,13 +3,13 @@
 #include <string>
 #include "enums.h"
 #include "base/entity.h"
+#include "data/entity.h"
 #include "actors/player.h"
 
 
 class MapTransition : public Entity {
 public:
-  MapTransition(std::string map_dest, std::string spawn_dest,
-                Rectangle rect, enum Direction direction);
+  MapTransition(MapTransData &data);
 
   void update() override;
   void draw() override {};
