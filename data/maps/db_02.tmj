@@ -92,7 +92,7 @@
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-1",
                  "x":48,
-                 "y":136
+                 "y":144
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -101,10 +101,35 @@
          "y":0
         }, 
         {
+         "color":"#000000",
          "draworder":"topdown",
          "id":5,
          "name":"MapTransitions",
-         "objects":[],
+         "objects":[
+                {
+                 "height":8,
+                 "id":7,
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }, 
+                        {
+                         "name":"map_dest",
+                         "type":"string",
+                         "value":"db_01"
+                        }, 
+                        {
+                         "name":"spawn_dest",
+                         "type":"string",
+                         "value":"db_02-1"
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "width":32,
+                 "x":32,
+                 "y":152
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -112,7 +137,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":7,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

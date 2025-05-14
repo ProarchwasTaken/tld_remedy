@@ -126,6 +126,7 @@
          "y":0
         }, 
         {
+         "color":"#000000",
          "draworder":"topdown",
          "id":6,
          "name":"MapTransitions",

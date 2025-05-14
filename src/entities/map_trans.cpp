@@ -19,14 +19,16 @@ MapTransition::MapTransition(MapTransData &data) {
   map_dest = data.map_dest;
   spawn_dest = data.spawn_dest;
 
-  Actor *ptr = Actor::getActor(ActorType::PLAYER);
-  assert(ptr != NULL);
-  plr = static_cast<PlayerActor*>(ptr);
+  direction = data.direction;
 
   position = {data.rect.x, data.rect.y};
   bounding_box.scale = {data.rect.width, data.rect.height};
   bounding_box.offset = {0, 0};
   rectExCorrection(bounding_box);
+
+  Actor *ptr = Actor::getActor(ActorType::PLAYER);
+  assert(ptr != NULL);
+  plr = static_cast<PlayerActor*>(ptr);
 
   PLOGI << "Entity Created: Transition Trigger [ID: " 
     << entity_id << "]";
