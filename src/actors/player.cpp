@@ -23,7 +23,7 @@ void PlayerActor::behavior() {
   bool gamepad = IsGamepadAvailable(0);
 
   movementInput(gamepad);
-  bool moving = isMoving();
+  moving = isMoving();
 }
 
 void PlayerActor::movementInput(bool gamepad) {
