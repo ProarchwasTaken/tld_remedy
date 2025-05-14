@@ -23,6 +23,7 @@ void PlayerActor::behavior() {
   bool gamepad = IsGamepadAvailable(0);
 
   movementInput(gamepad);
+  bool moving = isMoving();
 }
 
 void PlayerActor::movementInput(bool gamepad) {
@@ -50,6 +51,18 @@ void PlayerActor::movementInput(bool gamepad) {
   }
   if (Input::released(key_bind.move_up, gamepad) && moving_up) {
     moving_up = false;
+  }
+}
+
+bool PlayerActor::isMoving() {
+  if (moving_right != moving_left) {
+    return true;
+  }
+  else if (moving_down != moving_up) {
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
