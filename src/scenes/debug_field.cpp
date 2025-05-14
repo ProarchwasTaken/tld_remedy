@@ -84,6 +84,7 @@ void DebugField::setupMapTransitions() {
     unique_ptr<Entity> entity;
 
     entity = make_unique<MapTransition>(data);
+    entities.push_back(std::move(entity));
   }
 
   field.map_trans_queue.clear();
