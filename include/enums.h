@@ -1,6 +1,12 @@
 #pragma once
 
 
+enum GameState {
+  READY,
+  FADING_OUT,
+  FADING_IN
+};
+
 enum EntityType {
   ACTOR,
   COMBATANT,
