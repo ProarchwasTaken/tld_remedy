@@ -4,6 +4,7 @@
 #include <memory>
 #include "base/scene.h"
 #include "base/entity.h"
+#include "data/field_event.h"
 #include "system/field_handler.h"
 #include "system/field_map.h"
 
@@ -28,6 +29,9 @@ private:
 
   Camera2D camera;
   Entity *camera_target;
+
+  LoadMapEvent next_map;
+  bool map_ready = false;
 
   std::vector<std::unique_ptr<Entity>> entities;
 };

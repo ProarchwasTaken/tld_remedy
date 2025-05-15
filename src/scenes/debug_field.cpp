@@ -49,6 +49,8 @@ void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
   PLOGI << "Procedure complete.";
   float elapsed_time = GetTime() - start_time;
   PLOGI << "Loading Time: " << elapsed_time;
+
+  map_ready = true;
 }
 
 void DebugField::setupActors() {
@@ -90,10 +92,11 @@ void DebugField::setupMapTransitions() {
   field.map_trans_queue.clear();
 }
 
-void DebugField::update() {
-  if (IsKeyPressed(KEY_E)) {
-    // TODO: Make sure to remove this later!
-    FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, "db_02", "db_01-1");
+void DebugField::update() { 
+  if (!map_ready) {
+    mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
+    Game::fadein(0.10);
+    return;
   }
 
   for (Actor *actor : Actor::existing_actors) {
@@ -125,10 +128,12 @@ void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
 
       string map_name = event_data->map_name;
       string *spawn_name = &event_data->spawn_point;
-      PLOGD << "{Map Name: '" << map_name << "', Spawn Name: '" <<
-        *spawn_name << "'}";
 
-      mapLoadProcedure(map_name, spawn_name);
+      PLOGI << "Preparing to load map: '" << map_name << "at " <<
+        "spawnpoint: '" << *spawn_name << "'";
+      next_map = *event_data;
+      Game::fadeout(0.10);
+      map_ready = false;
       break;
     }
   }
