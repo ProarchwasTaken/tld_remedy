@@ -17,6 +17,24 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   collis_box.offset = {-4, -12};
 
   rectExCorrection(bounding_box, collis_box);
+  initMovementInput();
+}
+
+void PlayerActor::initMovementInput() {
+  bool gamepad = IsGamepadAvailable(0);
+
+  if (Input::down(key_bind.move_right, gamepad)) {
+    moving_right = true;
+  }
+  if (Input::down(key_bind.move_left, gamepad)) {
+    moving_left = true;
+  }
+  if (Input::down(key_bind.move_down, gamepad)) {
+    moving_down = true;
+  }
+  if (Input::down(key_bind.move_up, gamepad)) {
+    moving_up = true;
+  }
 }
 
 void PlayerActor::behavior() {
