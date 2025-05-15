@@ -17,24 +17,6 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   collis_box.offset = {-4, -12};
 
   rectExCorrection(bounding_box, collis_box);
-  initMovementInput();
-}
-
-void PlayerActor::initMovementInput() {
-  bool gamepad = IsGamepadAvailable(0);
-
-  if (Input::down(key_bind.move_right, gamepad)) {
-    moving_right = true;
-  }
-  if (Input::down(key_bind.move_left, gamepad)) {
-    moving_left = true;
-  }
-  if (Input::down(key_bind.move_down, gamepad)) {
-    moving_down = true;
-  }
-  if (Input::down(key_bind.move_up, gamepad)) {
-    moving_up = true;
-  }
 }
 
 void PlayerActor::behavior() {
@@ -45,29 +27,31 @@ void PlayerActor::behavior() {
 }
 
 void PlayerActor::movementInput(bool gamepad) {
-  if (Input::pressed(key_bind.move_right, gamepad) && !moving_right) {
+  if (Input::down(key_bind.move_right, gamepad)) {
     moving_right = true;
   } 
-  if (Input::pressed(key_bind.move_left, gamepad) && !moving_left) {
-    moving_left = true;
-  }
-  if (Input::pressed(key_bind.move_down, gamepad) && !moving_down) {
-    moving_down = true;
-  }
-  if (Input::pressed(key_bind.move_up, gamepad) && !moving_up) {
-    moving_up = true;
-  }
-
-  if (Input::released(key_bind.move_right, gamepad) && moving_right) {
+  else {
     moving_right = false;
   }
-  if (Input::released(key_bind.move_left, gamepad) && moving_left) {
+
+  if (Input::down(key_bind.move_left, gamepad)) {
+    moving_left = true;
+  }
+  else {
     moving_left = false;
   }
-  if (Input::released(key_bind.move_down, gamepad) && moving_down) {
+
+  if (Input::down(key_bind.move_down, gamepad)) {
+    moving_down = true;
+  }
+  else {
     moving_down = false;
   }
-  if (Input::released(key_bind.move_up, gamepad) && moving_up) {
+
+  if (Input::down(key_bind.move_up, gamepad)) {
+    moving_up = true;
+  }
+  else {
     moving_up = false;
   }
 }

@@ -8,7 +8,6 @@
 class PlayerActor : public Actor {
 public:
   PlayerActor(Vector2 position, enum Direction direction);
-  void initMovementInput();
 
   void behavior() override;
   void movementInput(bool gamepad);
