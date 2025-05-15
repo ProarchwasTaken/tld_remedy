@@ -27,33 +27,10 @@ void PlayerActor::behavior() {
 }
 
 void PlayerActor::movementInput(bool gamepad) {
-  if (Input::down(key_bind.move_right, gamepad)) {
-    moving_right = true;
-  } 
-  else {
-    moving_right = false;
-  }
-
-  if (Input::down(key_bind.move_left, gamepad)) {
-    moving_left = true;
-  }
-  else {
-    moving_left = false;
-  }
-
-  if (Input::down(key_bind.move_down, gamepad)) {
-    moving_down = true;
-  }
-  else {
-    moving_down = false;
-  }
-
-  if (Input::down(key_bind.move_up, gamepad)) {
-    moving_up = true;
-  }
-  else {
-    moving_up = false;
-  }
+  moving_right = Input::down(key_bind.move_right, gamepad);
+  moving_left = Input::down(key_bind.move_left, gamepad);
+  moving_down = Input::down(key_bind.move_down, gamepad);
+  moving_up = Input::down(key_bind.move_up, gamepad);
 }
 
 bool PlayerActor::isMoving() {
