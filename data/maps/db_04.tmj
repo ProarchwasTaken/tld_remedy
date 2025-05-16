@@ -177,6 +177,11 @@
                  "name":"From db_02",
                  "properties":[
                         {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"db_02"
