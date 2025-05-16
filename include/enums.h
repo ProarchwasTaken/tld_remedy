@@ -1,9 +1,16 @@
 #pragma once
 
 
+enum GameState {
+  READY,
+  FADING_OUT,
+  FADING_IN
+};
+
 enum EntityType {
   ACTOR,
   COMBATANT,
+  MAP_TRANSITION
 };
 
 enum ActorType {
@@ -17,4 +24,8 @@ enum Direction {
   LEFT = -1,
   RIGHT = 1,
   DOWN = 2,
+};
+
+enum FieldEventType {
+  LOAD_MAP
 };

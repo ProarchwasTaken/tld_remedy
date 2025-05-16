@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <memory>
 #include "base/scene.h"
+#include "enums.h"
 
 
 class Game {
@@ -11,11 +12,15 @@ public:
   ~Game();
 
   void start();
+  void fadeScreen();
 
   static float deltaTime();
   static bool debugInfo();
   static void toggleDebugInfo();
   static void setTimeScale(float number);
+
+  static void fadeout(float fade_time);
+  static void fadein(float fade_time);
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr Vector2 WINDOW_RES = {1280, 720};
@@ -28,12 +33,17 @@ public:
   static constexpr bool devmode = false;
   #endif // !NDEBUG
 private:
-  std::unique_ptr<Scene> scene;
+  static GameState game_state;
+  static bool debug_info;
+  static float time_scale;
+
+  static float fade_time;
+  static float fade_percentage;
+  Color screen_tint = WHITE;
 
   RenderTexture canvas;
   Rectangle canvas_src;
   Rectangle canvas_dest;
 
-  static bool debug_info;
-  static float time_scale;
+  std::unique_ptr<Scene> scene;
 };

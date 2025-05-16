@@ -1,13 +1,22 @@
 #include <cassert>
 #include <raylib.h>
+#include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
 #include "scenes/debug_field.h"
+#include "enums.h"
 #include "game.h"
 
 using std::make_unique;
+
+GameState Game::game_state = READY;
+
+float Game::fade_percentage = 0.0;
+float Game::fade_time = 0.0;
+
 float Game::time_scale = 1.0;
 bool Game::debug_info = false;
+
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, "Project Remedy");
@@ -40,7 +49,12 @@ void Game::start() {
       toggleDebugInfo();
     }
 
-    scene->update();
+    if (game_state == READY) {
+      scene->update();
+    }
+    else {
+      fadeScreen();
+    }
 
     BeginTextureMode(canvas);
     {
@@ -52,13 +66,62 @@ void Game::start() {
     BeginDrawing(); 
     {
       DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                     WHITE);
+                     screen_tint);
       if (debug_info) DrawFPS(24, 16);
     }
     EndDrawing();
   }
 
   CloseWindow();
+}
+
+void Game::fadeScreen() {
+  float magnitude = GetFrameTime() / fade_time;
+  if (magnitude == 0) {
+    return;
+  }
+
+  if (game_state == FADING_OUT) {
+    fade_percentage -= magnitude;
+  }
+  else if (game_state == FADING_IN){
+    fade_percentage += magnitude;
+  }
+
+  fade_percentage = Clamp(fade_percentage, 0.0, 1.0);
+
+  float value = Lerp(0, 255, fade_percentage);
+  screen_tint.r = value;
+  screen_tint.g = value;
+  screen_tint.b = value;
+
+  bool finished_fading = value == 0 || value == 255;
+  if (finished_fading) {
+    PLOGI << "Screen fade complete.";
+    game_state = READY;
+  }
+}
+
+void Game::fadeout(float fade_time) {
+  if (game_state != READY) {
+    return;
+  }
+
+  PLOGI << "Fading out the screen.";
+  Game::fade_percentage = 1.0;
+  Game::fade_time = fade_time;
+  game_state = FADING_OUT;
+}
+
+void Game::fadein(float fade_time) {
+  if (game_state != READY) {
+    return;
+  }
+
+  PLOGI << "Fading in the screen.";
+  Game::fade_percentage = 0.0;
+  Game::fade_time = fade_time;
+  game_state = FADING_IN;
 }
 
 float Game::deltaTime() {

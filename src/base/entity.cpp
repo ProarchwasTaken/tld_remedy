@@ -1,8 +1,22 @@
 #include <cassert>
 #include <raylib.h>
+#include <vector>
+#include <memory>
 #include <plog/Log.h>
 #include "data/rect_ex.h"
 #include "base/entity.h"
+
+using std::vector, std::unique_ptr;
+
+
+void Entity::clear(vector<unique_ptr<Entity>> &entity_list) {
+  PLOGI << "Clearing all entities from memory.";
+  for (unique_ptr<Entity> &entity : entity_list) {
+    entity.reset();
+  }
+
+  entity_list.clear();
+}
 
 
 Entity::Entity() {

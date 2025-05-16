@@ -11,6 +11,7 @@ public:
 
   void behavior() override;
   void movementInput(bool gamepad);
+  bool isMoving();
 
   void update() override;
   void moveX();
@@ -19,6 +20,8 @@ public:
   void draw() override;
 
   inline static FieldKeybinds key_bind;
+
+  bool moving = false;
 private:
   bool moving_right = false;
   bool moving_left = false;

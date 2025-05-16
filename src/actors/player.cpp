@@ -23,33 +23,25 @@ void PlayerActor::behavior() {
   bool gamepad = IsGamepadAvailable(0);
 
   movementInput(gamepad);
+  moving = isMoving();
 }
 
 void PlayerActor::movementInput(bool gamepad) {
-  if (Input::pressed(key_bind.move_right, gamepad) && !moving_right) {
-    moving_right = true;
-  } 
-  if (Input::pressed(key_bind.move_left, gamepad) && !moving_left) {
-    moving_left = true;
-  }
-  if (Input::pressed(key_bind.move_down, gamepad) && !moving_down) {
-    moving_down = true;
-  }
-  if (Input::pressed(key_bind.move_up, gamepad) && !moving_up) {
-    moving_up = true;
-  }
+  moving_right = Input::down(key_bind.move_right, gamepad);
+  moving_left = Input::down(key_bind.move_left, gamepad);
+  moving_down = Input::down(key_bind.move_down, gamepad);
+  moving_up = Input::down(key_bind.move_up, gamepad);
+}
 
-  if (Input::released(key_bind.move_right, gamepad) && moving_right) {
-    moving_right = false;
+bool PlayerActor::isMoving() {
+  if (moving_right != moving_left) {
+    return true;
   }
-  if (Input::released(key_bind.move_left, gamepad) && moving_left) {
-    moving_left = false;
+  else if (moving_down != moving_up) {
+    return true;
   }
-  if (Input::released(key_bind.move_down, gamepad) && moving_down) {
-    moving_down = false;
-  }
-  if (Input::released(key_bind.move_up, gamepad) && moving_up) {
-    moving_up = false;
+  else {
+    return false;
   }
 }
 

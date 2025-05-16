@@ -1,41 +1,101 @@
 #include <cassert>
 #include <memory>
+#include <string>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
 #include "game.h"
 #include "base/entity.h"
 #include "base/actor.h"
+#include "data/actor.h"
+#include "data/field_event.h"
+#include "system/field_handler.h"
 #include "utils/camera.h"
 #include "actors/player.h"
+#include "entities/map_trans.h"
 #include "scenes/debug_field.h"
 
-using std::unique_ptr, std::make_unique;
+using std::unique_ptr, std::make_unique, std::string;
 
 DebugField::DebugField() {
-  field.loadMap("db_01");
-  entities.push_back(
-    make_unique<PlayerActor>((Vector2){64, 120}, Direction::DOWN)
-  );
-
   camera = CameraUtils::setupField();
-  camera_target = Actor::getActor(ActorType::PLAYER);
+  mapLoadProcedure("db_01");
   PLOGI << "Initialized the DebugField Scene.";
 }
 
 DebugField::~DebugField() {
-  for (unique_ptr<Entity> &entity : entities) {
-    entity.reset();
-  }
-  entities.clear();
+  Entity::clear(entities);
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the DebugField scene.";
 }
 
-void DebugField::update() {
-  if (!field.ready) {
+void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
+  PLOGI << "Running map load procedure";
+  float start_time = GetTime();
+
+  if (!entities.empty()) {
+    Entity::clear(entities);
+  }
+
+  field.loadMap(map_name, spawn_name);
+  setupActors();
+  setupMapTransitions();
+
+  camera_target = Actor::getActor(ActorType::PLAYER);
+  camera.target = camera_target->position;
+
+  PLOGI << "Procedure complete.";
+  float elapsed_time = GetTime() - start_time;
+  PLOGI << "Loading Time: " << elapsed_time;
+
+  map_ready = true;
+}
+
+void DebugField::setupActors() {
+  PLOGI << "Setting up field actors...";
+  for (ActorData data : field.actor_queue) {
+    Vector2 position = data.position;
+    Direction direction = data.direction;
+
+    unique_ptr<Entity> entity;
+
+    switch (data.type) {
+      case ActorType::PLAYER: {
+        entity = make_unique<PlayerActor>(position, direction);
+        break;
+      }
+      default: {
+
+      }
+    }
+
+    if (entity != nullptr) {
+      entities.push_back(std::move(entity));
+    }
+  }
+
+  field.actor_queue.clear();
+}
+
+
+void DebugField::setupMapTransitions() {
+  PLOGI << "Setting up map transition triggers...";
+  for (MapTransData data : field.map_trans_queue) {
+    unique_ptr<Entity> entity;
+
+    entity = make_unique<MapTransition>(data);
+    entities.push_back(std::move(entity));
+  }
+
+  field.map_trans_queue.clear();
+}
+
+void DebugField::update() { 
+  if (!map_ready) {
+    mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
+    Game::fadein(0.10);
     return;
   }
 
@@ -48,13 +108,38 @@ void DebugField::update() {
   }
 
   CameraUtils::followFieldEntity(camera, camera_target);
+
+  EventPool<FieldEvent> *event_pool = field_handler.get();
+  if (!event_pool->empty()) {
+    PLOGI << "Field Events raised: " << event_pool->size();
+    for (auto &event : *event_pool) {
+      fieldEventHandling(event);
+    }
+
+    FieldEventHandler::clear();
+  }
+}
+
+void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
+  switch (event->event_type) {
+    case FieldEventType::LOAD_MAP: {
+      PLOGD << "Event detected: LoadMapEvent";
+      auto *event_data = static_cast<LoadMapEvent*>(event.get());
+
+      string map_name = event_data->map_name;
+      string *spawn_name = &event_data->spawn_point;
+
+      PLOGI << "Preparing to load map: '" << map_name << "at " <<
+        "spawnpoint: '" << *spawn_name << "'";
+      next_map = *event_data;
+      Game::fadeout(0.10);
+      map_ready = false;
+      break;
+    }
+  }
 }
 
 void DebugField::draw() {
-  if (!field.ready) {
-    return;
-  }
-
   BeginMode2D(camera); 
   {
     field.draw();
