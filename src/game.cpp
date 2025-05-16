@@ -20,7 +20,7 @@ bool Game::debug_info = false;
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, "Project Remedy");
-  SetTargetFPS(0);
+  SetTargetFPS(60);
   setupCanvas();
 
   scene = make_unique<DebugField>();

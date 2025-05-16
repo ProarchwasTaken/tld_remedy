@@ -1,14 +1,13 @@
 { "compressionlevel":-1,
- "height":12,
+ "height":10,
  "infinite":false,
  "layers":[
         {
-         "id":3,
-         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_01.png",
-         "imageheight":192,
-         "imagewidth":384,
-         "locked":true,
-         "name":"Map Image",
+         "id":2,
+         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_03.png",
+         "imageheight":160,
+         "imagewidth":256,
+         "name":"Map Layer",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -18,12 +17,12 @@
         {
          "color":"#ffaa00",
          "draworder":"topdown",
-         "id":4,
+         "id":3,
          "name":"Collisions",
          "objects":[
                 {
                  "height":0,
-                 "id":48,
+                 "id":1,
                  "name":"",
                  "polyline":[
                         {
@@ -32,70 +31,26 @@
                         }, 
                         {
                          "x":0,
-                         "y":-64
+                         "y":48
                         }, 
                         {
-                         "x":16,
-                         "y":-128
+                         "x":48,
+                         "y":96
                         }, 
                         {
-                         "x":160,
-                         "y":-128
+                         "x":208,
+                         "y":96
                         }, 
                         {
-                         "x":160,
-                         "y":-64
+                         "x":208,
+                         "y":48
                         }, 
                         {
-                         "x":192,
-                         "y":-64
+                         "x":240,
+                         "y":48
                         }, 
                         {
-                         "x":192,
-                         "y":-128
-                        }, 
-                        {
-                         "x":320,
-                         "y":-128
-                        }, 
-                        {
-                         "x":320,
-                         "y":-64
-                        }, 
-                        {
-                         "x":256,
-                         "y":0
-                        }, 
-                        {
-                         "x":144,
-                         "y":0
-                        }, 
-                        {
-                         "x":144,
-                         "y":16
-                        }, 
-                        {
-                         "x":112,
-                         "y":16
-                        }, 
-                        {
-                         "x":112,
-                         "y":0
-                        }, 
-                        {
-                         "x":96,
-                         "y":0
-                        }, 
-                        {
-                         "x":96,
-                         "y":-64
-                        }, 
-                        {
-                         "x":64,
-                         "y":-64
-                        }, 
-                        {
-                         "x":64,
+                         "x":240,
                          "y":0
                         }, 
                         {
@@ -106,8 +61,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":32,
-                 "y":176
+                 "x":16,
+                 "y":48
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -118,30 +73,34 @@
         {
          "color":"#00ff00",
          "draworder":"topdown",
-         "id":5,
+         "id":4,
          "name":"Spawnpoints",
          "objects":[
                 {
-                 "id":43,
+                 "id":2,
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "x":64,
-                 "y":160
+                 "x":128,
+                 "y":96
                 }, 
                 {
-                 "id":45,
-                 "name":"From db_02",
+                 "id":3,
+                 "name":"From db_01",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_01-1",
-                 "x":288,
+                 "type":"db_03-1",
+                 "x":48,
                  "y":64
                 }, 
                 {
-                 "id":50,
-                 "name":"From db_03",
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_01-2",
-                 "x":160,
-                 "y":176
+                 "height":0,
+                 "id":4,
+                 "name":"From db_04",
+                 "point":true,
+                 "rotation":0,
+                 "type":"db_03-2",
+                 "visible":true,
+                 "width":0,
+                 "x":236,
+                 "y":72
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -152,13 +111,13 @@
         {
          "color":"#000000",
          "draworder":"topdown",
-         "id":6,
+         "id":5,
          "name":"MapTransitions",
          "objects":[
                 {
                  "height":16,
-                 "id":46,
-                 "name":"To db_02",
+                 "id":5,
+                 "name":"To db_01",
                  "properties":[
                         {
                          "name":"direction",
@@ -168,42 +127,42 @@
                         {
                          "name":"map_dest",
                          "type":"string",
-                         "value":"db_02"
+                         "value":"db_01"
                         }, 
                         {
                          "name":"spawn_dest",
                          "type":"string",
-                         "value":"db_02-1"
+                         "value":"db_01-2"
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
                  "width":32,
-                 "x":272,
+                 "x":32,
                  "y":48
                 }, 
                 {
-                 "height":8,
-                 "id":51,
-                 "name":"To db_03",
+                 "height":48,
+                 "id":6,
+                 "name":"To db_04",
                  "properties":[
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":2
+                         "value":1
                         }, 
                         {
                          "name":"map_dest",
                          "type":"string",
-                         "value":"db_03"
+                         "value":"db_04"
                         }, 
                         {
                          "name":"spawn_dest",
                          "type":"string",
-                         "value":"db_03-1"
+                         "value":"db_04-2"
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
-                 "width":32,
-                 "x":144,
-                 "y":184
+                 "width":16,
+                 "x":240,
+                 "y":48
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -211,8 +170,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":52,
+ "nextlayerid":6,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -221,5 +180,5 @@
  "tilewidth":16,
  "type":"map",
  "version":"1.10",
- "width":24
+ "width":16
 }

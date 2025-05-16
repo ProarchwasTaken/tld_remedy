@@ -1,14 +1,13 @@
 { "compressionlevel":-1,
- "height":12,
+ "height":16,
  "infinite":false,
  "layers":[
         {
          "id":3,
-         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_01.png",
-         "imageheight":192,
+         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_04.png",
+         "imageheight":256,
          "imagewidth":384,
-         "locked":true,
-         "name":"Map Image",
+         "name":"Map Layer",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -23,7 +22,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":48,
+                 "id":1,
                  "name":"",
                  "polyline":[
                         {
@@ -31,72 +30,32 @@
                          "y":0
                         }, 
                         {
+                         "x":224,
+                         "y":0
+                        }, 
+                        {
+                         "x":224,
+                         "y":-48
+                        }, 
+                        {
+                         "x":368,
+                         "y":-48
+                        }, 
+                        {
+                         "x":368,
+                         "y":-192
+                        }, 
+                        {
+                         "x":176,
+                         "y":-192
+                        }, 
+                        {
+                         "x":176,
+                         "y":-48
+                        }, 
+                        {
                          "x":0,
-                         "y":-64
-                        }, 
-                        {
-                         "x":16,
-                         "y":-128
-                        }, 
-                        {
-                         "x":160,
-                         "y":-128
-                        }, 
-                        {
-                         "x":160,
-                         "y":-64
-                        }, 
-                        {
-                         "x":192,
-                         "y":-64
-                        }, 
-                        {
-                         "x":192,
-                         "y":-128
-                        }, 
-                        {
-                         "x":320,
-                         "y":-128
-                        }, 
-                        {
-                         "x":320,
-                         "y":-64
-                        }, 
-                        {
-                         "x":256,
-                         "y":0
-                        }, 
-                        {
-                         "x":144,
-                         "y":0
-                        }, 
-                        {
-                         "x":144,
-                         "y":16
-                        }, 
-                        {
-                         "x":112,
-                         "y":16
-                        }, 
-                        {
-                         "x":112,
-                         "y":0
-                        }, 
-                        {
-                         "x":96,
-                         "y":0
-                        }, 
-                        {
-                         "x":96,
-                         "y":-64
-                        }, 
-                        {
-                         "x":64,
-                         "y":-64
-                        }, 
-                        {
-                         "x":64,
-                         "y":0
+                         "y":-48
                         }, 
                         {
                          "x":0,
@@ -106,8 +65,40 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":32,
-                 "y":176
+                 "x":0,
+                 "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":2,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":16,
+                         "y":0
+                        }, 
+                        {
+                         "x":16,
+                         "y":-80
+                        }, 
+                        {
+                         "x":0,
+                         "y":-80
+                        }, 
+                        {
+                         "x":0,
+                         "y":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":304,
+                 "y":160
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -116,32 +107,32 @@
          "y":0
         }, 
         {
-         "color":"#00ff00",
+         "color":"#55ff00",
          "draworder":"topdown",
          "id":5,
          "name":"Spawnpoints",
          "objects":[
                 {
-                 "id":43,
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "x":64,
-                 "y":160
-                }, 
-                {
-                 "id":45,
+                 "id":4,
                  "name":"From db_02",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_01-1",
-                 "x":288,
+                 "type":"db_04-1",
+                 "x":208,
                  "y":64
                 }, 
                 {
-                 "id":50,
+                 "id":5,
                  "name":"From db_03",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_01-2",
-                 "x":160,
-                 "y":176
+                 "type":"db_04-2",
+                 "x":20,
+                 "y":216
+                }, 
+                {
+                 "id":8,
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "x":240,
+                 "y":120
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -156,39 +147,14 @@
          "name":"MapTransitions",
          "objects":[
                 {
-                 "height":16,
-                 "id":46,
-                 "name":"To db_02",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":-2
-                        }, 
-                        {
-                         "name":"map_dest",
-                         "type":"string",
-                         "value":"db_02"
-                        }, 
-                        {
-                         "name":"spawn_dest",
-                         "type":"string",
-                         "value":"db_02-1"
-                        }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
-                 "width":32,
-                 "x":272,
-                 "y":48
-                }, 
-                {
-                 "height":8,
-                 "id":51,
+                 "height":48,
+                 "id":6,
                  "name":"To db_03",
                  "properties":[
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":2
+                         "value":-1
                         }, 
                         {
                          "name":"map_dest",
@@ -198,12 +164,32 @@
                         {
                          "name":"spawn_dest",
                          "type":"string",
-                         "value":"db_03-1"
+                         "value":"db_03-2"
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "width":16,
+                 "x":0,
+                 "y":192
+                }, 
+                {
+                 "height":16,
+                 "id":7,
+                 "name":"From db_02",
+                 "properties":[
+                        {
+                         "name":"map_dest",
+                         "type":"string",
+                         "value":"db_02"
+                        }, 
+                        {
+                         "name":"spawn_dest",
+                         "type":"string",
+                         "value":"db_02-2"
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
                  "width":32,
-                 "x":144,
-                 "y":184
+                 "x":192,
+                 "y":48
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -212,7 +198,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":52,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

@@ -22,7 +22,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":1,
+                 "id":8,
                  "name":"",
                  "polyline":[
                         {
@@ -47,6 +47,22 @@
                         }, 
                         {
                          "x":192,
+                         "y":-16
+                        }, 
+                        {
+                         "x":176,
+                         "y":-16
+                        }, 
+                        {
+                         "x":176,
+                         "y":0
+                        }, 
+                        {
+                         "x":144,
+                         "y":0
+                        }, 
+                        {
+                         "x":144,
                          "y":-16
                         }, 
                         {
@@ -90,8 +106,16 @@
                  "id":6,
                  "name":"From db_01",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "type":"db_01-1",
+                 "type":"db_02-1",
                  "x":48,
+                 "y":144
+                }, 
+                {
+                 "id":9,
+                 "name":"From db_04",
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "type":"db_02-2",
+                 "x":192,
                  "y":144
                 }],
          "opacity":1,
@@ -109,6 +133,7 @@
                 {
                  "height":8,
                  "id":7,
+                 "name":"To db_01",
                  "properties":[
                         {
                          "name":"direction",
@@ -123,11 +148,31 @@
                         {
                          "name":"spawn_dest",
                          "type":"string",
-                         "value":"db_02-1"
+                         "value":"db_01-1"
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
                  "width":32,
                  "x":32,
+                 "y":152
+                }, 
+                {
+                 "height":8,
+                 "id":11,
+                 "name":"To db_04",
+                 "properties":[
+                        {
+                         "name":"map_dest",
+                         "type":"string",
+                         "value":"db_04"
+                        }, 
+                        {
+                         "name":"spawn_dest",
+                         "type":"string",
+                         "value":"db_04-1"
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "width":32,
+                 "x":176,
                  "y":152
                 }],
          "opacity":1,
@@ -137,7 +182,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":8,
+ "nextobjectid":12,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
