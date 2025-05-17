@@ -23,9 +23,7 @@ public:
 
   bool moving = false;
 private:
-  bool moving_right = false;
-  bool moving_left = false;
-  bool moving_down = false;
-  bool moving_up = false;
-  float movement_speed = 1.0;
+  const float default_speed = 1.2;
+  int moving_x = 0;
+  int moving_y = 0;
 };

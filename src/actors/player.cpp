@@ -1,4 +1,6 @@
 #include <raylib.h>
+#include <raymath.h>
+#include <cmath>
 #include <plog/Log.h>
 #include "enums.h"
 #include "game.h"
@@ -27,17 +29,19 @@ void PlayerActor::behavior() {
 }
 
 void PlayerActor::movementInput(bool gamepad) {
-  moving_right = Input::down(key_bind.move_right, gamepad);
-  moving_left = Input::down(key_bind.move_left, gamepad);
-  moving_down = Input::down(key_bind.move_down, gamepad);
-  moving_up = Input::down(key_bind.move_up, gamepad);
+  bool right = Input::down(key_bind.move_right, gamepad);
+  bool left = Input::down(key_bind.move_left, gamepad);
+
+  moving_x = right - left;
+
+  bool down = Input::down(key_bind.move_down, gamepad);
+  bool up = Input::down(key_bind.move_up, gamepad);
+
+  moving_y = down - up;
 }
 
 bool PlayerActor::isMoving() {
-  if (moving_right != moving_left) {
-    return true;
-  }
-  else if (moving_down != moving_up) {
+  if (moving_x != 0 || moving_y != 0) {
     return true;
   }
   else {
@@ -52,73 +56,56 @@ void PlayerActor::update() {
 }
 
 void PlayerActor::moveX() {
-  int x_direction;
-  if (moving_left == moving_right) {
+  if (moving_x == 0) {
     return;
   }
-  else if (moving_right) {
-    direction = Direction::RIGHT;
-    x_direction = 1;
-  }
-  else {
-    direction = Direction::LEFT;
-    x_direction = -1;
+  direction = static_cast<Direction>(moving_x);
+
+  float speed = default_speed;
+  if (moving_y != 0) {
+    speed = Normalize(default_speed, 0, 1.4);
   }
 
-  float magnitude = movement_speed * Game::deltaTime();
+  float magnitude = speed * Game::deltaTime();
   float collision_x;
+  if (Collision::checkX(this, magnitude, moving_x, collision_x)) {
+    float half_scale_x = collis_box.scale.x / 2;
+    float collis_x = collis_box.position.x + half_scale_x;
+    collis_x += half_scale_x * moving_x;
 
-  if (!Collision::checkX(this, magnitude, x_direction, collision_x)) {
-    position.x += magnitude * x_direction;
+    float difference = position.x - collis_x;
+    position.x = collision_x + difference;
     return;
   }
 
-  float half_scale_x = collis_box.scale.x / 2;
-  float collis_x;
-  if (x_direction == 1) {
-    collis_x = collis_box.position.x + collis_box.scale.x; 
-  }
-  else {
-    collis_x = collis_box.position.x;
-  }
-
-  float difference = position.x - collis_x;
-  position.x = collision_x + difference;
+  position.x += magnitude * moving_x;
 }
 
 void PlayerActor::moveY() {
-  int y_direction;
-  if (moving_down == moving_up) {
+  if (moving_y == 0) {
     return;
   }
-  else if (moving_down) {
-    direction = Direction::DOWN;
-    y_direction = 1;
-  }
-  else {
-    direction = Direction::UP;
-    y_direction = -1;
+  direction = static_cast<Direction>(moving_y * 2);
+
+  float speed = default_speed;
+  if (moving_x != 0) {
+    speed = Normalize(default_speed, 0, 1.4);
   }
 
-  float magnitude = movement_speed * Game::deltaTime();
+  float magnitude = speed * Game::deltaTime();
+
   float collision_y;
-  if (!Collision::checkY(this, magnitude, y_direction, collision_y)) {
-    position.y += magnitude * y_direction;
+  if (Collision::checkY(this, magnitude, moving_y, collision_y)) {
+    float half_scale_y = collis_box.scale.y / 2;
+    float collis_y = collis_box.position.y + half_scale_y;
+    collis_y += half_scale_y * moving_y;
+
+    float difference = position.y - collis_y;
+    position.y = collision_y + difference;
     return;
   }
 
-  float half_scale_y = collis_box.scale.y / 2;
-  float collis_y;
-
-  if (y_direction == 1) {
-    collis_y = collis_box.position.y + collis_box.scale.y;
-  }
-  else {
-    collis_y = collis_box.position.y;
-  }
-
-  float difference = position.y - collis_y;
-  position.y = collision_y + difference;
+  position.y += magnitude * moving_y;
 }
 
 void PlayerActor::draw() {
