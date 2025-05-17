@@ -11,6 +11,9 @@ using std::make_unique;
 
 GameState Game::game_state = READY;
 
+Font Game::sm_font;
+Color *Game::palette;
+
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
 
@@ -23,14 +26,19 @@ void Game::init() {
   SetTargetFPS(60);
   setupCanvas();
 
+  sm_font = LoadFont("graphics/fonts/sm_font.png");
+  defineColorPalette();
+
   scene = make_unique<DebugField>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
 
 Game::~Game() {
-  UnloadRenderTexture(canvas);
   scene.reset();
+  UnloadRenderTexture(canvas);
+  UnloadFont(sm_font);
+  UnloadImagePalette(palette);
   PLOGI << "Thanks for playing!";
 }
 
@@ -39,6 +47,17 @@ void Game::setupCanvas() {
   canvas = LoadRenderTexture(CANVAS_RES.x, CANVAS_RES.y);
   canvas_src = {0, 0, CANVAS_RES.x, -CANVAS_RES.y};
   canvas_dest = {0, 0, WINDOW_RES.x, WINDOW_RES.y};
+}
+
+void Game::defineColorPalette() {
+  PLOGI << "Loading the game's color palette...";
+  int color_count;
+  Image palette = LoadImage("graphics/palette.png");
+
+  this->palette = LoadImagePalette(palette, 56, &color_count);
+  PLOGI << "Successfully loaded palette!";
+  PLOGI << "Color Count: " << color_count;
+  UnloadImage(palette);
 }
 
 void Game::start() {
