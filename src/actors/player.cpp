@@ -69,12 +69,7 @@ void PlayerActor::moveX() {
   float magnitude = speed * Game::deltaTime();
   float collision_x;
   if (Collision::checkX(this, magnitude, moving_x, collision_x)) {
-    float half_scale_x = collis_box.scale.x / 2;
-    float collis_x = collis_box.position.x + half_scale_x;
-    collis_x += half_scale_x * moving_x;
-
-    float difference = position.x - collis_x;
-    position.x = collision_x + difference;
+    Collision::snapX(this, collision_x, moving_x);
     return;
   }
 
@@ -96,12 +91,7 @@ void PlayerActor::moveY() {
 
   float collision_y;
   if (Collision::checkY(this, magnitude, moving_y, collision_y)) {
-    float half_scale_y = collis_box.scale.y / 2;
-    float collis_y = collis_box.position.y + half_scale_y;
-    collis_y += half_scale_y * moving_y;
-
-    float difference = position.y - collis_y;
-    position.y = collision_y + difference;
+    Collision::snapY(this, collision_y, moving_y);
     return;
   }
 

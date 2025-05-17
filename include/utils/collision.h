@@ -7,4 +7,7 @@ namespace Collision {
               float &collision_x);
   bool checkY(Actor *actor, float magnitude, int y_direction,
               float &collision_y);
+
+  void snapX(Actor *actor, float x, int x_direction);
+  void snapY(Actor *actor, float y, int y_direction);
 }

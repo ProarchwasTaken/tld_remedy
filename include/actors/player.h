@@ -23,7 +23,7 @@ public:
 
   bool moving = false;
 private:
-  const float default_speed = 1.2;
+  const float default_speed = 1.1;
   int moving_x = 0;
   int moving_y = 0;
 };

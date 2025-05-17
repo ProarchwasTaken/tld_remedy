@@ -6,6 +6,7 @@
 #include <cassert>
 #include "base/actor.h"
 #include "data/line.h"
+#include "data/rect_ex.h"
 #include "system/field_map.h"
 #include "utils/collision.h"
 
@@ -116,4 +117,26 @@ bool Collision::checkY(Actor *actor, float magnitude, int y_direction,
 
   collision_y = viable_point->y;
   return true;
+}
+
+void Collision::snapX(Actor *actor, float x, int x_direction) {
+  RectEx *collis_box = &actor->collis_box;
+
+  float half_scale_x = collis_box->scale.x / 2;
+  float collis_x = collis_box->position.x + half_scale_x;
+  collis_x += half_scale_x * x_direction;
+
+  float difference = actor->position.x - collis_x;
+  actor->position.x = x + difference;
+}
+
+void Collision::snapY(Actor *actor, float y, int y_direction) {
+  RectEx *collis_box = &actor->collis_box;
+
+  float half_scale_y = collis_box->scale.y / 2;
+  float collis_y = collis_box->position.y + half_scale_y;
+  collis_y += half_scale_y * y_direction;
+
+  float difference = actor->position.y - collis_y;
+  actor->position.y = y + difference; 
 }
