@@ -9,10 +9,10 @@
 #include "system/field_map.h"
 
 
-class DebugField : public Scene {
+class FieldScene : public Scene {
 public:
-  DebugField();
-  ~DebugField();
+  FieldScene();
+  ~FieldScene();
 
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);

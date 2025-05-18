@@ -3,7 +3,7 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
-#include "scenes/debug_field.h"
+#include "scenes/field.h"
 #include "enums.h"
 #include "game.h"
 
@@ -29,7 +29,7 @@ void Game::init() {
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   defineColorPalette();
 
-  scene = make_unique<DebugField>();
+  scene = make_unique<FieldScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
