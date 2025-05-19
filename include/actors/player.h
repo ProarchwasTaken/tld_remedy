@@ -10,7 +10,6 @@ public:
   PlayerActor(Vector2 position, enum Direction direction);
 
   void behavior() override;
-  static void toggleControllable();
   void movementInput(bool gamepad);
   bool isMoving();
 
@@ -20,6 +19,7 @@ public:
 
   void draw() override;
 
+  static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
 
   bool moving = false;

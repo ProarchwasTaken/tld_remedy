@@ -34,8 +34,8 @@ void PlayerActor::behavior() {
   moving = isMoving();
 }
 
-void PlayerActor::toggleControllable() {
-  controllable = !controllable;
+void PlayerActor::setControllable(bool value) {
+  controllable = value;
 
   if (controllable) {
     PLOGI << "Control has been given to the player.";
