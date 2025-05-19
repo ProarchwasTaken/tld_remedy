@@ -15,12 +15,21 @@
 #include "entities/map_trans.h"
 #include "scenes/field.h"
 
+#ifndef NDEBUG
+#include "system/field_commands.h"
+#endif // !NDEBUG
+
 using std::unique_ptr, std::make_unique, std::string;
+
 
 FieldScene::FieldScene() {
   camera = CameraUtils::setupField();
   mapLoadProcedure("db_01");
-  PLOGI << "Initialized the DebugField Scene.";
+
+  #ifndef NDEBUG
+  static CommandSystem command_system(this);
+  #endif // !NDEBUG
+  PLOGI << "Initialized the Field Scene.";
 }
 
 FieldScene::~FieldScene() {
@@ -28,7 +37,7 @@ FieldScene::~FieldScene() {
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
-  PLOGI << "Unloaded the DebugField scene.";
+  PLOGI << "Unloaded the Field scene.";
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
@@ -98,6 +107,10 @@ void FieldScene::update() {
     Game::fadein(0.10);
     return;
   }
+
+  #ifndef NDEBUG
+  CommandSystem::process();
+  #endif // !NDEBUG
 
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
