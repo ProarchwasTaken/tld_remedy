@@ -10,6 +10,7 @@ public:
   PlayerActor(Vector2 position, enum Direction direction);
 
   void behavior() override;
+  static void toggleControllable();
   void movementInput(bool gamepad);
   bool isMoving();
 
@@ -23,6 +24,8 @@ public:
 
   bool moving = false;
 private:
+  static bool controllable;
+
   const float default_speed = 1.1;
   int moving_x = 0;
   int moving_y = 0;

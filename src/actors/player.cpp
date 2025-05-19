@@ -9,6 +9,8 @@
 #include "utils/collision.h"
 #include "actors/player.h"
 
+bool PlayerActor::controllable = true;
+
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
@@ -22,10 +24,25 @@ Actor("Mary", ActorType::PLAYER, position, direction)
 }
 
 void PlayerActor::behavior() {
+  if (!controllable) {
+    return;
+  }
+
   bool gamepad = IsGamepadAvailable(0);
 
   movementInput(gamepad);
   moving = isMoving();
+}
+
+void PlayerActor::toggleControllable() {
+  controllable = !controllable;
+
+  if (controllable) {
+    PLOGI << "Control has been given to the player.";
+  }
+  else {
+    PLOGI << "Control has been revoked from the player.";
+  }
 }
 
 void PlayerActor::movementInput(bool gamepad) {
