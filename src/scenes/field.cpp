@@ -142,7 +142,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       string map_name = event_data->map_name;
       string *spawn_name = &event_data->spawn_point;
 
-      PLOGI << "Preparing to load map: '" << map_name << "at " <<
+      PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
       Game::fadeout(0.10);
@@ -167,5 +167,9 @@ void FieldScene::draw() {
     }
   }
   EndMode2D();
+
+  #ifndef NDEBUG
+  CommandSystem::drawBuffer();
+  #endif // !NDEBUG
 }
  
