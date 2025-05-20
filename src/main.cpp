@@ -16,19 +16,22 @@ void setupLogger() {
   static RollingFileAppender<CsvFormatter> file("log.csv", 1000000, 5);
   static ColorConsoleAppender<TxtFormatter> console;
   
-  plog::init(plog::debug, &file).addAppender(&console);
-  
-  PLOGI << "Logger Initialized.";
+  plog::Severity severity = plog::info;
+  #ifndef NDEBUG
+  severity = plog::debug;
+  #endif // !NDEBUG
+
+  plog::init(severity, &file).addAppender(&console);
+
+  PLOGI << "Remedy " << VERSION << " - " << VER_STAGE;
+  PLOGI << "Open Source project originally made by: " << AUTHOR;
+  PLOGI << "Github Repositiory: " << HOME_URL;
 }
 
 
 int main(int argc, char *argv[]) {
   setupLogger();
   Game remedy;
-
-  if (Game::devmode) {
-    PLOGD << "Detected that the program is running on Dev Mode.";
-  }
 
   PLOGI << "Initializing the game...";
   remedy.init();

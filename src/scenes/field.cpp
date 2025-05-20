@@ -13,25 +13,34 @@
 #include "utils/camera.h"
 #include "actors/player.h"
 #include "entities/map_trans.h"
-#include "scenes/debug_field.h"
+#include "scenes/field.h"
+
+#ifndef NDEBUG
+#include "system/field_commands.h"
+#endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string;
 
-DebugField::DebugField() {
+
+FieldScene::FieldScene() {
   camera = CameraUtils::setupField();
   mapLoadProcedure("db_01");
-  PLOGI << "Initialized the DebugField Scene.";
+
+  #ifndef NDEBUG
+  static CommandSystem command_system(this);
+  #endif // !NDEBUG
+  PLOGI << "Initialized the Field Scene.";
 }
 
-DebugField::~DebugField() {
+FieldScene::~FieldScene() {
   Entity::clear(entities);
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
-  PLOGI << "Unloaded the DebugField scene.";
+  PLOGI << "Unloaded the Field scene.";
 }
 
-void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
+void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   PLOGI << "Running map load procedure";
   float start_time = GetTime();
 
@@ -53,7 +62,7 @@ void DebugField::mapLoadProcedure(string map_name, string *spawn_name) {
   map_ready = true;
 }
 
-void DebugField::setupActors() {
+void FieldScene::setupActors() {
   PLOGI << "Setting up field actors...";
   for (ActorData data : field.actor_queue) {
     Vector2 position = data.position;
@@ -80,7 +89,7 @@ void DebugField::setupActors() {
 }
 
 
-void DebugField::setupMapTransitions() {
+void FieldScene::setupMapTransitions() {
   PLOGI << "Setting up map transition triggers...";
   for (MapTransData data : field.map_trans_queue) {
     unique_ptr<Entity> entity;
@@ -92,12 +101,16 @@ void DebugField::setupMapTransitions() {
   field.map_trans_queue.clear();
 }
 
-void DebugField::update() { 
+void FieldScene::update() { 
   if (!map_ready) {
     mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
     Game::fadein(0.10);
     return;
   }
+
+  #ifndef NDEBUG
+  CommandSystem::process();
+  #endif // !NDEBUG
 
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
@@ -120,7 +133,7 @@ void DebugField::update() {
   }
 }
 
-void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
+void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
   switch (event->event_type) {
     case FieldEventType::LOAD_MAP: {
       PLOGD << "Event detected: LoadMapEvent";
@@ -129,7 +142,7 @@ void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       string map_name = event_data->map_name;
       string *spawn_name = &event_data->spawn_point;
 
-      PLOGI << "Preparing to load map: '" << map_name << "at " <<
+      PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
       Game::fadeout(0.10);
@@ -139,7 +152,7 @@ void DebugField::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
   }
 }
 
-void DebugField::draw() {
+void FieldScene::draw() {
   BeginMode2D(camera); 
   {
     field.draw();
@@ -154,5 +167,9 @@ void DebugField::draw() {
     }
   }
   EndMode2D();
+
+  #ifndef NDEBUG
+  CommandSystem::drawBuffer();
+  #endif // !NDEBUG
 }
  

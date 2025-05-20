@@ -8,8 +8,9 @@
 class Game {
 public:
   void init();
-  void setupCanvas();
   ~Game();
+  void setupCanvas();
+  void defineColorPalette();
 
   void start();
   void fadeScreen();
@@ -26,6 +27,9 @@ public:
   static constexpr Vector2 WINDOW_RES = {1280, 720};
 
   static constexpr int target_framerate = 60;
+
+  static Font sm_font;
+  static Color* palette;
 
   #ifndef NDEBUG
   static constexpr bool devmode = true; 

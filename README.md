@@ -12,7 +12,7 @@ the idea is worth expanding upon, or I need to take a difference approach.
 
 At the time of writing this, I'm looking for feedback on the game's 
 movement, and collision system. As well as feedback on how the game runs
-on lower end deviced.
+on lower end devices.
 
 
 # Default Controls

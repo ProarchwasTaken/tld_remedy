@@ -29,3 +29,7 @@ enum Direction {
 enum FieldEventType {
   LOAD_MAP
 };
+
+enum CommandType {
+  CHANGE_MAP
+};

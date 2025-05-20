@@ -93,7 +93,6 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
 
       Vector2 vertex = {base_x + x, base_y + y};
       vertices.push_back(vertex);
-      PLOGD << "Vertex Added: (" << x << ", " << y << ")";
     }
 
     int count = vertices.size();
@@ -104,7 +103,6 @@ void FieldMap::retrieveCollLines(json &layer_objects) {
     }
 
     for (int index = 0; index < (count - 1); index++) {
-      PLOGI << "Interation: " << index;
       int next_index = index + 1;
       Vector2 start = vertices[index];
       Vector2 end = vertices[next_index];

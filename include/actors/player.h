@@ -19,13 +19,14 @@ public:
 
   void draw() override;
 
+  static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
 
   bool moving = false;
 private:
-  bool moving_right = false;
-  bool moving_left = false;
-  bool moving_down = false;
-  bool moving_up = false;
-  float movement_speed = 1.0;
+  static bool controllable;
+
+  const float default_speed = 1.1;
+  int moving_x = 0;
+  int moving_y = 0;
 };
