@@ -22,9 +22,10 @@ void setupLogger() {
   #endif // !NDEBUG
 
   plog::init(severity, &file).addAppender(&console);
-  
-  PLOGI << "Logger Initialized.";
-  PLOGD << "Detected that the program is running on Dev Mode.";
+
+  PLOGI << "Remedy " << VERSION << " - " << VER_STAGE;
+  PLOGI << "Open Source project originally made by: " << AUTHOR;
+  PLOGI << "Github Repositiory: " << HOME_URL;
 }
 
 
