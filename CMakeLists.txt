@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.0.0
+VERSION 1.1.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -42,6 +42,7 @@ set(HEADERS
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/utils/collision.h"
+"include/utils/text.h"
 "include/system/field_handler.h"
 "include/system/field_map.h"
 "include/scenes/field.h"
@@ -55,6 +56,7 @@ set(SOURCE
 "src/utils/input.cpp"
 "src/utils/camera.cpp"
 "src/utils/collision.cpp"
+"src/utils/text.cpp"
 "src/system/field_handler.cpp"
 "src/system/field_map.cpp"
 "src/scenes/field.cpp"
