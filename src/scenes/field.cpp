@@ -158,6 +158,15 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       map_ready = false;
       break;
     }
+    case FieldEventType::CHANGE_SUPPLIES: {
+      PLOGD << "Event detected: SetSuppliesEvent";
+      auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
+
+      int value = event_data->value;
+
+      PLOGI << "Changing value of 'supplies' to: " << value;
+      session.supplies = value;
+    }
   }
 }
 

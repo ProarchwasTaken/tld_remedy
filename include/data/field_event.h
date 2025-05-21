@@ -10,3 +10,7 @@ struct LoadMapEvent : FieldEvent {
   std::string map_name;
   std::string spawn_point;
 };
+
+struct SetSuppliesEvent : FieldEvent {
+  int value;
+};

@@ -24,7 +24,8 @@ public:
 private:
   inline static FieldScene *scene;
   inline static std::map<std::string, CommandType> command_table {
-    {"MAP", CHANGE_MAP}
+    {"MAP", CHANGE_MAP},
+    {"SET_SUPPLIES", SET_SUPPLIES}
   };
 
   inline static std::string buffer;

@@ -10,3 +10,7 @@ struct FieldCommand {
 struct ChangeMapCommand : FieldCommand {
   std::string map_name;
 };
+
+struct SetSuppliesCommand : FieldCommand {
+  int value;
+};
