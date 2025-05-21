@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <raylib.h>
@@ -9,6 +10,7 @@
 #include "base/actor.h"
 #include "data/actor.h"
 #include "data/field_event.h"
+#include "data/session.h"
 #include "system/field_handler.h"
 #include "utils/camera.h"
 #include "actors/player.h"
@@ -22,13 +24,18 @@
 using std::unique_ptr, std::make_unique, std::string;
 
 
-FieldScene::FieldScene() {
-  camera = CameraUtils::setupField();
-  mapLoadProcedure("db_01");
+FieldScene::FieldScene(Session *session_data) {
+  if (session_data != NULL) {
+    PLOGI << "Loading existing session data.";
+    session = *session_data;
+  }
+  mapLoadProcedure(session.location);
 
   #ifndef NDEBUG
   static CommandSystem command_system(this);
   #endif // !NDEBUG
+  
+  camera = CameraUtils::setupField();
   PLOGI << "Initialized the Field Scene.";
 }
 

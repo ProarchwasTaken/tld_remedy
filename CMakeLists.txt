@@ -39,6 +39,7 @@ set(HEADERS
 "include/data/line.h"
 "include/data/actor.h"
 "include/data/field_event.h"
+"include/data/session.h"
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/utils/collision.h"

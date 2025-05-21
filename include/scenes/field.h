@@ -5,13 +5,14 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/field_event.h"
+#include "data/session.h"
 #include "system/field_handler.h"
 #include "system/field_map.h"
 
 
 class FieldScene : public Scene {
 public:
-  FieldScene();
+  FieldScene(Session *session_data = NULL);
   ~FieldScene();
 
   void mapLoadProcedure(std::string map_name, 
@@ -26,6 +27,7 @@ public:
 private:
   FieldMap field;
   FieldEventHandler field_handler;
+  Session session;
 
   Camera2D camera;
   Entity *camera_target;
