@@ -24,6 +24,7 @@ public:
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
 
   void draw() override;
+  void drawSessionInfo();
 private:
   FieldMap field;
   FieldEventHandler field_handler;

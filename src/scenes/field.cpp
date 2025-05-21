@@ -13,6 +13,7 @@
 #include "data/session.h"
 #include "system/field_handler.h"
 #include "utils/camera.h"
+#include "utils/text.h"
 #include "actors/player.h"
 #include "entities/map_trans.h"
 #include "scenes/field.h"
@@ -66,6 +67,7 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   float elapsed_time = GetTime() - start_time;
   PLOGI << "Loading Time: " << elapsed_time;
 
+  session.location = map_name;
   map_ready = true;
 }
 
@@ -177,6 +179,45 @@ void FieldScene::draw() {
 
   #ifndef NDEBUG
   CommandSystem::drawBuffer();
+  if (Game::debugInfo()) drawSessionInfo();
   #endif // !NDEBUG
+
+}
+
+void FieldScene::drawSessionInfo() {
+  int text_size = Game::sm_font.baseSize;
+  float base_x = 420;
+  float y = 4;
+
+  string location = "Location: " + session.location;
+  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), 
+                                               {base_x, y}, Game::sm_font, 
+                                               -3, 0);
+  y += 8;
+
+  const char *supplies = TextFormat("Supplies: %03i", session.supplies);
+  Vector2 sup_pos = TextUtils::alignRight(supplies, {base_x, y}, 
+                                               Game::sm_font, -3, 0);
+  y += 8;
+
+  const char *plr_hp = TextFormat("Player Life: %02.00f / %02.00f",
+                                  session.player.life, 
+                                  session.player.max_life);
+  Vector2 php_pos = TextUtils::alignRight(plr_hp, {base_x, y}, 
+                                          Game::sm_font, -3, 0);
+  y += 8;
+
+  const char *plr_mp = TextFormat("Player Morale: %02.00f / %02.00f "
+                                  "/ %02.00f", session.player.morale, 
+                                  session.player.init_morale, 
+                                  session.player.max_morale);
+  Vector2 pmp_pos = TextUtils::alignRight(plr_mp, {base_x, y}, 
+                                          Game::sm_font, -3, 0);
+
+  DrawTextEx(Game::sm_font, location.c_str(), loc_pos, text_size, -3, 
+             GREEN);
+  DrawTextEx(Game::sm_font, supplies, sup_pos, text_size, -3, GREEN);
+  DrawTextEx(Game::sm_font, plr_hp, php_pos, text_size, -3, GREEN);
+  DrawTextEx(Game::sm_font, plr_mp, pmp_pos, text_size, -3, GREEN);
 }
  
