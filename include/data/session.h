@@ -6,7 +6,6 @@ struct Player {
   float max_life = 20;
 
   float init_morale = 10;
-  float morale = init_morale;
   float max_morale = 35;
 };
 
