@@ -14,3 +14,7 @@ struct LoadMapEvent : FieldEvent {
 struct SetSuppliesEvent : FieldEvent {
   int value;
 };
+
+struct SetPlrLifeEvent : FieldEvent {
+  float value;
+};

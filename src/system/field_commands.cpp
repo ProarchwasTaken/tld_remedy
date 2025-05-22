@@ -16,6 +16,7 @@ string findNextWord(string &buffer, string::iterator &iterator,
                     bool uppercase = false);
 void loadMapCommand(string map_name, string spawn_name);
 void setSuppliesCommand(string argument);
+void setLifeCommand(string target, string value);
 
 
 CommandSystem::CommandSystem(FieldScene *scene) {
@@ -96,7 +97,15 @@ void CommandSystem::interpretCommand(CommandType type,
     }
     case SET_SUPPLIES: {
       string argument = findNextWord(buffer, iterator);
+
       setSuppliesCommand(argument);
+      break;
+    }
+    case SET_LIFE: {
+      string target = findNextWord(buffer, iterator, true);
+      string value = findNextWord(buffer, iterator);
+
+      setLifeCommand(target, value);
       break;
     }
   }
@@ -170,4 +179,42 @@ void setSuppliesCommand(string argument) {
   int value = std::stoi(argument);
 
   FieldEventHandler::raise<SetSuppliesEvent>(CHANGE_SUPPLIES, value);
+}
+
+void setLifeCommand(string target, string value) {
+  if (target.empty()) {
+    PLOGE << "Target is not specified!";
+    return;
+  }
+
+  if (value.empty()) {
+    PLOGE << "Expecting a value to set life to!";
+    return;
+  }
+
+  bool detected_decimal = false;
+  for (char letter : value) {
+    if (std::isdigit(letter)) {
+      continue;
+    }
+
+    if (!detected_decimal && letter == '.') {
+      detected_decimal = true;
+    }
+    else {
+      PLOGE << "'" << value << "' is not a floating point number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  float life_value = std::stof(value);
+  
+  if (target == "PLAYER") {
+    FieldEventHandler::raise<SetPlrLifeEvent>(CHANGE_PLR_LIFE, 
+                                              life_value);
+  }
+  else {
+    PLOGD << "'" << target << "' is not a valid target.";
+  }
 }

@@ -166,6 +166,17 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
 
       PLOGI << "Changing value of 'supplies' to: " << value;
       session.supplies = value;
+      break;
+    }
+    case FieldEventType::CHANGE_PLR_LIFE: {
+      PLOGD << "Event detected: SetPlrLifeEvent";
+      auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
+
+      float value = event_data->value;
+
+      PLOGI << "Changing the player's life expectancy to: " << value;
+      session.player.life = value;
+      break;
     }
   }
 }
@@ -216,8 +227,7 @@ void FieldScene::drawSessionInfo() {
                                           Game::sm_font, -3, 0);
   y += 8;
 
-  const char *plr_mp = TextFormat("Player Morale: %02.00f / %02.00f "
-                                  "/ %02.00f", session.player.morale, 
+  const char *plr_mp = TextFormat("Player Morale: %02.00f / %02.00f",  
                                   session.player.init_morale, 
                                   session.player.max_morale);
   Vector2 pmp_pos = TextUtils::alignRight(plr_mp, {base_x, y}, 
