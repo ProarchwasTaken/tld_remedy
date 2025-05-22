@@ -68,7 +68,6 @@ set(SOURCE
 if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
-  "include/data/debug.h"
   "include/system/field_commands.h"
   )
   list(APPEND SOURCE
