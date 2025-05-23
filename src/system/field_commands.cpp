@@ -21,14 +21,18 @@ void saveCommand();
 void loadCommand();
 
 
-CommandSystem::CommandSystem(FieldScene *scene) {
+CommandSystem::CommandSystem() {
   assert(Game::devmode);
-  this->scene = scene;
   PLOGD << "Initialized debug command system.";
 }
 
 CommandSystem::~CommandSystem() {
   PLOGD << "Reseting debug command system.";
+}
+
+void CommandSystem::assignScene(FieldScene *scene) {
+  PLOGI << "Assigned scene to command system.";
+  CommandSystem::scene = scene;
 }
 
 void CommandSystem::process() {

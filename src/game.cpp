@@ -5,14 +5,16 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
+#include <utility>
 #include "scenes/field.h"
 #include "enums.h"
 #include "data/session.h"
 #include "game.h"
 
-using std::make_unique, std::ofstream, std::ifstream;
+using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
 
 GameState Game::game_state = READY;
+unique_ptr<Session> Game::loaded_session;
 
 Font Game::sm_font;
 Color *Game::palette;
@@ -73,17 +75,17 @@ void Game::start() {
     }
 
     switch (game_state) {
-      case READY: {
-        scene->update();
-        break;
-      }
       case LOADING_SESSION: {
-
-        continue;
+        loadSessionProcedure();
+        break;
       }
       case FADING_IN:
       case FADING_OUT: {
         fadeScreen();
+        break;
+      }
+      case READY: {
+        scene->update();
         break;
       }
     }
@@ -134,8 +136,20 @@ void Game::fadeScreen() {
   }
 }
 
+void Game::loadSessionProcedure() {
+  PLOGI << "Initiating load session procedure.";
+  scene.reset();
+  
+  PLOGD << "Loading the field scene with loaded session as argument.";
+  assert(loaded_session != nullptr);
+  scene = make_unique<FieldScene>(loaded_session.get());
+
+  loaded_session.reset();
+  PLOGI << "Procedure complete.";
+}
+
 void Game::fadeout(float fade_time) {
-  if (game_state != READY) {
+  if (game_state != READY && game_state != LOADING_SESSION) {
     return;
   }
 
@@ -146,7 +160,7 @@ void Game::fadeout(float fade_time) {
 }
 
 void Game::fadein(float fade_time) {
-  if (game_state != READY) {
+  if (game_state != READY && game_state != LOADING_SESSION) {
     return;
   }
 
@@ -186,10 +200,15 @@ void Game::loadSession() {
     return;
   }
 
+  file.close();
+
+  PLOGI << "Successfully loaded the session data.";
   PLOGD << "Location: " << session.location;
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;
-  file.close();
+
+  loaded_session = make_unique<Session>(std::move(session));
+  game_state = LOADING_SESSION;
 }
 
 float Game::deltaTime() {

@@ -10,8 +10,9 @@
  * debugging purposes only.*/
 class CommandSystem {
 public:
-  CommandSystem(FieldScene *scene);
+  CommandSystem();
   ~CommandSystem();
+  static void assignScene(FieldScene *scene);
 
   static void process();
 

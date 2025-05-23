@@ -15,6 +15,7 @@ public:
 
   void start();
   void fadeScreen();
+  void loadSessionProcedure();
 
   static float deltaTime();
   static bool debugInfo();
@@ -47,6 +48,7 @@ private:
 
   static float fade_time;
   static float fade_percentage;
+
   Color screen_tint = WHITE;
 
   RenderTexture canvas;
@@ -54,4 +56,5 @@ private:
   Rectangle canvas_dest;
 
   std::unique_ptr<Scene> scene;
+  static std::unique_ptr<Session> loaded_session;
 };

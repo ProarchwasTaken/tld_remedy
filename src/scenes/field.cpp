@@ -31,13 +31,16 @@ FieldScene::FieldScene(Session *session_data) {
     PLOGI << "Loading existing session data.";
     session = *session_data;
   }
+
+  camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
 
   #ifndef NDEBUG
-  static CommandSystem command_system(this);
+  static CommandSystem command_system;
+  command_system.assignScene(this);
   #endif // !NDEBUG
   
-  camera = CameraUtils::setupField();
+  Game::fadein(1.0);
   PLOGI << "Initialized the Field Scene.";
 }
 
