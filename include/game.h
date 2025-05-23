@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <memory>
 #include "base/scene.h"
+#include "data/session.h"
 #include "enums.h"
 
 
@@ -19,6 +20,9 @@ public:
   static bool debugInfo();
   static void toggleDebugInfo();
   static void setTimeScale(float number);
+
+  static void saveSession(Session *data);
+  static void loadSession();
 
   static void fadeout(float fade_time);
   static void fadein(float fade_time);

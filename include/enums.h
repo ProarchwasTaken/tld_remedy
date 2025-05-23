@@ -3,6 +3,7 @@
 
 enum GameState {
   READY,
+  LOADING_SESSION,
   FADING_OUT,
   FADING_IN
 };

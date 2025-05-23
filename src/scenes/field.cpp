@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <string>
 #include <raylib.h>
@@ -67,7 +68,7 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   float elapsed_time = GetTime() - start_time;
   PLOGI << "Loading Time: " << elapsed_time;
 
-  session.location = map_name;
+  std::strcpy(session.location, map_name.c_str());
   map_ready = true;
 }
 
@@ -120,6 +121,13 @@ void FieldScene::update() {
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
+
+  if (IsKeyPressed(KEY_E)) {
+    Game::saveSession(&session);
+  }
+  else if (IsKeyPressed(KEY_Q)) {
+    Game::loadSession();
+  }
 
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
@@ -209,10 +217,11 @@ void FieldScene::drawSessionInfo() {
   float base_x = 420;
   float y = 4;
 
-  string location = "Location: " + session.location;
-  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), 
-                                               {base_x, y}, Game::sm_font, 
-                                               -3, 0);
+  string base = "Location: ";
+  string extension = session.location;
+  string location = base + extension;
+  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
+                                          Game::sm_font, -3, 0);
   y += 8;
 
   const char *supplies = TextFormat("Supplies: %03i", session.supplies);

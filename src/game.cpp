@@ -1,13 +1,16 @@
 #include <cassert>
+#include <fstream>
+#include <ios>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
 #include "scenes/field.h"
 #include "enums.h"
+#include "data/session.h"
 #include "game.h"
 
-using std::make_unique;
+using std::make_unique, std::ofstream, std::ifstream;
 
 GameState Game::game_state = READY;
 
@@ -69,11 +72,20 @@ void Game::start() {
       toggleDebugInfo();
     }
 
-    if (game_state == READY) {
-      scene->update();
-    }
-    else {
-      fadeScreen();
+    switch (game_state) {
+      case READY: {
+        scene->update();
+        break;
+      }
+      case LOADING_SESSION: {
+
+        continue;
+      }
+      case FADING_IN:
+      case FADING_OUT: {
+        fadeScreen();
+        break;
+      }
     }
 
     BeginTextureMode(canvas);
@@ -142,6 +154,42 @@ void Game::fadein(float fade_time) {
   Game::fade_percentage = 0.0;
   Game::fade_time = fade_time;
   game_state = FADING_IN;
+}
+
+void Game::saveSession(Session *data) {
+  PLOGI << "Saving the player's current session.";
+
+  ofstream file;
+  file.open("data/session.data", std::ios::binary);
+  file.write(reinterpret_cast<char*>(data), sizeof(Session));
+
+  file.close();
+  PLOGI << "Session data saved successfully.";
+}
+
+void Game::loadSession() {
+  PLOGI << "Attempting to load session data.";
+
+  Session session;
+
+  ifstream file;
+  file.open("data/session.data", std::ios::binary);
+  if (!file.is_open()) {
+    PLOGE << "'data/session.data' is not found.";
+  }
+
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    PLOGE << "Error opening file!";
+    file.close();
+    return;
+  }
+
+  PLOGD << "Location: " << session.location;
+  PLOGD << "Medical Supplies: " << session.supplies;
+  PLOGD << "Player Life: " << session.player.life;
+  file.close();
 }
 
 float Game::deltaTime() {
