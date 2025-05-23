@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 
 struct Player {
   float life = 20;
@@ -14,5 +13,5 @@ struct Session {
   Player player;
   int supplies = 0;
 
-  std::string location = "db_01";
+  char location[20] = "db_01";
 };
