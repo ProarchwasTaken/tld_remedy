@@ -122,13 +122,6 @@ void FieldScene::update() {
   CommandSystem::process();
   #endif // !NDEBUG
 
-  if (IsKeyPressed(KEY_E)) {
-    Game::saveSession(&session);
-  }
-  else if (IsKeyPressed(KEY_Q)) {
-    Game::loadSession();
-  }
-
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
@@ -186,6 +179,20 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       session.player.life = value;
       break;
     }
+    case FieldEventType::SAVE_SESSION: {
+      PLOGD << "Event Detected: SaveSessionEvent";
+
+      PLOGI << "Saving the session.";
+      Game::saveSession(&session);
+      break;
+    }
+    case FieldEventType::LOAD_SESSION: {
+      PLOGD << "Event Detected: LoadSessionEvent";
+
+      PLOGI << "Loading session.";
+      Game::loadSession();
+      break;
+    }
   }
 }
 
@@ -209,7 +216,6 @@ void FieldScene::draw() {
   CommandSystem::drawBuffer();
   if (Game::debugInfo()) drawSessionInfo();
   #endif // !NDEBUG
-
 }
 
 void FieldScene::drawSessionInfo() {
@@ -224,28 +230,31 @@ void FieldScene::drawSessionInfo() {
                                           Game::sm_font, -3, 0);
   y += 8;
 
-  const char *supplies = TextFormat("Supplies: %03i", session.supplies);
-  Vector2 sup_pos = TextUtils::alignRight(supplies, {base_x, y}, 
-                                               Game::sm_font, -3, 0);
-  y += 8;
-
-  const char *plr_hp = TextFormat("Player Life: %02.00f / %02.00f",
-                                  session.player.life, 
-                                  session.player.max_life);
-  Vector2 php_pos = TextUtils::alignRight(plr_hp, {base_x, y}, 
+  string supplies = TextFormat("Supplies: %03i", session.supplies);
+  Vector2 sup_pos = TextUtils::alignRight(supplies.c_str(), {base_x, y}, 
                                           Game::sm_font, -3, 0);
   y += 8;
 
-  const char *plr_mp = TextFormat("Player Morale: %02.00f / %02.00f",  
-                                  session.player.init_morale, 
-                                  session.player.max_morale);
-  Vector2 pmp_pos = TextUtils::alignRight(plr_mp, {base_x, y}, 
+  string plr_hp = TextFormat("Player Life: %02.00f / %02.00f",
+                             session.player.life, 
+                             session.player.max_life);
+  Vector2 php_pos = TextUtils::alignRight(plr_hp.c_str(), {base_x, y}, 
+                                          Game::sm_font, -3, 0);
+  y += 8;
+
+  string plr_mp = TextFormat("Player Morale: %02.00f / %02.00f",  
+                             session.player.init_morale, 
+                             session.player.max_morale);
+  Vector2 pmp_pos = TextUtils::alignRight(plr_mp.c_str(), {base_x, y}, 
                                           Game::sm_font, -3, 0);
 
   DrawTextEx(Game::sm_font, location.c_str(), loc_pos, text_size, -3, 
              GREEN);
-  DrawTextEx(Game::sm_font, supplies, sup_pos, text_size, -3, GREEN);
-  DrawTextEx(Game::sm_font, plr_hp, php_pos, text_size, -3, GREEN);
-  DrawTextEx(Game::sm_font, plr_mp, pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(Game::sm_font, supplies.c_str(), sup_pos, text_size, -3, 
+             GREEN);
+  DrawTextEx(Game::sm_font, plr_hp.c_str(), php_pos, text_size, -3, 
+             GREEN);
+  DrawTextEx(Game::sm_font, plr_mp.c_str(), pmp_pos, text_size, -3, 
+             GREEN);
 }
  

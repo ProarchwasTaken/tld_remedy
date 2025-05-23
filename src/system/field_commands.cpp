@@ -17,6 +17,8 @@ string findNextWord(string &buffer, string::iterator &iterator,
 void loadMapCommand(string map_name, string spawn_name);
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
+void saveCommand();
+void loadCommand();
 
 
 CommandSystem::CommandSystem(FieldScene *scene) {
@@ -106,6 +108,14 @@ void CommandSystem::interpretCommand(CommandType type,
       string value = findNextWord(buffer, iterator);
 
       setLifeCommand(target, value);
+      break;
+    }
+    case SAVE: {
+      saveCommand();
+      break;
+    }
+    case LOAD: {
+      loadCommand();
       break;
     }
   }
@@ -217,4 +227,14 @@ void setLifeCommand(string target, string value) {
   else {
     PLOGD << "'" << target << "' is not a valid target.";
   }
+}
+
+void saveCommand() {
+  PLOGD << "Now executing command.";
+  FieldEventHandler::raise<FieldEvent>(SAVE_SESSION);
+}
+
+void loadCommand() {
+  PLOGD << "Now executing command.";
+  FieldEventHandler::raise<FieldEvent>(LOAD_SESSION);
 }

@@ -26,7 +26,9 @@ private:
   inline static std::map<std::string, CommandType> command_table {
     {"MAP", CHANGE_MAP},
     {"SET_SUPPLIES", SET_SUPPLIES},
-    {"SET_LIFE", SET_LIFE}
+    {"SET_LIFE", SET_LIFE},
+    {"SAVE", SAVE},
+    {"LOAD", LOAD}
   };
 
   inline static std::string buffer;

@@ -31,10 +31,14 @@ enum FieldEventType {
   LOAD_MAP,
   CHANGE_SUPPLIES,
   CHANGE_PLR_LIFE,
+  SAVE_SESSION,
+  LOAD_SESSION,
 };
 
 enum CommandType {
   CHANGE_MAP,
   SET_SUPPLIES,
-  SET_LIFE
+  SET_LIFE,
+  SAVE,
+  LOAD
 };
