@@ -74,42 +74,49 @@ void Game::start() {
       toggleDebugInfo();
     }
 
-    switch (game_state) {
-      case LOADING_SESSION: {
-        loadSessionProcedure();
-        break;
-      }
-      case FADING_IN:
-      case FADING_OUT: {
-        fadeScreen();
-        break;
-      }
-      case READY: {
-        scene->update();
-        break;
-      }
-    }
-
-    BeginTextureMode(canvas);
-    {
-      ClearBackground(BLACK);
-      scene->draw();
-    }
-    EndTextureMode();
-
-    BeginDrawing(); 
-    {
-      DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                     screen_tint);
-      if (debug_info) DrawFPS(24, 16);
-    }
-    EndDrawing();
+    gameLogic();
+    drawScene();
   }
 
   CloseWindow();
 }
 
-void Game::fadeScreen() {
+void Game::gameLogic() {
+  switch (game_state) {
+    case LOADING_SESSION: {
+      loadSessionProcedure();
+      break;
+    }
+    case FADING_IN:
+    case FADING_OUT: {
+      fadeScreenProcedure();
+      break;
+    }
+    case READY: {
+      scene->update();
+      break;
+    }
+  }
+}
+
+void Game::drawScene() {
+  BeginTextureMode(canvas);
+  {
+    ClearBackground(BLACK);
+    scene->draw();
+  }
+  EndTextureMode();
+
+  BeginDrawing(); 
+  {
+    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
+                   screen_tint);
+    if (debug_info) DrawFPS(24, 16);
+  }
+  EndDrawing();
+}
+
+void Game::fadeScreenProcedure() {
   float magnitude = GetFrameTime() / fade_time;
   if (magnitude == 0) {
     return;
@@ -183,15 +190,14 @@ void Game::saveSession(Session *data) {
 
 void Game::loadSession() {
   PLOGI << "Attempting to load session data.";
-
-  Session session;
-
   ifstream file;
   file.open("data/session.data", std::ios::binary);
+
   if (!file.is_open()) {
     PLOGE << "'data/session.data' is not found.";
   }
 
+  Session session;
   file.read(reinterpret_cast<char*>(&session), sizeof(Session));
 
   if (file.fail()) {
@@ -202,7 +208,7 @@ void Game::loadSession() {
 
   file.close();
 
-  PLOGI << "Successfully loaded the session data.";
+  PLOGI << "Successfully loaded session data.";
   PLOGD << "Location: " << session.location;
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;

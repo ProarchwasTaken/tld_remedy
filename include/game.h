@@ -14,7 +14,15 @@ public:
   void defineColorPalette();
 
   void start();
-  void fadeScreen();
+
+  /* The functionality of this function majorly depends on what state
+   * the game is in. Updating the scene, fading the screen, and loading
+   * existing sessions; It's all set up so the game could only perform
+   * one of these things per frame to reduce complexity.*/
+  void gameLogic();
+  void drawScene();
+
+  void fadeScreenProcedure();
   void loadSessionProcedure();
 
   static float deltaTime();
