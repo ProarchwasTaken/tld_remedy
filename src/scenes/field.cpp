@@ -10,6 +10,7 @@
 #include "base/entity.h"
 #include "base/actor.h"
 #include "data/actor.h"
+#include "data/entity.h"
 #include "data/field_event.h"
 #include "data/session.h"
 #include "field/system/field_handler.h"
@@ -61,8 +62,7 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   }
 
   field.loadMap(map_name, spawn_name);
-  setupActors();
-  setupMapTransitions();
+  setupEntities();
 
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
@@ -75,17 +75,42 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   map_ready = true;
 }
 
-void FieldScene::setupActors() {
-  PLOGI << "Setting up field actors...";
-  for (ActorData data : field.actor_queue) {
-    Vector2 position = data.position;
-    Direction direction = data.direction;
+void FieldScene::setupActor(ActorData *data) {
+  unique_ptr<Entity> entity;
+  Vector2 position = data->position;
+  Direction direction = data->direction;
 
+  switch (data->actor_type) {
+    case ActorType::PLAYER: {
+      entity = make_unique<PlayerActor>(position, direction);
+      break;
+    }
+    default: {
+
+    }
+  }
+
+  if (entity != nullptr) {
+    entities.push_back(std::move(entity));
+  }
+}
+
+
+void FieldScene::setupEntities() {
+  PLOGI << "Setting up field entities...";
+  PLOGD << "Entities to be created: " << field.entity_queue.size();
+
+  for (auto &data : field.entity_queue) {
     unique_ptr<Entity> entity;
 
-    switch (data.type) {
-      case ActorType::PLAYER: {
-        entity = make_unique<PlayerActor>(position, direction);
+    switch (data->type) {
+      case EntityType::ACTOR: {
+        setupActor(static_cast<ActorData*>(data.get()));
+        break;
+      }
+      case EntityType::MAP_TRANSITION: {
+        MapTransData *trans_data = static_cast<MapTransData*>(data.get());
+        entity = make_unique<MapTransition>(*trans_data);
         break;
       }
       default: {
@@ -96,22 +121,11 @@ void FieldScene::setupActors() {
     if (entity != nullptr) {
       entities.push_back(std::move(entity));
     }
+
+    data.reset();
   }
 
-  field.actor_queue.clear();
-}
-
-
-void FieldScene::setupMapTransitions() {
-  PLOGI << "Setting up map transition triggers...";
-  for (MapTransData data : field.map_trans_queue) {
-    unique_ptr<Entity> entity;
-
-    entity = make_unique<MapTransition>(data);
-    entities.push_back(std::move(entity));
-  }
-
-  field.map_trans_queue.clear();
+  field.entity_queue.clear();
 }
 
 void FieldScene::update() { 

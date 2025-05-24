@@ -4,6 +4,7 @@
 #include <memory>
 #include "base/scene.h"
 #include "base/entity.h"
+#include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
 #include "field/system/field_handler.h"
@@ -17,8 +18,8 @@ public:
 
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
-  void setupActors();
-  void setupMapTransitions();
+  void setupEntities();
+  void setupActor(ActorData *data);
 
   void update() override;
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);

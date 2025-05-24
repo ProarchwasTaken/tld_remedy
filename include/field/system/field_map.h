@@ -2,8 +2,8 @@
 #include <nlohmann/json_fwd.hpp>
 #include <raylib.h>
 #include <string>
+#include <memory>
 #include <vector>
-#include "data/actor.h"
 #include "data/entity.h"
 #include "data/line.h"
 
@@ -25,8 +25,7 @@ public:
   void drawCollLines();
 
   static std::vector<Line> collision_lines;
-  std::vector<ActorData> actor_queue;
-  std::vector<MapTransData> map_trans_queue;
+  std::vector<std::unique_ptr<EntityData>> entity_queue;
 private:
   Texture base;
 };

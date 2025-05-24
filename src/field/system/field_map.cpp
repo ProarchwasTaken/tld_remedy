@@ -1,6 +1,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <nlohmann/json.hpp>
 #include <cassert>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <fstream>
@@ -14,7 +15,7 @@
 #include "field/system/field_map.h"
 
 using std::string, std::ifstream, nlohmann::json, std::vector, 
-nlohmann::basic_json;
+nlohmann::basic_json, std::make_unique;
 
 
 vector<Line> FieldMap::collision_lines;
@@ -22,8 +23,11 @@ vector<Line> FieldMap::collision_lines;
 FieldMap::~FieldMap() {
   UnloadTexture(base);
   collision_lines.clear();
-  actor_queue.clear();
-  map_trans_queue.clear();
+
+  for (auto &data : entity_queue) {
+    data.reset();
+  }
+  entity_queue.clear();
 }
 
 void FieldMap::loadMap(string map_name, string *spawn_name) {
@@ -128,9 +132,9 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
     if (object.find("type") == object.end()) {
       PLOGD << "Found initial spawn point for the player.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
-      ActorData actor_data = {{x, y}, direction, actor_type};
+      ActorData actor_data = {ACTOR, actor_type, {x, y}, direction};
 
-      actor_queue.push_back(actor_data);
+      entity_queue.push_back(make_unique<ActorData>(actor_data));
       found_initial = true;
       break;
     }
@@ -159,8 +163,8 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
     if (type_value == spawn_name) {
       PLOGD << "Found transition spawn point for the player.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
-      ActorData actor_data = {{x, y}, direction, actor_type};
-      actor_queue.push_back(actor_data);
+      ActorData actor_data = {ACTOR, actor_type, {x, y}, direction};
+      entity_queue.push_back(make_unique<ActorData>(actor_data));
 
       found_transition = true;
       break;
@@ -204,10 +208,11 @@ void FieldMap::findMapTransitions(json &layer_objects) {
       }
     }
 
-    MapTransData data = {map_dest, spawn_dest, rect, direction};
+    MapTransData data = {MAP_TRANSITION, map_dest, spawn_dest, rect, 
+      direction};
     PLOGD << "Trigger Data: {Map Destination: '" << map_dest <<
       "' Spawnpoint: '" << spawn_dest << "' Direction: " << direction;
-    map_trans_queue.push_back(data);
+    entity_queue.push_back(make_unique<MapTransData>(data));
   }
 }
 
