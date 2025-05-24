@@ -11,7 +11,8 @@ enum GameState {
 enum EntityType {
   ACTOR,
   COMBATANT,
-  MAP_TRANSITION
+  MAP_TRANSITION,
+  PICKUP
 };
 
 enum ActorType {
@@ -25,6 +26,10 @@ enum Direction {
   LEFT = -1,
   RIGHT = 1,
   DOWN = 2,
+};
+
+enum PickupType {
+  SUPPLIES
 };
 
 enum FieldEventType {

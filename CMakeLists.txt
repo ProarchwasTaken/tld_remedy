@@ -47,8 +47,9 @@ set(HEADERS
 "include/scenes/field.h"
 "include/field/system/field_handler.h"
 "include/field/system/field_map.h"
-"include/field/entities/map_trans.h"
 "include/field/actors/player.h"
+"include/field/entities/map_trans.h"
+"include/field/entities/pickup.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -61,8 +62,9 @@ set(SOURCE
 "src/scenes/field.cpp"
 "src/field/system/field_handler.cpp"
 "src/field/system/field_map.cpp"
-"src/field/entities/map_trans.cpp"
 "src/field/actors/player.cpp"
+"src/field/entities/map_trans.cpp"
+"src/field/entities/pickup.cpp"
 )
 
 if(${BUILD_DEV})
