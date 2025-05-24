@@ -7,7 +7,7 @@
 #include "base/actor.h"
 #include "data/line.h"
 #include "data/rect_ex.h"
-#include "system/field_map.h"
+#include "field/system/field_map.h"
 #include "utils/collision.h"
 
 using std::vector, std::sort;

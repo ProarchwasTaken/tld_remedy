@@ -6,8 +6,8 @@
 #include "base/entity.h"
 #include "data/field_event.h"
 #include "data/session.h"
-#include "system/field_handler.h"
-#include "system/field_map.h"
+#include "field/system/field_handler.h"
+#include "field/system/field_map.h"
 
 
 class FieldScene : public Scene {

@@ -7,7 +7,7 @@
 #include "base/actor.h"
 #include "utils/input.h"
 #include "utils/collision.h"
-#include "actors/player.h"
+#include "field/actors/player.h"
 
 bool PlayerActor::controllable = true;
 

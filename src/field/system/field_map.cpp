@@ -7,11 +7,11 @@
 #include <vector>
 #include <cstddef>
 #include <plog/Log.h>
+#include "enums.h"
 #include "data/actor.h"
 #include "data/entity.h"
 #include "data/line.h"
-#include "enums.h"
-#include "system/field_map.h"
+#include "field/system/field_map.h"
 
 using std::string, std::ifstream, nlohmann::json, std::vector, 
 nlohmann::basic_json;

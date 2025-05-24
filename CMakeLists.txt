@@ -44,11 +44,11 @@ set(HEADERS
 "include/utils/camera.h"
 "include/utils/collision.h"
 "include/utils/text.h"
-"include/system/field_handler.h"
-"include/system/field_map.h"
 "include/scenes/field.h"
-"include/entities/map_trans.h"
-"include/actors/player.h"
+"include/field/system/field_handler.h"
+"include/field/system/field_map.h"
+"include/field/entities/map_trans.h"
+"include/field/actors/player.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -58,20 +58,20 @@ set(SOURCE
 "src/utils/camera.cpp"
 "src/utils/collision.cpp"
 "src/utils/text.cpp"
-"src/system/field_handler.cpp"
-"src/system/field_map.cpp"
 "src/scenes/field.cpp"
-"src/entities/map_trans.cpp"
-"src/actors/player.cpp"
+"src/field/system/field_handler.cpp"
+"src/field/system/field_map.cpp"
+"src/field/entities/map_trans.cpp"
+"src/field/actors/player.cpp"
 )
 
 if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
-  "include/system/field_commands.h"
+  "include/field/system/field_commands.h"
   )
   list(APPEND SOURCE
-  "src/system/field_commands.cpp"
+  "src/field/system/field_commands.cpp"
   )
 endif()
 

@@ -6,9 +6,9 @@
 #include "data/field_event.h"
 #include "game.h"
 #include "scenes/field.h"
-#include "system/field_handler.h"
-#include "actors/player.h"
-#include "system/field_commands.h"
+#include "field/system/field_handler.h"
+#include "field/system/field_commands.h"
+#include "field/actors/player.h"
 #include <plog/Log.h>
 
 using std::string;

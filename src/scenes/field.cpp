@@ -12,15 +12,15 @@
 #include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
-#include "system/field_handler.h"
+#include "field/system/field_handler.h"
 #include "utils/camera.h"
 #include "utils/text.h"
-#include "actors/player.h"
-#include "entities/map_trans.h"
+#include "field/actors/player.h"
+#include "field/entities/map_trans.h"
 #include "scenes/field.h"
 
 #ifndef NDEBUG
-#include "system/field_commands.h"
+#include "field/system/field_commands.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string;

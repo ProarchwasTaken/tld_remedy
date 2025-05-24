@@ -4,7 +4,7 @@
 #include "enums.h"
 #include "base/entity.h"
 #include "data/entity.h"
-#include "actors/player.h"
+#include "field/actors/player.h"
 
 
 class MapTransition : public Entity {
