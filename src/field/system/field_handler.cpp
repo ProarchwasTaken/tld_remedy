@@ -13,7 +13,6 @@ EventPool<FieldEvent> *FieldHandler::get() {
 }
 
 void FieldHandler::clear() {
-  PLOGI << "Clearing leftover events from memory.";
   for (auto &event : event_pool) {
     event.reset();
   }

@@ -15,6 +15,7 @@
 #include "data/field_event.h"
 #include "data/session.h"
 #include "field/system/field_handler.h"
+#include "field/system/actor_handler.h"
 #include "utils/camera.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
@@ -142,6 +143,7 @@ void FieldScene::update() {
 
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
+    ActorHandler::clearEvents();
   }
 
   for (unique_ptr<Entity> &entity : entities) {
@@ -149,7 +151,10 @@ void FieldScene::update() {
   }
 
   CameraUtils::followFieldEntity(camera, camera_target);
+  eventProcessing();
+}
 
+void FieldScene::eventProcessing() {
   EventPool<FieldEvent> *event_pool = field_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Field Events raised: " << event_pool->size();
@@ -159,6 +164,8 @@ void FieldScene::update() {
 
     FieldHandler::clear();
   }
+
+  ActorHandler::transferEvents();
 }
 
 void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {

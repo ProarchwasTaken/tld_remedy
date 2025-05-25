@@ -42,6 +42,12 @@ enum FieldEventType {
   CHANGE_PLR_LIFE,
 };
 
+enum ActorEventType {
+  IN_RANGE,
+  OUT_RANGE,
+  INTERACT,
+};
+
 enum CommandType {
   CHANGE_MAP,
   SAVE,

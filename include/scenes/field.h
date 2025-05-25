@@ -7,8 +7,9 @@
 #include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
-#include "field/system/field_handler.h"
 #include "field/system/field_map.h"
+#include "field/system/field_handler.h"
+#include "field/system/actor_handler.h"
 
 
 class FieldScene : public Scene {
@@ -22,6 +23,7 @@ public:
   void setupActor(ActorData *data);
 
   void update() override;
+  void eventProcessing();
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
   void deleteEntity(int entity_id);
 
@@ -30,6 +32,7 @@ public:
 private:
   FieldMap field;
   FieldHandler field_handler;
+  ActorHandler actor_handler;
   Session session;
 
   Camera2D camera;
