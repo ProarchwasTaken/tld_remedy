@@ -34,16 +34,19 @@ enum PickupType {
 
 enum FieldEventType {
   LOAD_MAP,
-  CHANGE_SUPPLIES,
-  CHANGE_PLR_LIFE,
   SAVE_SESSION,
   LOAD_SESSION,
+  DELETE_ENTITY,
+  CHANGE_SUPPLIES,
+  ADD_SUPPLIES,
+  CHANGE_PLR_LIFE,
 };
 
 enum CommandType {
   CHANGE_MAP,
+  SAVE,
+  LOAD,
+  DELETE_ENT,
   SET_SUPPLIES,
   SET_LIFE,
-  SAVE,
-  LOAD
 };
