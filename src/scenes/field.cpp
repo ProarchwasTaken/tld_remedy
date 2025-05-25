@@ -157,7 +157,7 @@ void FieldScene::update() {
       fieldEventHandling(event);
     }
 
-    FieldEventHandler::clear();
+    FieldHandler::clear();
   }
 }
 

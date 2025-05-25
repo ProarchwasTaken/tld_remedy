@@ -29,7 +29,7 @@ public:
   void drawSessionInfo();
 private:
   FieldMap field;
-  FieldEventHandler field_handler;
+  FieldHandler field_handler;
   Session session;
 
   Camera2D camera;

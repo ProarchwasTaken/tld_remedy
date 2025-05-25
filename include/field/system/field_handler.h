@@ -10,9 +10,9 @@ using EventPool = std::vector<std::unique_ptr<EventType>>;
 /* Designed to allow the entities and actors to communicate with the
  * Field scene via raising events. From there, it's up to the scene to
  * decide what to do.*/
-class FieldEventHandler {
+class FieldHandler {
 public:
-  ~FieldEventHandler();
+  ~FieldHandler();
   static EventPool<FieldEvent> *get();
 
   template<class Event, typename... Args>

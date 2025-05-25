@@ -4,15 +4,15 @@
 #include "field/system/field_handler.h"
 
 
-FieldEventHandler::~FieldEventHandler() {
-  FieldEventHandler::clear();
+FieldHandler::~FieldHandler() {
+  FieldHandler::clear();
 }
 
-EventPool<FieldEvent> *FieldEventHandler::get() {
+EventPool<FieldEvent> *FieldHandler::get() {
   return &event_pool;
 }
 
-void FieldEventHandler::clear() {
+void FieldHandler::clear() {
   PLOGI << "Clearing leftover events from memory.";
   for (auto &event : event_pool) {
     event.reset();

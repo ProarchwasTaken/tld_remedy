@@ -180,17 +180,17 @@ void loadMapCommand(string map_name, string spawn_name) {
   }
 
   PLOGD << "Now executing command.";
-  FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, map_name, spawn_name);
+  FieldHandler::raise<LoadMapEvent>(LOAD_MAP, map_name, spawn_name);
 }
 
 void saveCommand() {
   PLOGD << "Now executing command.";
-  FieldEventHandler::raise<FieldEvent>(SAVE_SESSION);
+  FieldHandler::raise<FieldEvent>(SAVE_SESSION);
 }
 
 void loadCommand() {
   PLOGD << "Now executing command.";
-  FieldEventHandler::raise<FieldEvent>(LOAD_SESSION);
+  FieldHandler::raise<FieldEvent>(LOAD_SESSION);
 }
 
 void deleteEntityCommand(string argument) {
@@ -209,7 +209,7 @@ void deleteEntityCommand(string argument) {
   PLOGD << "Now executing command.";
   int entity_id = std::stoi(argument);
 
-  FieldEventHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
+  FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
 }
 
 void setSuppliesCommand(string argument) {
@@ -228,7 +228,7 @@ void setSuppliesCommand(string argument) {
   PLOGD << "Now executing command.";
   int value = std::stoi(argument);
 
-  FieldEventHandler::raise<SetSuppliesEvent>(CHANGE_SUPPLIES, value);
+  FieldHandler::raise<SetSuppliesEvent>(CHANGE_SUPPLIES, value);
 }
 
 void setLifeCommand(string target, string value) {
@@ -261,7 +261,7 @@ void setLifeCommand(string target, string value) {
   float life_value = std::stof(value);
   
   if (target == "PLAYER") {
-    FieldEventHandler::raise<SetPlrLifeEvent>(CHANGE_PLR_LIFE, 
+    FieldHandler::raise<SetPlrLifeEvent>(CHANGE_PLR_LIFE, 
                                               life_value);
   }
   else {

@@ -46,7 +46,7 @@ void MapTransition::update() {
   if (CheckCollisionPointRec(plr->position, bounding_box.rect)) {
     PLOGI << "Player has triggered Map Transition [ID: " << 
       entity_id << "]";
-    FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, map_dest, 
+    FieldHandler::raise<LoadMapEvent>(LOAD_MAP, map_dest, 
                                            spawn_dest);
   }
 }
