@@ -23,6 +23,7 @@ public:
 
   void update() override;
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
+  void deleteEntity(int entity_id);
 
   void draw() override;
   void drawSessionInfo();

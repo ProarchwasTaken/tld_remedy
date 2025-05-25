@@ -11,8 +11,16 @@ struct LoadMapEvent : FieldEvent {
   std::string spawn_point;
 };
 
+struct DeleteEntityEvent : FieldEvent {
+  int entity_id;
+};
+
 struct SetSuppliesEvent : FieldEvent {
   int value;
+};
+
+struct AddSuppliesEvent : FieldEvent {
+  int magnitude;
 };
 
 struct SetPlrLifeEvent : FieldEvent {

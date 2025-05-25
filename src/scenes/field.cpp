@@ -3,6 +3,7 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <vector>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
@@ -24,7 +25,7 @@
 #include "field/system/field_commands.h"
 #endif // !NDEBUG
 
-using std::unique_ptr, std::make_unique, std::string;
+using std::unique_ptr, std::make_unique, std::string, std::vector;
 
 
 FieldScene::FieldScene(Session *session_data) {
@@ -176,26 +177,6 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       map_ready = false;
       break;
     }
-    case FieldEventType::CHANGE_SUPPLIES: {
-      PLOGD << "Event detected: SetSuppliesEvent";
-      auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
-
-      int value = event_data->value;
-
-      PLOGI << "Changing value of 'supplies' to: " << value;
-      session.supplies = value;
-      break;
-    }
-    case FieldEventType::CHANGE_PLR_LIFE: {
-      PLOGD << "Event detected: SetPlrLifeEvent";
-      auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
-
-      float value = event_data->value;
-
-      PLOGI << "Changing the player's life expectancy to: " << value;
-      session.player.life = value;
-      break;
-    }
     case FieldEventType::SAVE_SESSION: {
       PLOGD << "Event Detected: SaveSessionEvent";
 
@@ -210,7 +191,67 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       Game::loadSession();
       break;
     }
+    case FieldEventType::DELETE_ENTITY: {
+      PLOGD << "Event detected: DeleteEntityEvent";
+      auto *event_data = static_cast<DeleteEntityEvent*>(event.get());
+
+      int entity_id = event_data->entity_id;
+
+      PLOGI << "Attempting to delete Entity [ID: " << entity_id << "]";
+      deleteEntity(entity_id);
+      break;
+    }
+    case FieldEventType::CHANGE_SUPPLIES: {
+      PLOGD << "Event detected: SetSuppliesEvent";
+      auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
+
+      int value = event_data->value;
+
+      PLOGI << "Changing value of 'supplies' to: " << value;
+      session.supplies = value;
+      break;
+    }
+    case FieldEventType::ADD_SUPPLIES: {
+      PLOGD << "Event detected: AddSuppliesEvent";
+      auto *event_data = static_cast<AddSuppliesEvent*>(event.get());
+
+      int magnitude = event_data->magnitude;
+
+      PLOGI << "Incrementing value of 'supplies' by: " << magnitude;
+      session.supplies += magnitude;
+      break;
+    }
+    case FieldEventType::CHANGE_PLR_LIFE: {
+      PLOGD << "Event detected: SetPlrLifeEvent";
+      auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
+
+      float value = event_data->value;
+
+      PLOGI << "Changing the player's life expectancy to: " << value;
+      session.player.life = value;
+      break;
+    }
   }
+}
+
+void FieldScene::deleteEntity(int entity_id) {
+  vector<unique_ptr<Entity>> temporary;
+
+  for (auto &entity : entities) {
+    if (entity->entity_id == entity_id) {
+      PLOGD << "Found Entity [ID: " << entity_id << "]";
+      entity.reset();
+    }
+    else {
+      unique_ptr<Entity> temp_entity = nullptr;
+      entity.swap(temp_entity);
+
+      temporary.push_back(std::move(temp_entity));
+    }
+  }
+
+  entities.clear();
+  temporary.swap(entities);
 }
 
 void FieldScene::draw() {
