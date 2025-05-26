@@ -1,3 +1,4 @@
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include <cmath>
@@ -5,12 +6,14 @@
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
+#include "data/actor_event.h"
 #include "utils/input.h"
 #include "utils/collision.h"
+#include "field/system/actor_handler.h"
 #include "field/actors/player.h"
 
+using std::unique_ptr;
 bool PlayerActor::controllable = true;
-
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
@@ -23,7 +26,15 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   rectExCorrection(bounding_box, collis_box);
 }
 
+PlayerActor::~PlayerActor() {
+  if (pickup_event != nullptr) {
+    pickup_event.reset();
+  }
+}
+
 void PlayerActor::behavior() {
+  processEvents();
+
   if (!controllable) {
     return;
   }
@@ -32,6 +43,38 @@ void PlayerActor::behavior() {
 
   movementInput(gamepad);
   moving = isMoving();
+}
+
+void PlayerActor::processEvents() {
+  for (unique_ptr<ActorEvent> &event : *ActorHandler::get()) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    bool holding_event = pickup_event != nullptr;
+    if (!holding_event && event->event_type == PICKUP_IN_RANGE) {
+      int id = event->sender->entity_id;
+
+      PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
+      pickup_event.swap(event);
+    } 
+    else if (holding_event && event->event_type == PICKUP_OUT_RANGE) {
+      dropPickupEvent(event);
+    }
+  }
+}
+
+void PlayerActor::dropPickupEvent(unique_ptr<ActorEvent> &out_range) {
+  int first_id = pickup_event->sender->entity_id;
+  int second_id = out_range->sender->entity_id;
+
+  bool from_same_entity = first_id == second_id;
+
+  if (from_same_entity) {
+    PLOGD << "Player has exited range of Pickup Entity [ID: " 
+      << second_id << "]";
+    pickup_event.reset();
+  }
 }
 
 void PlayerActor::setControllable(bool value) {

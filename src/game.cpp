@@ -28,7 +28,7 @@ bool Game::debug_info = false;
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, 
-             "Project Remedy - " VER_STAGE " - v" VERSION);
+             "Project Remedy - v" VERSION " " VER_STAGE);
   SetTargetFPS(60);
   setupCanvas();
 

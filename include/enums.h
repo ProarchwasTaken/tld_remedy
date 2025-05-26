@@ -43,9 +43,8 @@ enum FieldEventType {
 };
 
 enum ActorEventType {
-  IN_RANGE,
-  OUT_RANGE,
-  INTERACT,
+  PICKUP_IN_RANGE,
+  PICKUP_OUT_RANGE,
 };
 
 enum CommandType {

@@ -8,7 +8,4 @@ struct ActorEvent {
   ActorEventType event_type;
 };
 
-struct InteractEvent : ActorEvent {
-  int target_id;
-};
 

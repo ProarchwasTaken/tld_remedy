@@ -1,8 +1,11 @@
 #include <cassert>
 #include <cstddef>
+#include <raylib.h>
 #include "enums.h"
 #include "base/actor.h"
 #include "data/entity.h"
+#include "data/actor_event.h"
+#include "field/system/actor_handler.h"
 #include "field/actors/player.h"
 #include "field/entities/pickup.h"
 #include <plog/Log.h>
@@ -26,5 +29,13 @@ Pickup::Pickup(PickupData &data) {
 }
 
 void Pickup::update() {
-
+  bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
+  if (!in_range && inside) {
+    ActorHandler::queue<ActorEvent>(this, PICKUP_IN_RANGE);
+    in_range = true;
+  }
+  else if (in_range && !inside) { 
+    ActorHandler::queue<ActorEvent>(this, PICKUP_OUT_RANGE);
+    in_range = false;
+  }
 }

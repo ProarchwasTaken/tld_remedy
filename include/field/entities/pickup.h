@@ -13,6 +13,7 @@ public:
   void draw() override {};
 private:
   PlayerActor *plr;
+  bool in_range = false;
 
   PickupType pickup_type;
   int count;

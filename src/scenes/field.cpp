@@ -20,6 +20,7 @@
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/entities/map_trans.h"
+#include "field/entities/pickup.h"
 #include "scenes/field.h"
 
 #ifndef NDEBUG
@@ -37,6 +38,10 @@ FieldScene::FieldScene(Session *session_data) {
 
   camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
+
+  // Testing! Remove this later!
+  PickupData data = {PICKUP, {175, 65}, SUPPLIES, 5};
+  entities.push_back(make_unique<Pickup>(data));
 
   #ifndef NDEBUG
   static CommandSystem command_system;

@@ -1,15 +1,20 @@
 #pragma once
+#include <memory>
 #include <raylib.h>
 #include "data/keybinds.h"
 #include "enums.h"
 #include "base/actor.h"
+#include "data/actor_event.h"
 
 
 class PlayerActor : public Actor {
 public:
   PlayerActor(Vector2 position, enum Direction direction);
+  ~PlayerActor();
 
   void behavior() override;
+  void processEvents();
+  void dropPickupEvent(std::unique_ptr<ActorEvent> &out_range);
   void movementInput(bool gamepad);
   bool isMoving();
 
@@ -25,6 +30,7 @@ public:
   bool moving = false;
 private:
   static bool controllable;
+  std::unique_ptr<ActorEvent> pickup_event;
 
   const float default_speed = 1.1;
   int moving_x = 0;
