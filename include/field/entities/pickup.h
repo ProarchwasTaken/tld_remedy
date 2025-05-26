@@ -9,6 +9,8 @@ class Pickup : public Entity {
 public:
   Pickup(PickupData &data);
 
+  void interact();
+
   void update() override;
   void draw() override {};
 private:
@@ -17,4 +19,6 @@ private:
 
   PickupType pickup_type;
   int count;
+
+  bool interacted = false;
 };

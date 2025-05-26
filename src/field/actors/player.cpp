@@ -10,6 +10,7 @@
 #include "utils/input.h"
 #include "utils/collision.h"
 #include "field/system/actor_handler.h"
+#include "field/entities/pickup.h"
 #include "field/actors/player.h"
 
 using std::unique_ptr;
@@ -29,20 +30,19 @@ Actor("Mary", ActorType::PLAYER, position, direction)
 PlayerActor::~PlayerActor() {
   if (pickup_event != nullptr) {
     pickup_event.reset();
+    PLOGD << "Cleared held event: PickupInRange";
   }
 }
 
 void PlayerActor::behavior() {
   processEvents();
 
-  if (!controllable) {
-    return;
+  if (controllable) {
+    bool gamepad = IsGamepadAvailable(0);
+
+    movementInput(gamepad);
+    interactInput(gamepad);
   }
-
-  bool gamepad = IsGamepadAvailable(0);
-
-  movementInput(gamepad);
-  moving = isMoving();
 }
 
 void PlayerActor::processEvents() {
@@ -98,6 +98,8 @@ void PlayerActor::movementInput(bool gamepad) {
   bool up = Input::down(key_bind.move_up, gamepad);
 
   moving_y = down - up;
+
+  moving = isMoving();
 }
 
 bool PlayerActor::isMoving() {
@@ -106,6 +108,20 @@ bool PlayerActor::isMoving() {
   }
   else {
     return false;
+  }
+}
+
+void PlayerActor::interactInput(bool gamepad) {
+  bool interact = Input::pressed(key_bind.interact, gamepad);
+
+  if (interact && pickup_event != nullptr) {
+    Pickup *pickup = static_cast<Pickup*>(pickup_event->sender);
+
+    PLOGI << "Interacting with Pickup [ID: " << pickup->entity_id << "]";
+    pickup->interact();
+
+    pickup_event.reset();
+    return;
   }
 }
 

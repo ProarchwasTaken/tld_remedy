@@ -17,6 +17,7 @@ public:
   void dropPickupEvent(std::unique_ptr<ActorEvent> &out_range);
   void movementInput(bool gamepad);
   bool isMoving();
+  void interactInput(bool gamepad);
 
   void update() override;
   void moveX();

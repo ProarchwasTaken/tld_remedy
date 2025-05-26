@@ -4,7 +4,9 @@
 #include "enums.h"
 #include "base/actor.h"
 #include "data/entity.h"
+#include "data/field_event.h"
 #include "data/actor_event.h"
+#include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/player.h"
 #include "field/entities/pickup.h"
@@ -28,7 +30,25 @@ Pickup::Pickup(PickupData &data) {
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
 }
 
+void Pickup::interact() {
+  PLOGD << "Interaction function for Pickup [ID: " << entity_id << "]"
+    " has been called.";
+
+  switch (pickup_type) {
+    case PickupType::SUPPLIES: {
+      FieldHandler::raise<AddSuppliesEvent>(ADD_SUPPLIES, count);
+    }
+  }
+
+  FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
+  interacted = true;
+}
+
 void Pickup::update() {
+  if (interacted) {
+    return;
+  }
+
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
     ActorHandler::queue<ActorEvent>(this, PICKUP_IN_RANGE);
