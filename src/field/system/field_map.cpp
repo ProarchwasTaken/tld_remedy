@@ -1,11 +1,13 @@
 #include <nlohmann/json_fwd.hpp>
 #include <nlohmann/json.hpp>
 #include <cassert>
+#include <cctype>
 #include <memory>
 #include <raylib.h>
 #include <string>
 #include <fstream>
 #include <vector>
+#include <map>
 #include <cstddef>
 #include <plog/Log.h>
 #include "enums.h"
@@ -71,6 +73,9 @@ void FieldMap::parseMapData(string json_path, string *spawn_name) {
     }
     else if (layer_name == "MapTransitions") {
       findMapTransitions(layer["objects"]);
+    }
+    else if (layer_name == "Pickups") {
+      findPickups(layer["objects"]);
     }
   }
 
@@ -213,6 +218,50 @@ void FieldMap::findMapTransitions(json &layer_objects) {
     PLOGD << "Trigger Data: {Map Destination: '" << map_dest <<
       "' Spawnpoint: '" << spawn_dest << "' Direction: " << direction;
     entity_queue.push_back(make_unique<MapTransData>(data));
+  }
+}
+
+void FieldMap::findPickups(json &layer_objects) {
+  PLOGI << "Searching for Pickup data...";
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+    Vector2 position = {x, y};
+
+    string pickup_class = object["type"];
+    for (char &letter : pickup_class) {
+      letter = std::toupper(letter);
+    }
+
+    std::map<string, PickupType> type_table = {
+      {"SUPPLIES", PickupType::SUPPLIES}
+    };
+
+    auto result = type_table.find(pickup_class);
+    if (result == type_table.end()) {
+      PLOGE << "Pickup Class: '" << pickup_class << 
+        "' does not match with any key on the table!";
+      continue;
+    }
+
+    PickupType pickup_type = result->second;
+    int count = 0;
+    for (basic_json property : object["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "count") {
+        count = property["value"];
+      }
+    }
+
+    if (count == 0) {
+      continue;
+    }
+
+
+    PickupData data = {PICKUP, position, pickup_type, count};
+    PLOGD << "Pickup Data: {Type: " << pickup_class << ", Count: " <<
+    count << "}";
+    entity_queue.push_back(make_unique<PickupData>(data));
   }
 }
 

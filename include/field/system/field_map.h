@@ -20,6 +20,7 @@ public:
                        std::string spawn_name);
 
   void findMapTransitions(nlohmann::json &layer_objects);
+  void findPickups(nlohmann::json &layer_objects);
 
   void draw();
   void drawCollLines();

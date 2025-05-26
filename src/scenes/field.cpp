@@ -39,10 +39,6 @@ FieldScene::FieldScene(Session *session_data) {
   camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
 
-  // Testing! Remove this later!
-  PickupData data = {PICKUP, {175, 65}, SUPPLIES, 5};
-  entities.push_back(make_unique<Pickup>(data));
-
   #ifndef NDEBUG
   static CommandSystem command_system;
   command_system.assignScene(this);
@@ -118,6 +114,11 @@ void FieldScene::setupEntities() {
       case EntityType::MAP_TRANSITION: {
         MapTransData *trans_data = static_cast<MapTransData*>(data.get());
         entity = make_unique<MapTransition>(*trans_data);
+        break;
+      }
+      case EntityType::PICKUP: {
+        PickupData *pick_data = static_cast<PickupData*>(data.get());
+        entity = make_unique<Pickup>(*pick_data);
         break;
       }
       default: {
