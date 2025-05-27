@@ -210,9 +210,34 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "color":"#ffff00",
+         "draworder":"topdown",
+         "id":7,
+         "name":"Pickups",
+         "objects":[
+                {
+                 "id":58,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "type":"Supplies",
+                 "x":176,
+                 "y":64
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":52,
+ "nextlayerid":8,
+ "nextobjectid":59,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

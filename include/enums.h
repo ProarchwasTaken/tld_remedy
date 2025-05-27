@@ -3,6 +3,7 @@
 
 enum GameState {
   READY,
+  LOADING_SESSION,
   FADING_OUT,
   FADING_IN
 };
@@ -10,7 +11,8 @@ enum GameState {
 enum EntityType {
   ACTOR,
   COMBATANT,
-  MAP_TRANSITION
+  MAP_TRANSITION,
+  PICKUP
 };
 
 enum ActorType {
@@ -26,10 +28,31 @@ enum Direction {
   DOWN = 2,
 };
 
+enum PickupType {
+  SUPPLIES
+};
+
 enum FieldEventType {
-  LOAD_MAP
+  LOAD_MAP,
+  SAVE_SESSION,
+  LOAD_SESSION,
+  UPDATE_COMMON_DATA,
+  DELETE_ENTITY,
+  CHANGE_SUPPLIES,
+  ADD_SUPPLIES,
+  CHANGE_PLR_LIFE,
+};
+
+enum ActorEventType {
+  PICKUP_IN_RANGE,
+  PICKUP_OUT_RANGE,
 };
 
 enum CommandType {
-  CHANGE_MAP
+  CHANGE_MAP,
+  SAVE,
+  LOAD,
+  DELETE_ENT,
+  SET_SUPPLIES,
+  SET_LIFE,
 };

@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.0.0
+VERSION 1.1.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -11,7 +11,7 @@ option(BUILD_DEV "Build the game for development purposes." OFF)
 if(${BUILD_DEV})
   message(STATUS "Using debug flags.")
   set(COMPILE_OPTIONS --debug -O0)
-  set(PROJECT_STAGE "Pre-Alpha | Devmode")
+  set(PROJECT_STAGE "Pre-Alpha (Devmode)")
 else()
   set(COMPILE_OPTIONS -DNDEBUG)
   set(PROJECT_STAGE "Pre-Alpha")
@@ -39,14 +39,19 @@ set(HEADERS
 "include/data/line.h"
 "include/data/actor.h"
 "include/data/field_event.h"
+"include/data/actor_event.h"
+"include/data/session.h"
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/utils/collision.h"
-"include/system/field_handler.h"
-"include/system/field_map.h"
+"include/utils/text.h"
 "include/scenes/field.h"
-"include/entities/map_trans.h"
-"include/actors/player.h"
+"include/field/system/field_map.h"
+"include/field/system/field_handler.h"
+"include/field/system/actor_handler.h"
+"include/field/actors/player.h"
+"include/field/entities/map_trans.h"
+"include/field/entities/pickup.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -55,21 +60,23 @@ set(SOURCE
 "src/utils/input.cpp"
 "src/utils/camera.cpp"
 "src/utils/collision.cpp"
-"src/system/field_handler.cpp"
-"src/system/field_map.cpp"
+"src/utils/text.cpp"
 "src/scenes/field.cpp"
-"src/entities/map_trans.cpp"
-"src/actors/player.cpp"
+"src/field/system/field_map.cpp"
+"src/field/system/field_handler.cpp"
+"src/field/system/actor_handler.cpp"
+"src/field/actors/player.cpp"
+"src/field/entities/map_trans.cpp"
+"src/field/entities/pickup.cpp"
 )
 
 if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
-  "include/data/debug.h"
-  "include/system/field_commands.h"
+  "include/field/system/field_commands.h"
   )
   list(APPEND SOURCE
-  "src/system/field_commands.cpp"
+  "src/field/system/field_commands.cpp"
   )
 endif()
 

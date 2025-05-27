@@ -6,25 +6,34 @@
 #include "data/field_event.h"
 #include "game.h"
 #include "scenes/field.h"
-#include "system/field_handler.h"
-#include "actors/player.h"
-#include "system/field_commands.h"
+#include "field/system/field_handler.h"
+#include "field/system/field_commands.h"
+#include "field/actors/player.h"
 #include <plog/Log.h>
 
 using std::string;
 string findNextWord(string &buffer, string::iterator &iterator, 
                     bool uppercase = false);
 void loadMapCommand(string map_name, string spawn_name);
+void deleteEntityCommand(string argument);
+void saveCommand();
+void loadCommand();
+void setSuppliesCommand(string argument);
+void setLifeCommand(string target, string value);
 
 
-CommandSystem::CommandSystem(FieldScene *scene) {
+CommandSystem::CommandSystem() {
   assert(Game::devmode);
-  this->scene = scene;
   PLOGD << "Initialized debug command system.";
 }
 
 CommandSystem::~CommandSystem() {
   PLOGD << "Reseting debug command system.";
+}
+
+void CommandSystem::assignScene(FieldScene *scene) {
+  PLOGI << "Assigned scene to command system.";
+  CommandSystem::scene = scene;
 }
 
 void CommandSystem::process() {
@@ -93,6 +102,33 @@ void CommandSystem::interpretCommand(CommandType type,
       loadMapCommand(map_name, spawn_name);
       break;
     }
+    case SAVE: {
+      saveCommand();
+      break;
+    }
+    case LOAD: {
+      loadCommand();
+      break;
+    }
+    case DELETE_ENT: {
+      string argument = findNextWord(buffer, iterator);
+
+      deleteEntityCommand(argument);
+      break;
+    }
+    case SET_SUPPLIES: {
+      string argument = findNextWord(buffer, iterator);
+
+      setSuppliesCommand(argument);
+      break;
+    }
+    case SET_LIFE: {
+      string target = findNextWord(buffer, iterator, true);
+      string value = findNextWord(buffer, iterator);
+
+      setLifeCommand(target, value);
+      break;
+    }
   }
 }
 
@@ -144,5 +180,92 @@ void loadMapCommand(string map_name, string spawn_name) {
   }
 
   PLOGD << "Now executing command.";
-  FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, map_name, spawn_name);
+  FieldHandler::raise<LoadMapEvent>(LOAD_MAP, map_name, spawn_name);
 }
+
+void saveCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<FieldEvent>(SAVE_SESSION);
+}
+
+void loadCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<FieldEvent>(LOAD_SESSION);
+}
+
+void deleteEntityCommand(string argument) {
+  if (argument.empty()) {
+    PLOGE << "Expecting 1 or more arguments, but found none!";
+    return;
+  }
+
+  for (char letter : argument) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  int entity_id = std::stoi(argument);
+
+  FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
+}
+
+void setSuppliesCommand(string argument) {
+  if (argument.empty()) {
+    PLOGE << "Expecting 1 or more arguments, but found none!";
+    return;
+  }
+
+  for (char letter : argument) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  int value = std::stoi(argument);
+
+  FieldHandler::raise<SetSuppliesEvent>(CHANGE_SUPPLIES, value);
+}
+
+void setLifeCommand(string target, string value) {
+  if (target.empty()) {
+    PLOGE << "Target is not specified!";
+    return;
+  }
+
+  if (value.empty()) {
+    PLOGE << "Expecting a value to set life to!";
+    return;
+  }
+
+  bool detected_decimal = false;
+  for (char letter : value) {
+    if (std::isdigit(letter)) {
+      continue;
+    }
+
+    if (!detected_decimal && letter == '.') {
+      detected_decimal = true;
+    }
+    else {
+      PLOGE << "'" << value << "' is not a floating point number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  float life_value = std::stof(value);
+  
+  if (target == "PLAYER") {
+    FieldHandler::raise<SetPlrLifeEvent>(CHANGE_PLR_LIFE, 
+                                              life_value);
+  }
+  else {
+    PLOGD << "'" << target << "' is not a valid target.";
+  }
+}
+

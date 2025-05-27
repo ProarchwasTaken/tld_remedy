@@ -1,15 +1,20 @@
 #include <cassert>
+#include <fstream>
+#include <ios>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
+#include <utility>
 #include "scenes/field.h"
 #include "enums.h"
+#include "data/session.h"
 #include "game.h"
 
-using std::make_unique;
+using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
 
 GameState Game::game_state = READY;
+unique_ptr<Session> Game::loaded_session;
 
 Font Game::sm_font;
 Color *Game::palette;
@@ -23,7 +28,7 @@ bool Game::debug_info = false;
 
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, 
-             "Project Remedy - " VER_STAGE " - v" VERSION);
+             "Project Remedy - v" VERSION " " VER_STAGE);
   SetTargetFPS(60);
   setupCanvas();
 
@@ -69,33 +74,49 @@ void Game::start() {
       toggleDebugInfo();
     }
 
-    if (game_state == READY) {
-      scene->update();
-    }
-    else {
-      fadeScreen();
-    }
-
-    BeginTextureMode(canvas);
-    {
-      ClearBackground(BLACK);
-      scene->draw();
-    }
-    EndTextureMode();
-
-    BeginDrawing(); 
-    {
-      DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                     screen_tint);
-      if (debug_info) DrawFPS(24, 16);
-    }
-    EndDrawing();
+    gameLogic();
+    drawScene();
   }
 
   CloseWindow();
 }
 
-void Game::fadeScreen() {
+void Game::gameLogic() {
+  switch (game_state) {
+    case LOADING_SESSION: {
+      loadSessionProcedure();
+      break;
+    }
+    case FADING_IN:
+    case FADING_OUT: {
+      fadeScreenProcedure();
+      break;
+    }
+    case READY: {
+      scene->update();
+      break;
+    }
+  }
+}
+
+void Game::drawScene() {
+  BeginTextureMode(canvas);
+  {
+    ClearBackground(BLACK);
+    scene->draw();
+  }
+  EndTextureMode();
+
+  BeginDrawing(); 
+  {
+    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
+                   screen_tint);
+    if (debug_info) DrawFPS(24, 16);
+  }
+  EndDrawing();
+}
+
+void Game::fadeScreenProcedure() {
   float magnitude = GetFrameTime() / fade_time;
   if (magnitude == 0) {
     return;
@@ -122,8 +143,20 @@ void Game::fadeScreen() {
   }
 }
 
+void Game::loadSessionProcedure() {
+  PLOGI << "Initiating load session procedure.";
+  scene.reset();
+  
+  PLOGD << "Loading the field scene with loaded session as argument.";
+  assert(loaded_session != nullptr);
+  scene = make_unique<FieldScene>(loaded_session.get());
+
+  loaded_session.reset();
+  PLOGI << "Procedure complete.";
+}
+
 void Game::fadeout(float fade_time) {
-  if (game_state != READY) {
+  if (game_state != READY && game_state != LOADING_SESSION) {
     return;
   }
 
@@ -134,7 +167,7 @@ void Game::fadeout(float fade_time) {
 }
 
 void Game::fadein(float fade_time) {
-  if (game_state != READY) {
+  if (game_state != READY && game_state != LOADING_SESSION) {
     return;
   }
 
@@ -142,6 +175,46 @@ void Game::fadein(float fade_time) {
   Game::fade_percentage = 0.0;
   Game::fade_time = fade_time;
   game_state = FADING_IN;
+}
+
+void Game::saveSession(Session *data) {
+  PLOGI << "Saving the player's current session.";
+
+  ofstream file;
+  file.open("data/session.data", std::ios::binary);
+  file.write(reinterpret_cast<char*>(data), sizeof(Session));
+
+  file.close();
+  PLOGI << "Session data saved successfully.";
+}
+
+void Game::loadSession() {
+  PLOGI << "Attempting to load session data.";
+  ifstream file;
+  file.open("data/session.data", std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGE << "'data/session.data' is not found.";
+  }
+
+  Session session;
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    PLOGE << "Error opening file!";
+    file.close();
+    return;
+  }
+
+  file.close();
+
+  PLOGI << "Successfully loaded session data.";
+  PLOGD << "Location: " << session.location;
+  PLOGD << "Medical Supplies: " << session.supplies;
+  PLOGD << "Player Life: " << session.player.life;
+
+  loaded_session = make_unique<Session>(std::move(session));
+  game_state = LOADING_SESSION;
 }
 
 float Game::deltaTime() {

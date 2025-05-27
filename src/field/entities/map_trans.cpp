@@ -6,10 +6,10 @@
 #include "enums.h"
 #include "base/actor.h"
 #include "data/entity.h"
-#include "system/field_handler.h"
 #include "data/field_event.h"
-#include "actors/player.h"
-#include "entities/map_trans.h"
+#include "field/system/field_handler.h"
+#include "field/actors/player.h"
+#include "field/entities/map_trans.h"
 
 using std::string;
 
@@ -46,7 +46,7 @@ void MapTransition::update() {
   if (CheckCollisionPointRec(plr->position, bounding_box.rect)) {
     PLOGI << "Player has triggered Map Transition [ID: " << 
       entity_id << "]";
-    FieldEventHandler::raise<LoadMapEvent>(LOAD_MAP, map_dest, 
+    FieldHandler::raise<LoadMapEvent>(LOAD_MAP, map_dest, 
                                            spawn_dest);
   }
 }

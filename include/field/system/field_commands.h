@@ -10,8 +10,9 @@
  * debugging purposes only.*/
 class CommandSystem {
 public:
-  CommandSystem(FieldScene *scene);
+  CommandSystem();
   ~CommandSystem();
+  static void assignScene(FieldScene *scene);
 
   static void process();
 
@@ -24,7 +25,12 @@ public:
 private:
   inline static FieldScene *scene;
   inline static std::map<std::string, CommandType> command_table {
-    {"MAP", CHANGE_MAP}
+    {"MAP", CHANGE_MAP},
+    {"SAVE", SAVE},
+    {"LOAD", LOAD},
+    {"DELETE_ENTITY", DELETE_ENT},
+    {"SET_SUPPLIES", SET_SUPPLIES},
+    {"SET_LIFE", SET_LIFE},
   };
 
   inline static std::string buffer;

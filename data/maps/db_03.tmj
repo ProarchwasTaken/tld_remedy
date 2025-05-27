@@ -169,9 +169,47 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "color":"#ffff00",
+         "draworder":"topdown",
+         "id":6,
+         "name":"Pickups",
+         "objects":[
+                {
+                 "id":7,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "type":"Supplies",
+                 "x":208,
+                 "y":128
+                }, 
+                {
+                 "id":8,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "type":"Supplies",
+                 "x":80,
+                 "y":128
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":7,
+ "nextlayerid":7,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
