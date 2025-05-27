@@ -214,6 +214,18 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       deleteEntity(entity_id);
       break;
     }
+    case FieldEventType::UPDATE_COMMON_DATA: {
+      PLOGD << "Event detected: UpdateCommonEvent";
+      auto *event_data = static_cast<UpdateCommonEvent*>(event.get());
+
+      int object_id = event_data->object_id;
+      bool active = event_data->active;
+
+      PLOGI << "Updating common data associated with Object ID: " 
+        << object_id;
+      updateCommonData(object_id, active);
+      break;
+    }
     case FieldEventType::CHANGE_SUPPLIES: {
       PLOGD << "Event detected: SetSuppliesEvent";
       auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
@@ -245,6 +257,24 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       break;
     }
   }
+}
+
+void FieldScene::updateCommonData(int object_id, bool active) {
+  int common_count = session.common_count;
+  for (int x = 0; x < common_count; x++) {
+    CommonData *data = &session.common[x];
+
+    if (session.location != data->map_name) {
+      continue;
+    }
+
+    if (object_id == data->object_id) {
+      data->active = active;
+      return;
+    }
+  }
+
+  PLOGE << "Failed to find common data!";
 }
 
 void FieldScene::deleteEntity(int entity_id) {

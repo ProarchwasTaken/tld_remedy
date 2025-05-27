@@ -11,6 +11,11 @@ struct LoadMapEvent : FieldEvent {
   std::string spawn_point;
 };
 
+struct UpdateCommonEvent : FieldEvent {
+  int object_id;
+  bool active;
+};
+
 struct DeleteEntityEvent : FieldEvent {
   int entity_id;
 };

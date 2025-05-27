@@ -25,6 +25,7 @@ public:
   void update() override;
   void eventProcessing();
   void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
+  void updateCommonData(int object_id, bool active);
   void deleteEntity(int entity_id);
 
   void draw() override;

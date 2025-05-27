@@ -1,5 +1,6 @@
 #pragma once
 
+
 struct Player {
   float life = 20;
   float max_life = 20;
@@ -8,10 +9,20 @@ struct Player {
   float max_morale = 35;
 };
 
+struct CommonData {
+  int object_id = -1;
+  bool active = false;
+
+  char map_name[16];
+};
 
 struct Session {
   Player player;
   int supplies = 0;
 
-  char location[20] = "db_01";
+  char location[16] = "db_01";
+
+  int common_count = 0;
+  int common_limit = 64;
+  CommonData common[64];
 };
