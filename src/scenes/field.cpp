@@ -64,18 +64,18 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
     Entity::clear(entities);
   }
 
-  field.loadMap(map_name, spawn_name);
+  field.loadMap(session, map_name, spawn_name);
   setupEntities();
 
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
 
-  PLOGI << "Procedure complete.";
-  float elapsed_time = GetTime() - start_time;
-  PLOGI << "Loading Time: " << elapsed_time;
-
   std::strcpy(session.location, map_name.c_str());
   map_ready = true;
+
+  PLOGI << "Procedure complete.";
+  float elapsed_time = GetTime() - start_time;
+  PLOGI << "Load Time: " << elapsed_time;
 }
 
 void FieldScene::setupActor(ActorData *data) {
