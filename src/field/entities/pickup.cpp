@@ -14,7 +14,9 @@
 
 
 Pickup::Pickup(PickupData &data) {
+  object_id = data.object_id;
   entity_type = EntityType::PICKUP;
+
   pickup_type = data.pickup_type;
   count = data.count;
 
@@ -24,7 +26,7 @@ Pickup::Pickup(PickupData &data) {
   rectExCorrection(bounding_box);
 
   Actor *ptr = Actor::getActor(ActorType::PLAYER);
-  assert(plr != NULL);
+  assert(ptr != NULL);
   plr = static_cast<PlayerActor*>(ptr);
 
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
@@ -41,6 +43,8 @@ void Pickup::interact() {
   }
 
   FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
+  FieldHandler::raise<UpdateCommonEvent>(UPDATE_COMMON_DATA, 
+                                         object_id, false);
   interacted = true;
 }
 

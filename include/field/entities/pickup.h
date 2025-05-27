@@ -14,11 +14,12 @@ public:
   void update() override;
   void draw() override {};
 private:
+  int object_id;
+  bool interacted = false;
+
   PlayerActor *plr;
   bool in_range = false;
 
   PickupType pickup_type;
   int count;
-
-  bool interacted = false;
 };

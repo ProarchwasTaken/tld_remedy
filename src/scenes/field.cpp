@@ -264,7 +264,9 @@ void FieldScene::updateCommonData(int object_id, bool active) {
   for (int x = 0; x < common_count; x++) {
     CommonData *data = &session.common[x];
 
-    if (session.location != data->map_name) {
+    string map_name = data->map_name;
+
+    if (map_name != session.location) {
       continue;
     }
 
