@@ -29,7 +29,12 @@ void CompanionActor::behavior() {
 }
 
 void CompanionActor::processEvents() {
-  for (unique_ptr<ActorEvent> &event : *ActorHandler::get()) {
+  EventPool<ActorEvent> *event_pool = ActorHandler::get();
+  int count = event_pool->size();
+
+  for (int x = 0; x < count; x++) {
+    unique_ptr<ActorEvent> &event = event_pool->at(x);
+
     if (event == nullptr) {
       continue;
     }

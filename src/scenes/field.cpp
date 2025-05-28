@@ -154,8 +154,8 @@ void FieldScene::update() {
   
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
-    ActorHandler::clearEvents();
   }
+  ActorHandler::clearEvents();
 
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
