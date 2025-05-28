@@ -133,25 +133,40 @@ void FieldMap::setupCollision(json &layer_objects) {
 void FieldMap::findSpawnpoints(json &layer_objects) {
   PLOGI << "Searching for initial spawn points.";
 
-  bool found_initial = false;
+  bool found_initial_plr = false;
+  bool found_initial_com = false;
   for (basic_json object : layer_objects) {
     float x = object["x"];
     float y = object["y"];
     Direction direction = Direction::DOWN;
-    ActorType actor_type = ActorType::PLAYER;
 
-    if (object.find("type") == object.end()) {
+    if (object.find("type") != object.end()) {
+      continue;
+    }
+
+    ActorType actor_type;
+    if (object.find("properties") == object.end()) {
       PLOGD << "Found initial spawn point for the player.";
-      PLOGD << "(X: " << x << ", Y: " << y << ")";
-      ActorData actor_data = {ACTOR, actor_type, {x, y}, direction};
+      actor_type = PLAYER;
+      found_initial_plr = true;
+    }
+    else {
+      PLOGD << "Found initial spawn point for the companion actor.";
+      actor_type = COMPANION;
+      found_initial_com = true;
+    }
 
-      entity_queue.push_back(make_unique<ActorData>(actor_data));
-      found_initial = true;
+    PLOGD << "(X: " << x << ", Y: " << y << ")";
+    ActorData actor_data = {ACTOR, actor_type, {x, y}, direction};
+    entity_queue.push_back(make_unique<ActorData>(actor_data));
+
+    if (found_initial_plr && found_initial_com) {
       break;
     }
   }
 
-  assert(found_initial);
+  assert(found_initial_plr);
+  assert(found_initial_com);
 }
 
 void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {

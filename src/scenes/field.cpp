@@ -19,6 +19,7 @@
 #include "utils/camera.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
+#include "field/actors/companion.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
@@ -86,6 +87,10 @@ void FieldScene::setupActor(ActorData *data) {
   switch (data->actor_type) {
     case ActorType::PLAYER: {
       entity = make_unique<PlayerActor>(position, direction);
+      break;
+    }
+    case ActorType::COMPANION: {
+      entity = make_unique<CompanionActor>(position, direction);
       break;
     }
     default: {

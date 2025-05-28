@@ -123,9 +123,10 @@
          "objects":[
                 {
                  "id":43,
+                 "name":"Player",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
-                 "y":160
+                 "y":144
                 }, 
                 {
                  "id":45,
@@ -142,6 +143,20 @@
                  "type":"db_01-2",
                  "x":160,
                  "y":176
+                }, 
+                {
+                 "id":59,
+                 "name":"Companion",
+                 "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":1
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "x":64,
+                 "y":168
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -237,7 +252,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":59,
+ "nextobjectid":60,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
