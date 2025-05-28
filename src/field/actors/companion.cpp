@@ -1,7 +1,15 @@
 #include <raylib.h>
+#include <raymath.h>
+#include <memory>
+#include <plog/Log.h>
 #include "enums.h"
+#include "game.h"
 #include "base/actor.h"
+#include "data/actor_event.h"
+#include "field/system/actor_handler.h"
 #include "field/actors/companion.h"
+
+using std::unique_ptr;
 
 
 CompanionActor::CompanionActor(Vector2 position, 
@@ -17,14 +25,56 @@ Actor("Companion", ActorType::COMPANION, position, direction)
 }
 
 void CompanionActor::behavior() {
+  processEvents();
+}
 
+void CompanionActor::processEvents() {
+  for (unique_ptr<ActorEvent> &event : *ActorHandler::get()) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    if (event->event_type == PLR_MOVING) {
+      Vector2 position = event->sender->position;
+      move_points.push_back(position);
+    }
+  }
 }
 
 void CompanionActor::update() {
+  if (!move_points.empty()) {
+    pathfind();
+    rectExCorrection(bounding_box, collis_box);
+  }
+}
 
+void CompanionActor::pathfind() {
+  Vector2 first_point = move_points.front();
+
+  float speed = movement_speed * Game::deltaTime();
+  position = Vector2MoveTowards(position, first_point, speed);
+
+  if (Vector2Equals(position, first_point)) {
+    move_points.pop_front();
+  }
 }
 
 void CompanionActor::draw() {
 
+}
+
+void CompanionActor::drawDebug() {
+  Actor::drawDebug();
+
+  if (move_points.empty()) {
+    return;
+  }
+
+  Vector2 first_point = move_points.front();
+  DrawLineV(position, first_point, YELLOW);
+
+  for (Vector2 point : move_points) {
+    DrawCircleV(point, 2, YELLOW);
+  }
 }
 

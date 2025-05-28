@@ -129,6 +129,15 @@ void PlayerActor::update() {
   moveX();
   moveY();
   rectExCorrection(bounding_box, collis_box);
+
+  if (moving) {
+    move_clock += Game::time() / move_interval;
+  }
+
+  if (move_clock >= 1.0) {
+    ActorHandler::queue<ActorEvent>(this, PLR_MOVING);
+    move_clock = 0.0;
+  }
 }
 
 void PlayerActor::moveX() {

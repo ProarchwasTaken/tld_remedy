@@ -151,7 +151,7 @@ void FieldScene::update() {
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
-
+  
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
     ActorHandler::clearEvents();

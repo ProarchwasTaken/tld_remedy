@@ -33,8 +33,6 @@ void ActorHandler::transferEvents() {
     return;
   }
 
-  PLOGD << "Transfering " << count << " queued events over to main pool.";
-
   assert(event_pool.empty());
   event_queue.swap(event_pool);
 }

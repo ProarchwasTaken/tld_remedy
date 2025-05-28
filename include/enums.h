@@ -44,6 +44,7 @@ enum FieldEventType {
 };
 
 enum ActorEventType {
+  PLR_MOVING,
   PICKUP_IN_RANGE,
   PICKUP_OUT_RANGE,
 };

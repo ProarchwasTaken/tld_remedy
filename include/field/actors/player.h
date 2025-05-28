@@ -36,4 +36,7 @@ private:
   const float default_speed = 1.1;
   int moving_x = 0;
   int moving_y = 0;
+
+  float move_clock = 0.0;
+  float move_interval = 0.35;
 };
