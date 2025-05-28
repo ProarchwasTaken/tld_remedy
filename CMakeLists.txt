@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.1.0
+VERSION 1.2.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -50,6 +50,7 @@ set(HEADERS
 "include/field/system/field_handler.h"
 "include/field/system/actor_handler.h"
 "include/field/actors/player.h"
+"include/field/actors/companion.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
 )
@@ -66,6 +67,7 @@ set(SOURCE
 "src/field/system/field_handler.cpp"
 "src/field/system/actor_handler.cpp"
 "src/field/actors/player.cpp"
+"src/field/actors/companion.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
 )
