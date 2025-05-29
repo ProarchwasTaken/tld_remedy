@@ -124,6 +124,12 @@
                 {
                  "id":43,
                  "name":"Player",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
                  "y":152
@@ -131,6 +137,12 @@
                 {
                  "id":45,
                  "name":"From db_02",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-1",
                  "x":288,
@@ -139,6 +151,12 @@
                 {
                  "id":50,
                  "name":"From db_03",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-2",
                  "x":160,
@@ -153,6 +171,11 @@
                          "propertytype":"ActorType",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
