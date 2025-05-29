@@ -60,6 +60,7 @@ FieldScene::~FieldScene() {
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   PLOGI << "Running map load procedure";
   float start_time = GetTime();
+  ActorHandler::clearEvents();
 
   if (!entities.empty()) {
     Entity::clear(entities);
