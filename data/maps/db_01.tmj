@@ -126,7 +126,7 @@
                  "name":"Player",
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
-                 "y":144
+                 "y":152
                 }, 
                 {
                  "id":45,
@@ -252,7 +252,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":60,
+ "nextobjectid":61,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

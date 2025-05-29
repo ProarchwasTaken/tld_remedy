@@ -179,7 +179,6 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
     float y = object["y"];
 
     Direction direction = Direction::DOWN;
-    ActorType actor_type = ActorType::PLAYER;
 
     if (object.find("type") == object.end()) {
       continue;
@@ -189,8 +188,11 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
     if (type_value == spawn_name) {
       PLOGD << "Found transition spawn point for the player.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
-      ActorData actor_data = {ACTOR, actor_type, {x, y}, direction};
-      entity_queue.push_back(make_unique<ActorData>(actor_data));
+      ActorData plr_data = {ACTOR, PLAYER, {x, y}, direction};
+      entity_queue.push_back(make_unique<ActorData>(plr_data));
+
+      ActorData com_data = {ACTOR, COMPANION, {x, y}, direction};
+      entity_queue.push_back(make_unique<ActorData>(com_data));
 
       found_transition = true;
       break;

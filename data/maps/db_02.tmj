@@ -99,8 +99,8 @@
                 {
                  "id":5,
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
-                 "x":120,
-                 "y":104
+                 "x":128,
+                 "y":96
                 }, 
                 {
                  "id":6,
@@ -117,6 +117,20 @@
                  "type":"db_02-2",
                  "x":192,
                  "y":144
+                }, 
+                {
+                 "id":14,
+                 "name":"Companion",
+                 "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":1
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "x":112,
+                 "y":96
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -220,7 +234,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":14,
+ "nextobjectid":15,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

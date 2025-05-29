@@ -56,6 +56,21 @@ void CompanionActor::update() {
 void CompanionActor::pathfind() {
   Vector2 first_point = move_points.front();
 
+  Vector2 difference = Vector2Subtract(first_point, position);
+  if (difference.x >= 0) {
+    direction = RIGHT;
+  }
+  else {
+    direction = LEFT;
+  }
+
+  if (difference.y >= 0) {
+    direction = DOWN;
+  }
+  else {
+    direction = UP;
+  }
+
   float speed = movement_speed * Game::deltaTime();
   position = Vector2MoveTowards(position, first_point, speed);
 
