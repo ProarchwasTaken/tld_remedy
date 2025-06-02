@@ -16,7 +16,7 @@ public:
   void release();
 
   Rectangle source;
-  Texture atlas;
+  Texture sheet;
   std::vector<Rectangle> sprites;
 private:
   std::string sprite_group;

@@ -7,6 +7,7 @@
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/collision.h"
 #include "field/system/actor_handler.h"
@@ -15,6 +16,8 @@
 
 using std::unique_ptr;
 bool PlayerActor::controllable = true;
+SpriteAtlas PlayerActor::atlas("mary_actor");
+
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
@@ -25,6 +28,7 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   collis_box.offset = {-4, -12};
 
   rectExCorrection(bounding_box, collis_box);
+  atlas.use();
 }
 
 PlayerActor::~PlayerActor() {
@@ -32,6 +36,8 @@ PlayerActor::~PlayerActor() {
     pickup_event.reset();
     PLOGD << "Cleared held event: PickupInRange";
   }
+
+  atlas.release();
 }
 
 void PlayerActor::behavior() {
@@ -189,6 +195,26 @@ void PlayerActor::moveY() {
 }
 
 void PlayerActor::draw() {
+  Rectangle *sprite = getIdleSprite();
 
+  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+                 WHITE);
+}
+
+Rectangle *PlayerActor::getIdleSprite() {
+  switch (direction) {
+    case DOWN: {
+      return &atlas.sprites[1];
+    }
+    case RIGHT: {
+      return &atlas.sprites[4];
+    }
+    case UP: {
+      return &atlas.sprites[7];
+    }
+    case LEFT: {
+      return &atlas.sprites[10];
+    }
+  }
 }
 

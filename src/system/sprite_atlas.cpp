@@ -29,7 +29,7 @@ void SpriteAtlas::setup() {
   Image image = LoadImage(sheet_path.c_str());
   ImageColorReplace(&image, Game::palette[0], {0, 0, 0, 0});
 
-  atlas = LoadTextureFromImage(image);
+  sheet = LoadTextureFromImage(image);
   UnloadImage(image);
 
   string data_path = "data/spritesheets/" + sprite_group + ".json";
@@ -64,7 +64,7 @@ void SpriteAtlas::reset() {
   assert(user_count == 0);
   PLOGI << "Resetting sprite atlas: '" << sprite_group << "'";
 
-  UnloadTexture(atlas);
+  UnloadTexture(sheet);
   sprites.clear();
 }
 
@@ -82,6 +82,6 @@ void SpriteAtlas::release() {
   user_count--;
 
   if (user_count == 0) {
-    release();
+    reset();
   }
 }

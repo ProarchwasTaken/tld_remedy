@@ -5,6 +5,7 @@
 #include "enums.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "system/sprite_atlas.h"
 
 
 class PlayerActor : public Actor {
@@ -24,14 +25,15 @@ public:
   void moveY();
 
   void draw() override;
+  Rectangle *getIdleSprite();
 
   static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
 
   bool moving = false;
+  static SpriteAtlas atlas;
 private:
   static bool controllable;
-  std::unique_ptr<ActorEvent> pickup_event;
 
   const float default_speed = 1.1;
   int moving_x = 0;
@@ -39,4 +41,6 @@ private:
 
   float move_clock = 0.0;
   float move_interval = 0.35;
+
+  std::unique_ptr<ActorEvent> pickup_event;
 };
