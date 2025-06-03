@@ -1,10 +1,12 @@
 #pragma once
+#include <cstddef>
 #include <memory>
 #include <raylib.h>
 #include "data/keybinds.h"
 #include "enums.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/animation.h"
 #include "system/sprite_atlas.h"
 
 
@@ -26,6 +28,7 @@ public:
 
   void draw() override;
   Rectangle *getIdleSprite();
+  Rectangle *getWalkSprite();
 
   static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
@@ -41,6 +44,12 @@ private:
 
   float move_clock = 0.0;
   float move_interval = 0.35;
+
+  Animation *animation = NULL;
+  Animation anim_down = {{0, 1, 2, 1}, 0.2};
+  Animation anim_right = {{3, 4, 5, 4}, 0.2};
+  Animation anim_up = {{6, 7, 8, 7}, 0.2};
+  Animation anim_left = {{9, 10, 11, 10}, 0.2};
 
   std::unique_ptr<ActorEvent> pickup_event;
 };

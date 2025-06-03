@@ -7,9 +7,11 @@
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/collision.h"
+#include "utils/animation.h"
 #include "field/system/actor_handler.h"
 #include "field/entities/pickup.h"
 #include "field/actors/player.h"
@@ -195,13 +197,21 @@ void PlayerActor::moveY() {
 }
 
 void PlayerActor::draw() {
-  Rectangle *sprite = getIdleSprite();
+  Rectangle *sprite; 
+  if (!moving) {
+    sprite = getIdleSprite();
+  }
+  else {
+    sprite = getWalkSprite();
+  }
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
 }
 
 Rectangle *PlayerActor::getIdleSprite() {
+  animation = NULL;
+
   switch (direction) {
     case DOWN: {
       return &atlas.sprites[1];
@@ -216,5 +226,37 @@ Rectangle *PlayerActor::getIdleSprite() {
       return &atlas.sprites[10];
     }
   }
+}
+
+Rectangle *PlayerActor::getWalkSprite() {
+  Animation *next_anim;
+
+  switch (direction) {  
+    case DOWN: {
+      next_anim = &anim_down;
+      break;
+    }
+    case RIGHT: {
+      next_anim = &anim_right;
+      break;
+    }
+    case UP: {
+      next_anim = &anim_up;
+      break;
+    }
+    case LEFT: {
+      next_anim = &anim_left;
+      break;
+    }
+  }
+
+  if (animation != next_anim) {
+    animation = next_anim;
+    animation->current = animation->frames.begin();
+    animation->frame_clock = 0.0;
+  }
+
+  SpriteAnimation::play(*animation, true);
+  return &atlas.sprites[*animation->current];
 }
 
