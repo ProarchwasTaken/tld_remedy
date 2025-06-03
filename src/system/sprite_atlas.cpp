@@ -11,7 +11,8 @@
 using std::string, nlohmann::json, nlohmann::basic_json, std::ifstream;
 
 
-SpriteAtlas::SpriteAtlas(string sprite_group) {
+SpriteAtlas::SpriteAtlas(string directory, string sprite_group) {
+  this->directory = directory;
   this->sprite_group = sprite_group;
 }
 
@@ -22,7 +23,8 @@ SpriteAtlas::~SpriteAtlas() {
 void SpriteAtlas::setup() {
   PLOGI << "Setting up atlas: '" << sprite_group << "'";
 
-  string sheet_path = "graphics/actors/" + sprite_group + ".png";
+  string sheet_path = "graphics/" + directory + "/" + sprite_group + 
+    ".png";
   assert(FileExists(sheet_path.c_str()));
 
   PLOGD << "Loading spritesheet.";

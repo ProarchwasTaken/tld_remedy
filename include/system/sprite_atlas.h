@@ -6,7 +6,7 @@
 
 class SpriteAtlas {
 public:
-  SpriteAtlas(std::string sprite_group);
+  SpriteAtlas(std::string directory, std::string sprite_group);
   ~SpriteAtlas();
 
   void setup();
@@ -20,5 +20,6 @@ public:
   std::vector<Rectangle> sprites;
 private:
   std::string sprite_group;
+  std::string directory;
   unsigned int user_count = 0;
 };
