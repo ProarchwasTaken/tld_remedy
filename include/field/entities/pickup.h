@@ -2,6 +2,7 @@
 #include "enums.h"
 #include "base/entity.h"
 #include "data/entity.h"
+#include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "field/actors/player.h"
 
@@ -25,4 +26,6 @@ private:
 
   PickupType pickup_type;
   int count;
+
+  Animation anim_idle = {{0, 1, 2}, 0.10};
 };

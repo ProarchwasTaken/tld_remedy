@@ -7,6 +7,7 @@
 #include "data/field_event.h"
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
+#include "utils/animation.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/player.h"
@@ -73,7 +74,8 @@ void Pickup::update() {
 }
 
 void Pickup::draw() {
-  Rectangle *sprite = &atlas.sprites[0];
+  SpriteAnimation::play(anim_idle, true);
+  Rectangle *sprite = &atlas.sprites[*anim_idle.current];
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
