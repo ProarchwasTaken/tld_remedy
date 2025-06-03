@@ -6,11 +6,14 @@
 #include "data/entity.h"
 #include "data/field_event.h"
 #include "data/actor_event.h"
+#include "system/sprite_atlas.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/player.h"
 #include "field/entities/pickup.h"
 #include <plog/Log.h>
+
+SpriteAtlas Pickup::atlas("entities", "pickup_entity");
 
 
 Pickup::Pickup(PickupData &data) {
@@ -29,7 +32,12 @@ Pickup::Pickup(PickupData &data) {
   assert(ptr != NULL);
   plr = static_cast<PlayerActor*>(ptr);
 
+  atlas.use();
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
+}
+
+Pickup::~Pickup() {
+  atlas.release();
 }
 
 void Pickup::interact() {
@@ -62,4 +70,11 @@ void Pickup::update() {
     ActorHandler::queue<ActorEvent>(this, PICKUP_OUT_RANGE);
     in_range = false;
   }
+}
+
+void Pickup::draw() {
+  Rectangle *sprite = &atlas.sprites[0];
+
+  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+                 WHITE);
 }

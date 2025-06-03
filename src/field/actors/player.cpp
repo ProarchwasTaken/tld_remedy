@@ -16,7 +16,7 @@
 
 using std::unique_ptr;
 bool PlayerActor::controllable = true;
-SpriteAtlas PlayerActor::atlas("mary_actor");
+SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
 
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
