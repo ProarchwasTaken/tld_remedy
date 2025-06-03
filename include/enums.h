@@ -10,9 +10,9 @@ enum GameState {
 
 enum EntityType {
   ACTOR,
-  COMBATANT,
+  PICKUP,
   MAP_TRANSITION,
-  PICKUP
+  COMBATANT,
 };
 
 enum ActorType {

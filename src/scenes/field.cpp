@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -29,6 +30,7 @@
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
+bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 
 FieldScene::FieldScene(Session *session_data) {
@@ -306,6 +308,8 @@ void FieldScene::deleteEntity(int entity_id) {
 }
 
 void FieldScene::draw() {
+  std::sort(entities.begin(), entities.end(), entityAlgorithm);
+
   BeginMode2D(camera); 
   {
     field.draw();
@@ -325,6 +329,15 @@ void FieldScene::draw() {
   CommandSystem::drawBuffer();
   if (Game::debugInfo()) drawSessionInfo();
   #endif // !NDEBUG
+}
+
+bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
+  if (e1->entity_type != e2->entity_type) {
+    return e1->entity_type > e2->entity_type;
+  }
+  else {
+    return e1->position.y < e2->position.y;
+  }
 }
 
 void FieldScene::drawSessionInfo() {
