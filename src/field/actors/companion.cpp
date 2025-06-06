@@ -49,17 +49,19 @@ void CompanionActor::processEvents() {
     }
 
     if (event->event_type == PLR_MOVING) {
-      Actor *sender = static_cast<Actor*>(event->sender);
+      PlayerActor *sender = static_cast<PlayerActor*>(event->sender);
       Vector2 position = sender->position;
       Direction direction = sender->direction;
 
       move_points.push_back({position, direction});
+      if (plr == NULL) plr = sender;
     }
   }
 }
 
 void CompanionActor::update() {
-  if (!move_points.empty()) {
+  moving = plr != NULL && plr->has_moved;
+  if (moving && !move_points.empty()) {
     pathfind();
     rectExCorrection(bounding_box, collis_box);
   }
@@ -81,7 +83,7 @@ void CompanionActor::pathfind() {
 
 void CompanionActor::draw() {
   Rectangle *sprite;
-  if (move_points.empty()) {
+  if (!moving) {
     sprite = getIdleSprite();
   }
   else {

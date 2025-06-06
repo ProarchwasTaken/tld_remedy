@@ -6,6 +6,7 @@
 #include "base/actor.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
+#include "field/actors/player.h"
 
 
 
@@ -27,7 +28,10 @@ public:
 
   static SpriteAtlas atlas;
 private:
+  PlayerActor *plr = NULL;
+
   std::list<std::pair<Vector2, enum Direction>> move_points;
+  bool moving = false;
   float movement_speed = 1.1;
 
   Animation *animation = NULL;

@@ -139,11 +139,15 @@ void PlayerActor::interactInput(bool gamepad) {
 }
 
 void PlayerActor::update() {
+  Vector2 old_position = position;
+
   moveX();
   moveY();
   rectExCorrection(bounding_box, collis_box);
 
-  if (moving) {
+  has_moved = !Vector2Equals(old_position, position);
+
+  if (has_moved) {
     move_clock += Game::time() / move_interval;
   }
 
@@ -198,7 +202,7 @@ void PlayerActor::moveY() {
 
 void PlayerActor::draw() {
   Rectangle *sprite; 
-  if (!moving) {
+  if (!has_moved) {
     sprite = getIdleSprite();
   }
   else {

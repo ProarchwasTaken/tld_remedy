@@ -33,8 +33,9 @@ public:
   static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
 
-  bool moving = false;
   static SpriteAtlas atlas;
+  bool moving = false;
+  bool has_moved = false;
 private:
   static bool controllable;
 
@@ -43,7 +44,7 @@ private:
   int moving_y = 0;
 
   float move_clock = 0.0;
-  float move_interval = 0.35;
+  float move_interval = 0.25;
 
   Animation *animation = NULL;
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
