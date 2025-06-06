@@ -316,12 +316,17 @@ void FieldScene::draw() {
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
-      entity->drawDebug();
     }
 
+    #ifndef NDEBUG
     if (Game::debugInfo()) {
+      for (unique_ptr<Entity> &entity : entities) {
+        entity->drawDebug();
+      }
+
       field.drawCollLines();
-    }
+    } 
+    #endif // !NDEBUG
   }
   EndMode2D();
 
