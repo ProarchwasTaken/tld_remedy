@@ -147,7 +147,7 @@ void FieldScene::setupEntities() {
 void FieldScene::update() { 
   if (!map_ready) {
     mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
-    Game::fadein(0.10);
+    Game::fadein(0.25);
     return;
   }
 
@@ -194,7 +194,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
-      Game::fadeout(0.10);
+      Game::fadeout(0.25);
       map_ready = false;
       break;
     }
