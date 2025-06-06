@@ -17,6 +17,7 @@
 #include "field/actors/player.h"
 
 using std::unique_ptr;
+
 bool PlayerActor::controllable = true;
 SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
 
@@ -165,7 +166,7 @@ void PlayerActor::moveX() {
 
   float speed = default_speed;
   if (moving_y != 0) {
-    speed = Normalize(default_speed, 0, 1.4);
+    speed = Normalize(default_speed, 0, speed_root);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -186,7 +187,7 @@ void PlayerActor::moveY() {
 
   float speed = default_speed;
   if (moving_x != 0) {
-    speed = Normalize(default_speed, 0, 1.4);
+    speed = Normalize(default_speed, 0, 1.45);
   }
 
   float magnitude = speed * Game::deltaTime();

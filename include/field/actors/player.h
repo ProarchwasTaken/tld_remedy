@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include "data/keybinds.h"
@@ -40,6 +41,7 @@ private:
   static bool controllable;
 
   const float default_speed = 1.1;
+  const float speed_root = std::sqrt(default_speed * 2);
   int moving_x = 0;
   int moving_y = 0;
 
