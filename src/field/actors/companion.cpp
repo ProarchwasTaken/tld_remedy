@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
@@ -7,6 +8,7 @@
 #include "base/actor.h"
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
+#include "utils/animation.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/companion.h"
 
@@ -79,14 +81,21 @@ void CompanionActor::pathfind() {
 
 void CompanionActor::draw() {
   Rectangle *sprite;
+  if (move_points.empty()) {
+    sprite = getIdleSprite();
+  }
+  else {
+    sprite = getWalkSprite();
+  }
 
-  sprite = getIdleSprite();
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
 }
 
 Rectangle *CompanionActor::getIdleSprite() {
+  animation = NULL;
+
   switch (direction) {
     case DOWN: {
       return &atlas.sprites[1];
@@ -101,6 +110,38 @@ Rectangle *CompanionActor::getIdleSprite() {
       return &atlas.sprites[10];
     }
   }
+}
+
+Rectangle *CompanionActor::getWalkSprite() {
+  Animation *next_anim;
+
+  switch (direction) {  
+    case DOWN: {
+      next_anim = &anim_down;
+      break;
+    }
+    case RIGHT: {
+      next_anim = &anim_right;
+      break;
+    }
+    case UP: {
+      next_anim = &anim_up;
+      break;
+    }
+    case LEFT: {
+      next_anim = &anim_left;
+      break;
+    }
+  }
+
+  if (animation != next_anim) {
+    animation = next_anim;
+    animation->current = animation->frames.begin();
+    animation->frame_clock = 0.0;
+  }
+
+  SpriteAnimation::play(*animation, true);
+  return &atlas.sprites[*animation->current];
 }
 
 void CompanionActor::drawDebug() {
