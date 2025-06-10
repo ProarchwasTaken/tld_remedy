@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -19,6 +20,7 @@
 #include "utils/camera.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
+#include "field/actors/companion.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
@@ -28,6 +30,7 @@
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
+bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 
 FieldScene::FieldScene(Session *session_data) {
@@ -59,6 +62,7 @@ FieldScene::~FieldScene() {
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   PLOGI << "Running map load procedure";
   float start_time = GetTime();
+  ActorHandler::clearEvents();
 
   if (!entities.empty()) {
     Entity::clear(entities);
@@ -86,6 +90,10 @@ void FieldScene::setupActor(ActorData *data) {
   switch (data->actor_type) {
     case ActorType::PLAYER: {
       entity = make_unique<PlayerActor>(position, direction);
+      break;
+    }
+    case ActorType::COMPANION: {
+      entity = make_unique<CompanionActor>(position, direction);
       break;
     }
     default: {
@@ -139,18 +147,18 @@ void FieldScene::setupEntities() {
 void FieldScene::update() { 
   if (!map_ready) {
     mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
-    Game::fadein(0.10);
+    Game::fadein(0.25);
     return;
   }
 
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
-
+  
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
-    ActorHandler::clearEvents();
   }
+  ActorHandler::clearEvents();
 
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
@@ -186,7 +194,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
-      Game::fadeout(0.10);
+      Game::fadeout(0.25);
       map_ready = false;
       break;
     }
@@ -300,18 +308,25 @@ void FieldScene::deleteEntity(int entity_id) {
 }
 
 void FieldScene::draw() {
+  std::sort(entities.begin(), entities.end(), entityAlgorithm);
+
   BeginMode2D(camera); 
   {
     field.draw();
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
-      entity->drawDebug();
     }
 
+    #ifndef NDEBUG
     if (Game::debugInfo()) {
+      for (unique_ptr<Entity> &entity : entities) {
+        entity->drawDebug();
+      }
+
       field.drawCollLines();
-    }
+    } 
+    #endif // !NDEBUG
   }
   EndMode2D();
 
@@ -319,6 +334,15 @@ void FieldScene::draw() {
   CommandSystem::drawBuffer();
   if (Game::debugInfo()) drawSessionInfo();
   #endif // !NDEBUG
+}
+
+bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
+  if (e1->entity_type != e2->entity_type) {
+    return e1->entity_type > e2->entity_type;
+  }
+  else {
+    return e1->position.y < e2->position.y;
+  }
 }
 
 void FieldScene::drawSessionInfo() {

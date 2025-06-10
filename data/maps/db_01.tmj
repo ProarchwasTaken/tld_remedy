@@ -123,13 +123,26 @@
          "objects":[
                 {
                  "id":43,
+                 "name":"Player",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
-                 "y":160
+                 "y":152
                 }, 
                 {
                  "id":45,
                  "name":"From db_02",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-1",
                  "x":288,
@@ -138,10 +151,35 @@
                 {
                  "id":50,
                  "name":"From db_03",
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_01-2",
                  "x":160,
                  "y":176
+                }, 
+                {
+                 "id":59,
+                 "name":"Companion",
+                 "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":1
+                        }, 
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "x":64,
+                 "y":168
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -237,7 +275,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":59,
+ "nextobjectid":61,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

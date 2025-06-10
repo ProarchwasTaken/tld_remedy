@@ -117,7 +117,7 @@ void Game::drawScene() {
 }
 
 void Game::fadeScreenProcedure() {
-  float magnitude = GetFrameTime() / fade_time;
+  float magnitude = time() / fade_time;
   if (magnitude == 0) {
     return;
   }
@@ -215,6 +215,10 @@ void Game::loadSession() {
 
   loaded_session = make_unique<Session>(std::move(session));
   game_state = LOADING_SESSION;
+}
+
+float Game::time() {
+  return GetFrameTime() * time_scale;
 }
 
 float Game::deltaTime() {

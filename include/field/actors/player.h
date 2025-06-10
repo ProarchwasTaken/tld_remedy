@@ -1,10 +1,14 @@
 #pragma once
+#include <cstddef>
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include "data/keybinds.h"
 #include "enums.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/animation.h"
+#include "system/sprite_atlas.h"
 
 
 class PlayerActor : public Actor {
@@ -24,16 +28,31 @@ public:
   void moveY();
 
   void draw() override;
+  Rectangle *getIdleSprite();
+  Rectangle *getWalkSprite();
 
   static void setControllable(bool value);
   inline static FieldKeybinds key_bind;
 
+  static SpriteAtlas atlas;
   bool moving = false;
+  bool has_moved = false;
 private:
   static bool controllable;
-  std::unique_ptr<ActorEvent> pickup_event;
 
   const float default_speed = 1.1;
+  const float speed_root = std::sqrt(default_speed * 2);
   int moving_x = 0;
   int moving_y = 0;
+
+  float move_clock = 0.0;
+  float move_interval = 0.25;
+
+  Animation *animation = NULL;
+  Animation anim_down = {{0, 1, 2, 1}, 0.2};
+  Animation anim_right = {{3, 4, 5, 4}, 0.2};
+  Animation anim_up = {{6, 7, 8, 7}, 0.2};
+  Animation anim_left = {{9, 10, 11, 10}, 0.2};
+
+  std::unique_ptr<ActorEvent> pickup_event;
 };

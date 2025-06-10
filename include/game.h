@@ -25,6 +25,7 @@ public:
   void fadeScreenProcedure();
   void loadSessionProcedure();
 
+  static float time();
   static float deltaTime();
   static bool debugInfo();
   static void toggleDebugInfo();

@@ -10,9 +10,9 @@ enum GameState {
 
 enum EntityType {
   ACTOR,
-  COMBATANT,
+  PICKUP,
   MAP_TRANSITION,
-  PICKUP
+  COMBATANT,
 };
 
 enum ActorType {
@@ -44,6 +44,7 @@ enum FieldEventType {
 };
 
 enum ActorEventType {
+  PLR_MOVING,
   PICKUP_IN_RANGE,
   PICKUP_OUT_RANGE,
 };

@@ -7,14 +7,20 @@
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/animation.h"
+#include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/collision.h"
+#include "utils/animation.h"
 #include "field/system/actor_handler.h"
 #include "field/entities/pickup.h"
 #include "field/actors/player.h"
 
 using std::unique_ptr;
+
 bool PlayerActor::controllable = true;
+SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
+
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
@@ -25,6 +31,7 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   collis_box.offset = {-4, -12};
 
   rectExCorrection(bounding_box, collis_box);
+  atlas.use();
 }
 
 PlayerActor::~PlayerActor() {
@@ -32,6 +39,8 @@ PlayerActor::~PlayerActor() {
     pickup_event.reset();
     PLOGD << "Cleared held event: PickupInRange";
   }
+
+  atlas.release();
 }
 
 void PlayerActor::behavior() {
@@ -46,7 +55,12 @@ void PlayerActor::behavior() {
 }
 
 void PlayerActor::processEvents() {
-  for (unique_ptr<ActorEvent> &event : *ActorHandler::get()) {
+  EventPool<ActorEvent> *event_pool = ActorHandler::get();
+  int count = event_pool->size();
+
+  for (int x = 0; x < count; x++) {
+    unique_ptr<ActorEvent> &event = event_pool->at(x);
+
     if (event == nullptr) {
       continue;
     }
@@ -126,9 +140,22 @@ void PlayerActor::interactInput(bool gamepad) {
 }
 
 void PlayerActor::update() {
+  Vector2 old_position = position;
+
   moveX();
   moveY();
   rectExCorrection(bounding_box, collis_box);
+
+  has_moved = !Vector2Equals(old_position, position);
+
+  if (has_moved) {
+    move_clock += Game::time() / move_interval;
+  }
+
+  if (move_clock >= 1.0) {
+    ActorHandler::queue<ActorEvent>(this, PLR_MOVING);
+    move_clock = 0.0;
+  }
 }
 
 void PlayerActor::moveX() {
@@ -139,7 +166,7 @@ void PlayerActor::moveX() {
 
   float speed = default_speed;
   if (moving_y != 0) {
-    speed = Normalize(default_speed, 0, 1.4);
+    speed = Normalize(default_speed, 0, speed_root);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -160,7 +187,7 @@ void PlayerActor::moveY() {
 
   float speed = default_speed;
   if (moving_x != 0) {
-    speed = Normalize(default_speed, 0, 1.4);
+    speed = Normalize(default_speed, 0, 1.45);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -175,6 +202,66 @@ void PlayerActor::moveY() {
 }
 
 void PlayerActor::draw() {
+  Rectangle *sprite; 
+  if (!has_moved) {
+    sprite = getIdleSprite();
+  }
+  else {
+    sprite = getWalkSprite();
+  }
 
+  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+                 WHITE);
+}
+
+Rectangle *PlayerActor::getIdleSprite() {
+  animation = NULL;
+
+  switch (direction) {
+    case DOWN: {
+      return &atlas.sprites[1];
+    }
+    case RIGHT: {
+      return &atlas.sprites[4];
+    }
+    case UP: {
+      return &atlas.sprites[7];
+    }
+    case LEFT: {
+      return &atlas.sprites[10];
+    }
+  }
+}
+
+Rectangle *PlayerActor::getWalkSprite() {
+  Animation *next_anim;
+
+  switch (direction) {  
+    case DOWN: {
+      next_anim = &anim_down;
+      break;
+    }
+    case RIGHT: {
+      next_anim = &anim_right;
+      break;
+    }
+    case UP: {
+      next_anim = &anim_up;
+      break;
+    }
+    case LEFT: {
+      next_anim = &anim_left;
+      break;
+    }
+  }
+
+  if (animation != next_anim) {
+    animation = next_anim;
+    animation->current = animation->frames.begin();
+    animation->frame_clock = 0.0;
+  }
+
+  SpriteAnimation::play(*animation, true);
+  return &atlas.sprites[*animation->current];
 }
 

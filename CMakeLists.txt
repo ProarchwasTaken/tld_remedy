@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.1.0
+VERSION 1.2.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -41,15 +41,19 @@ set(HEADERS
 "include/data/field_event.h"
 "include/data/actor_event.h"
 "include/data/session.h"
+"include/data/animation.h"
 "include/utils/input.h"
 "include/utils/camera.h"
 "include/utils/collision.h"
 "include/utils/text.h"
+"include/utils/animation.h"
+"include/system/sprite_atlas.h"
 "include/scenes/field.h"
 "include/field/system/field_map.h"
 "include/field/system/field_handler.h"
 "include/field/system/actor_handler.h"
 "include/field/actors/player.h"
+"include/field/actors/companion.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
 )
@@ -61,11 +65,14 @@ set(SOURCE
 "src/utils/camera.cpp"
 "src/utils/collision.cpp"
 "src/utils/text.cpp"
+"src/utils/animation.cpp"
+"src/system/sprite_atlas.cpp"
 "src/scenes/field.cpp"
 "src/field/system/field_map.cpp"
 "src/field/system/field_handler.cpp"
 "src/field/system/actor_handler.cpp"
 "src/field/actors/player.cpp"
+"src/field/actors/companion.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
 )

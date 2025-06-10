@@ -25,7 +25,7 @@ void CameraUtils::followFieldEntity(Camera2D &camera, Entity *entity) {
 
   static float min_length = 1.0;
   static float min_speed = 0.75;
-  static float fraction_speed = 0.05;
+  static float fraction_speed = 0.10;
 
   Vector2 difference = Vector2Subtract(entity->position, camera.target);
   float length = Vector2Length(difference);

@@ -8,4 +8,3 @@ struct ActorEvent {
   ActorEventType event_type;
 };
 
-
