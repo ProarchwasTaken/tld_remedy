@@ -14,8 +14,8 @@ struct Player {
 
   int offense = 4;
   int defense = 4;
-  int intimidation = 4;
-  int persistence = 4;
+  int intimid = 4;
+  int persist = 4;
 };
 
 struct Companion {
@@ -30,8 +30,8 @@ struct Companion {
 
   int offense;
   int defense;
-  int intimidation;
-  int persistence;
+  int intimid;
+  int persist;
 };
 
 struct CommonData {

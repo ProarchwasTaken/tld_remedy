@@ -36,6 +36,9 @@ FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
   session.version = Game::session_version;
 
+  session.player.sub_weapon = sub_weapon;
+  initCompanionData(companion);
+
   setup();
 }
 
@@ -67,6 +70,31 @@ void FieldScene::setup() {
   
   Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
+}
+
+void FieldScene::initCompanionData(CompanionID id) {
+  PLOGI << "Initializing Companion data...";
+  Companion *companion = &session.companion;
+
+  switch (id) {
+    case CompanionID::ERWIN: {
+      std::strcpy(companion->name, "Erwin");
+      companion->id = id;
+
+      companion->life = 30;
+      companion->max_life = 30;
+
+      companion->init_morale = 8;
+      companion->max_morale = 25;
+
+      companion->offense = 6;
+      companion->defense = 6;
+      companion->intimid = 5;
+      companion->persist = 3;
+    }
+  }
+
+  PLOGI << "Initialized data for: " << companion->name;
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
@@ -356,42 +384,71 @@ bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
 }
 
 void FieldScene::drawSessionInfo() {
+  Font *font = &Game::sm_font;
   int text_size = Game::sm_font.baseSize;
   float base_x = 420;
   float y = 4;
+  float spacing = 9;
 
-  string base = "Location: ";
-  string extension = session.location;
-  string location = base + extension;
+  string location = TextFormat("Location: %s", session.location);
   Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
   string supplies = TextFormat("Supplies: %03i", session.supplies);
   Vector2 sup_pos = TextUtils::alignRight(supplies.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
-  string plr_hp = TextFormat("Player Life: %02.00f / %02.00f",
-                             session.player.life, 
-                             session.player.max_life);
+  Player *player = &session.player;
+  string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
+                             player->life, player->max_life);
   Vector2 php_pos = TextUtils::alignRight(plr_hp.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
-  string plr_mp = TextFormat("Player Morale: %02.00f / %02.00f",  
-                             session.player.init_morale, 
-                             session.player.max_morale);
+  string plr_mp = TextFormat("%s Morale: %02.00f / %02.00f", player->name,
+                             player->init_morale, player->max_morale);
   Vector2 pmp_pos = TextUtils::alignRight(plr_mp.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
+                                          *font, -3, 0);
+  y += spacing;
 
-  DrawTextEx(Game::sm_font, location.c_str(), loc_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, supplies.c_str(), sup_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, plr_hp.c_str(), php_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, plr_mp.c_str(), pmp_pos, text_size, -3, 
-             GREEN);
+  string plr_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
+                                player->name, player->offense,
+                                player->defense, player->intimid,
+                                player->persist);
+  Vector2 pst_pos = TextUtils::alignRight(plr_stats.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  Companion *companion = &session.companion;
+  string com_hp = TextFormat("%s Life: %02.00f / %02.00f", 
+                             companion->name, companion->life,
+                             companion->max_life);
+  Vector2 chp_pos = TextUtils::alignRight(com_hp.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string com_mp = TextFormat("%s Morale: %02.00f / %02.00f", 
+                             companion->name, companion->init_morale,
+                             companion->max_morale);
+  Vector2 cmp_pos = TextUtils::alignRight(com_mp.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string com_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
+                                companion->name, companion->offense,
+                                companion->defense, companion->intimid,
+                                companion->persist);
+  Vector2 cst_pos = TextUtils::alignRight(com_stats.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+
+  DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_mp.c_str(), pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_stats.c_str(), pst_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_mp.c_str(), cmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_stats.c_str(), cst_pos, text_size, -3, GREEN);
 }
- 
