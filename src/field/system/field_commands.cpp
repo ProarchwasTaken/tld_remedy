@@ -169,7 +169,7 @@ string findNextWord(string &buffer, string::iterator &iterator,
     iterator++;
   }
 
-  PLOGE << "Word returned: '" << word << "'";
+  PLOGD << "Word returned: '" << word << "'";
   return word;
 }
 
