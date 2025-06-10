@@ -66,13 +66,14 @@ void PlayerActor::processEvents() {
     }
 
     bool holding_event = pickup_event != nullptr;
-    if (!holding_event && event->event_type == PICKUP_IN_RANGE) {
+    ActorEVT type = event->event_type;
+    if (!holding_event && type == ActorEVT::PICKUP_IN) {
       int id = event->sender->entity_id;
 
       PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
       pickup_event.swap(event);
     } 
-    else if (holding_event && event->event_type == PICKUP_OUT_RANGE) {
+    else if (holding_event && type == ActorEVT::PICKUP_OUT) {
       dropPickupEvent(event);
     }
   }
@@ -153,7 +154,7 @@ void PlayerActor::update() {
   }
 
   if (move_clock >= 1.0) {
-    ActorHandler::queue<ActorEvent>(this, PLR_MOVING);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::PLR_MOVING);
     move_clock = 0.0;
   }
 }

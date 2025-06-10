@@ -9,7 +9,6 @@ using std::string;
 
 
 Actor* Actor::getActor(enum ActorType type) {
-  PLOGD << "Attempting to retrieve first actor of type: " << type;
   Actor *result;
 
   for (Actor* actor : existing_actors) {

@@ -143,7 +143,7 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
     float x = object["x"];
     float y = object["y"];
     Direction direction = Direction::DOWN;
-    ActorType actor_type = PLAYER;
+    ActorType actor_type = ActorType::PLAYER;
 
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
@@ -151,17 +151,17 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
         direction = property["value"];
       }
       else if (property_name == "actor_type") {
-        actor_type = COMPANION;
+        actor_type = ActorType::COMPANION;
       }
     }
 
     switch (actor_type) {
-      case PLAYER: {
+      case ActorType::PLAYER: {
         PLOGD << "Found initial spawn point for the player.";
         found_initial_plr = true;
         break;
       }
-      case COMPANION: {
+      case ActorType::COMPANION: {
         PLOGD << "Found initial spawn point for the companion actor.";
         found_initial_com = true;
         break;
@@ -211,10 +211,11 @@ void FieldMap::findSpawnpoints(json &layer_objects, string spawn_name) {
     if (type_value == spawn_name) {
       PLOGD << "Found transition spawn point for the player.";
       PLOGD << "(X: " << x << ", Y: " << y << ")";
-      ActorData plr_data = {ACTOR, PLAYER, {x, y}, direction};
+      ActorData plr_data = {ACTOR, ActorType::PLAYER, {x, y}, direction};
       entity_queue.push_back(make_unique<ActorData>(plr_data));
 
-      ActorData com_data = {ACTOR, COMPANION, {x, y}, direction};
+      ActorData com_data = {ACTOR, ActorType::COMPANION, {x, y}, 
+        direction};
       entity_queue.push_back(make_unique<ActorData>(com_data));
 
       found_transition = true;

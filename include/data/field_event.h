@@ -3,7 +3,7 @@
 #include "enums.h"
 
 struct FieldEvent {
-  FieldEventType event_type;
+  FieldEVT event_type;
 };
 
 struct LoadMapEvent : FieldEvent {

@@ -184,7 +184,7 @@ void FieldScene::eventProcessing() {
 
 void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
   switch (event->event_type) {
-    case FieldEventType::LOAD_MAP: {
+    case FieldEVT::LOAD_MAP: {
       PLOGD << "Event detected: LoadMapEvent";
       auto *event_data = static_cast<LoadMapEvent*>(event.get());
 
@@ -198,21 +198,21 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       map_ready = false;
       break;
     }
-    case FieldEventType::SAVE_SESSION: {
+    case FieldEVT::SAVE_SESSION: {
       PLOGD << "Event Detected: SaveSessionEvent";
 
       PLOGI << "Saving the session.";
       Game::saveSession(&session);
       break;
     }
-    case FieldEventType::LOAD_SESSION: {
+    case FieldEVT::LOAD_SESSION: {
       PLOGD << "Event Detected: LoadSessionEvent";
 
       PLOGI << "Loading session.";
       Game::loadSession();
       break;
     }
-    case FieldEventType::DELETE_ENTITY: {
+    case FieldEVT::DELETE_ENTITY: {
       PLOGD << "Event detected: DeleteEntityEvent";
       auto *event_data = static_cast<DeleteEntityEvent*>(event.get());
 
@@ -222,7 +222,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       deleteEntity(entity_id);
       break;
     }
-    case FieldEventType::UPDATE_COMMON_DATA: {
+    case FieldEVT::UPDATE_COMMON_DATA: {
       PLOGD << "Event detected: UpdateCommonEvent";
       auto *event_data = static_cast<UpdateCommonEvent*>(event.get());
 
@@ -234,7 +234,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       updateCommonData(object_id, active);
       break;
     }
-    case FieldEventType::CHANGE_SUPPLIES: {
+    case FieldEVT::CHANGE_SUPPLIES: {
       PLOGD << "Event detected: SetSuppliesEvent";
       auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
 
@@ -244,7 +244,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       session.supplies = value;
       break;
     }
-    case FieldEventType::ADD_SUPPLIES: {
+    case FieldEVT::ADD_SUPPLIES: {
       PLOGD << "Event detected: AddSuppliesEvent";
       auto *event_data = static_cast<AddSuppliesEvent*>(event.get());
 
@@ -254,7 +254,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       session.supplies += magnitude;
       break;
     }
-    case FieldEventType::CHANGE_PLR_LIFE: {
+    case FieldEVT::CHANGE_PLR_LIFE: {
       PLOGD << "Event detected: SetPlrLifeEvent";
       auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
 

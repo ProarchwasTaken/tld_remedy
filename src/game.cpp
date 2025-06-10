@@ -13,7 +13,7 @@
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
 
-GameState Game::game_state = READY;
+GameState Game::game_state = GameState::READY;
 unique_ptr<Session> Game::loaded_session;
 
 Font Game::sm_font;
@@ -83,16 +83,16 @@ void Game::start() {
 
 void Game::gameLogic() {
   switch (game_state) {
-    case LOADING_SESSION: {
+    case GameState::LOADING_SESSION: {
       loadSessionProcedure();
       break;
     }
-    case FADING_IN:
-    case FADING_OUT: {
+    case GameState::FADING_IN:
+    case GameState::FADING_OUT: {
       fadeScreenProcedure();
       break;
     }
-    case READY: {
+    case GameState::READY: {
       scene->update();
       break;
     }
@@ -122,10 +122,10 @@ void Game::fadeScreenProcedure() {
     return;
   }
 
-  if (game_state == FADING_OUT) {
+  if (game_state == GameState::FADING_OUT) {
     fade_percentage -= magnitude;
   }
-  else if (game_state == FADING_IN){
+  else if (game_state == GameState::FADING_IN){
     fade_percentage += magnitude;
   }
 
@@ -139,7 +139,7 @@ void Game::fadeScreenProcedure() {
   bool finished_fading = value == 0 || value == 255;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
-    game_state = READY;
+    game_state = GameState::READY;
   }
 }
 
@@ -156,25 +156,33 @@ void Game::loadSessionProcedure() {
 }
 
 void Game::fadeout(float fade_time) {
-  if (game_state != READY && game_state != LOADING_SESSION) {
-    return;
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::LOADING_SESSION: {
+      PLOGI << "Fading out the screen.";
+      Game::fade_percentage = 1.0;
+      Game::fade_time = fade_time;
+      game_state = GameState::FADING_OUT;
+    }
+    default: {
+      return;
+    }
   }
-
-  PLOGI << "Fading out the screen.";
-  Game::fade_percentage = 1.0;
-  Game::fade_time = fade_time;
-  game_state = FADING_OUT;
 }
 
 void Game::fadein(float fade_time) {
-  if (game_state != READY && game_state != LOADING_SESSION) {
-    return;
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::LOADING_SESSION: {
+      PLOGI << "Fading in the screen.";
+      Game::fade_percentage = 0.0;
+      Game::fade_time = fade_time;
+      game_state = GameState::FADING_IN;
+    }
+    default: {
+      return;
+    }
   }
-
-  PLOGI << "Fading in the screen.";
-  Game::fade_percentage = 0.0;
-  Game::fade_time = fade_time;
-  game_state = FADING_IN;
 }
 
 void Game::saveSession(Session *data) {
@@ -214,7 +222,7 @@ void Game::loadSession() {
   PLOGD << "Player Life: " << session.player.life;
 
   loaded_session = make_unique<Session>(std::move(session));
-  game_state = LOADING_SESSION;
+  game_state = GameState::LOADING_SESSION;
 }
 
 float Game::time() {

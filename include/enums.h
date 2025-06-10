@@ -1,7 +1,7 @@
 #pragma once
 
 
-enum GameState {
+enum class GameState {
   READY,
   LOADING_SESSION,
   FADING_OUT,
@@ -15,10 +15,16 @@ enum EntityType {
   COMBATANT,
 };
 
-enum ActorType {
+enum class ActorType {
   PLAYER,
   COMPANION,
   ENEMY,
+};
+
+enum class CombatantType {
+  PLAYER,
+  COMPANION,
+  ENEMY
 };
 
 enum Direction {
@@ -28,11 +34,11 @@ enum Direction {
   DOWN = 2,
 };
 
-enum PickupType {
+enum class PickupType {
   SUPPLIES
 };
 
-enum FieldEventType {
+enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
   LOAD_SESSION,
@@ -43,13 +49,13 @@ enum FieldEventType {
   CHANGE_PLR_LIFE,
 };
 
-enum ActorEventType {
+enum class ActorEVT {
   PLR_MOVING,
-  PICKUP_IN_RANGE,
-  PICKUP_OUT_RANGE,
+  PICKUP_IN,
+  PICKUP_OUT,
 };
 
-enum CommandType {
+enum class CommandType {
   CHANGE_MAP,
   SAVE,
   LOAD,

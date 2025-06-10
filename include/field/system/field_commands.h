@@ -25,12 +25,12 @@ public:
 private:
   inline static FieldScene *scene;
   inline static std::map<std::string, CommandType> command_table {
-    {"MAP", CHANGE_MAP},
-    {"SAVE", SAVE},
-    {"LOAD", LOAD},
-    {"DELETE_ENTITY", DELETE_ENT},
-    {"SET_SUPPLIES", SET_SUPPLIES},
-    {"SET_LIFE", SET_LIFE},
+    {"MAP", CommandType::CHANGE_MAP},
+    {"SAVE", CommandType::SAVE},
+    {"LOAD", CommandType::LOAD},
+    {"DELETE_ENTITY", CommandType::DELETE_ENT},
+    {"SET_SUPPLIES", CommandType::SET_SUPPLIES},
+    {"SET_LIFE", CommandType::SET_LIFE},
   };
 
   inline static std::string buffer;

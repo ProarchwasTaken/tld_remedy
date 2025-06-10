@@ -5,6 +5,6 @@
 
 struct ActorEvent {
   Entity *sender;
-  ActorEventType event_type;
+  ActorEVT event_type;
 };
 

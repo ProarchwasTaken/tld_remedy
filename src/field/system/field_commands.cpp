@@ -95,34 +95,34 @@ void CommandSystem::interpretCommand(CommandType type,
 {
   PLOGD << "Interpreting command type.";
   switch (type) {
-    case CHANGE_MAP: {
+    case CommandType::CHANGE_MAP: {
       string map_name = findNextWord(buffer, iterator);
       string spawn_name = findNextWord(buffer, iterator);
 
       loadMapCommand(map_name, spawn_name);
       break;
     }
-    case SAVE: {
+    case CommandType::SAVE: {
       saveCommand();
       break;
     }
-    case LOAD: {
+    case CommandType::LOAD: {
       loadCommand();
       break;
     }
-    case DELETE_ENT: {
+    case CommandType::DELETE_ENT: {
       string argument = findNextWord(buffer, iterator);
 
       deleteEntityCommand(argument);
       break;
     }
-    case SET_SUPPLIES: {
+    case CommandType::SET_SUPPLIES: {
       string argument = findNextWord(buffer, iterator);
 
       setSuppliesCommand(argument);
       break;
     }
-    case SET_LIFE: {
+    case CommandType::SET_LIFE: {
       string target = findNextWord(buffer, iterator, true);
       string value = findNextWord(buffer, iterator);
 
@@ -180,17 +180,18 @@ void loadMapCommand(string map_name, string spawn_name) {
   }
 
   PLOGD << "Now executing command.";
-  FieldHandler::raise<LoadMapEvent>(LOAD_MAP, map_name, spawn_name);
+  FieldHandler::raise<LoadMapEvent>(FieldEVT::LOAD_MAP, map_name, 
+                                    spawn_name);
 }
 
 void saveCommand() {
   PLOGD << "Now executing command.";
-  FieldHandler::raise<FieldEvent>(SAVE_SESSION);
+  FieldHandler::raise<FieldEvent>(FieldEVT::SAVE_SESSION);
 }
 
 void loadCommand() {
   PLOGD << "Now executing command.";
-  FieldHandler::raise<FieldEvent>(LOAD_SESSION);
+  FieldHandler::raise<FieldEvent>(FieldEVT::LOAD_SESSION);
 }
 
 void deleteEntityCommand(string argument) {
@@ -209,7 +210,8 @@ void deleteEntityCommand(string argument) {
   PLOGD << "Now executing command.";
   int entity_id = std::stoi(argument);
 
-  FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
+  FieldHandler::raise<DeleteEntityEvent>(FieldEVT::DELETE_ENTITY, 
+                                         entity_id);
 }
 
 void setSuppliesCommand(string argument) {
@@ -228,7 +230,7 @@ void setSuppliesCommand(string argument) {
   PLOGD << "Now executing command.";
   int value = std::stoi(argument);
 
-  FieldHandler::raise<SetSuppliesEvent>(CHANGE_SUPPLIES, value);
+  FieldHandler::raise<SetSuppliesEvent>(FieldEVT::CHANGE_SUPPLIES, value);
 }
 
 void setLifeCommand(string target, string value) {
@@ -261,8 +263,8 @@ void setLifeCommand(string target, string value) {
   float life_value = std::stof(value);
   
   if (target == "PLAYER") {
-    FieldHandler::raise<SetPlrLifeEvent>(CHANGE_PLR_LIFE, 
-                                              life_value);
+    FieldHandler::raise<SetPlrLifeEvent>(FieldEVT::CHANGE_PLR_LIFE, 
+                                         life_value);
   }
   else {
     PLOGD << "'" << target << "' is not a valid target.";
