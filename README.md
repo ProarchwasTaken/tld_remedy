@@ -5,26 +5,25 @@ at the end. All the while, they must try their best to avoid unnecessary
 battles, and carefully manage their resources so they don't end up too 
 weak to cross the metaphorical "finish line".
 
-The game is currently in it's prototyping stages. So feedback, and 
+The game is currently in it's early pre-alpha stages. So feedback, and 
 constructive criticism is very much appreciated. I'm currently focused on
-building and testing the game's fundamental mechanics to see whether if 
-the idea is worth expanding upon, or I need to take a difference approach.
-
-At the time of writing this, I'm looking for feedback on the game's 
-movement, and collision system. As well as feedback on how the game runs
-on lower end devices.
-
+building the game's core mechanics and systems, while also refining what's
+built. Possible the most experimental phase of development as everything
+is subject to change.
 
 # Default Controls
 This section goes over the game's default controls.
 
 ## Keyboard
 * **Arrow Keys** - Movement
+* **Z Key** - Interact
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
 may be different depending on what controller you use.
+
 * **D-Pad** - Movement
+* **A Button** - Interact
 
 
 # Credits and Contacts
@@ -42,6 +41,8 @@ much everything.
 **Gamejolt** - https://gamejolt.com/@LorenArc
 
 **Twitter** - https://twitter.com/Tyler37961642
+
+**Bluesky** - https://bsky.app/profile/lorenarc707.bsky.social
 
 **Dev Channel** - https://www.youtube.com/channel/UCzR-5I3KE2YAV-Ilndl8Y9w
 
