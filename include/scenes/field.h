@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/actor.h"
@@ -14,9 +15,11 @@
 
 class FieldScene : public Scene {
 public:
-  FieldScene(Session *session_data = NULL);
+  FieldScene(SubWeaponID sub_weapon, CompanionID companion);
+  FieldScene(Session *session_data);
   ~FieldScene();
 
+  void setup();
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupEntities();

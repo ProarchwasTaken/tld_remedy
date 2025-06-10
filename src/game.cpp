@@ -35,7 +35,7 @@ void Game::init() {
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   defineColorPalette();
 
-  scene = make_unique<FieldScene>();
+  scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }

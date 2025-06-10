@@ -32,18 +32,31 @@
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
+FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
+  PLOGI << "Starting a new session.";
+  session.version = Game::session_version;
+
+  setup();
+}
 
 FieldScene::FieldScene(Session *session_data) {
-  bool new_game = session_data == NULL;
-  if (new_game) {
-    PLOGI << "Starting a new session.";
-    session.version = Game::session_version;
-  }
-  else {
-    PLOGI << "Loading existing session data.";
-    session = *session_data;
-  } 
+  assert(session_data != NULL);
 
+  PLOGI << "Loading existing session data.";
+  session = *session_data;
+  setup();
+}
+
+FieldScene::~FieldScene() {
+  Entity::clear(entities);
+
+  assert(Actor::existing_actors.empty());
+  assert(Entity::existing_entities.empty());
+  PLOGI << "Unloaded the Field scene.";
+}
+
+void FieldScene::setup() {
+  PLOGI << "Setting up the field scene...";
   camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
 
@@ -53,15 +66,7 @@ FieldScene::FieldScene(Session *session_data) {
   #endif // !NDEBUG
   
   Game::fadein(1.0);
-  PLOGI << "Initialized the Field Scene.";
-}
-
-FieldScene::~FieldScene() {
-  Entity::clear(entities);
-
-  assert(Actor::existing_actors.empty());
-  assert(Entity::existing_entities.empty());
-  PLOGI << "Unloaded the Field scene.";
+  PLOGI << "Field scene is ready to go!";
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
