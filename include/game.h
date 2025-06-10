@@ -41,6 +41,7 @@ public:
   static constexpr Vector2 WINDOW_RES = {1280, 720};
 
   static constexpr int target_framerate = 60;
+  static constexpr unsigned int session_version = 1;
 
   static Font sm_font;
   static Color* palette;

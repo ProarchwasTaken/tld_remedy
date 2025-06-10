@@ -221,6 +221,11 @@ void Game::loadSession() {
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;
 
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    return;
+  }
+
   loaded_session = make_unique<Session>(std::move(session));
   game_state = GameState::LOADING_SESSION;
 }

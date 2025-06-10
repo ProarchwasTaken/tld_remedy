@@ -34,10 +34,15 @@ bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 
 FieldScene::FieldScene(Session *session_data) {
-  if (session_data != NULL) {
+  bool new_game = session_data == NULL;
+  if (new_game) {
+    PLOGI << "Starting a new session.";
+    session.version = Game::session_version;
+  }
+  else {
     PLOGI << "Loading existing session data.";
     session = *session_data;
-  }
+  } 
 
   camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
