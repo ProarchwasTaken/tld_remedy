@@ -38,7 +38,7 @@ struct CommonData {
   int object_id = -1;
   bool active = false;
 
-  char map_name[16];
+  char map_name[16] = "";
 };
 
 struct Session {
