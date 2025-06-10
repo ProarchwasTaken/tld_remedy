@@ -21,6 +21,14 @@ enum class ActorType {
   ENEMY,
 };
 
+enum class SubWeaponID {
+  KNIFE
+};
+
+enum class CompanionID {
+  ERWIN
+};
+
 enum class CombatantType {
   PLAYER,
   COMPANION,
