@@ -35,6 +35,16 @@ enum class CombatantType {
   ENEMY
 };
 
+enum CombatantState {
+  NEUTRAL,
+  HIT_STUN,
+  MORALE_STUN,
+  DEAD,
+  WIND_UP,
+  ACTION,
+  END_LAG
+};
+
 enum Direction {
   UP = -2,
   LEFT = -1,
