@@ -1,5 +1,7 @@
 #include <cassert>
+#include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "data/session.h"
@@ -24,7 +26,9 @@ CombatScene::~CombatScene() {
 }
 
 void CombatScene::update() {
-
+  if (IsKeyPressed(KEY_BACKSPACE)) {
+    Game::endCombat();
+  }
 }
 
 void CombatScene::draw() {
