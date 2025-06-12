@@ -57,6 +57,7 @@ set(HEADERS
 "include/field/actors/companion.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
+"include/scenes/combat.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -77,6 +78,7 @@ set(SOURCE
 "src/field/actors/companion.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
+"src/scenes/combat.cpp"
 )
 
 if(${BUILD_DEV})
