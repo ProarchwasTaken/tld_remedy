@@ -20,10 +20,12 @@ public:
    * existing sessions; It's all set up so the game could only perform
    * one of these things per frame to reduce complexity.*/
   void gameLogic();
-  void drawScene();
-
   void fadeScreenProcedure();
   void loadSessionProcedure();
+  void initCombatProcedure();
+  void endCombatProcedure();
+
+  void drawScene();
 
   static float time();
   static float deltaTime();
@@ -33,6 +35,9 @@ public:
 
   static void saveSession(Session *data);
   static void loadSession();
+
+  static void initCombat(Session *data);
+  static void endCombat();
 
   static void fadeout(float fade_time);
   static void fadein(float fade_time);
@@ -66,5 +71,6 @@ private:
   Rectangle canvas_dest;
 
   std::unique_ptr<Scene> scene;
+  static std::unique_ptr<Scene> reserve;
   static std::unique_ptr<Session> loaded_session;
 };

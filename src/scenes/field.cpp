@@ -252,6 +252,12 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       Game::loadSession();
       break;
     }
+    case FieldEVT::INIT_COMBAT: {
+      PLOGI << "Event Detected: InitCombatEvent";
+
+      Game::initCombat(&session);
+      break;
+    }
     case FieldEVT::DELETE_ENTITY: {
       PLOGD << "Event detected: DeleteEntityEvent";
       auto *event_data = static_cast<DeleteEntityEvent*>(event.get());
