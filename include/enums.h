@@ -4,8 +4,15 @@
 enum class GameState {
   READY,
   LOADING_SESSION,
+  INIT_COMBAT,
+  END_COMBAT,
   FADING_OUT,
   FADING_IN
+};
+
+enum class SceneID {
+  FIELD,
+  COMBAT
 };
 
 enum EntityType {

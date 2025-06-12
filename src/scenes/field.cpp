@@ -60,6 +60,8 @@ FieldScene::~FieldScene() {
 
 void FieldScene::setup() {
   PLOGI << "Setting up the field scene...";
+  scene_id = SceneID::FIELD;
+
   camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
 
