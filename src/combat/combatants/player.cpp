@@ -3,6 +3,9 @@
 #include "base/combatant.h"
 #include "data/session.h"
 #include "combat/combatants/player.h"
+#include <plog/Log.h>
+
+bool PlayerCombatant::controllable = true;
 
 
 PlayerCombatant::PlayerCombatant(Player *plr) : 
@@ -28,8 +31,18 @@ PlayerCombatant::PlayerCombatant(Player *plr) :
   rectExCorrection(bounding_box, hurtbox);
 }
 
-void PlayerCombatant::behavior() {
+void PlayerCombatant::setControllable(bool value) {
+  controllable = value;
 
+  if (controllable) {
+    PLOGI << "Control has been given to the player.";
+  }
+  else {
+    PLOGI << "Control has been revoked from the player.";
+  }
+}
+
+void PlayerCombatant::behavior() {
 }
 
 void PlayerCombatant::update() {

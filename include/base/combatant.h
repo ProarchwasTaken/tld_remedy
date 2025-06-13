@@ -34,7 +34,8 @@ public:
   int defense;
   int intimid;
   int persist;
+
+  float speed_multiplier = 1.0;
 protected:
   std::string name;
-  CombatantState state = CombatantState::NEUTRAL;
 };

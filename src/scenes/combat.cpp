@@ -22,6 +22,8 @@ CombatScene::CombatScene(Session *session) {
   camera = CameraUtils::setupCombat();
 
   auto player = make_unique<PlayerCombatant>(&session->player);
+  this->player = player.get();
+
   entities.push_back(std::move(player));
 }
 
@@ -35,6 +37,14 @@ CombatScene::~CombatScene() {
 void CombatScene::update() {
   if (IsKeyPressed(KEY_BACKSPACE)) {
     Game::endCombat();
+  }
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->behavior();
+  }
+
+  for (unique_ptr<Entity> &entity : entities) {
+    entity->update();
   }
 }
 

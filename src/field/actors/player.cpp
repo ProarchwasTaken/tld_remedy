@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
+#include "data/keybinds.h"
 #include "data/actor_event.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
@@ -19,6 +20,7 @@
 using std::unique_ptr;
 
 bool PlayerActor::controllable = true;
+FieldKeybinds PlayerActor::key_bind;
 SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
 
 

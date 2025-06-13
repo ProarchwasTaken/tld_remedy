@@ -32,9 +32,9 @@ public:
   Rectangle *getWalkSprite();
 
   static void setControllable(bool value);
-  inline static FieldKeybinds key_bind;
-
+  static FieldKeybinds key_bind;
   static SpriteAtlas atlas;
+
   bool moving = false;
   bool has_moved = false;
 private:
