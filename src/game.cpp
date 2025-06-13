@@ -177,7 +177,7 @@ void Game::drawScene() {
   {
     DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
                    screen_tint);
-    if (debug_info) DrawFPS(24, 16);
+    if (debug_info) DrawFPS(24, 680);
   }
   EndDrawing();
 }
