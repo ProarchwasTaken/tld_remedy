@@ -147,12 +147,11 @@ void PlayerActor::update() {
 
   moveX();
   moveY();
-  rectExCorrection(bounding_box, collis_box);
 
   has_moved = !Vector2Equals(old_position, position);
-
   if (has_moved) {
     move_clock += Game::time() / move_interval;
+    rectExCorrection(bounding_box, collis_box);
   }
 
   if (move_clock >= 1.0) {
