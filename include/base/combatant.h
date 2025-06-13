@@ -27,6 +27,9 @@ public:
   Direction direction;
   RectEx hurtbox;
 
+  float life; 
+  float max_life;
+
   int offense;
   int defense;
   int intimid;
@@ -34,7 +37,4 @@ public:
 protected:
   std::string name;
   CombatantState state = CombatantState::NEUTRAL;
-
-  float max_life;
-  float life; 
 };

@@ -4,5 +4,6 @@
 
 namespace CameraUtils {
 Camera2D setupField();
+Camera2D setupCombat();
 void followFieldEntity(Camera2D &camera, Entity *entity);
 }

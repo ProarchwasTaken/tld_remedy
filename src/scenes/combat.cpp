@@ -1,3 +1,4 @@
+#include <memory>
 #include <cassert>
 #include <raylib.h>
 #include "enums.h"
@@ -5,8 +6,12 @@
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "data/session.h"
+#include "utils/camera.h"
+#include "combat/combatants/player.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
+
+using std::unique_ptr, std::make_unique;
 
 
 CombatScene::CombatScene(Session *session) {
@@ -14,8 +19,10 @@ CombatScene::CombatScene(Session *session) {
   assert(session != NULL);
   scene_id = SceneID::COMBAT;
 
-  player = &session->player;
-  companion = &session->companion;
+  camera = CameraUtils::setupCombat();
+
+  auto player = make_unique<PlayerCombatant>(&session->player);
+  entities.push_back(std::move(player));
 }
 
 CombatScene::~CombatScene() {
@@ -32,5 +39,12 @@ void CombatScene::update() {
 }
 
 void CombatScene::draw() {
-
+  BeginMode2D(camera);
+  {
+    for (unique_ptr<Entity> &entity : entities) {
+      entity->draw();
+      entity->drawDebug();
+    }
+  }
+  EndMode2D();
 }

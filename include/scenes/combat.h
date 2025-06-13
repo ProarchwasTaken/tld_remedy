@@ -4,6 +4,7 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/session.h"
+#include "combat/combatants/player.h"
 
 
 class CombatScene : public Scene {
@@ -14,8 +15,7 @@ public:
   void update() override;
   void draw() override;
 private:
-  Player *player;
-  Companion *companion;
-
+  Camera2D camera;
+  PlayerCombatant *player;
   std::vector<std::unique_ptr<Entity>> entities;
 };

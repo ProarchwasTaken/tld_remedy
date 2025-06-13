@@ -18,6 +18,16 @@ Camera2D CameraUtils::setupField() {
   return camera;
 }
 
+Camera2D CameraUtils::setupCombat() {
+  Camera2D camera;
+  camera.target = {0, 0};
+  camera.offset = {Game::CANVAS_RES.x / 2, 0};
+  camera.zoom = 1.0;
+  camera.rotation = 0;
+
+  return camera;
+}
+
 void CameraUtils::followFieldEntity(Camera2D &camera, Entity *entity) {
   if (entity == NULL) {
     return;
