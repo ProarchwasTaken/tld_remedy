@@ -1,11 +1,15 @@
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
+#include "data/keybinds.h"
 #include "data/session.h"
+#include "utils/input.h"
 #include "combat/combatants/player.h"
 #include <plog/Log.h>
 
 bool PlayerCombatant::controllable = true;
+CombatKeybinds PlayerCombatant::key_bind;
 
 
 PlayerCombatant::PlayerCombatant(Player *plr) : 
@@ -43,10 +47,37 @@ void PlayerCombatant::setControllable(bool value) {
 }
 
 void PlayerCombatant::behavior() {
+  bool gamepad = IsGamepadAvailable(0);
+  movementInput(gamepad);
+}
+
+void PlayerCombatant::movementInput(bool gamepad) {
+  bool right = Input::down(key_bind.move_right, gamepad);
+  bool left = Input::down(key_bind.move_left, gamepad);
+
+  moving_x = right - left;
+  moving = moving_x != 0;
 }
 
 void PlayerCombatant::update() {
+  float old_x = position.x;
+  movement();
 
+  has_moved = old_x != position.x;
+  if (has_moved) {
+    rectExCorrection(bounding_box, hurtbox);
+  }
+}
+
+void PlayerCombatant::movement() {
+  if (!moving) {
+    return;
+  }
+
+  direction = static_cast<Direction>(moving_x);
+
+  float speed = default_speed * speed_multiplier;
+  position.x += (speed * direction) * Game::deltaTime();
 }
 
 void PlayerCombatant::draw() {

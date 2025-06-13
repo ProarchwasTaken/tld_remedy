@@ -7,7 +7,6 @@ struct KeyBind {
   GamepadButton button;
 };
 
-
 struct FieldKeybinds {
   KeyBind move_right = {KEY_RIGHT, GAMEPAD_BUTTON_LEFT_FACE_RIGHT};
   KeyBind move_left = {KEY_LEFT, GAMEPAD_BUTTON_LEFT_FACE_LEFT};
@@ -17,3 +16,7 @@ struct FieldKeybinds {
   KeyBind interact = {KEY_Z, GAMEPAD_BUTTON_RIGHT_FACE_DOWN};
 };
 
+struct CombatKeybinds {
+  KeyBind move_right = {KEY_RIGHT, GAMEPAD_BUTTON_LEFT_FACE_RIGHT};
+  KeyBind move_left = {KEY_LEFT, GAMEPAD_BUTTON_LEFT_FACE_LEFT};
+};
