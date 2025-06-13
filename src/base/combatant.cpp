@@ -17,6 +17,8 @@ Combatant::Combatant(string name, CombatantType combatant_type,
 
   entity_type = EntityType::COMBATANT;
   this->combatant_type = combatant_type;
+  state = CombatantState::NEUTRAL;
+  
   bool successful = existing_combatants.emplace(this).second;
 
   assert(successful);

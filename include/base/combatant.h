@@ -23,7 +23,9 @@ public:
   virtual void behavior() = 0;
   virtual void drawDebug() override;
 
+  std::string name;
   CombatantType combatant_type;
+  CombatantState state;
   Direction direction;
   RectEx hurtbox;
 
@@ -36,6 +38,4 @@ public:
   int persist;
 
   float speed_multiplier = 1.0;
-protected:
-  std::string name;
 };
