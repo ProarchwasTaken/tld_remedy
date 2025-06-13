@@ -1,5 +1,6 @@
-#include <memory>
 #include <cassert>
+#include <memory>
+#include <string>
 #include <raylib.h>
 #include "enums.h"
 #include "game.h"
@@ -7,11 +8,12 @@
 #include "base/combatant.h"
 #include "data/session.h"
 #include "utils/camera.h"
+#include "utils/text.h"
 #include "combat/combatants/player.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
-using std::unique_ptr, std::make_unique;
+using std::unique_ptr, std::make_unique, std::string;
 
 
 CombatScene::CombatScene(Session *session) {
@@ -57,4 +59,41 @@ void CombatScene::draw() {
     }
   }
   EndMode2D();
+
+  #ifndef NDEBUG
+  if (Game::debugInfo()) {
+    drawDebugInfo();
+  }
+  #endif // !NDEBUG
+}
+
+void CombatScene::drawDebugInfo() {
+  Font *font = &Game::sm_font;
+  int text_size = font->baseSize;
+  
+  Vector2 position = {6, 4};
+  float spacing = 9;
+
+  string p_name = "Player Name: " + player->name;
+  Vector2 pn_pos = position;
+  position.y += spacing;
+
+  string p_state = TextFormat("State: %i", player->state);
+  Vector2 ps_pos = position;
+  position.y += spacing;
+
+  string p_hp = TextFormat("Life: %02.02f/%02.02f", player->life,
+                           player->max_life);
+  Vector2 php_pos = position;
+  position.y += spacing;
+
+  string p_mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f",
+                           player->morale, player->init_morale,
+                           player->max_morale);
+  Vector2 pmp_pos = position;
+
+  DrawTextEx(*font, p_name.c_str(), pn_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
 }

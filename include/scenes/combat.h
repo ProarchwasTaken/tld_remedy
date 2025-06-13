@@ -14,6 +14,7 @@ public:
 
   void update() override;
   void draw() override;
+  void drawDebugInfo();
 private:
   Camera2D camera;
   PlayerCombatant *player;

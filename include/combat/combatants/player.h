@@ -19,9 +19,9 @@ public:
   void draw() override;
 
   float morale;
+  float init_morale;
   float max_morale;
 private:
-  float init_morale;
 
   const float default_speed = 1.75;
   bool has_moved = false;
