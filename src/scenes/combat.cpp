@@ -8,7 +8,6 @@
 #include "base/combatant.h"
 #include "data/session.h"
 #include "utils/camera.h"
-#include "utils/text.h"
 #include "combat/combatants/player.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
@@ -22,6 +21,11 @@ CombatScene::CombatScene(Session *session) {
   scene_id = SceneID::COMBAT;
 
   camera = CameraUtils::setupCombat();
+  stage.loadStage("debug");
+
+  #ifndef NDEBUG
+  debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
+  #endif // !NDEBUG
 
   auto player = make_unique<PlayerCombatant>(&session->player);
   this->player = player.get();
@@ -32,6 +36,7 @@ CombatScene::CombatScene(Session *session) {
 CombatScene::~CombatScene() {
   Entity::clear(entities);
 
+  UnloadTexture(debug_overlay);
   assert(Combatant::existing_combatants.empty());
   PLOGI << "Unloaded the Combat scene.";
 }
@@ -51,19 +56,27 @@ void CombatScene::update() {
 }
 
 void CombatScene::draw() {
+  bool debug_info = Game::debugInfo();
+
   BeginMode2D(camera);
   {
+    stage.drawBackground();
+
+    #ifndef NDEBUG
+    if (debug_info) DrawTextureV(debug_overlay, {-512, 0}, WHITE);
+    #endif // !NDEBUG
+
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
       entity->drawDebug();
     }
+    
+    stage.drawOverlay();
   }
   EndMode2D();
 
   #ifndef NDEBUG
-  if (Game::debugInfo()) {
-    drawDebugInfo();
-  }
+  if (debug_info) drawDebugInfo();
   #endif // !NDEBUG
 }
 

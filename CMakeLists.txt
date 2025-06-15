@@ -58,6 +58,7 @@ set(HEADERS
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
 "include/scenes/combat.h"
+"include/combat/system/stage.h"
 "include/combat/combatants/player.h"
 )
 set(SOURCE
@@ -80,6 +81,7 @@ set(SOURCE
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
 "src/scenes/combat.cpp"
+"src/combat/system/stage.cpp"
 "src/combat/combatants/player.cpp"
 )
 

@@ -4,6 +4,7 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/session.h"
+#include "combat/system/stage.h"
 #include "combat/combatants/player.h"
 
 
@@ -17,6 +18,10 @@ public:
   void drawDebugInfo();
 private:
   Camera2D camera;
+
+  CombatStage stage;
+  Texture debug_overlay;
+
   PlayerCombatant *player;
   std::vector<std::unique_ptr<Entity>> entities;
 };
