@@ -48,3 +48,29 @@ void CameraUtils::followFieldEntity(Camera2D &camera, Entity *entity) {
     camera.target = Vector2Add(camera.target, scale);
   }
 }
+
+void CameraUtils::combatFollow(Camera2D &camera, float x) {
+  float bounds = 512 - 213;
+
+  if (x >= 0 && x > bounds) {
+    x = bounds;
+  }
+  else if (x < 0 && x < -bounds) {
+    x = -bounds;
+  }
+
+  static float min_length = 1.0;
+  static float min_speed = 0.40;
+  static float fraction_speed = 0.05;
+
+  Vector2 difference = Vector2Subtract({x, 0}, camera.target);
+  float length = Vector2Length(difference);
+
+  if (length > min_length) {
+    float speed = std::max(fraction_speed * length, min_speed);
+    float delta = Game::deltaTime();
+
+    Vector2 scale = Vector2Scale(difference, speed * delta / length);
+    camera.target = Vector2Add(camera.target, scale);
+  }
+}

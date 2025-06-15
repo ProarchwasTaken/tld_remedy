@@ -13,7 +13,7 @@ CombatKeybinds PlayerCombatant::key_bind;
 
 
 PlayerCombatant::PlayerCombatant(Player *plr) : 
-  Combatant(plr->name, CombatantType::PLAYER, {0, 152}, RIGHT)
+  Combatant(plr->name, CombatantType::PLAYER, {-64, 152}, RIGHT)
 {
   life = plr->life;
   max_life = plr->max_life;

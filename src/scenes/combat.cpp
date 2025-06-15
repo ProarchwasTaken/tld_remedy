@@ -53,6 +53,8 @@ void CombatScene::update() {
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
   }
+
+  CameraUtils::combatFollow(camera, player->position.x);
 }
 
 void CombatScene::draw() {

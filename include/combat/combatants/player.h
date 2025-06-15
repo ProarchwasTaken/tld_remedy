@@ -23,7 +23,7 @@ public:
   float max_morale;
 private:
 
-  const float default_speed = 1.75;
+  const float default_speed = 1.5;
   bool has_moved = false;
   bool moving = true;
   int moving_x = 0;
