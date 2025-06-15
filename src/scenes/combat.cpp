@@ -33,8 +33,8 @@ CombatScene::CombatScene(Session *session) {
 
   entities.push_back(std::move(player));
 
-  auto dummy = make_unique<DummyEnemy>((Vector2){64, 152}, LEFT);
-  entities.push_back(std::move(dummy));
+  entities.push_back(make_unique<DummyEnemy>((Vector2){256, 152}, LEFT));
+  PLOGI << "Enemies present: " << Combatant::enemyCount(); 
 }
 
 CombatScene::~CombatScene() {
@@ -58,7 +58,7 @@ void CombatScene::update() {
     entity->update();
   }
 
-  CameraUtils::combatFollow(camera, player->position.x);
+  CameraUtils::combatCamera(camera, player);
 }
 
 void CombatScene::draw() {
