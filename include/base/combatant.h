@@ -15,6 +15,7 @@
 class Combatant : public Entity {
 public:
   inline static std::set<Combatant*> existing_combatants;
+  static Combatant *getCombatantByID(int entity_id);
 
   Combatant(std::string name, CombatantType combatant_type,
             Vector2 position, Direction direction);

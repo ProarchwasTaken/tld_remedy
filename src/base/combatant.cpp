@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <string>
 #include <raylib.h>
 #include <plog/Log.h>
@@ -7,6 +8,19 @@
 
 using std::string;
 
+
+Combatant *Combatant::getCombatantByID(int entity_id) {
+  Combatant *result = NULL;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->entity_id == entity_id) {
+      result = combatant;
+      break;
+    }
+  }
+
+  return result;
+}
 
 Combatant::Combatant(string name, CombatantType combatant_type,
                      Vector2 position, Direction direction)
