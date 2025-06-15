@@ -89,9 +89,11 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
+  "include/combat/combatants/nme_dummy.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
+  "src/combat/combatants/nme_dummy.cpp"
   )
 endif()
 

@@ -9,6 +9,7 @@
 #include "data/session.h"
 #include "utils/camera.h"
 #include "combat/combatants/player.h"
+#include "combat/combatants/nme_dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -31,6 +32,9 @@ CombatScene::CombatScene(Session *session) {
   this->player = player.get();
 
   entities.push_back(std::move(player));
+
+  auto dummy = make_unique<DummyEnemy>((Vector2){64, 152}, LEFT);
+  entities.push_back(std::move(dummy));
 }
 
 CombatScene::~CombatScene() {
