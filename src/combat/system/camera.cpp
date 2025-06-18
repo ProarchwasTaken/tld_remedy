@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <utility>
 #include <algorithm>
 #include <raylib.h>
@@ -34,14 +35,14 @@ void CombatCamera::update(PlayerCombatant *player) {
   area.y = target.y;
 }
 
-bool maxAlgorithm(const std::pair<int, float> &p1, 
-                  const std::pair<int, float> &p2) 
+bool maxAlgorithm(const std::pair<Combatant*, float> &p1, 
+                  const std::pair<Combatant*, float> &p2) 
 {
   return p1.second < p2.second;
 }
 
 void CombatCamera::enemyTargeting(PlayerCombatant *player) {
-  std::map<int, float> length_table;
+  std::map<Combatant*, float> length_table;
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant->combatant_type != CombatantType::ENEMY) {
@@ -53,26 +54,24 @@ void CombatCamera::enemyTargeting(PlayerCombatant *player) {
                                            combatant->position);
       float length = Vector2Length(difference);
 
-      length_table.emplace(combatant->entity_id, length);
+      length_table.emplace(combatant, length);
     }
   }
 
-  int entity_id;
+  Combatant *enemy = NULL;
   if (length_table.empty()) {
     follow(player->position.x);
     return;
   }
   else if (length_table.size() == 1) {
-    entity_id = length_table.begin()->first;
+    enemy = length_table.begin()->first;
   }
   else {
     auto furthest = std::max_element(length_table.begin(), 
                                      length_table.end(),
                                      maxAlgorithm);
-    entity_id = furthest->first;
+    enemy = furthest->first;
   }
-
-  Combatant *enemy = Combatant::getCombatantByID(entity_id);
   assert(enemy != NULL);
 
   Vector2 difference = Vector2Subtract(enemy->position, player->position);
@@ -91,10 +90,6 @@ void CombatCamera::follow(float x) {
   else if (x < 0 && x < -bounds) {
     x = -bounds;
   }
-
-  static float min_length = 1.0;
-  static float min_speed = 0.30;
-  static float fraction_speed = 0.05;
 
   Vector2 difference = Vector2Subtract({x, 0}, target);
   float length = Vector2Length(difference);

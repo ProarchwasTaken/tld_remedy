@@ -12,4 +12,8 @@ public:
   void follow(float x);
 
   static Rectangle area;
+private:
+  float min_length = 1.0;
+  float min_speed = 0.30;
+  float fraction_speed = 0.05;
 };
