@@ -21,7 +21,6 @@ CombatScene::CombatScene(Session *session) {
   assert(session != NULL);
   scene_id = SceneID::COMBAT;
 
-  camera = CameraUtils::setupCombat();
   stage.loadStage("debug");
 
   #ifndef NDEBUG
@@ -58,7 +57,7 @@ void CombatScene::update() {
     entity->update();
   }
 
-  CameraUtils::combatCamera(camera, player);
+  camera.update(player);
 }
 
 void CombatScene::draw() {

@@ -59,6 +59,7 @@ set(HEADERS
 "include/field/entities/pickup.h"
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
+"include/combat/system/camera.h"
 "include/combat/combatants/player.h"
 )
 set(SOURCE
@@ -82,6 +83,7 @@ set(SOURCE
 "src/field/entities/pickup.cpp"
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
+"src/combat/system/camera.cpp"
 "src/combat/combatants/player.cpp"
 )
 

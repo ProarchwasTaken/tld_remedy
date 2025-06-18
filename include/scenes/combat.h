@@ -5,6 +5,7 @@
 #include "base/entity.h"
 #include "data/session.h"
 #include "combat/system/stage.h"
+#include "combat/system/camera.h"
 #include "combat/combatants/player.h"
 
 
@@ -17,7 +18,7 @@ public:
   void draw() override;
   void drawDebugInfo();
 private:
-  Camera2D camera;
+  CombatCamera camera;
 
   CombatStage stage;
   Texture debug_overlay;
