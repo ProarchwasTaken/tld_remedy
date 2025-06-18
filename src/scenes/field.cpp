@@ -17,7 +17,6 @@
 #include "data/session.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
-#include "utils/camera.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
@@ -62,7 +61,6 @@ void FieldScene::setup() {
   PLOGI << "Setting up the field scene...";
   scene_id = SceneID::FIELD;
 
-  camera = CameraUtils::setupField();
   mapLoadProcedure(session.location);
 
   #ifndef NDEBUG
@@ -204,7 +202,7 @@ void FieldScene::update() {
     entity->update();
   }
 
-  CameraUtils::followFieldEntity(camera, camera_target);
+  camera.follow(camera_target);
   eventProcessing();
 }
 

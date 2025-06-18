@@ -7,7 +7,6 @@
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "data/session.h"
-#include "utils/camera.h"
 #include "combat/combatants/player.h"
 #include "combat/combatants/nme_dummy.h"
 #include "scenes/combat.h"

@@ -9,6 +9,7 @@
 #include "data/field_event.h"
 #include "data/session.h"
 #include "field/system/field_map.h"
+#include "field/system/camera.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 
@@ -40,7 +41,7 @@ private:
   ActorHandler actor_handler;
   Session session;
 
-  Camera2D camera;
+  FieldCamera camera;
   Entity *camera_target;
 
   LoadMapEvent next_map;
