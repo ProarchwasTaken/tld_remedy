@@ -45,11 +45,29 @@ enum class CombatantType {
 enum CombatantState {
   NEUTRAL,
   HIT_STUN,
-  MORALE_STUN,
-  DEAD,
-  WIND_UP,
+  DEFENSE_STUN,
   ACTION,
+  DEAD
+};
+
+enum class ActionID {
+  ATTACK,
+  GHOST_STEP,
+  SIDE_STEP
+};
+
+enum ActionState {
+  WIND_UP,
+  ACTIVE,
   END_LAG
+};
+
+enum class ActionType {
+  OFFENSE_HP,
+  OFFENSE_MP,
+  DEFENSE,
+  SUPPORT,
+  SPECIAL
 };
 
 enum Direction {
