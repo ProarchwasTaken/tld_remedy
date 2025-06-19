@@ -49,6 +49,7 @@ public:
   static constexpr unsigned int session_version = 1;
 
   static Font sm_font;
+  static Font med_font;
   static Color* palette;
 
   #ifndef NDEBUG

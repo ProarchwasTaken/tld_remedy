@@ -19,6 +19,7 @@ unique_ptr<Session> Game::loaded_session;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
+Font Game::med_font;
 Color *Game::palette;
 
 float Game::fade_percentage = 0.0;
@@ -35,6 +36,7 @@ void Game::init() {
   setupCanvas();
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
+  med_font = LoadFont("graphics/fonts/med_font.png");
   defineColorPalette();
 
   scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
@@ -46,6 +48,7 @@ Game::~Game() {
   scene.reset();
   UnloadRenderTexture(canvas);
   UnloadFont(sm_font);
+  UnloadFont(med_font);
   UnloadImagePalette(palette);
   PLOGI << "Thanks for playing!";
 }
