@@ -46,6 +46,11 @@ void Game::init() {
 
 Game::~Game() {
   scene.reset();
+
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
   UnloadRenderTexture(canvas);
   UnloadFont(sm_font);
   UnloadFont(med_font);
