@@ -12,7 +12,7 @@ class CombatAction {
 public:
   CombatAction(ActionID id, ActionType type, Combatant *user, 
                float wind_up, float action, float end_lag);
-  ~CombatAction();
+  virtual ~CombatAction();
 
   void logic();
   void proceed();

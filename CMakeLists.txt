@@ -62,6 +62,7 @@ set(HEADERS
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
 "include/combat/combatants/player.h"
+"include/combat/actions/attack.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -87,6 +88,7 @@ set(SOURCE
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
 "src/combat/combatants/player.cpp"
+"src/combat/actions/attack.cpp"
 )
 
 if(${BUILD_DEV})

@@ -46,6 +46,8 @@ public:
   int intimid;
   int persist;
 
+  float speed_multiplier = 1.0;
+
   std::unique_ptr<CombatAction> action;
 private:
   static int enemy_count;
