@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combat_action.h"
 #include "base/combatant.h"
 
@@ -55,6 +56,78 @@ Combatant::~Combatant() {
 
   action.reset();
   PLOGI << "Removed combatant: '" << name << "'";
+}
+
+void Combatant::takeDamage(DamageData &data) {
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
+  << "taken damage!";
+  if (state == CombatantState::ACTION) {
+    action->intercept(data);
+  }
+
+  float damage = damageCalulation(data);
+  PLOGI << "Result: " << damage;
+
+  if (data.damage_type == DamageType::LIFE) {
+    PLOGD << "Directing damage towards combatant's Life.";
+    damageLife(damage);
+  }
+  else {
+    PLOGD << "Directing damage towards combatant's Morale.";
+    damageMorale(damage);
+    data.assailant->increaseMorale(damage);
+  }
+}
+
+float Combatant::damageCalulation(DamageData &data) {
+  PLOGI << "Now performing damage calulation.";
+  assert(data.assailant != NULL);
+  Combatant *assailant = data.assailant;
+
+  bool atk_not_set = data.a_atk == NULL;
+  bool def_not_set = data.b_def == NULL;
+
+  switch (data.calulation) {
+    case DamageType::LIFE: {
+      if (atk_not_set) {
+        data.a_atk = &assailant->offense;
+      }
+
+      if (def_not_set) {
+        data.b_def = &assailant->offense;
+      }
+    }
+    case DamageType::MORALE: {
+      if (atk_not_set) {
+        data.a_atk = &assailant->intimid;
+      }
+
+      if (def_not_set) {
+        data.b_def = &assailant->persist;
+      }
+    }
+  }
+
+  float base_damage = data.base_damage;
+  int a_atk = *data.a_atk;
+  int b_def = *data.b_def;
+
+  PLOGD << "Base Damage: " << base_damage;
+  PLOGD << "Assailant ATK: " << a_atk << " Victim DEF: " << b_def;
+  return (base_damage + a_atk) - b_def;
+}
+
+void Combatant::damageLife(float magnitude) {
+  life = life - magnitude;
+  PLOGI << "Life decreased to: " << life;
+}
+
+void Combatant::damageMorale(float magnitude) {
+  PLOGD << "Combatant does not possess Morale to damage.";
+}
+
+void Combatant::increaseMorale(float magnitude) {
+  PLOGD << "Combatant does not possess Morale to increase.";
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {

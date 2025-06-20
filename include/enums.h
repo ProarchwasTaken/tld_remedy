@@ -49,6 +49,11 @@ enum CombatantState {
   DEAD
 };
 
+enum class DamageType {
+  LIFE,
+  MORALE,
+};
+
 enum class StunType {
   NORMAL,
   DEFENSIVE,

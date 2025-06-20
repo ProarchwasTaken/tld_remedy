@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combatant.h"
 
 
@@ -14,6 +15,7 @@ public:
                float wind_up, float action, float end_lag);
   virtual ~CombatAction();
 
+  virtual void intercept(DamageData &data);
   void logic();
   void proceed();
 

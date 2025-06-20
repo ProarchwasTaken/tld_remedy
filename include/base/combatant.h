@@ -8,6 +8,7 @@
 #include "base/entity.h"
 
 class CombatAction;
+struct DamageData;
 
 
 /* Combatants are the main focus of the CombatScene. They are otherwise
@@ -26,6 +27,13 @@ public:
   ~Combatant();
 
   virtual void behavior() = 0;
+
+  void takeDamage(DamageData &data);
+  float damageCalulation(DamageData &data);
+  virtual void damageLife(float magnitude);
+
+  virtual void damageMorale(float magnitude);
+  virtual void increaseMorale(float magnitude);
 
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();

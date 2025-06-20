@@ -2,6 +2,7 @@
 #include <cstddef>
 #include "enums.h"
 #include "game.h"
+#include "data/damage.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include <plog/Log.h>
@@ -21,6 +22,16 @@ CombatAction::CombatAction(ActionID id, ActionType type, Combatant *user,
 }
 
 CombatAction::~CombatAction() {
+}
+
+void CombatAction::intercept(DamageData &data) {
+  if (phase == ActionPhase::END_LAG) {
+    PLOGI << "User had taken damage while Action is in End Lag phase.";
+    data.stun_type = StunType::STAGGER;
+    data.calulation = DamageType::LIFE;
+    data.damage_type = DamageType::LIFE;
+    PLOGD << "Forcing Life damage calulation, and Stagger";
+  }
 }
 
 void CombatAction::logic() {
