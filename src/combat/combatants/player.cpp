@@ -70,7 +70,11 @@ void PlayerCombatant::actionInput(bool gamepad) {
   unique_ptr<CombatAction> action;
 
   if (Input::pressed(key_bind.attack, gamepad)) {
-    action = make_unique<Attack>(this);
+    RectEx hitbox;
+    hitbox.scale = {32, 16};
+    hitbox.offset = {-16 + (16.0f * direction), -40};
+
+    action = make_unique<Attack>(this, hitbox);
   }
 
   if (action != nullptr) {
@@ -115,5 +119,12 @@ void PlayerCombatant::movement() {
 }
 
 void PlayerCombatant::draw() {
+}
 
+void PlayerCombatant::drawDebug() {
+  Combatant::drawDebug();
+
+  if (state == CombatantState::ACTION) {
+    action->drawDebug();
+  }
 }

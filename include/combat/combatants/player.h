@@ -19,6 +19,7 @@ public:
   void movement();
 
   void draw() override;
+  void drawDebug() override;
 
   float morale;
   float init_morale;
