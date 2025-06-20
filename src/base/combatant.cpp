@@ -1,12 +1,14 @@
 #include <cassert>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "base/combat_action.h"
 #include "base/combatant.h"
 
-using std::string;
+using std::string, std::unique_ptr;
 int Combatant::enemy_count = 0;
 
 
@@ -50,8 +52,32 @@ Combatant::~Combatant() {
   if (combatant_type == CombatantType::ENEMY) {
     enemy_count--;
   }
+
+  action.reset();
   PLOGI << "Removed combatant: '" << name << "'";
 }
+
+void Combatant::performAction(unique_ptr<CombatAction> &action) {
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]" <<
+    " is performing ACTION: '" << action->name << "'";
+  if (this->action != nullptr) {
+    this->action.reset();
+  }
+
+  this->action.swap(action);
+  state = CombatantState::ACTION;
+} 
+
+void Combatant::cancelAction() {
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] action"
+  << " has been canceled!";
+  action.reset();
+
+  if (state != CombatantState::HIT_STUN) {
+    state = CombatantState::NEUTRAL;
+  }
+}
+
 
 void Combatant::drawDebug() {
   Entity::drawDebug();

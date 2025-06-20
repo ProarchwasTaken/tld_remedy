@@ -45,9 +45,14 @@ enum class CombatantType {
 enum CombatantState {
   NEUTRAL,
   HIT_STUN,
-  DEFENSE_STUN,
   ACTION,
   DEAD
+};
+
+enum class StunType {
+  NORMAL,
+  DEFENSIVE,
+  STAGGER
 };
 
 enum class ActionID {

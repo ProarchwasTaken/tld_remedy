@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "enums.h"
 #include "base/combatant.h"
 
@@ -25,6 +26,7 @@ public:
   ActionID id;
   ActionState state;
   ActionType type;
+  std::string name;
 
   float wind_time;
   float act_time;

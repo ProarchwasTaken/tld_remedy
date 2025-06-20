@@ -1,10 +1,13 @@
 #pragma once
 #include <string>
+#include <memory>
 #include <raylib.h>
 #include <set>
 #include "enums.h"
 #include "data/rect_ex.h"
 #include "base/entity.h"
+
+class CombatAction;
 
 
 /* Combatants are the main focus of the CombatScene. They are otherwise
@@ -23,6 +26,10 @@ public:
   ~Combatant();
 
   virtual void behavior() = 0;
+
+  void performAction(std::unique_ptr<CombatAction> &action);
+  void cancelAction();
+
   virtual void drawDebug() override;
 
   std::string name;
@@ -39,7 +46,7 @@ public:
   int intimid;
   int persist;
 
-  float speed_multiplier = 1.0;
+  std::unique_ptr<CombatAction> action;
 private:
   static int enemy_count;
 };
