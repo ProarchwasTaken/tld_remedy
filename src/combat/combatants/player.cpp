@@ -1,13 +1,17 @@
 #include <raylib.h>
+#include <memory>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
+#include "base/combat_action.h"
 #include "data/keybinds.h"
 #include "data/session.h"
 #include "utils/input.h"
+#include "combat/actions/attack.h"
 #include "combat/combatants/player.h"
 #include <plog/Log.h>
 
+using std::unique_ptr, std::make_unique;
 bool PlayerCombatant::controllable = true;
 CombatKeybinds PlayerCombatant::key_bind;
 
@@ -47,8 +51,11 @@ void PlayerCombatant::setControllable(bool value) {
 }
 
 void PlayerCombatant::behavior() {
-  bool gamepad = IsGamepadAvailable(0);
-  movementInput(gamepad);
+  if (state == CombatantState::NEUTRAL) {
+    bool gamepad = IsGamepadAvailable(0);
+    movementInput(gamepad);
+    actionInput(gamepad);
+  }
 }
 
 void PlayerCombatant::movementInput(bool gamepad) {
@@ -59,7 +66,34 @@ void PlayerCombatant::movementInput(bool gamepad) {
   moving = moving_x != 0;
 }
 
+void PlayerCombatant::actionInput(bool gamepad) {
+  unique_ptr<CombatAction> action;
+
+  if (Input::pressed(key_bind.attack, gamepad)) {
+    action = make_unique<Attack>(this);
+  }
+
+  if (action != nullptr) {
+    performAction(action);
+  }
+}
+
 void PlayerCombatant::update() {
+  switch (state) {
+    case CombatantState::NEUTRAL: {
+      neutralLogic();
+      break;
+    }
+    case CombatantState::ACTION: {
+      action->logic();
+    }
+    default: {
+
+    }
+  }
+}
+
+void PlayerCombatant::neutralLogic() {
   float old_x = position.x;
   movement();
 

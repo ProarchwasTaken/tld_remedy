@@ -12,8 +12,10 @@ public:
 
   void behavior() override;
   void movementInput(bool gamepad);
+  void actionInput(bool gamepad);
 
   void update() override;
+  void neutralLogic();
   void movement();
 
   void draw() override;

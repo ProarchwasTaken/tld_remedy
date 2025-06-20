@@ -24,7 +24,7 @@ public:
   virtual void drawDebug() {};
 
   ActionID id;
-  ActionState state;
+  ActionPhase phase;
   ActionType type;
   std::string name;
 

@@ -12,7 +12,8 @@ CombatAction::CombatAction(ActionID id, ActionType type, Combatant *user,
 {
   this->id = id;
   this->type = type;
-  state = ActionState::WIND_UP;
+  this->user = user;
+  phase = ActionPhase::WIND_UP;
 
   wind_time = wind_up;
   act_time = action;
@@ -27,18 +28,18 @@ void CombatAction::logic() {
   assert(user->state == CombatantState::ACTION);
 
   float *state_time;
-  switch (state) {
-    case ActionState::WIND_UP: {
+  switch (phase) {
+    case ActionPhase::WIND_UP: {
       windUp();
       state_time = &wind_time;
       break;
     }
-    case ActionState::ACTIVE: {
+    case ActionPhase::ACTIVE: {
       action();
       state_time = &act_time;
       break;
     }
-    case ActionState::END_LAG: {
+    case ActionPhase::END_LAG: {
       endLag();
       state_time = &end_time;
       break;
@@ -54,10 +55,14 @@ void CombatAction::logic() {
 }
 
 void CombatAction::proceed() {
-  if (state != ActionState::END_LAG) {
-    state = static_cast<ActionState>(state + 1);
+  if (phase != ActionPhase::END_LAG) {
+    PLOGD << "ACTION: '" << name << "' owned by COMBATANT: '" << 
+      user->name << "' is proceeding to phase: " << phase;
+    phase = static_cast<ActionPhase>(phase + 1);
   }
   else {
+    PLOGI << "COMBATANT: '" << user->name << "' [ID: " << user->entity_id
+      << "] has finished performing ACTION: '" << name << "'";
     user->state = CombatantState::NEUTRAL;
   }
 

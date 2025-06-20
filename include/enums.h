@@ -61,7 +61,7 @@ enum class ActionID {
   SIDE_STEP
 };
 
-enum ActionState {
+enum ActionPhase {
   WIND_UP,
   ACTIVE,
   END_LAG
