@@ -1,10 +1,10 @@
 #pragma once
-#include "base/combatant.h"
+#include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/session.h"
 
 
-class PlayerCombatant : public Combatant {
+class PlayerCombatant : public PartyMember {
 public:
   PlayerCombatant(Player *data);
   static void setControllable(bool value);

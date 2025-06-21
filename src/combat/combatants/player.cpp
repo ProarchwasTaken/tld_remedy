@@ -4,6 +4,7 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
+#include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/session.h"
 #include "utils/input.h"
@@ -16,8 +17,8 @@ bool PlayerCombatant::controllable = true;
 CombatKeybinds PlayerCombatant::key_bind;
 
 
-PlayerCombatant::PlayerCombatant(Player *plr) : 
-  Combatant(plr->name, CombatantTeam::PARTY, {-64, 152}, RIGHT)
+PlayerCombatant::PlayerCombatant(Player *plr): 
+  PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
 {
   life = plr->life;
   max_life = plr->max_life;
