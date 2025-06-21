@@ -5,7 +5,7 @@
 
 
 DummyEnemy::DummyEnemy(Vector2 position, Direction direction) : 
-  Combatant("Dummy", CombatantType::ENEMY, position, direction)
+  Combatant("Dummy", CombatantTeam::ENEMY, position, direction)
 {
   max_life = 50;
   life = max_life;

@@ -26,16 +26,16 @@ Combatant *Combatant::getCombatantByID(int entity_id) {
   return result;
 }
 
-Combatant::Combatant(string name, CombatantType combatant_type,
-                     Vector2 position, Direction direction)
+Combatant::Combatant(string name, CombatantTeam team, Vector2 position, 
+                     Direction direction)
 {
   this->name = name;
   this->position = position;
   this->direction = direction;
 
   entity_type = EntityType::COMBATANT;
-  this->combatant_type = combatant_type;
-  if (combatant_type == CombatantType::ENEMY) {
+  this->team = team;
+  if (team == CombatantTeam::ENEMY) {
     enemy_count++;
   }
  
@@ -50,7 +50,7 @@ Combatant::~Combatant() {
   int erased = existing_combatants.erase(this);
   assert(erased == 1);
 
-  if (combatant_type == CombatantType::ENEMY) {
+  if (team == CombatantTeam::ENEMY) {
     enemy_count--;
   }
 
@@ -60,7 +60,8 @@ Combatant::~Combatant() {
 
 void Combatant::takeDamage(DamageData &data) {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
-  << "taken damage!";
+  << "taken damage from: '" << data.assailant->name << "' [ID: " <<
+  data.assailant->entity_id << "]";
   if (state == CombatantState::ACTION) {
     action->intercept(data);
   }
@@ -69,11 +70,11 @@ void Combatant::takeDamage(DamageData &data) {
   PLOGI << "Result: " << damage;
 
   if (data.damage_type == DamageType::LIFE) {
-    PLOGD << "Directing damage towards combatant's Life.";
+    PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
   }
   else {
-    PLOGD << "Directing damage towards combatant's Morale.";
+    PLOGD << "Directing damage towards Combatant's Morale.";
     damageMorale(damage);
     data.assailant->increaseMorale(damage);
   }
@@ -113,7 +114,7 @@ float Combatant::damageCalulation(DamageData &data) {
   int b_def = *data.b_def;
 
   PLOGD << "Base Damage: " << base_damage;
-  PLOGD << "Assailant ATK: " << a_atk << " Victim DEF: " << b_def;
+  PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
   return (base_damage + a_atk) - b_def;
 }
 

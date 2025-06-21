@@ -45,7 +45,7 @@ void CombatCamera::enemyTargeting(PlayerCombatant *player) {
   std::map<Combatant*, float> length_table;
 
   for (Combatant *combatant : Combatant::existing_combatants) {
-    if (combatant->combatant_type != CombatantType::ENEMY) {
+    if (combatant->team != CombatantTeam::ENEMY) {
       continue;
     }
 

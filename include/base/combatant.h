@@ -22,8 +22,8 @@ public:
   static Combatant *getCombatantByID(int entity_id);
   static int enemyCount() {return enemy_count;}
 
-  Combatant(std::string name, CombatantType combatant_type,
-            Vector2 position, Direction direction);
+  Combatant(std::string name, CombatantTeam team, Vector2 position, 
+            Direction direction);
   ~Combatant();
 
   virtual void behavior() = 0;
@@ -41,7 +41,7 @@ public:
   virtual void drawDebug() override;
 
   std::string name;
-  CombatantType combatant_type;
+  CombatantTeam team;
   CombatantState state;
   Direction direction;
   RectEx hurtbox;

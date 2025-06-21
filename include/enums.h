@@ -36,9 +36,8 @@ enum class CompanionID {
   ERWIN
 };
 
-enum class CombatantType {
+enum class CombatantTeam {
   PLAYER,
-  COMPANION,
   ENEMY
 };
 

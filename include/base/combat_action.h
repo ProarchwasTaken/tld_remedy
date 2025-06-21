@@ -35,6 +35,6 @@ public:
   float end_time;
 
   float state_clock = 0.0;
-private:
+protected:
   Combatant *user;
 };

@@ -3,6 +3,7 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
+#include "data/damage.h"
 #include "combat/actions/attack.h"
 #include <plog/Log.h>
 
@@ -14,6 +15,29 @@ Attack::Attack(Combatant *user, RectEx hitbox):
   name = "Attack";
   user->rectExCorrection(hitbox);
   this->hitbox = hitbox;
+
+  data.base_damage = 4;
+  data.damage_type = DamageType::MORALE;
+  data.calulation = DamageType::MORALE;
+  data.assailant = user;
+}
+
+void Attack::action() {
+  if (attack_connected) {
+    return;
+  }
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant->team == user->team) {
+      return;
+    }
+
+    if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
+      combatant->takeDamage(data);
+      attack_connected = true;
+      break;
+    }
+  }
 }
 
 void Attack::drawDebug() {
