@@ -9,6 +9,9 @@ public:
   DummyEnemy(Vector2 position, Direction direction);
 
   void behavior() override {};
+  void attack();
+
   void update() override;
   void draw() override;
+  void drawDebug() override;
 };

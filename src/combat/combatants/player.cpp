@@ -90,6 +90,7 @@ void PlayerCombatant::update() {
     }
     case CombatantState::ACTION: {
       action->logic();
+      break;
     }
     default: {
 

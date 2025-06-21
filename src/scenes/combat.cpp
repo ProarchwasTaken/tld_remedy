@@ -22,16 +22,19 @@ CombatScene::CombatScene(Session *session) {
 
   stage.loadStage("debug");
 
-  #ifndef NDEBUG
-  debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
-  #endif // !NDEBUG
-
   auto player = make_unique<PlayerCombatant>(&session->player);
   this->player = player.get();
 
   entities.push_back(std::move(player));
 
-  entities.push_back(make_unique<DummyEnemy>((Vector2){256, 152}, LEFT));
+  #ifndef NDEBUG
+  debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
+  auto dummy = make_unique<DummyEnemy>((Vector2){256, 152}, LEFT);
+  this->dummy = dummy.get();
+
+  entities.push_back(std::move(dummy));
+  #endif // !NDEBUG
+
   PLOGI << "Enemies present: " << Combatant::enemyCount(); 
 }
 
@@ -46,6 +49,9 @@ CombatScene::~CombatScene() {
 void CombatScene::update() {
   if (IsKeyPressed(KEY_BACKSPACE)) {
     Game::endCombat();
+  }
+  if (IsKeyPressed(KEY_P)) {
+    dummy->attack();
   }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
