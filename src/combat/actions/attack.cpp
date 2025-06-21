@@ -29,7 +29,7 @@ void Attack::action() {
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant->team == user->team) {
-      return;
+      continue;
     }
 
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
