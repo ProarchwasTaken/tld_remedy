@@ -9,15 +9,15 @@
 #include "data/session.h"
 #include "utils/input.h"
 #include "combat/actions/attack.h"
-#include "combat/combatants/player.h"
+#include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique;
-bool PlayerCombatant::controllable = true;
-CombatKeybinds PlayerCombatant::key_bind;
+bool Mary::controllable = true;
+CombatKeybinds Mary::key_bind;
 
 
-PlayerCombatant::PlayerCombatant(Player *plr): 
+Mary::Mary(Player *plr): 
   PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
 {
   life = plr->life;
@@ -40,7 +40,7 @@ PlayerCombatant::PlayerCombatant(Player *plr):
   rectExCorrection(bounding_box, hurtbox);
 }
 
-void PlayerCombatant::setControllable(bool value) {
+void Mary::setControllable(bool value) {
   controllable = value;
 
   if (controllable) {
@@ -51,7 +51,7 @@ void PlayerCombatant::setControllable(bool value) {
   }
 }
 
-void PlayerCombatant::behavior() {
+void Mary::behavior() {
   if (state == CombatantState::NEUTRAL) {
     bool gamepad = IsGamepadAvailable(0);
     movementInput(gamepad);
@@ -59,7 +59,7 @@ void PlayerCombatant::behavior() {
   }
 }
 
-void PlayerCombatant::movementInput(bool gamepad) {
+void Mary::movementInput(bool gamepad) {
   bool right = Input::down(key_bind.move_right, gamepad);
   bool left = Input::down(key_bind.move_left, gamepad);
 
@@ -67,7 +67,7 @@ void PlayerCombatant::movementInput(bool gamepad) {
   moving = moving_x != 0;
 }
 
-void PlayerCombatant::actionInput(bool gamepad) {
+void Mary::actionInput(bool gamepad) {
   unique_ptr<CombatAction> action;
 
   if (Input::pressed(key_bind.attack, gamepad)) {
@@ -83,7 +83,7 @@ void PlayerCombatant::actionInput(bool gamepad) {
   }
 }
 
-void PlayerCombatant::update() {
+void Mary::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
       neutralLogic();
@@ -99,7 +99,7 @@ void PlayerCombatant::update() {
   }
 }
 
-void PlayerCombatant::neutralLogic() {
+void Mary::neutralLogic() {
   float old_x = position.x;
   movement();
 
@@ -109,7 +109,7 @@ void PlayerCombatant::neutralLogic() {
   }
 }
 
-void PlayerCombatant::movement() {
+void Mary::movement() {
   if (!moving) {
     return;
   }
@@ -120,10 +120,10 @@ void PlayerCombatant::movement() {
   position.x += (speed * direction) * Game::deltaTime();
 }
 
-void PlayerCombatant::draw() {
+void Mary::draw() {
 }
 
-void PlayerCombatant::drawDebug() {
+void Mary::drawDebug() {
   Combatant::drawDebug();
 
   if (state == CombatantState::ACTION) {

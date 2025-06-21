@@ -6,7 +6,7 @@
 #include "data/session.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
-#include "combat/combatants/player.h"
+#include "combat/combatants/party/mary.h"
 #include "combat/combatants/nme_dummy.h"
 
 
@@ -24,7 +24,7 @@ private:
   CombatStage stage;
   Texture debug_overlay;
 
-  PlayerCombatant *player;
+  Mary *player;
   DummyEnemy *dummy;
   std::vector<std::unique_ptr<Entity>> entities;
 };

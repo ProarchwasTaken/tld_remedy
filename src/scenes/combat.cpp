@@ -6,8 +6,9 @@
 #include "game.h"
 #include "base/entity.h"
 #include "base/combatant.h"
+#include "base/party_member.h"
 #include "data/session.h"
-#include "combat/combatants/player.h"
+#include "combat/combatants/party/mary.h"
 #include "combat/combatants/nme_dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
@@ -22,7 +23,7 @@ CombatScene::CombatScene(Session *session) {
 
   stage.loadStage("debug");
 
-  auto player = make_unique<PlayerCombatant>(&session->player);
+  auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
 
   entities.push_back(std::move(player));
@@ -35,6 +36,7 @@ CombatScene::CombatScene(Session *session) {
   entities.push_back(std::move(dummy));
   #endif // !NDEBUG
 
+  PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Combatant::enemyCount(); 
 }
 

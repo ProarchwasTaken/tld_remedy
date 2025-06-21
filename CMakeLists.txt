@@ -63,7 +63,7 @@ set(HEADERS
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
-"include/combat/combatants/player.h"
+"include/combat/combatants/party/mary.h"
 "include/combat/actions/attack.h"
 )
 set(SOURCE
@@ -90,7 +90,7 @@ set(SOURCE
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
-"src/combat/combatants/player.cpp"
+"src/combat/combatants/party/mary.cpp"
 "src/combat/actions/attack.cpp"
 )
 

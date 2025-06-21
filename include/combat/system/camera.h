@@ -1,14 +1,14 @@
 #pragma once
 #include <raylib.h>
-#include "combat/combatants/player.h"
+#include "base/party_member.h"
 
 
 class CombatCamera : public Camera2D {
 public:
   CombatCamera();
 
-  void update(PlayerCombatant *player);
-  void enemyTargeting(PlayerCombatant *player);
+  void update(PartyMember *player);
+  void enemyTargeting(PartyMember *player);
   void follow(float x);
 
   static Rectangle area;

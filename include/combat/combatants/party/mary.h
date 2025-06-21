@@ -4,9 +4,9 @@
 #include "data/session.h"
 
 
-class PlayerCombatant : public PartyMember {
+class Mary : public PartyMember {
 public:
-  PlayerCombatant(Player *data);
+  Mary(Player *data);
   static void setControllable(bool value);
   static CombatKeybinds key_bind;
 
@@ -20,10 +20,6 @@ public:
 
   void draw() override;
   void drawDebug() override;
-
-  float morale;
-  float init_morale;
-  float max_morale;
 private:
   const float default_speed = 1.2;
   bool has_moved = false;

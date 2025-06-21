@@ -7,7 +7,7 @@
 #include <map>
 #include "game.h"
 #include "base/combatant.h"
-#include "combat/combatants/player.h"
+#include "base/party_member.h"
 #include "combat/system/camera.h"
 
 Rectangle CombatCamera::area = {
@@ -22,7 +22,7 @@ CombatCamera::CombatCamera() {
   rotation = 0;
 }
 
-void CombatCamera::update(PlayerCombatant *player) {
+void CombatCamera::update(PartyMember *player) {
   bool enemies_present = Combatant::enemyCount() != 0;
   if (enemies_present) {
     enemyTargeting(player);
@@ -41,7 +41,7 @@ bool maxAlgorithm(const std::pair<Combatant*, float> &p1,
   return p1.second < p2.second;
 }
 
-void CombatCamera::enemyTargeting(PlayerCombatant *player) {
+void CombatCamera::enemyTargeting(PartyMember *player) {
   std::map<Combatant*, float> length_table;
 
   for (Combatant *combatant : Combatant::existing_combatants) {
