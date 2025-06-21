@@ -37,8 +37,17 @@ enum class CompanionID {
 };
 
 enum class CombatantTeam {
-  PLAYER,
+  PARTY,
   ENEMY
+};
+
+enum class PartyMemberID {
+  MARY,
+  ERWIN,
+};
+
+enum class EnemyID {
+  DUMMY,
 };
 
 enum CombatantState {
