@@ -176,7 +176,8 @@ void Combatant::stunLogic() {
 
 void Combatant::applyKnockback() {
   float percentage = 1.0 - stun_clock;
-  position.x += (knockback * percentage) * kb_direction;
+  float magnitude = (knockback * percentage) * Game::deltaTime();
+  position.x += magnitude * kb_direction;
 
   rectExCorrection(bounding_box, hurtbox);
 }
