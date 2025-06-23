@@ -1,10 +1,12 @@
 #include <cassert>
 #include <cstddef>
 #include <memory>
-#include <string>
 #include <raylib.h>
+#include <raymath.h>
+#include <string>
 #include <plog/Log.h>
 #include "enums.h"
+#include "game.h"
 #include "data/damage.h"
 #include "base/combat_action.h"
 #include "base/combatant.h"
@@ -70,6 +72,10 @@ void Combatant::takeDamage(DamageData &data) {
     damageMorale(damage);
     data.assailant->increaseMorale(damage);
   }
+
+  if (data.stun_time != 0) {
+    enterHitstun(data);
+  }
 }
 
 float Combatant::damageCalulation(DamageData &data) {
@@ -87,7 +93,7 @@ float Combatant::damageCalulation(DamageData &data) {
       }
 
       if (def_not_set) {
-        data.b_def = &assailant->offense;
+        data.b_def = &defense;
       }
     }
     case DamageType::MORALE: {
@@ -96,7 +102,7 @@ float Combatant::damageCalulation(DamageData &data) {
       }
 
       if (def_not_set) {
-        data.b_def = &assailant->persist;
+        data.b_def = &persist;
       }
     }
   }
@@ -121,6 +127,52 @@ void Combatant::damageMorale(float magnitude) {
 
 void Combatant::increaseMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to increase.";
+}
+
+void Combatant::enterHitstun(DamageData &data) {
+  StunType stun_type = data.stun_type;
+
+  float multiplier;
+  switch (stun_type) {
+    case StunType::NORMAL: {
+      multiplier = 1.0;
+      break;
+    }
+    case StunType::DEFENSIVE: {
+      multiplier = 0.80;
+      break;
+    }
+    case StunType::STAGGER: {
+      multiplier = 1.20;
+    }
+  }
+
+  stun_time = data.stun_time * multiplier;
+  state = CombatantState::HIT_STUN;
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
+  " has entered hitstun for: " << stun_time << " seconds.";
+
+  if (action != nullptr) {
+    cancelAction();
+  }
+}
+
+void Combatant::stunLogic() {
+  assert(stun_time != 0 && "enterHitstun has to be called first!");
+  stun_clock += Game::time() / stun_time;
+  stun_clock = Clamp(stun_clock, 0.0, 1.0);
+
+  if (stun_clock == 1.0) {
+    exitHitstun();
+  }
+}
+
+void Combatant::exitHitstun() {
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
+  " has exited hit stun.";
+  state = CombatantState::NEUTRAL;
+  stun_clock = 0.0;
+  stun_time = 0;
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {

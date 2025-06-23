@@ -43,6 +43,11 @@ void Dummy::update() {
   switch (state) {
     case CombatantState::ACTION: {
       action->logic();
+      break;
+    }
+    case CombatantState::HIT_STUN: {
+      stunLogic();
+      break;
     }
     default: {
 

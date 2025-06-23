@@ -29,10 +29,15 @@ public:
 
   void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
+
   virtual void damageLife(float magnitude);
 
   virtual void damageMorale(float magnitude);
   virtual void increaseMorale(float magnitude);
+
+  void enterHitstun(DamageData &data);
+  void stunLogic();
+  void exitHitstun();
 
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
@@ -56,4 +61,7 @@ public:
   float speed_multiplier = 1.0;
 
   std::unique_ptr<CombatAction> action;
+private:
+  float stun_time = 0;
+  float stun_clock = 0.0;
 };

@@ -19,6 +19,9 @@ Attack::Attack(Combatant *user, RectEx hitbox):
   data.base_damage = 4;
   data.damage_type = DamageType::MORALE;
   data.calulation = DamageType::MORALE;
+
+  data.stun_time = 0.20;
+  data.stun_type = StunType::NORMAL;
   data.assailant = user;
 }
 

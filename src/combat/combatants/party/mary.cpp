@@ -93,8 +93,12 @@ void Mary::update() {
       action->logic();
       break;
     }
-    default: {
-
+    case CombatantState::HIT_STUN: {
+      stunLogic();
+      break;
+    }
+    case CombatantState::DEAD: {
+      break;
     }
   }
 }
