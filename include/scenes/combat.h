@@ -7,7 +7,7 @@
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
 #include "combat/combatants/party/mary.h"
-#include "combat/combatants/nme_dummy.h"
+#include "combat/combatants/enemy/dummy.h"
 
 
 class CombatScene : public Scene {
@@ -25,6 +25,6 @@ private:
   Texture debug_overlay;
 
   Mary *player;
-  DummyEnemy *dummy;
+  Dummy *dummy;
   std::vector<std::unique_ptr<Entity>> entities;
 };

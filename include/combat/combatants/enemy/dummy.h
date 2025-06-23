@@ -1,12 +1,12 @@
 #pragma once
 #include <raylib.h>
+#include "base/enemy.h"
 #include "enums.h"
-#include "base/combatant.h"
 
 
-class DummyEnemy : public Combatant {
+class Dummy : public Enemy {
 public:
-  DummyEnemy(Vector2 position, Direction direction);
+  Dummy(Vector2 position, Direction direction);
 
   void behavior() override {};
   void attack();

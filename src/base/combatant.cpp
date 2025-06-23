@@ -10,7 +10,6 @@
 #include "base/combatant.h"
 
 using std::string, std::unique_ptr;
-int Combatant::enemy_count = 0;
 
 
 Combatant *Combatant::getCombatantByID(int entity_id) {
@@ -35,9 +34,6 @@ Combatant::Combatant(string name, CombatantTeam team, Vector2 position,
 
   entity_type = EntityType::COMBATANT;
   this->team = team;
-  if (team == CombatantTeam::ENEMY) {
-    enemy_count++;
-  }
  
   bool successful = existing_combatants.emplace(this).second;
   assert(successful);
@@ -49,10 +45,6 @@ Combatant::Combatant(string name, CombatantTeam team, Vector2 position,
 Combatant::~Combatant() {
   int erased = existing_combatants.erase(this);
   assert(erased == 1);
-
-  if (team == CombatantTeam::ENEMY) {
-    enemy_count--;
-  }
 
   action.reset();
   PLOGI << "Removed combatant: '" << name << "'";

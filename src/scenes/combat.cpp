@@ -7,9 +7,10 @@
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "data/session.h"
 #include "combat/combatants/party/mary.h"
-#include "combat/combatants/nme_dummy.h"
+#include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -30,14 +31,14 @@ CombatScene::CombatScene(Session *session) {
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
-  auto dummy = make_unique<DummyEnemy>((Vector2){256, 152}, LEFT);
+  auto dummy = make_unique<Dummy>((Vector2){256, 152}, LEFT);
   this->dummy = dummy.get();
 
   entities.push_back(std::move(dummy));
   #endif // !NDEBUG
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
-  PLOGI << "Enemies present: " << Combatant::enemyCount(); 
+  PLOGI << "Enemies present: " << Enemy::memberCount(); 
 }
 
 CombatScene::~CombatScene() {

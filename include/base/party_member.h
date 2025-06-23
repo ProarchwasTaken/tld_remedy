@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
+#include <raylib.h>
 #include "enums.h"
-#include "raylib.h"
 #include "base/combatant.h"
 
 

@@ -20,7 +20,6 @@ class Combatant : public Entity {
 public:
   inline static std::set<Combatant*> existing_combatants;
   static Combatant *getCombatantByID(int entity_id);
-  static int enemyCount() {return enemy_count;}
 
   Combatant(std::string name, CombatantTeam team, Vector2 position, 
             Direction direction);
@@ -57,6 +56,4 @@ public:
   float speed_multiplier = 1.0;
 
   std::unique_ptr<CombatAction> action;
-private:
-  static int enemy_count;
 };

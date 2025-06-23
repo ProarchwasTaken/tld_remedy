@@ -8,6 +8,7 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "combat/system/camera.h"
 
 Rectangle CombatCamera::area = {
@@ -23,7 +24,7 @@ CombatCamera::CombatCamera() {
 }
 
 void CombatCamera::update(PartyMember *player) {
-  bool enemies_present = Combatant::enemyCount() != 0;
+  bool enemies_present = Enemy::memberCount() != 0;
   if (enemies_present) {
     enemyTargeting(player);
   }

@@ -1,17 +1,17 @@
 #include <memory>
 #include <raylib.h>
+#include "base/enemy.h"
 #include "enums.h"
 #include "data/rect_ex.h"
-#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "combat/actions/attack.h"
-#include "combat/combatants/nme_dummy.h"
+#include "combat/combatants/enemy/dummy.h"
 
 using std::unique_ptr, std::make_unique;
 
 
-DummyEnemy::DummyEnemy(Vector2 position, Direction direction) : 
-  Combatant("Dummy", CombatantTeam::ENEMY, position, direction)
+Dummy::Dummy(Vector2 position, Direction direction) :  
+  Enemy("Dummy", EnemyID::DUMMY, position)
 {
   max_life = 50;
   life = max_life;
@@ -29,7 +29,7 @@ DummyEnemy::DummyEnemy(Vector2 position, Direction direction) :
   rectExCorrection(bounding_box, hurtbox);
 }
 
-void DummyEnemy::attack() {
+void Dummy::attack() {
   RectEx hitbox;
   hitbox.scale = {32, 16};
   hitbox.offset = {-16 + (16.0f * direction), -40};
@@ -39,7 +39,7 @@ void DummyEnemy::attack() {
   performAction(action);
 }
 
-void DummyEnemy::update() {
+void Dummy::update() {
   switch (state) {
     case CombatantState::ACTION: {
       action->logic();
@@ -50,11 +50,11 @@ void DummyEnemy::update() {
   }
 }
 
-void DummyEnemy::draw() {
+void Dummy::draw() {
 
 }
 
-void DummyEnemy::drawDebug() {
+void Dummy::drawDebug() {
   Combatant::drawDebug();
 
   if (state == CombatantState::ACTION) {

@@ -37,6 +37,7 @@ set(HEADERS
 "include/base/combatant.h"
 "include/base/combat_action.h"
 "include/base/party_member.h"
+"include/base/enemy.h"
 "include/data/keybinds.h"
 "include/data/rect_ex.h"
 "include/data/line.h"
@@ -73,6 +74,7 @@ set(SOURCE
 "src/base/combatant.cpp"
 "src/base/combat_action.cpp"
 "src/base/party_member.cpp"
+"src/base/enemy.cpp"
 "src/utils/input.cpp"
 "src/utils/collision.cpp"
 "src/utils/text.cpp"
@@ -98,11 +100,11 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
-  "include/combat/combatants/nme_dummy.h"
+  "include/combat/combatants/enemy/dummy.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
-  "src/combat/combatants/nme_dummy.cpp"
+  "src/combat/combatants/enemy/dummy.cpp"
   )
 endif()
 
