@@ -37,6 +37,7 @@ public:
 
   void enterHitstun(DamageData &data);
   void stunLogic();
+  void applyKnockback();
   void exitHitstun();
 
   void performAction(std::unique_ptr<CombatAction> &action);
@@ -64,4 +65,7 @@ public:
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
+
+  float knockback = 0;
+  Direction kb_direction;
 };

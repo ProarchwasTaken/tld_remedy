@@ -148,13 +148,16 @@ void Combatant::enterHitstun(DamageData &data) {
   }
 
   stun_time = data.stun_time * multiplier;
-  state = CombatantState::HIT_STUN;
-  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
-  " has entered hitstun for: " << stun_time << " seconds.";
+  knockback = data.knockback;
+  kb_direction = data.assailant->direction;
 
+  state = CombatantState::HIT_STUN;
   if (action != nullptr) {
     cancelAction();
   }
+
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
+  " has entered hitstun for: " << stun_time << " seconds.";
 }
 
 void Combatant::stunLogic() {
@@ -162,9 +165,20 @@ void Combatant::stunLogic() {
   stun_clock += Game::time() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
+  if (knockback != 0) {
+    applyKnockback();
+  }
+
   if (stun_clock == 1.0) {
     exitHitstun();
   }
+}
+
+void Combatant::applyKnockback() {
+  float percentage = 1.0 - stun_clock;
+  position.x += (knockback * percentage) * kb_direction;
+
+  rectExCorrection(bounding_box, hurtbox);
 }
 
 void Combatant::exitHitstun() {
@@ -173,6 +187,7 @@ void Combatant::exitHitstun() {
   state = CombatantState::NEUTRAL;
   stun_clock = 0.0;
   stun_time = 0;
+  knockback = 0;
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {

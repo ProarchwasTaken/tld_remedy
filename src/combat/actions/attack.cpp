@@ -22,6 +22,8 @@ Attack::Attack(Combatant *user, RectEx hitbox):
 
   data.stun_time = 0.20;
   data.stun_type = StunType::NORMAL;
+
+  data.knockback = 3.5;
   data.assailant = user;
 }
 
