@@ -7,16 +7,19 @@
 #include <plog/Log.h>
 #include <utility>
 #include "scenes/field.h"
+#include "scenes/combat.h"
 #include "enums.h"
 #include "data/session.h"
 #include "game.h"
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
 
-GameState Game::game_state = READY;
+GameState Game::game_state = GameState::READY;
 unique_ptr<Session> Game::loaded_session;
+unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
+Font Game::med_font;
 Color *Game::palette;
 
 float Game::fade_percentage = 0.0;
@@ -33,17 +36,24 @@ void Game::init() {
   setupCanvas();
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
+  med_font = LoadFont("graphics/fonts/med_font.png");
   defineColorPalette();
 
-  scene = make_unique<FieldScene>();
+  scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
 
 Game::~Game() {
   scene.reset();
+
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
   UnloadRenderTexture(canvas);
   UnloadFont(sm_font);
+  UnloadFont(med_font);
   UnloadImagePalette(palette);
   PLOGI << "Thanks for playing!";
 }
@@ -83,37 +93,28 @@ void Game::start() {
 
 void Game::gameLogic() {
   switch (game_state) {
-    case LOADING_SESSION: {
+    case GameState::LOADING_SESSION: {
       loadSessionProcedure();
       break;
     }
-    case FADING_IN:
-    case FADING_OUT: {
+    case GameState::INIT_COMBAT: {
+      initCombatProcedure();
+      break;
+    }
+    case GameState::END_COMBAT: {
+      endCombatProcedure();
+      break;
+    }
+    case GameState::FADING_IN:
+    case GameState::FADING_OUT: {
       fadeScreenProcedure();
       break;
     }
-    case READY: {
+    case GameState::READY: {
       scene->update();
       break;
     }
   }
-}
-
-void Game::drawScene() {
-  BeginTextureMode(canvas);
-  {
-    ClearBackground(BLACK);
-    scene->draw();
-  }
-  EndTextureMode();
-
-  BeginDrawing(); 
-  {
-    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                   screen_tint);
-    if (debug_info) DrawFPS(24, 16);
-  }
-  EndDrawing();
 }
 
 void Game::fadeScreenProcedure() {
@@ -122,10 +123,10 @@ void Game::fadeScreenProcedure() {
     return;
   }
 
-  if (game_state == FADING_OUT) {
+  if (game_state == GameState::FADING_OUT) {
     fade_percentage -= magnitude;
   }
-  else if (game_state == FADING_IN){
+  else if (game_state == GameState::FADING_IN){
     fade_percentage += magnitude;
   }
 
@@ -139,7 +140,7 @@ void Game::fadeScreenProcedure() {
   bool finished_fading = value == 0 || value == 255;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
-    game_state = READY;
+    game_state = GameState::READY;
   }
 }
 
@@ -155,26 +156,68 @@ void Game::loadSessionProcedure() {
   PLOGI << "Procedure complete.";
 }
 
-void Game::fadeout(float fade_time) {
-  if (game_state != READY && game_state != LOADING_SESSION) {
-    return;
-  }
+void Game::initCombatProcedure() {
+  PLOGI << "Switching over to the Combat scene.";
+  scene.swap(reserve);
 
-  PLOGI << "Fading out the screen.";
-  Game::fade_percentage = 1.0;
-  Game::fade_time = fade_time;
-  game_state = FADING_OUT;
+  assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
+  game_state = GameState::READY;
+}
+
+void Game::endCombatProcedure() {
+  PLOGI << "Switching back to the Field scene";
+  scene.reset();
+  scene.swap(reserve);
+
+  assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
+  game_state = GameState::READY;
+}
+
+void Game::drawScene() {
+  BeginTextureMode(canvas);
+  {
+    ClearBackground(BLACK);
+    scene->draw();
+  }
+  EndTextureMode();
+
+  BeginDrawing(); 
+  {
+    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
+                   screen_tint);
+    if (debug_info) DrawFPS(24, 680);
+  }
+  EndDrawing();
+}
+
+void Game::fadeout(float fade_time) {
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::LOADING_SESSION: {
+      PLOGI << "Fading out the screen.";
+      Game::fade_percentage = 1.0;
+      Game::fade_time = fade_time;
+      game_state = GameState::FADING_OUT;
+    }
+    default: {
+      return;
+    }
+  }
 }
 
 void Game::fadein(float fade_time) {
-  if (game_state != READY && game_state != LOADING_SESSION) {
-    return;
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::LOADING_SESSION: {
+      PLOGI << "Fading in the screen.";
+      Game::fade_percentage = 0.0;
+      Game::fade_time = fade_time;
+      game_state = GameState::FADING_IN;
+    }
+    default: {
+      return;
+    }
   }
-
-  PLOGI << "Fading in the screen.";
-  Game::fade_percentage = 0.0;
-  Game::fade_time = fade_time;
-  game_state = FADING_IN;
 }
 
 void Game::saveSession(Session *data) {
@@ -213,8 +256,28 @@ void Game::loadSession() {
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;
 
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    return;
+  }
+
   loaded_session = make_unique<Session>(std::move(session));
-  game_state = LOADING_SESSION;
+  game_state = GameState::LOADING_SESSION;
+}
+
+void Game::initCombat(Session *data) {
+  PLOGI << "Battle Time!";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CombatScene>(data);
+  game_state = GameState::INIT_COMBAT;
+}
+
+void Game::endCombat() {
+  PLOGI << "Preparing to end combat.";
+  assert(reserve != nullptr);
+
+  game_state = GameState::END_COMBAT;
 }
 
 float Game::time() {

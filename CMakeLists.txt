@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.2.0
+VERSION 1.3.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -34,6 +34,10 @@ set(HEADERS
 "include/base/scene.h"
 "include/base/entity.h"
 "include/base/actor.h"
+"include/base/combatant.h"
+"include/base/combat_action.h"
+"include/base/party_member.h"
+"include/base/enemy.h"
 "include/data/keybinds.h"
 "include/data/rect_ex.h"
 "include/data/line.h"
@@ -42,48 +46,65 @@ set(HEADERS
 "include/data/actor_event.h"
 "include/data/session.h"
 "include/data/animation.h"
+"include/data/damage.h"
 "include/utils/input.h"
-"include/utils/camera.h"
 "include/utils/collision.h"
 "include/utils/text.h"
 "include/utils/animation.h"
 "include/system/sprite_atlas.h"
 "include/scenes/field.h"
 "include/field/system/field_map.h"
+"include/field/system/camera.h"
 "include/field/system/field_handler.h"
 "include/field/system/actor_handler.h"
 "include/field/actors/player.h"
 "include/field/actors/companion.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
+"include/scenes/combat.h"
+"include/combat/system/stage.h"
+"include/combat/system/camera.h"
+"include/combat/combatants/party/mary.h"
+"include/combat/actions/attack.h"
 )
 set(SOURCE
 "src/game.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
+"src/base/combatant.cpp"
+"src/base/combat_action.cpp"
+"src/base/party_member.cpp"
+"src/base/enemy.cpp"
 "src/utils/input.cpp"
-"src/utils/camera.cpp"
 "src/utils/collision.cpp"
 "src/utils/text.cpp"
 "src/utils/animation.cpp"
 "src/system/sprite_atlas.cpp"
 "src/scenes/field.cpp"
 "src/field/system/field_map.cpp"
+"src/field/system/camera.cpp"
 "src/field/system/field_handler.cpp"
 "src/field/system/actor_handler.cpp"
 "src/field/actors/player.cpp"
 "src/field/actors/companion.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
+"src/scenes/combat.cpp"
+"src/combat/system/stage.cpp"
+"src/combat/system/camera.cpp"
+"src/combat/combatants/party/mary.cpp"
+"src/combat/actions/attack.cpp"
 )
 
 if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
+  "include/combat/combatants/enemy/dummy.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
+  "src/combat/combatants/enemy/dummy.cpp"
   )
 endif()
 

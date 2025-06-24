@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
+#include "data/keybinds.h"
 #include "data/actor_event.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
@@ -19,6 +20,7 @@
 using std::unique_ptr;
 
 bool PlayerActor::controllable = true;
+FieldKeybinds PlayerActor::key_bind;
 SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
 
 
@@ -66,13 +68,14 @@ void PlayerActor::processEvents() {
     }
 
     bool holding_event = pickup_event != nullptr;
-    if (!holding_event && event->event_type == PICKUP_IN_RANGE) {
+    ActorEVT type = event->event_type;
+    if (!holding_event && type == ActorEVT::PICKUP_IN) {
       int id = event->sender->entity_id;
 
       PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
       pickup_event.swap(event);
     } 
-    else if (holding_event && event->event_type == PICKUP_OUT_RANGE) {
+    else if (holding_event && type == ActorEVT::PICKUP_OUT) {
       dropPickupEvent(event);
     }
   }
@@ -144,16 +147,15 @@ void PlayerActor::update() {
 
   moveX();
   moveY();
-  rectExCorrection(bounding_box, collis_box);
 
   has_moved = !Vector2Equals(old_position, position);
-
   if (has_moved) {
     move_clock += Game::time() / move_interval;
+    rectExCorrection(bounding_box, collis_box);
   }
 
   if (move_clock >= 1.0) {
-    ActorHandler::queue<ActorEvent>(this, PLR_MOVING);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::PLR_MOVING);
     move_clock = 0.0;
   }
 }

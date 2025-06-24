@@ -48,7 +48,8 @@ void CompanionActor::processEvents() {
       continue;
     }
 
-    if (event->event_type == PLR_MOVING) {
+    ActorEVT type = event->event_type;
+    if (type == ActorEVT::PLR_MOVING) {
       PlayerActor *sender = static_cast<PlayerActor*>(event->sender);
       Vector2 position = sender->position;
       Direction direction = sender->direction;

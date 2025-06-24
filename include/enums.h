@@ -1,11 +1,18 @@
 #pragma once
 
 
-enum GameState {
+enum class GameState {
   READY,
   LOADING_SESSION,
+  INIT_COMBAT,
+  END_COMBAT,
   FADING_OUT,
   FADING_IN
+};
+
+enum class SceneID {
+  FIELD,
+  COMBAT
 };
 
 enum EntityType {
@@ -15,10 +22,70 @@ enum EntityType {
   COMBATANT,
 };
 
-enum ActorType {
+enum class ActorType {
   PLAYER,
   COMPANION,
   ENEMY,
+};
+
+enum class SubWeaponID {
+  KNIFE
+};
+
+enum class CompanionID {
+  ERWIN
+};
+
+enum class CombatantTeam {
+  PARTY,
+  ENEMY
+};
+
+enum class PartyMemberID {
+  MARY,
+  ERWIN,
+};
+
+enum class EnemyID {
+  DUMMY,
+};
+
+enum CombatantState {
+  NEUTRAL,
+  HIT_STUN,
+  ACTION,
+  DEAD
+};
+
+enum class DamageType {
+  LIFE,
+  MORALE,
+};
+
+enum class StunType {
+  NORMAL,
+  DEFENSIVE,
+  STAGGER
+};
+
+enum class ActionID {
+  ATTACK,
+  GHOST_STEP,
+  SIDE_STEP
+};
+
+enum ActionPhase {
+  WIND_UP,
+  ACTIVE,
+  END_LAG
+};
+
+enum class ActionType {
+  OFFENSE_HP,
+  OFFENSE_MP,
+  DEFENSE,
+  SUPPORT,
+  SPECIAL
 };
 
 enum Direction {
@@ -28,14 +95,15 @@ enum Direction {
   DOWN = 2,
 };
 
-enum PickupType {
+enum class PickupType {
   SUPPLIES
 };
 
-enum FieldEventType {
+enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
   LOAD_SESSION,
+  INIT_COMBAT,
   UPDATE_COMMON_DATA,
   DELETE_ENTITY,
   CHANGE_SUPPLIES,
@@ -43,16 +111,17 @@ enum FieldEventType {
   CHANGE_PLR_LIFE,
 };
 
-enum ActorEventType {
+enum class ActorEVT {
   PLR_MOVING,
-  PICKUP_IN_RANGE,
-  PICKUP_OUT_RANGE,
+  PICKUP_IN,
+  PICKUP_OUT,
 };
 
-enum CommandType {
+enum class CommandType {
   CHANGE_MAP,
   SAVE,
   LOAD,
+  INIT_COMBAT,
   DELETE_ENT,
   SET_SUPPLIES,
   SET_LIFE,

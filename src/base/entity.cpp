@@ -10,7 +10,7 @@ using std::vector, std::unique_ptr;
 
 
 void Entity::clear(vector<unique_ptr<Entity>> &entity_list) {
-  PLOGI << "Clearing all entities from memory.";
+  PLOGI << "Clearing all entities in the current scene from memory.";
   for (unique_ptr<Entity> &entity : entity_list) {
     entity.reset();
   }

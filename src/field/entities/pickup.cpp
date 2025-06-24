@@ -47,12 +47,14 @@ void Pickup::interact() {
 
   switch (pickup_type) {
     case PickupType::SUPPLIES: {
-      FieldHandler::raise<AddSuppliesEvent>(ADD_SUPPLIES, count);
+      FieldHandler::raise<AddSuppliesEvent>(FieldEVT::ADD_SUPPLIES, 
+                                            count);
     }
   }
 
-  FieldHandler::raise<DeleteEntityEvent>(DELETE_ENTITY, entity_id);
-  FieldHandler::raise<UpdateCommonEvent>(UPDATE_COMMON_DATA, 
+  FieldHandler::raise<DeleteEntityEvent>(FieldEVT::DELETE_ENTITY, 
+                                         entity_id);
+  FieldHandler::raise<UpdateCommonEvent>(FieldEVT::UPDATE_COMMON_DATA, 
                                          object_id, false);
   interacted = true;
 }
@@ -64,11 +66,11 @@ void Pickup::update() {
 
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
-    ActorHandler::queue<ActorEvent>(this, PICKUP_IN_RANGE);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::PICKUP_IN);
     in_range = true;
   }
   else if (in_range && !inside) { 
-    ActorHandler::queue<ActorEvent>(this, PICKUP_OUT_RANGE);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::PICKUP_OUT);
     in_range = false;
   }
 }

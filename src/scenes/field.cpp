@@ -17,7 +17,6 @@
 #include "data/session.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
-#include "utils/camera.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
@@ -32,23 +31,22 @@
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
+FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
+  PLOGI << "Starting a new session.";
+  session.version = Game::session_version;
+
+  session.player.sub_weapon = sub_weapon;
+  initCompanionData(companion);
+
+  setup();
+}
 
 FieldScene::FieldScene(Session *session_data) {
-  if (session_data != NULL) {
-    PLOGI << "Loading existing session data.";
-    session = *session_data;
-  }
+  assert(session_data != NULL);
 
-  camera = CameraUtils::setupField();
-  mapLoadProcedure(session.location);
-
-  #ifndef NDEBUG
-  static CommandSystem command_system;
-  command_system.assignScene(this);
-  #endif // !NDEBUG
-  
-  Game::fadein(1.0);
-  PLOGI << "Initialized the Field Scene.";
+  PLOGI << "Loading existing session data.";
+  session = *session_data;
+  setup();
 }
 
 FieldScene::~FieldScene() {
@@ -57,6 +55,46 @@ FieldScene::~FieldScene() {
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the Field scene.";
+}
+
+void FieldScene::setup() {
+  PLOGI << "Setting up the field scene...";
+  scene_id = SceneID::FIELD;
+
+  mapLoadProcedure(session.location);
+
+  #ifndef NDEBUG
+  static CommandSystem command_system;
+  command_system.assignScene(this);
+  #endif // !NDEBUG
+  
+  Game::fadein(1.0);
+  PLOGI << "Field scene is ready to go!";
+}
+
+void FieldScene::initCompanionData(CompanionID id) {
+  PLOGI << "Initializing Companion data...";
+  Companion *companion = &session.companion;
+
+  switch (id) {
+    case CompanionID::ERWIN: {
+      std::strcpy(companion->name, "Erwin");
+      companion->id = id;
+
+      companion->life = 30;
+      companion->max_life = 30;
+
+      companion->init_morale = 8;
+      companion->max_morale = 25;
+
+      companion->offense = 6;
+      companion->defense = 6;
+      companion->intimid = 5;
+      companion->persist = 3;
+    }
+  }
+
+  PLOGI << "Initialized data for: " << companion->name;
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
@@ -164,7 +202,7 @@ void FieldScene::update() {
     entity->update();
   }
 
-  CameraUtils::followFieldEntity(camera, camera_target);
+  camera.follow(camera_target);
   eventProcessing();
 }
 
@@ -184,7 +222,7 @@ void FieldScene::eventProcessing() {
 
 void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
   switch (event->event_type) {
-    case FieldEventType::LOAD_MAP: {
+    case FieldEVT::LOAD_MAP: {
       PLOGD << "Event detected: LoadMapEvent";
       auto *event_data = static_cast<LoadMapEvent*>(event.get());
 
@@ -198,21 +236,27 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       map_ready = false;
       break;
     }
-    case FieldEventType::SAVE_SESSION: {
+    case FieldEVT::SAVE_SESSION: {
       PLOGD << "Event Detected: SaveSessionEvent";
 
       PLOGI << "Saving the session.";
       Game::saveSession(&session);
       break;
     }
-    case FieldEventType::LOAD_SESSION: {
+    case FieldEVT::LOAD_SESSION: {
       PLOGD << "Event Detected: LoadSessionEvent";
 
       PLOGI << "Loading session.";
       Game::loadSession();
       break;
     }
-    case FieldEventType::DELETE_ENTITY: {
+    case FieldEVT::INIT_COMBAT: {
+      PLOGI << "Event Detected: InitCombatEvent";
+
+      Game::initCombat(&session);
+      break;
+    }
+    case FieldEVT::DELETE_ENTITY: {
       PLOGD << "Event detected: DeleteEntityEvent";
       auto *event_data = static_cast<DeleteEntityEvent*>(event.get());
 
@@ -222,7 +266,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       deleteEntity(entity_id);
       break;
     }
-    case FieldEventType::UPDATE_COMMON_DATA: {
+    case FieldEVT::UPDATE_COMMON_DATA: {
       PLOGD << "Event detected: UpdateCommonEvent";
       auto *event_data = static_cast<UpdateCommonEvent*>(event.get());
 
@@ -234,7 +278,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       updateCommonData(object_id, active);
       break;
     }
-    case FieldEventType::CHANGE_SUPPLIES: {
+    case FieldEVT::CHANGE_SUPPLIES: {
       PLOGD << "Event detected: SetSuppliesEvent";
       auto *event_data = static_cast<SetSuppliesEvent*>(event.get());
 
@@ -244,7 +288,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       session.supplies = value;
       break;
     }
-    case FieldEventType::ADD_SUPPLIES: {
+    case FieldEVT::ADD_SUPPLIES: {
       PLOGD << "Event detected: AddSuppliesEvent";
       auto *event_data = static_cast<AddSuppliesEvent*>(event.get());
 
@@ -254,7 +298,7 @@ void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
       session.supplies += magnitude;
       break;
     }
-    case FieldEventType::CHANGE_PLR_LIFE: {
+    case FieldEVT::CHANGE_PLR_LIFE: {
       PLOGD << "Event detected: SetPlrLifeEvent";
       auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
 
@@ -346,42 +390,71 @@ bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
 }
 
 void FieldScene::drawSessionInfo() {
+  Font *font = &Game::sm_font;
   int text_size = Game::sm_font.baseSize;
   float base_x = 420;
   float y = 4;
+  float spacing = 9;
 
-  string base = "Location: ";
-  string extension = session.location;
-  string location = base + extension;
+  string location = TextFormat("Location: %s", session.location);
   Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
   string supplies = TextFormat("Supplies: %03i", session.supplies);
   Vector2 sup_pos = TextUtils::alignRight(supplies.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
-  string plr_hp = TextFormat("Player Life: %02.00f / %02.00f",
-                             session.player.life, 
-                             session.player.max_life);
+  Player *player = &session.player;
+  string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
+                             player->life, player->max_life);
   Vector2 php_pos = TextUtils::alignRight(plr_hp.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
-  y += 8;
+                                          *font, -3, 0);
+  y += spacing;
 
-  string plr_mp = TextFormat("Player Morale: %02.00f / %02.00f",  
-                             session.player.init_morale, 
-                             session.player.max_morale);
+  string plr_mp = TextFormat("%s Morale: %02.00f / %02.00f", player->name,
+                             player->init_morale, player->max_morale);
   Vector2 pmp_pos = TextUtils::alignRight(plr_mp.c_str(), {base_x, y}, 
-                                          Game::sm_font, -3, 0);
+                                          *font, -3, 0);
+  y += spacing;
 
-  DrawTextEx(Game::sm_font, location.c_str(), loc_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, supplies.c_str(), sup_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, plr_hp.c_str(), php_pos, text_size, -3, 
-             GREEN);
-  DrawTextEx(Game::sm_font, plr_mp.c_str(), pmp_pos, text_size, -3, 
-             GREEN);
+  string plr_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
+                                player->name, player->offense,
+                                player->defense, player->intimid,
+                                player->persist);
+  Vector2 pst_pos = TextUtils::alignRight(plr_stats.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  Companion *companion = &session.companion;
+  string com_hp = TextFormat("%s Life: %02.00f / %02.00f", 
+                             companion->name, companion->life,
+                             companion->max_life);
+  Vector2 chp_pos = TextUtils::alignRight(com_hp.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string com_mp = TextFormat("%s Morale: %02.00f / %02.00f", 
+                             companion->name, companion->init_morale,
+                             companion->max_morale);
+  Vector2 cmp_pos = TextUtils::alignRight(com_mp.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string com_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
+                                companion->name, companion->offense,
+                                companion->defense, companion->intimid,
+                                companion->persist);
+  Vector2 cst_pos = TextUtils::alignRight(com_stats.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+
+  DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_mp.c_str(), pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_stats.c_str(), pst_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_mp.c_str(), cmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_stats.c_str(), cst_pos, text_size, -3, GREEN);
 }
- 
