@@ -5,6 +5,8 @@
 #include "base/combatant.h"
 
 
+/* The Enemy subclass is used by Combatants who directly oppose the 
+ * player, and Combatants who side with them.*/
 class Enemy : public Combatant {
 public:
   static int memberCount() {return member_count;}

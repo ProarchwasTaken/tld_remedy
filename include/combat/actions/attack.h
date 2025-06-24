@@ -5,6 +5,10 @@
 #include "data/rect_ex.h"
 
 
+/* The Attack CombatAction is a very versatile Action that's designed to
+ * be used by any Combatant as long as the right arguments are provided
+ * on initialization. It's the most simple way to allow the Combatant to 
+ * inflict damage of any kind.*/
 class Attack : public CombatAction {
 public:
   Attack(Combatant *user, RectEx hitbox);

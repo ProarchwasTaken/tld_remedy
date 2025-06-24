@@ -63,6 +63,10 @@ void Combatant::takeDamage(DamageData &data) {
   float damage = damageCalulation(data);
   PLOGI << "Result: " << damage;
 
+  if (damage < 0) {
+    damage = 0;
+  }
+
   if (data.damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
