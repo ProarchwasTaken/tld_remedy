@@ -15,15 +15,26 @@ is subject to change.
 This section goes over the game's default controls.
 
 ## Keyboard
+
+### Field
 * **Arrow Keys** - Movement
 * **Z Key** - Interact
+
+### Battle
+* **Arrow Keys** - Movement
+* **Z Key** - Attack
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
 may be different depending on what controller you use.
 
+### Field
 * **D-Pad** - Movement
 * **A Button** - Interact
+
+### Combat 
+* **D-Pad** - Movement
+* **A Button** - Attack
 
 
 # Credits and Contacts
