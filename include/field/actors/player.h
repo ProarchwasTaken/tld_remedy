@@ -45,7 +45,7 @@ private:
   int moving_x = 0;
   int moving_y = 0;
 
-  float move_clock = 0.0;
+  float move_clock = 1.0;
   float move_interval = 0.25;
 
   Animation *animation = NULL;
