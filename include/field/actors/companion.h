@@ -12,8 +12,9 @@
 
 class CompanionActor : public Actor {
 public:
-  CompanionActor(Vector2 position, enum Direction direction);
+  CompanionActor(CompanionID id, Vector2 position, Direction direction);
   ~CompanionActor();
+  void setupAtlas(CompanionID id);
 
   void behavior() override;
   void processEvents();

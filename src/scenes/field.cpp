@@ -131,7 +131,8 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      entity = make_unique<CompanionActor>(position, direction);
+      CompanionID id = session.companion.id;
+      entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
     default: {

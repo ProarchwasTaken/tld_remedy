@@ -1,7 +1,9 @@
+#include <cassert>
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
+#include <string>
 #include <plog/Log.h>
 #include "enums.h"
 #include "game.h"
@@ -12,18 +14,15 @@
 #include "field/system/actor_handler.h"
 #include "field/actors/companion.h"
 
-using std::unique_ptr;
-SpriteAtlas CompanionActor::atlas("actors", "erwin_actor");
+using std::unique_ptr, std::string;
+SpriteAtlas CompanionActor::atlas("actors", "");
 
 
-CompanionActor::CompanionActor(Vector2 position, 
+CompanionActor::CompanionActor(CompanionID id, Vector2 position, 
                                enum Direction direction):
 Actor("Companion", ActorType::COMPANION, position, direction)
 {
-  bounding_box.scale = {32, 34};
-  bounding_box.offset = {-16, -30};
-  collis_box.scale = {8, 16};
-  collis_box.offset = {-4, -12};
+  setupAtlas(id);
 
   rectExCorrection(bounding_box, collis_box);
   atlas.use();
@@ -31,6 +30,25 @@ Actor("Companion", ActorType::COMPANION, position, direction)
 
 CompanionActor::~CompanionActor() {
   atlas.release();
+}
+
+void CompanionActor::setupAtlas(CompanionID id) {
+  assert(atlas.users() == 0);
+  string sprite_group;
+
+  switch (id) {
+    case CompanionID::ERWIN: {
+      sprite_group = "erwin_actor";
+
+      bounding_box.scale = {32, 34};
+      bounding_box.offset = {-16, -30};
+      collis_box.scale = {8, 16};
+      collis_box.offset = {-4, -12};
+      break;
+    }
+  }
+
+  atlas = SpriteAtlas("actors", sprite_group);
 }
 
 void CompanionActor::behavior() {
