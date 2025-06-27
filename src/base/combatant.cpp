@@ -123,6 +123,12 @@ float Combatant::damageCalulation(DamageData &data) {
 void Combatant::damageLife(float magnitude) {
   life = life - magnitude;
   PLOGI << "Life decreased to: " << life;
+
+  if (life < max_life * LOW_LIFE_THRESHOLD) {
+    PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has"
+    << " entered Critical Life!";
+    critical_life = true;
+  }
 }
 
 void Combatant::damageMorale(float magnitude) {

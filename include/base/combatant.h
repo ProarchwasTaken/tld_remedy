@@ -53,6 +53,7 @@ public:
 
   float life; 
   float max_life;
+  bool critical_life = false;
 
   int offense;
   int defense;
@@ -62,6 +63,8 @@ public:
   float speed_multiplier = 1.0;
 
   std::unique_ptr<CombatAction> action;
+protected:
+  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
