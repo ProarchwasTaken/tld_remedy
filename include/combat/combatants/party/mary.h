@@ -1,7 +1,10 @@
 #pragma once
+#include <raylib.h>
 #include "base/party_member.h"
 #include "data/keybinds.h"
+#include "data/animation.h"
 #include "data/session.h"
+#include "system/sprite_atlas.h"
 
 
 /* Mary is a Combatant whose directly controlled by the player. As such,
@@ -10,6 +13,7 @@
 class Mary : public PartyMember {
 public:
   Mary(Player *data);
+  ~Mary();
   static void setControllable(bool value);
   static CombatKeybinds key_bind;
 
@@ -29,5 +33,12 @@ private:
   bool moving = true;
   int moving_x = 0;
 
+  Rectangle *sprite;
+  Animation *animation;
+  Animation anim_idle = {{0, 1}, 2.0};
+  Animation anim_crit = {{2, 3}, 1.0};
+  Animation anim_move = {{4, 5, 6, 5}, 0.2};
+
   static bool controllable;
+  static SpriteAtlas atlas;
 };

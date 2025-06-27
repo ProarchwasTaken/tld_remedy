@@ -1,3 +1,5 @@
+#include <cassert>
+#include <cstddef>
 #include <raylib.h>
 #include <memory>
 #include "enums.h"
@@ -6,15 +8,20 @@
 #include "base/combat_action.h"
 #include "base/party_member.h"
 #include "data/keybinds.h"
+#include "data/animation.h"
 #include "data/session.h"
+#include "system/sprite_atlas.h"
 #include "utils/input.h"
+#include "utils/animation.h"
 #include "combat/actions/attack.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique;
 bool Mary::controllable = true;
+
 CombatKeybinds Mary::key_bind;
+SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
 Mary::Mary(Player *plr): 
@@ -38,6 +45,12 @@ Mary::Mary(Player *plr):
   hurtbox.offset = {-8, -58};
 
   rectExCorrection(bounding_box, hurtbox);
+  atlas.use();
+  sprite = &atlas.sprites[0];
+}
+
+Mary::~Mary() {
+  atlas.release();
 }
 
 void Mary::setControllable(bool value) {
@@ -107,10 +120,18 @@ void Mary::neutralLogic() {
   float old_x = position.x;
   movement();
 
+  Animation *next_anim;
   has_moved = old_x != position.x;
   if (has_moved) {
     rectExCorrection(bounding_box, hurtbox);
+    next_anim = &anim_move;
   }
+  else {
+    next_anim = &anim_idle;
+  }
+
+  SpriteAnimation::play(animation, next_anim, true);
+  sprite = &atlas.sprites[*animation->current];
 }
 
 void Mary::movement() {
@@ -125,6 +146,12 @@ void Mary::movement() {
 }
 
 void Mary::draw() {
+  assert(sprite != NULL);
+
+  Rectangle final = *sprite;
+  final.width = final.width * direction;
+
+  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, WHITE);
 }
 
 void Mary::drawDebug() {
