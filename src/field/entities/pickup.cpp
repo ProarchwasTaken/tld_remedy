@@ -76,7 +76,8 @@ void Pickup::update() {
 }
 
 void Pickup::draw() {
-  SpriteAnimation::play(anim_idle, true);
+  Animation *anim = &anim_idle;
+  SpriteAnimation::play(anim, NULL, true);
   Rectangle *sprite = &atlas.sprites[*anim_idle.current];
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 

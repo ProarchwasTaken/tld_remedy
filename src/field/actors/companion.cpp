@@ -25,7 +25,9 @@ Actor("Companion", ActorType::COMPANION, position, direction)
   setupAtlas(id);
 
   rectExCorrection(bounding_box, collis_box);
+  
   atlas.use();
+  sprite = getIdleSprite();
 }
 
 CompanionActor::~CompanionActor() {
@@ -82,7 +84,11 @@ void CompanionActor::update() {
   moving = plr != NULL && plr->has_moved;
   if (moving && !move_points.empty()) {
     pathfind();
+    moveAnimation();
     rectExCorrection(bounding_box, collis_box);
+  }
+  else {
+    sprite = getIdleSprite();
   }
 }
 
@@ -98,20 +104,6 @@ void CompanionActor::pathfind() {
   if (Vector2Equals(position, target)) {
     move_points.pop_front();
   }
-}
-
-void CompanionActor::draw() {
-  Rectangle *sprite;
-  if (!moving) {
-    sprite = getIdleSprite();
-  }
-  else {
-    sprite = getWalkSprite();
-  }
-
-
-  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
-                 WHITE);
 }
 
 Rectangle *CompanionActor::getIdleSprite() {
@@ -133,7 +125,7 @@ Rectangle *CompanionActor::getIdleSprite() {
   }
 }
 
-Rectangle *CompanionActor::getWalkSprite() {
+void CompanionActor::moveAnimation() {
   Animation *next_anim;
 
   switch (direction) {  
@@ -155,14 +147,14 @@ Rectangle *CompanionActor::getWalkSprite() {
     }
   }
 
-  if (animation != next_anim) {
-    animation = next_anim;
-    animation->current = animation->frames.begin();
-    animation->frame_clock = 0.0;
-  }
+  SpriteAnimation::play(animation, next_anim, true);
+  sprite = &atlas.sprites[*animation->current];
+}
 
-  SpriteAnimation::play(*animation, true);
-  return &atlas.sprites[*animation->current];
+void CompanionActor::draw() {
+  assert(sprite != NULL);
+  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+                 WHITE);
 }
 
 void CompanionActor::drawDebug() {
