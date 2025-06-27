@@ -123,11 +123,13 @@ void Mary::neutralLogic() {
   Animation *next_anim;
   has_moved = old_x != position.x;
   if (has_moved) {
-    rectExCorrection(bounding_box, hurtbox);
     next_anim = &anim_move;
+    last_moved = 0.0;
+    rectExCorrection(bounding_box, hurtbox);
   }
   else {
-    next_anim = &anim_idle;
+    last_moved += Game::time();
+    next_anim = getIdleAnim();
   }
 
   SpriteAnimation::play(animation, next_anim, true);
@@ -143,6 +145,15 @@ void Mary::movement() {
 
   float speed = default_speed * speed_multiplier;
   position.x += (speed * direction) * Game::deltaTime();
+}
+
+Animation *Mary::getIdleAnim() {
+  if (!critical_life || last_moved < 0.35) {
+    return &anim_idle;
+  }
+  else {
+    return &anim_crit;
+  }
 }
 
 void Mary::draw() {

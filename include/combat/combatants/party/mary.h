@@ -24,6 +24,7 @@ public:
   void update() override;
   void neutralLogic();
   void movement();
+  Animation *getIdleAnim();
 
   void draw() override;
   void drawDebug() override;
@@ -32,6 +33,8 @@ private:
   bool has_moved = false;
   bool moving = true;
   int moving_x = 0;
+
+  float last_moved = 0.0;
 
   Rectangle *sprite;
   Animation *animation;
