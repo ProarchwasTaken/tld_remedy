@@ -24,7 +24,9 @@ public:
   void update() override;
   void neutralLogic();
   void movement();
+
   Animation *getIdleAnim();
+  Rectangle *getStunSprite();
 
   void draw() override;
   void drawDebug() override;

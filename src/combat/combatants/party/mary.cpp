@@ -108,6 +108,7 @@ void Mary::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
+      sprite = getStunSprite();
       break;
     }
     case CombatantState::DEAD: {
@@ -144,7 +145,20 @@ void Mary::movement() {
   direction = static_cast<Direction>(moving_x);
 
   float speed = default_speed * speed_multiplier;
-  position.x += (speed * direction) * Game::deltaTime();
+  float magnitude = (speed * direction) * Game::deltaTime();
+  float half_scale = (hurtbox.scale.x / 2) * direction;
+  float offset = magnitude + half_scale;
+
+  float bounds = 512;
+  if (position.x + offset > bounds) {
+    position.x = bounds - half_scale;
+  }
+  else if (position.x + offset < -bounds) {
+    position.x = -bounds - half_scale;
+  }
+  else {
+    position.x += magnitude;
+  }
 }
 
 Animation *Mary::getIdleAnim() {
@@ -153,6 +167,15 @@ Animation *Mary::getIdleAnim() {
   }
   else {
     return &anim_crit;
+  }
+}
+
+Rectangle *Mary::getStunSprite() {
+  if (damage_type == DamageType::LIFE) {
+    return &atlas.sprites[7];
+  }
+  else {
+    return &atlas.sprites[8];
   }
 }
 
