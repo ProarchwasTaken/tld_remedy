@@ -64,6 +64,7 @@ public:
 
   std::unique_ptr<CombatAction> action;
 protected:
+  DamageType damage_type;
   static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 private:
   float stun_time = 0;

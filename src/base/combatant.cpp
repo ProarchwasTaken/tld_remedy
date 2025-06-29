@@ -67,7 +67,8 @@ void Combatant::takeDamage(DamageData &data) {
     damage = 0;
   }
 
-  if (data.damage_type == DamageType::LIFE) {
+  damage_type = data.damage_type;
+  if (damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
   }
@@ -187,7 +188,9 @@ void Combatant::stunLogic() {
 void Combatant::applyKnockback() {
   float percentage = 1.0 - stun_clock;
   float magnitude = (knockback * percentage) * Game::deltaTime();
+
   position.x += magnitude * kb_direction;
+  direction = static_cast<Direction>(kb_direction * -1);
 
   rectExCorrection(bounding_box, hurtbox);
 }
