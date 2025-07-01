@@ -82,13 +82,16 @@ void CompanionActor::processEvents() {
 
 void CompanionActor::update() {
   moving = plr != NULL && plr->has_moved;
-  if (moving && !move_points.empty()) {
-    pathfind();
-    moveAnimation();
-    rectExCorrection(bounding_box, collis_box);
-  }
-  else {
+  if (!moving) {
     sprite = getIdleSprite();
+    return;
+  }
+
+  moveAnimation();
+
+  if (!move_points.empty()) {
+    pathfind();
+    rectExCorrection(bounding_box, collis_box);
   }
 }
 

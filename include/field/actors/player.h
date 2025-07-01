@@ -43,7 +43,7 @@ private:
   int moving_y = 0;
 
   float move_clock = 1.0;
-  float move_interval = 0.25;
+  float move_interval = 0.30;
 
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
   Animation anim_right = {{3, 4, 5, 4}, 0.2};

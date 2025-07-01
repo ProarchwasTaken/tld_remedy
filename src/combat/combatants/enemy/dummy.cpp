@@ -77,7 +77,10 @@ void Dummy::update() {
 }
 
 void Dummy::draw() {
-  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+  Rectangle final = *sprite;
+  final.width = final.width * direction;
+
+  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
 }
 

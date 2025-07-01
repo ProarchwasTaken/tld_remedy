@@ -43,8 +43,6 @@ public:
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr Vector2 WINDOW_RES = {1280, 720};
-
-  static constexpr int target_framerate = 60;
   static constexpr unsigned int session_version = 1;
 
   static Font sm_font;
