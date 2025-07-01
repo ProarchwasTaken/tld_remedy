@@ -35,8 +35,6 @@ private:
   bool moving = false;
   float movement_speed = 1.1;
 
-  Rectangle *sprite = NULL;
-  Animation *animation = NULL;
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
   Animation anim_right = {{3, 4, 5, 4}, 0.2};
   Animation anim_up = {{6, 7, 8, 7}, 0.2};

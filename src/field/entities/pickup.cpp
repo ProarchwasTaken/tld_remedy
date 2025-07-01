@@ -34,6 +34,7 @@ Pickup::Pickup(PickupData &data) {
   plr = static_cast<PlayerActor*>(ptr);
 
   atlas.use();
+  animation = &anim_idle;
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
 }
 
@@ -64,6 +65,8 @@ void Pickup::update() {
     return;
   }
 
+  SpriteAnimation::play(animation, NULL, true);
+
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
     ActorHandler::queue<ActorEvent>(this, ActorEVT::PICKUP_IN);
@@ -76,9 +79,7 @@ void Pickup::update() {
 }
 
 void Pickup::draw() {
-  Animation *anim = &anim_idle;
-  SpriteAnimation::play(anim, NULL, true);
-  Rectangle *sprite = &atlas.sprites[*anim_idle.current];
+  sprite = &atlas.sprites[*animation->current];
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);

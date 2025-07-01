@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstddef>
 #include "game.h"
 #include "data/animation.h"
@@ -11,6 +12,11 @@ void SpriteAnimation::play(Animation *&anim, Animation *next, bool loop) {
     anim = next;
     anim->current = anim->frames.begin();
     anim->frame_clock = 0.0;
+  }
+
+  assert(!anim->frames.empty());
+  if (anim->frames.size() == 1) {
+    return;
   }
 
   anim->frame_clock += Game::time() / anim->frame_duration;

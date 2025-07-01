@@ -81,10 +81,17 @@ void CombatScene::draw() {
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
-      entity->drawDebug();
     }
     
     stage.drawOverlay();
+
+    #ifndef NDEBUG
+    if (Game::debugInfo()) {
+      for (unique_ptr<Entity> &entity : entities) {
+        entity->drawDebug();
+      }
+    } 
+    #endif // !NDEBUG
   }
   EndMode2D();
 
