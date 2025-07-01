@@ -4,11 +4,14 @@
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
+#include "utils/animation.h"
+#include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include <plog/Log.h>
 
 
-Attack::Attack(Combatant *user, RectEx hitbox): 
+Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
+               RectEx hitbox, AttackAnimSet &anim_set): 
   CombatAction(ActionID::ATTACK, ActionType::OFFENSE_MP, user, 
                0.10, 0.05, 0.10)
 {
@@ -20,14 +23,26 @@ Attack::Attack(Combatant *user, RectEx hitbox):
   data.damage_type = DamageType::MORALE;
   data.calulation = DamageType::MORALE;
 
-  data.stun_time = 0.20;
+  data.stun_time = 0.35;
   data.stun_type = StunType::NORMAL;
 
-  data.knockback = 3.5;
+  data.knockback = 1.5;
   data.assailant = user;
+
+  this->user_atlas = &user_atlas;
+  this->anim_set = &anim_set;
+}
+
+void Attack::windUp() {
+  SpriteAnimation::play(user->animation, &anim_set->wind_up, false);
+  int current_frame = *user->animation->current;
+
+  user->sprite = &user_atlas->sprites[current_frame];
 }
 
 void Attack::action() {
+  user->sprite = &user_atlas->sprites[anim_set->atk_sprite];
+
   if (attack_connected) {
     return;
   }
@@ -43,6 +58,12 @@ void Attack::action() {
       break;
     }
   }
+}
+
+void Attack::endLag() {
+  SpriteAnimation::play(user->animation, &anim_set->end_lag, false);
+  int current_frame = *user->animation->current;
+  user->sprite = &user_atlas->sprites[current_frame];
 }
 
 void Attack::drawDebug() {

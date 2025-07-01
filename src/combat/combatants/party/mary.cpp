@@ -85,10 +85,10 @@ void Mary::actionInput(bool gamepad) {
 
   if (Input::pressed(key_bind.attack, gamepad)) {
     RectEx hitbox;
-    hitbox.scale = {32, 16};
-    hitbox.offset = {-16 + (16.0f * direction), -40};
+    hitbox.scale = {28, 8};
+    hitbox.offset = {-14 + (14.0f * direction), -50};
 
-    action = make_unique<Attack>(this, hitbox);
+    action = make_unique<Attack>(this, atlas, hitbox, atk_set);
   }
 
   if (action != nullptr) {

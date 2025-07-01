@@ -5,6 +5,7 @@
 #include "data/animation.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
+#include "combat/actions/attack.h"
 
 
 /* Mary is a Combatant whose directly controlled by the player. As such,
@@ -38,11 +39,15 @@ private:
 
   float last_moved = 0.0;
 
-  Rectangle *sprite;
-  Animation *animation;
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
   Animation anim_move = {{4, 5, 6, 5}, 0.2};
+
+  AttackAnimSet atk_set = {
+    {{9, 10}, 0.05},
+    {{10, 9}, 0.05},
+    11
+  };
 
   static bool controllable;
   static SpriteAtlas atlas;

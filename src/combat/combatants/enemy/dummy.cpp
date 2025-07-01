@@ -44,7 +44,7 @@ void Dummy::attack() {
   hitbox.offset = {-16 + (16.0f * direction), -40};
 
   unique_ptr<CombatAction> action;
-  action = make_unique<Attack>(this, hitbox);
+  action = make_unique<Attack>(this, atlas, hitbox, atk_set);
   performAction(action);
 }
 
