@@ -19,7 +19,7 @@ void SpriteAnimation::play(Animation *&anim, Animation *next, bool loop) {
     return;
   }
 
-  anim->frame_clock += Game::time() / anim->frame_duration;
+  anim->frame_clock += Game::deltaTime() / anim->frame_duration;
 
   if (anim->frame_clock < 1.0) {
     return;

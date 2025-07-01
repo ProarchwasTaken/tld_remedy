@@ -118,7 +118,7 @@ void Game::gameLogic() {
 }
 
 void Game::fadeScreenProcedure() {
-  float magnitude = time() / fade_time;
+  float magnitude = deltaTime() / fade_time;
   if (magnitude == 0) {
     return;
   }
@@ -280,12 +280,8 @@ void Game::endCombat() {
   game_state = GameState::END_COMBAT;
 }
 
-float Game::time() {
-  return GetFrameTime() * time_scale;
-}
-
 float Game::deltaTime() {
-  return (GetFrameTime() * target_framerate) * time_scale;
+  return GetFrameTime() * time_scale;
 }
 
 bool Game::debugInfo() {

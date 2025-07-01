@@ -27,7 +27,6 @@ public:
 
   void drawScene();
 
-  static float time();
   static float deltaTime();
   static bool debugInfo();
   static void toggleDebugInfo();

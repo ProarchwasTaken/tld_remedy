@@ -18,8 +18,8 @@ void FieldCamera::follow(Entity *entity) {
   }
 
   static float min_length = 1.0;
-  static float min_speed = 0.75;
-  static float fraction_speed = 0.10;
+  static float min_speed = 8;
+  static float fraction_speed = 4.0;
 
   Vector2 difference = Vector2Subtract(entity->position, target);
   float length = Vector2Length(difference);

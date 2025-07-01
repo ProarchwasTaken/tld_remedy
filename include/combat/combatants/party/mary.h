@@ -32,7 +32,7 @@ public:
   void draw() override;
   void drawDebug() override;
 private:
-  const float default_speed = 1.2;
+  const float default_speed = 68;
   bool has_moved = false;
   bool moving = true;
   int moving_x = 0;

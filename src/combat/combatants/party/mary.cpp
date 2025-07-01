@@ -129,7 +129,7 @@ void Mary::neutralLogic() {
     rectExCorrection(bounding_box, hurtbox);
   }
   else {
-    last_moved += Game::time();
+    last_moved += Game::deltaTime();
     next_anim = getIdleAnim();
   }
 

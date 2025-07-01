@@ -26,7 +26,7 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   data.stun_time = 0.35;
   data.stun_type = StunType::NORMAL;
 
-  data.knockback = 1.5;
+  data.knockback = 90.0;
   data.assailant = user;
 
   this->user_atlas = &user_atlas;

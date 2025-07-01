@@ -152,7 +152,7 @@ void PlayerActor::update() {
 
   has_moved = !Vector2Equals(old_position, position);
   if (has_moved) {
-    move_clock += Game::time() / move_interval;
+    move_clock += Game::deltaTime() / move_interval;
     moveAnimation();
     rectExCorrection(bounding_box, collis_box);
   }
@@ -174,6 +174,7 @@ void PlayerActor::moveX() {
 
   float speed = default_speed;
   if (moving_y != 0) {
+    float speed_root = std::sqrt(2);
     speed = Normalize(default_speed, 0, speed_root);
   }
 

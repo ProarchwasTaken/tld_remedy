@@ -173,7 +173,7 @@ void Combatant::enterHitstun(DamageData &data) {
 
 void Combatant::stunLogic() {
   assert(stun_time != 0 && "enterHitstun has to be called first!");
-  stun_clock += Game::time() / stun_time;
+  stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
   if (knockback != 0) {

@@ -33,7 +33,7 @@ private:
 
   std::list<std::pair<Vector2, enum Direction>> move_points;
   bool moving = false;
-  float movement_speed = 1.1;
+  float movement_speed = 56;
 
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
   Animation anim_right = {{3, 4, 5, 4}, 0.2};

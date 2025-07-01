@@ -58,7 +58,7 @@ void CombatAction::logic() {
   }
 
   if (*state_time != 0.0 && state_clock < 1.0) {
-    state_clock += Game::time() / *state_time;
+    state_clock += Game::deltaTime() / *state_time;
   }
   else {
     proceed();
