@@ -1,7 +1,10 @@
 #include <raylib.h>
 #include <string>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combatant.h"
+#include "base/party_member.h"
+#include "game.h"
 #include "base/enemy.h"
 
 using std::string;
@@ -17,4 +20,21 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 
 Enemy::~Enemy() {
   member_count--;
+}
+
+void Enemy::takeDamage(DamageData &data) {
+  Combatant::takeDamage(data);
+
+  if (data.assailant->team != CombatantTeam::PARTY) {
+    return;
+  }
+
+  PartyMember *combatant = static_cast<PartyMember*>(data.assailant);
+  if (!combatant->important) {
+    return;
+  }
+
+  if (data.damage_type == DamageType::LIFE) {
+    Game::sleep(data.hit_stop);
+  }
 }

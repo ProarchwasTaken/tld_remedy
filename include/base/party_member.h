@@ -2,6 +2,7 @@
 #include <string>
 #include <raylib.h>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combatant.h"
 
 
@@ -12,6 +13,8 @@ public:
   static int memberCount() {return member_count;}
   PartyMember(std::string name, PartyMemberID id, Vector2 position);
   ~PartyMember();
+
+  void takeDamage(DamageData &data) override;
 
   void damageMorale(float magnitude) override;
   void increaseMorale(float magnitude) override;
