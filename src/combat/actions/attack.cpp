@@ -38,10 +38,15 @@ void Attack::windUp() {
   int current_frame = *user->animation->current;
 
   user->sprite = &user_atlas->sprites[current_frame];
+
+  bool end_phase = state_clock >= 1.0;
+  if (end_phase) {
+    user->sprite = &user_atlas->sprites[anim_set->atk_sprite];
+    Combatant::sfx.play("attack");
+  }
 }
 
 void Attack::action() {
-  user->sprite = &user_atlas->sprites[anim_set->atk_sprite];
 
   if (attack_connected) {
     return;

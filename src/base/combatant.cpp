@@ -74,11 +74,13 @@ void Combatant::takeDamage(DamageData &data) {
   if (damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
+    sfx.play("damage_hp");
   }
   else {
     PLOGD << "Directing damage towards Combatant's Morale.";
     damageMorale(damage);
     data.assailant->increaseMorale(damage);
+    sfx.play("damage_mp");
   }
 
   if (data.stun_time != 0) {

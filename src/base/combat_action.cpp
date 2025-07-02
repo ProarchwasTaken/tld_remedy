@@ -30,6 +30,8 @@ void CombatAction::intercept(DamageData &data) {
     data.stun_type = StunType::STAGGER;
     data.calulation = DamageType::LIFE;
     data.damage_type = DamageType::LIFE;
+
+    Combatant::sfx.play("damage_stagger");
     PLOGD << "Forcing Life damage calulation, and Stagger";
   }
 }
