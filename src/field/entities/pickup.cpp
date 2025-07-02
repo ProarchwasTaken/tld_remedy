@@ -8,6 +8,7 @@
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
+#include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/player.h"
@@ -57,6 +58,8 @@ void Pickup::interact() {
                                          entity_id);
   FieldHandler::raise<UpdateCommonEvent>(FieldEVT::UPDATE_COMMON_DATA, 
                                          object_id, false);
+
+  FieldScene::sfx.play("pickup");
   interacted = true;
 }
 
