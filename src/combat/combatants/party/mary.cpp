@@ -27,6 +27,7 @@ SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 Mary::Mary(Player *plr): 
   PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
 {
+  important = true;
   life = plr->life;
   max_life = plr->max_life;
 

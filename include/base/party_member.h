@@ -17,6 +17,7 @@ public:
   void increaseMorale(float magnitude) override;
 
   PartyMemberID id;
+  bool important = false;
 
   float morale;
   float init_morale;
