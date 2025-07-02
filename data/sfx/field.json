@@ -1,0 +1,12 @@
+{
+  "sfx": [
+    {
+      "name": "map_transition",
+      "filename": "field/map_transition.mp3",
+    },
+    {
+      "name": "pickup",
+      "filename": "field/pickup.mp3",
+    }
+  ]
+}
