@@ -204,6 +204,10 @@ void FieldScene::update() {
   }
   ActorHandler::clearEvents();
 
+  if (Game::state() == GameState::SLEEP) {
+    return;
+  }
+
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
   }

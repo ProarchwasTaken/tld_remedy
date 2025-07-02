@@ -60,6 +60,10 @@ void CombatScene::update() {
     combatant->behavior();
   }
 
+  if (Game::state() == GameState::SLEEP) {
+    return;
+  }
+
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
   }

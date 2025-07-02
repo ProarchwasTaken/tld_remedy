@@ -24,10 +24,13 @@ public:
   void loadSessionProcedure();
   void initCombatProcedure();
   void endCombatProcedure();
+  void sleepProcedure();
 
   void drawScene();
 
   static float deltaTime();
+  static GameState state() {return game_state;}
+
   static bool debugInfo();
   static void toggleDebugInfo();
   static void setTimeScale(float number);
@@ -38,8 +41,10 @@ public:
   static void initCombat(Session *data);
   static void endCombat();
 
-  static void fadeout(float fade_time);
-  static void fadein(float fade_time);
+  static void fadeout(float seconds);
+  static void fadein(float seconds);
+
+  static void sleep(float seconds);
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr Vector2 WINDOW_RES = {1280, 720};
@@ -61,6 +66,9 @@ private:
 
   static float fade_time;
   static float fade_percentage;
+
+  static float sleep_time;
+  float sleep_clock = 0.0;
 
   Color screen_tint = WHITE;
 

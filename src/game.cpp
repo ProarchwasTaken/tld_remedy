@@ -25,6 +25,8 @@ Color *Game::palette;
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
 
+float Game::sleep_time = 0.0;
+
 float Game::time_scale = 1.0;
 bool Game::debug_info = false;
 
@@ -112,6 +114,9 @@ void Game::gameLogic() {
       fadeScreenProcedure();
       break;
     }
+    case GameState::SLEEP: {
+      sleepProcedure();
+    }
     case GameState::READY: {
       scene->update();
       break;
@@ -143,6 +148,16 @@ void Game::fadeScreenProcedure() {
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
     game_state = GameState::READY;
+  }
+}
+
+void Game::sleepProcedure() {
+  sleep_clock += deltaTime() / sleep_time;
+  if (sleep_clock >= 1.0) {
+    PLOGI << "Now returning to normal logic processing.";
+    PLOGI << sleep_time;
+    game_state = GameState::READY;
+    sleep_clock = 0.0;
   }
 }
 
@@ -192,13 +207,13 @@ void Game::drawScene() {
   EndDrawing();
 }
 
-void Game::fadeout(float fade_time) {
+void Game::fadeout(float seconds) {
   switch (game_state) {
     case GameState::READY:
     case GameState::LOADING_SESSION: {
       PLOGI << "Fading out the screen.";
       Game::fade_percentage = 1.0;
-      Game::fade_time = fade_time;
+      Game::fade_time = seconds;
       game_state = GameState::FADING_OUT;
     }
     default: {
@@ -207,19 +222,25 @@ void Game::fadeout(float fade_time) {
   }
 }
 
-void Game::fadein(float fade_time) {
+void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
     case GameState::LOADING_SESSION: {
       PLOGI << "Fading in the screen.";
       Game::fade_percentage = 0.0;
-      Game::fade_time = fade_time;
+      Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
     }
     default: {
       return;
     }
   }
+}
+
+void Game::sleep(float seconds) {
+  PLOGI << "Pausing game logic for: " << seconds << " seconds";
+  Game::sleep_time = seconds;
+  game_state = GameState::SLEEP;
 }
 
 void Game::saveSession(Session *data) {

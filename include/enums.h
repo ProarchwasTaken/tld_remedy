@@ -7,7 +7,8 @@ enum class GameState {
   INIT_COMBAT,
   END_COMBAT,
   FADING_OUT,
-  FADING_IN
+  FADING_IN,
+  SLEEP,
 };
 
 enum class SceneID {
