@@ -33,8 +33,9 @@ void SoundAtlas::setup() {
   for (basic_json sfx_data : data["sfx"]) { 
     string name = sfx_data["name"];
     string filename = sfx_data["filename"];
+    string path = "audio/sfx/" + filename;
 
-    sound_table.emplace(name, LoadSound(filename.c_str()));
+    sound_table.emplace(name, LoadSound(path.c_str()));
     PLOGD << "Sound Loaded: '" << name << "'";
   }
 
@@ -46,8 +47,9 @@ void SoundAtlas::reset() {
   assert(user_count == 0);
   PLOGI << "Resetting sound atlas: '" << category << "'";
 
-  for (auto element : sound_table) { 
+  for (auto &element : sound_table) { 
     UnloadSound(element.second);
+    PLOGD << "Sound Unloaded: '" << element.first << "'";
   }
 
   sound_table.clear();
@@ -68,5 +70,18 @@ void SoundAtlas::release() {
 
   if (user_count == 0) {
     reset();
+  }
+}
+
+void SoundAtlas::play(string sound_name) {
+  assert(user_count != 0);
+  auto data = sound_table.find(sound_name);
+
+  if (data != sound_table.end()) {
+    PlaySound(data->second);
+  }
+  else {
+    PLOGE << "Sound: '" << sound_name << "' not found!";
+    return;
   }
 }

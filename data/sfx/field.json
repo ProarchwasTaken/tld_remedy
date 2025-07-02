@@ -2,11 +2,11 @@
   "sfx": [
     {
       "name": "map_transition",
-      "filename": "field/map_transition.mp3",
+      "filename": "field/map_transition.mp3"
     },
     {
       "name": "pickup",
-      "filename": "field/pickup.mp3",
+      "filename": "field/pickup.mp3"
     }
   ]
 }

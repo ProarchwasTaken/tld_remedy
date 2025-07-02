@@ -8,6 +8,7 @@
 #include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
+#include "system/sound_atlas.h"
 #include "field/system/field_map.h"
 #include "field/system/camera.h"
 #include "field/system/field_handler.h"
@@ -35,6 +36,8 @@ public:
 
   void draw() override;
   void drawSessionInfo();
+
+  static SoundAtlas sfx;
 private:
   FieldMap field;
   FieldHandler field_handler;

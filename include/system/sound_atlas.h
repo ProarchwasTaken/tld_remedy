@@ -16,6 +16,8 @@ public:
 
   void use();
   void release();
+
+  void play(std::string sound_name);
 private:
   std::string category;
   std::map<std::string, Sound> sound_table;

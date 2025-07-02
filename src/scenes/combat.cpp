@@ -9,13 +9,14 @@
 #include "base/party_member.h"
 #include "base/enemy.h"
 #include "data/session.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique, std::string;
-
+SoundAtlas CombatScene::sfx("combat");
 
 CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
@@ -37,6 +38,7 @@ CombatScene::CombatScene(Session *session) {
   entities.push_back(std::move(dummy));
   #endif // !NDEBUG
 
+  sfx.use();
   PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Enemy::memberCount(); 
 }
@@ -45,6 +47,7 @@ CombatScene::~CombatScene() {
   Entity::clear(entities);
 
   UnloadTexture(debug_overlay);
+  sfx.release();
   assert(Combatant::existing_combatants.empty());
   PLOGI << "Unloaded the Combat scene.";
 }

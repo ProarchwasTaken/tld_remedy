@@ -15,6 +15,7 @@
 #include "data/entity.h"
 #include "data/field_event.h"
 #include "data/session.h"
+#include "system/sound_atlas.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "utils/text.h"
@@ -23,13 +24,15 @@
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
-
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+
+SoundAtlas FieldScene::sfx("field");
+
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
@@ -51,6 +54,7 @@ FieldScene::FieldScene(Session *session_data) {
 
 FieldScene::~FieldScene() {
   Entity::clear(entities);
+  sfx.release();
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
@@ -68,6 +72,7 @@ void FieldScene::setup() {
   command_system.assignScene(this);
   #endif // !NDEBUG
   
+  sfx.use();
   Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }

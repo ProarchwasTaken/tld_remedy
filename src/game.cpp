@@ -32,6 +32,7 @@ bool Game::debug_info = false;
 void Game::init() {
   InitWindow(WINDOW_RES.x, WINDOW_RES.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
+  InitAudioDevice();
   SetTargetFPS(60);
   setupCanvas();
 
@@ -89,6 +90,7 @@ void Game::start() {
   }
 
   CloseWindow();
+  CloseAudioDevice();
 }
 
 void Game::gameLogic() {

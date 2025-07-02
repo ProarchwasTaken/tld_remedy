@@ -2,19 +2,19 @@
   "sfx": [
     {
       "name": "damage_hp",
-      "filename": "combat/damage_hp.mp3",
+      "filename": "combat/damage_hp.mp3"
     },
     {
       "name": "damage_mp",
-      "filename": "combat/damage_mp.mp3",
+      "filename": "combat/damage_mp.mp3"
     },
     {
       "name": "damage_stagger",
-      "filename": "combat/damage_stagger.mp3",
+      "filename": "combat/damage_stagger.mp3"
     },
     {
       "name": "attack",
-      "filename": "combat/attack.mp3",
+      "filename": "combat/attack.mp3"
     }
   ]
 }
