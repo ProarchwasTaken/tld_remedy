@@ -13,6 +13,7 @@ struct DamageData {
   StunType stun_type;
 
   float knockback = 0;
+  float hit_stop = 0;
 
   Combatant *assailant = NULL;
   int *a_atk = NULL;

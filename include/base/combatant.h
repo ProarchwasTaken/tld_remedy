@@ -29,7 +29,7 @@ public:
 
   virtual void behavior() = 0;
 
-  void takeDamage(DamageData &data);
+  virtual void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
 
   virtual void damageLife(float magnitude);

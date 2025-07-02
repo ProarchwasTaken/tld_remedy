@@ -159,11 +159,13 @@ void Combatant::enterHitstun(DamageData &data) {
       break;
     }
     case StunType::STAGGER: {
-      multiplier = 1.20;
+      multiplier = 1.50;
     }
   }
 
   stun_time = data.stun_time * multiplier;
+  data.hit_stop *= multiplier;
+
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
 
