@@ -52,9 +52,9 @@ enum class EnemyID {
 };
 
 enum CombatantState {
+  ACTION,
   NEUTRAL,
   HIT_STUN,
-  ACTION,
   DEAD
 };
 

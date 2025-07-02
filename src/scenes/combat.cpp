@@ -1,5 +1,6 @@
 #include <cassert>
 #include <memory>
+#include <algorithm>
 #include <string>
 #include <raylib.h>
 #include "enums.h"
@@ -15,6 +16,7 @@
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique, std::string;
+bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
@@ -73,6 +75,7 @@ void CombatScene::update() {
 
 void CombatScene::draw() {
   bool debug_info = Game::debugInfo();
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 
   BeginMode2D(camera);
   {
@@ -101,6 +104,26 @@ void CombatScene::draw() {
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
   #endif // !NDEBUG
+}
+
+bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
+  if (e1->entity_type != e2->entity_type) {
+    return e1->entity_type > e2->entity_type;
+  }
+  
+  if (e1->entity_type != EntityType::COMBATANT) {
+    return e1->position.y < e2->position.y;
+  }
+
+  Combatant *c1 = static_cast<Combatant*>(e1.get());
+  Combatant *c2 = static_cast<Combatant*>(e2.get());
+
+  if (c1->state != c2->state) {
+    return c1->state > c2->state;
+  }
+  else {
+    return c1->team > c2->team;
+  }
 }
 
 void CombatScene::drawDebugInfo() {

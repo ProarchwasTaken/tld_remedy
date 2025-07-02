@@ -29,7 +29,7 @@
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
-bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 SoundAtlas FieldScene::sfx("field");
 
@@ -362,7 +362,7 @@ void FieldScene::deleteEntity(int entity_id) {
 }
 
 void FieldScene::draw() {
-  std::sort(entities.begin(), entities.end(), entityAlgorithm);
+  std::sort(entities.begin(), entities.end(), fieldAlgorithm);
 
   BeginMode2D(camera); 
   {
@@ -390,7 +390,7 @@ void FieldScene::draw() {
   #endif // !NDEBUG
 }
 
-bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
+bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (e1->entity_type != e2->entity_type) {
     return e1->entity_type > e2->entity_type;
   }
