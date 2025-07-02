@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "data/rect_ex.h"
 #include "base/entity.h"
+#include "system/sound_atlas.h"
 
 class CombatAction;
 struct DamageData;
@@ -19,6 +20,7 @@ struct DamageData;
 class Combatant : public Entity {
 public:
   inline static std::set<Combatant*> existing_combatants;
+  static SoundAtlas sfx;
   static Combatant *getCombatantByID(int entity_id);
 
   Combatant(std::string name, CombatantTeam team, Vector2 position, 

@@ -4,7 +4,6 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/session.h"
-#include "system/sound_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
 #include "combat/combatants/party/mary.h"
@@ -19,8 +18,6 @@ public:
   void update() override;
   void draw() override;
   void drawDebugInfo();
-
-  static SoundAtlas sfx;
 private:
   CombatCamera camera;
 

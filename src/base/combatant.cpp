@@ -9,10 +9,11 @@
 #include "game.h"
 #include "data/damage.h"
 #include "base/combat_action.h"
+#include "system/sound_atlas.h"
 #include "base/combatant.h"
 
 using std::string, std::unique_ptr;
-
+SoundAtlas Combatant::sfx("combat");
 
 Combatant *Combatant::getCombatantByID(int entity_id) {
   Combatant *result = NULL;
@@ -41,6 +42,7 @@ Combatant::Combatant(string name, CombatantTeam team, Vector2 position,
   assert(successful);
 
   state = CombatantState::NEUTRAL;
+  sfx.use();
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]";
 }
 
@@ -49,6 +51,7 @@ Combatant::~Combatant() {
   assert(erased == 1);
 
   action.reset();
+  sfx.release();
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
