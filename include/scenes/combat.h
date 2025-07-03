@@ -21,6 +21,8 @@ public:
   void eventProcessing();
   void eventHandling(std::unique_ptr<CombatEvent> &event);
 
+  void deleteEntity(int entity_id);
+
   void draw() override;
   void drawDebugInfo();
 private:

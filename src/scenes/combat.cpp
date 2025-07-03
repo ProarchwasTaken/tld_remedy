@@ -1,5 +1,6 @@
 #include <cassert>
 #include <memory>
+#include <vector>
 #include <algorithm>
 #include <string>
 #include <raylib.h>
@@ -17,7 +18,7 @@
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
-using std::unique_ptr, std::make_unique, std::string;
+using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 CombatScene::CombatScene(Session *session) {
@@ -92,6 +93,12 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
   switch (event->event_type) { 
     case CombatEVT::DELETE_ENTITY: {
       PLOGD << "Event detected: DeleteEntityEvent";
+      auto *event_data = static_cast<DeleteEntityCB*>(event.get());
+
+      int entity_id = event_data->entity_id;
+
+      PLOGI << "Attempting to delete Entity [ID: " << entity_id << "]";
+      deleteEntity(entity_id);
       break;
     }
     case CombatEVT::CREATE_DMG_NUM: {
@@ -99,6 +106,26 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       break;
     }
   }
+}
+
+void CombatScene::deleteEntity(int entity_id) {
+  vector<unique_ptr<Entity>> temporary;
+
+  for (auto &entity : entities) {
+    if (entity->entity_id == entity_id) {
+      PLOGD << "Found Entity [ID: " << entity_id << "]";
+      entity.reset();
+    }
+    else {
+      unique_ptr<Entity> temp_entity = nullptr;
+      entity.swap(temp_entity);
+
+      temporary.push_back(std::move(temp_entity));
+    }
+  }
+
+  entities.clear();
+  temporary.swap(entities);
 }
 
 void CombatScene::draw() {
