@@ -67,6 +67,7 @@ set(HEADERS
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
 "include/combat/system/evt_handler.h"
+"include/combat/entities/dmg_number.h"
 "include/combat/combatants/party/mary.h"
 "include/combat/actions/attack.h"
 )
@@ -97,6 +98,7 @@ set(SOURCE
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
 "src/combat/system/evt_handler.cpp"
+"src/combat/entities/dmg_number.cpp"
 "src/combat/combatants/party/mary.cpp"
 "src/combat/actions/attack.cpp"
 )

@@ -1,5 +1,5 @@
 #pragma once
-#include "data/damage.h"
+#include "base/combatant.h"
 #include "enums.h"
 
 
@@ -12,6 +12,7 @@ struct DeleteEntityCB : CombatEvent {
 };
 
 struct CreateDmgNumCB : CombatEvent {
-  Vector2 position;
-  DamageData data;
+  Combatant *target;
+  DamageType damage_type;
+  float damage_taken;
 };
