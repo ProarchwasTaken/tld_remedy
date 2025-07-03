@@ -13,6 +13,7 @@ public:
   void update() override;
   void draw() override;
 private:
+  bool visible = false;
   float value;
   Color color;
 

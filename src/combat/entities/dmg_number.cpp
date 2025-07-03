@@ -60,9 +60,17 @@ void DamageNumber::update() {
     CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY,
                                          this->entity_id);
   }
+
+  if (!visible) {
+    visible = true;
+  }
 }
 
 void DamageNumber::draw() {
+  if (!visible) {
+    return;
+  }
+
   Font *font = &Game::sm_font;
   int fnt_size = font->baseSize;
 
