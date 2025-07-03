@@ -202,7 +202,7 @@ void FieldScene::update() {
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
-  ActorHandler::clearEvents();
+  actor_handler.clearEvents();
 
   if (Game::state() == GameState::SLEEP) {
     return;
@@ -217,20 +217,20 @@ void FieldScene::update() {
 }
 
 void FieldScene::eventProcessing() {
-  EventPool<FieldEvent> *event_pool = field_handler.get();
+  EventPool<FieldEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Field Events raised: " << event_pool->size();
     for (auto &event : *event_pool) {
-      fieldEventHandling(event);
+      eventHandling(event);
     }
 
-    FieldHandler::clear();
+    evt_handler.clear();
   }
 
-  ActorHandler::transferEvents();
+  actor_handler.transferEvents();
 }
 
-void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
+void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
   switch (event->event_type) {
     case FieldEVT::LOAD_MAP: {
       PLOGD << "Event detected: LoadMapEvent";

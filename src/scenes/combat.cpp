@@ -10,6 +10,8 @@
 #include "base/party_member.h"
 #include "base/enemy.h"
 #include "data/session.h"
+#include "data/combat_event.h"
+#include "combat/system/evt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
@@ -71,6 +73,32 @@ void CombatScene::update() {
   }
 
   camera.update(player);
+  eventProcessing();
+}
+
+void CombatScene::eventProcessing() {
+  EventPool<CombatEvent> *event_pool = evt_handler.get();
+  if (!event_pool->empty()) {
+    PLOGI << "Combat Events raised: " << event_pool->size();
+    for (auto &event : *event_pool) {
+      eventHandling(event);
+    }
+
+    evt_handler.clear();
+  }
+}
+
+void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
+  switch (event->event_type) { 
+    case CombatEVT::DELETE_ENTITY: {
+      PLOGD << "Event detected: DeleteEntityEvent";
+      break;
+    }
+    case CombatEVT::CREATE_DMG_NUM: {
+      PLOGD << "Event detected: CreateDmgNumEvent";
+      break;
+    }
+  }
 }
 
 void CombatScene::draw() {

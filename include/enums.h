@@ -20,6 +20,7 @@ enum EntityType {
   ACTOR,
   PICKUP,
   MAP_TRANSITION,
+  DMG_NUMBER,
   COMBATANT,
 };
 
@@ -116,6 +117,11 @@ enum class ActorEVT {
   PLR_MOVING,
   PICKUP_IN,
   PICKUP_OUT,
+};
+
+enum class CombatEVT {
+  CREATE_DMG_NUM,
+  DELETE_ENTITY,
 };
 
 enum class CommandType {

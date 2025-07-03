@@ -30,7 +30,7 @@ public:
 
   void update() override;
   void eventProcessing();
-  void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
+  void eventHandling(std::unique_ptr<FieldEvent> &event);
   void updateCommonData(int object_id, bool active);
   void deleteEntity(int entity_id);
 
@@ -40,7 +40,7 @@ public:
   static SoundAtlas sfx;
 private:
   FieldMap field;
-  FieldHandler field_handler;
+  FieldHandler evt_handler;
   ActorHandler actor_handler;
   Session session;
 

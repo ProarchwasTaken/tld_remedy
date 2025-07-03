@@ -1,5 +1,4 @@
 #include <memory>
-#include <plog/Log.h>
 #include "data/field_event.h"
 #include "field/system/field_handler.h"
 
