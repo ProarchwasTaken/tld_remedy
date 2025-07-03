@@ -8,6 +8,7 @@
 #include "utils/text.h"
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
+#include <plog/Log.h>
 
 
 DamageNumber::DamageNumber(Combatant *target, DamageType damage_type,
@@ -22,6 +23,7 @@ DamageNumber::DamageNumber(Combatant *target, DamageType damage_type,
   bounding_box.scale = {8, 8};
   bounding_box.offset = {-4, 0};
   rectExCorrection(bounding_box);
+  PLOGI << "Entity Created: Damage Number [ID: " << entity_id << "]";
 }
 
 void DamageNumber::setStartPosition(Combatant *target) {

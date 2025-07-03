@@ -13,6 +13,7 @@
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "combat/system/evt_handler.h"
+#include "combat/entities/dmg_number.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
@@ -103,6 +104,15 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
     }
     case CombatEVT::CREATE_DMG_NUM: {
       PLOGD << "Event detected: CreateDmgNumEvent";
+      auto *event_data = static_cast<CreateDmgNumCB*>(event.get());
+
+      Combatant *target = event_data->target;
+      DamageType damage_type = event_data->damage_type;
+      float damage_taken = event_data->damage_taken;
+
+      auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
+                                               damage_taken);
+      entities.push_back(std::move(dmg_num));
       break;
     }
   }
