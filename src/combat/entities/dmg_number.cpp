@@ -48,8 +48,13 @@ void DamageNumber::update() {
   life_clock = Clamp(life_clock, 0.0, 1.0);
 
   if (life_clock != 1.0) {
-    float speed = initial_speed;
-    position.y += speed * Game::deltaTime();
+    float percentage = 1.0 - life_clock;
+
+    float speed = initial_speed * percentage;
+    position.y -= speed * Game::deltaTime();
+
+    float alpha = Clamp(percentage / 0.25, 0.0, 1.0);
+    color.a = 255 * alpha;
   }
   else {
     CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY,

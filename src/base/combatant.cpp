@@ -8,8 +8,10 @@
 #include "enums.h"
 #include "game.h"
 #include "data/damage.h"
-#include "base/combat_action.h"
+#include "data/combat_event.h"
 #include "system/sound_atlas.h"
+#include "base/combat_action.h"
+#include "combat/system/evt_handler.h"
 #include "base/combatant.h"
 
 using std::string, std::unique_ptr;
@@ -63,12 +65,8 @@ void Combatant::takeDamage(DamageData &data) {
     action->intercept(data);
   }
 
-  float damage = damageCalulation(data);
+  float damage = Clamp(damageCalulation(data), 0, 9999);
   PLOGI << "Result: " << damage;
-
-  if (damage < 0) {
-    damage = 0;
-  }
 
   damage_type = data.damage_type;
   if (damage_type == DamageType::LIFE) {
@@ -81,6 +79,12 @@ void Combatant::takeDamage(DamageData &data) {
     damageMorale(damage);
     data.assailant->increaseMorale(damage);
     sfx.play("damage_mp");
+  }
+
+  if (damage != 0) {
+    PLOGD << "Sending a request for a DamageNumber to be created.";
+    CombatHandler::raise<CreateDmgNumCB>(CombatEVT::CREATE_DMG_NUM,
+                                         this, data.damage_type, damage);
   }
 
   if (data.stun_time != 0) {
@@ -164,10 +168,13 @@ void Combatant::enterHitstun(DamageData &data) {
   }
 
   stun_time = data.stun_time * multiplier;
-  data.hit_stop *= multiplier;
+  stun_clock = 0.0;
 
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
+
+  data.hit_stop *= multiplier;
+  state = CombatantState::HIT_STUN;
 
   if (data.damage_type == DamageType::LIFE) {
     start_tint = Game::palette[32];
@@ -177,7 +184,6 @@ void Combatant::enterHitstun(DamageData &data) {
   }
   tint = start_tint;
 
-  state = CombatantState::HIT_STUN;
   if (action != nullptr) {
     cancelAction();
   }
