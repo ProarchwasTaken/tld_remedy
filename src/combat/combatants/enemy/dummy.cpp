@@ -60,14 +60,7 @@ void Dummy::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
-
-      if (damage_type == DamageType::LIFE) {
-        sprite = &atlas.sprites[1];
-      }
-      else {
-        sprite = &atlas.sprites[2];
-      }
-
+      sprite = &atlas.sprites[1];
       break;
     }
     default: {
@@ -80,8 +73,7 @@ void Dummy::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
-  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, 
-                 WHITE);
+  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 
 void Dummy::drawDebug() {

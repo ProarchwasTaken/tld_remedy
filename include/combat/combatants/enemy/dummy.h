@@ -19,9 +19,9 @@ public:
   void drawDebug() override;
 
   AttackAnimSet atk_set = {
-    {{3, 4}, 0.05},
-    {{4, 3}, 0.05},
-    5
+    {{2, 3}, 0.05},
+    {{3, 2}, 0.05},
+    4
   };
   static SpriteAtlas atlas;
 };

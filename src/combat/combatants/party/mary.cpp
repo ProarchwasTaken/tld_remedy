@@ -186,7 +186,7 @@ void Mary::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
-  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, WHITE);
+  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 
 void Mary::drawDebug() {

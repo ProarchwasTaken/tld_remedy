@@ -169,6 +169,14 @@ void Combatant::enterHitstun(DamageData &data) {
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
 
+  if (data.damage_type == DamageType::LIFE) {
+    start_tint = Game::palette[32];
+  }
+  else {
+    start_tint = Game::palette[40];
+  }
+  tint = start_tint;
+
   state = CombatantState::HIT_STUN;
   if (action != nullptr) {
     cancelAction();
@@ -187,6 +195,8 @@ void Combatant::stunLogic() {
     applyKnockback();
   }
 
+  stunTintLerp();
+
   if (stun_clock == 1.0) {
     exitHitstun();
   }
@@ -200,6 +210,17 @@ void Combatant::applyKnockback() {
   direction = static_cast<Direction>(kb_direction * -1);
 
   rectExCorrection(bounding_box, hurtbox);
+}
+
+void Combatant::stunTintLerp() {
+  float percentage = Clamp(stun_clock / 0.30, 0.0, 1.0);
+  Color end_tint = WHITE;
+
+  unsigned char r = Lerp(start_tint.r, end_tint.r, percentage);
+  unsigned char g = Lerp(start_tint.g, end_tint.g, percentage);
+  unsigned char b = Lerp(start_tint.b, end_tint.b, percentage);
+
+  tint = {r, g, b, 255};
 }
 
 void Combatant::exitHitstun() {
