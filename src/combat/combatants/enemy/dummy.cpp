@@ -18,10 +18,10 @@ Dummy::Dummy(Vector2 position, Direction direction) :
   max_life = 50;
   life = max_life;
 
-  offense = 0;
-  defense = 8;
-  intimid = 8;
-  persist = 4;
+  offense = 9;
+  defense = 4;
+  intimid = 14;
+  persist = 2;
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};

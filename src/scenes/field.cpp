@@ -86,16 +86,16 @@ void FieldScene::initCompanionData(CompanionID id) {
       std::strcpy(companion->name, "Erwin");
       companion->id = id;
 
-      companion->life = 30;
-      companion->max_life = 30;
+      companion->life = 20;
+      companion->max_life = 20;
 
       companion->init_morale = 8;
       companion->max_morale = 25;
 
-      companion->offense = 6;
-      companion->defense = 6;
-      companion->intimid = 5;
-      companion->persist = 3;
+      companion->offense = 10;
+      companion->defense = 5;
+      companion->intimid = 8;
+      companion->persist = 6;
     }
   }
 
