@@ -57,3 +57,14 @@ much everything.
 
 **Dev Channel** - https://www.youtube.com/channel/UCzR-5I3KE2YAV-Ilndl8Y9w
 
+
+# Dependencies
+If you wish to compile the game's source code for whatever reason. Either 
+to try out upcoming updates early, access the super secret devmode, or 
+add your own modifications; Then there's a couple external dependencies 
+that need to met in order for compilation to be successful.
+
+* C++17 - Standard Library
+* Plog v1.1.10 - Header Only Logging Library
+* Raylib v5.0 - Game Framework. Problems may occur on newer versions.
+* Nlohmann Json - Modern C++ Json Library.
