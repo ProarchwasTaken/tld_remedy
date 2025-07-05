@@ -215,9 +215,14 @@ void CombatScene::drawDebugInfo() {
                            player->morale, player->init_morale,
                            player->max_morale);
   Vector2 pmp_pos = position;
+  position.y += spacing;
+
+  string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
+  Vector2 combo_pos = position;
 
   DrawTextEx(*font, p_name.c_str(), pn_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }

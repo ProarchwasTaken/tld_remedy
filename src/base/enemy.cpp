@@ -1,3 +1,4 @@
+#include <cassert>
 #include <raylib.h>
 #include <string>
 #include "enums.h"
@@ -6,9 +7,12 @@
 #include "base/party_member.h"
 #include "game.h"
 #include "base/enemy.h"
+#include <plog/Log.h>
 
 using std::string;
 int Enemy::member_count = 0;
+int Enemy::stunned = 0;
+int Enemy::combo = 0;
 
 
 Enemy::Enemy(string name, EnemyID id, Vector2 position): 
@@ -23,6 +27,11 @@ Enemy::~Enemy() {
 }
 
 void Enemy::takeDamage(DamageData &data) {
+  if (stunned == 0) {
+    PLOGI << "Reseting Combo Count.";
+    combo = 0;
+  }
+
   Combatant::takeDamage(data);
 
   if (data.assailant->team != CombatantTeam::PARTY) {
@@ -37,4 +46,24 @@ void Enemy::takeDamage(DamageData &data) {
   if (data.damage_type == DamageType::LIFE) {
     Game::sleep(data.hit_stop);
   }
+}
+
+void Enemy::enterHitstun(DamageData &data) {
+  if (state != HIT_STUN) {
+    stunned++;
+  }
+
+  if (data.stun_type != StunType::DEFENSIVE) {
+    combo++;
+    PLOGI << "Combo: " << combo;
+  }
+
+  Combatant::enterHitstun(data);
+}
+
+void Enemy::exitHitstun() {
+  Combatant::exitHitstun();
+
+  assert(stunned > 0);
+  stunned--;
 }

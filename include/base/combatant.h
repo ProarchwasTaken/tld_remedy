@@ -37,11 +37,11 @@ public:
   virtual void damageMorale(float magnitude);
   virtual void increaseMorale(float magnitude);
 
-  void enterHitstun(DamageData &data);
+  virtual void enterHitstun(DamageData &data);
   void stunLogic();
   void applyKnockback();
   void stunTintLerp();
-  void exitHitstun();
+  virtual void exitHitstun();
 
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
