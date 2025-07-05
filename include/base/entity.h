@@ -1,9 +1,11 @@
 #pragma once
+#include <cstddef>
 #include <raylib.h>
 #include <unordered_set>
 #include <vector>
 #include <memory>
 #include "data/rect_ex.h"
+#include "data/animation.h"
 #include "enums.h"
 
 
@@ -44,5 +46,7 @@ public:
   EntityType entity_type;
 
   Vector2 position;
+  Rectangle *sprite = NULL;
+  Animation *animation = NULL;
   RectEx bounding_box;
 };

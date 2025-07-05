@@ -30,6 +30,8 @@ void CombatAction::intercept(DamageData &data) {
     data.stun_type = StunType::STAGGER;
     data.calulation = DamageType::LIFE;
     data.damage_type = DamageType::LIFE;
+
+    Combatant::sfx.play("damage_stagger");
     PLOGD << "Forcing Life damage calulation, and Stagger";
   }
 }
@@ -58,7 +60,7 @@ void CombatAction::logic() {
   }
 
   if (*state_time != 0.0 && state_clock < 1.0) {
-    state_clock += Game::time() / *state_time;
+    state_clock += Game::deltaTime() / *state_time;
   }
   else {
     proceed();

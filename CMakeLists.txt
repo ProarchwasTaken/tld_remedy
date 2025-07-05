@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.3.0
+VERSION 1.4.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -44,6 +44,7 @@ set(HEADERS
 "include/data/actor.h"
 "include/data/field_event.h"
 "include/data/actor_event.h"
+"include/data/combat_event.h"
 "include/data/session.h"
 "include/data/animation.h"
 "include/data/damage.h"
@@ -52,6 +53,7 @@ set(HEADERS
 "include/utils/text.h"
 "include/utils/animation.h"
 "include/system/sprite_atlas.h"
+"include/system/sound_atlas.h"
 "include/scenes/field.h"
 "include/field/system/field_map.h"
 "include/field/system/camera.h"
@@ -64,6 +66,8 @@ set(HEADERS
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
+"include/combat/system/evt_handler.h"
+"include/combat/entities/dmg_number.h"
 "include/combat/combatants/party/mary.h"
 "include/combat/actions/attack.h"
 )
@@ -80,6 +84,7 @@ set(SOURCE
 "src/utils/text.cpp"
 "src/utils/animation.cpp"
 "src/system/sprite_atlas.cpp"
+"src/system/sound_atlas.cpp"
 "src/scenes/field.cpp"
 "src/field/system/field_map.cpp"
 "src/field/system/camera.cpp"
@@ -92,6 +97,8 @@ set(SOURCE
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
+"src/combat/system/evt_handler.cpp"
+"src/combat/entities/dmg_number.cpp"
 "src/combat/combatants/party/mary.cpp"
 "src/combat/actions/attack.cpp"
 )

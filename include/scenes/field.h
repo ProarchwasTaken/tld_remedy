@@ -8,6 +8,7 @@
 #include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
+#include "system/sound_atlas.h"
 #include "field/system/field_map.h"
 #include "field/system/camera.h"
 #include "field/system/field_handler.h"
@@ -29,15 +30,17 @@ public:
 
   void update() override;
   void eventProcessing();
-  void fieldEventHandling(std::unique_ptr<FieldEvent> &event);
+  void eventHandling(std::unique_ptr<FieldEvent> &event);
   void updateCommonData(int object_id, bool active);
   void deleteEntity(int entity_id);
 
   void draw() override;
   void drawSessionInfo();
+
+  static SoundAtlas sfx;
 private:
   FieldMap field;
-  FieldHandler field_handler;
+  FieldHandler evt_handler;
   ActorHandler actor_handler;
   Session session;
 

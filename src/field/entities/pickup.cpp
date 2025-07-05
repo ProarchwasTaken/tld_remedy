@@ -8,6 +8,7 @@
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
+#include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "field/actors/player.h"
@@ -34,6 +35,7 @@ Pickup::Pickup(PickupData &data) {
   plr = static_cast<PlayerActor*>(ptr);
 
   atlas.use();
+  animation = &anim_idle;
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
 }
 
@@ -56,6 +58,8 @@ void Pickup::interact() {
                                          entity_id);
   FieldHandler::raise<UpdateCommonEvent>(FieldEVT::UPDATE_COMMON_DATA, 
                                          object_id, false);
+
+  FieldScene::sfx.play("pickup");
   interacted = true;
 }
 
@@ -63,6 +67,8 @@ void Pickup::update() {
   if (interacted) {
     return;
   }
+
+  SpriteAnimation::play(animation, NULL, true);
 
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
@@ -76,8 +82,7 @@ void Pickup::update() {
 }
 
 void Pickup::draw() {
-  SpriteAnimation::play(anim_idle, true);
-  Rectangle *sprite = &atlas.sprites[*anim_idle.current];
+  sprite = &atlas.sprites[*animation->current];
 
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);

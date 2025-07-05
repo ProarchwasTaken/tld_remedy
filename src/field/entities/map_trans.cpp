@@ -7,6 +7,7 @@
 #include "base/actor.h"
 #include "data/entity.h"
 #include "data/field_event.h"
+#include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/actors/player.h"
 #include "field/entities/map_trans.h"
@@ -48,5 +49,6 @@ void MapTransition::update() {
       entity_id << "]";
     FieldHandler::raise<LoadMapEvent>(FieldEVT::LOAD_MAP, map_dest, 
                                       spawn_dest);
+    FieldScene::sfx.play("map_transition");
   }
 }

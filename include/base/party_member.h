@@ -2,6 +2,7 @@
 #include <string>
 #include <raylib.h>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combatant.h"
 
 
@@ -13,10 +14,13 @@ public:
   PartyMember(std::string name, PartyMemberID id, Vector2 position);
   ~PartyMember();
 
+  void takeDamage(DamageData &data) override;
+
   void damageMorale(float magnitude) override;
   void increaseMorale(float magnitude) override;
 
   PartyMemberID id;
+  bool important = false;
 
   float morale;
   float init_morale;

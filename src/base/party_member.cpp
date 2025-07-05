@@ -2,7 +2,9 @@
 #include <raymath.h>
 #include <string>
 #include "enums.h"
+#include "data/damage.h"
 #include "base/combatant.h"
+#include "game.h"
 #include "base/party_member.h"
 #include <plog/Log.h>
 
@@ -19,6 +21,14 @@ PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position):
 
 PartyMember::~PartyMember() {
   member_count--;
+}
+
+void PartyMember::takeDamage(DamageData &data) {
+  Combatant::takeDamage(data);
+
+  if (important && data.damage_type == DamageType::LIFE) {
+    Game::sleep(data.hit_stop);
+  }
 }
 
 void PartyMember::damageMorale(float magnitude) {

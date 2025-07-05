@@ -6,16 +6,16 @@ struct Player {
   char name[9] = "Mary";
   SubWeaponID sub_weapon = SubWeaponID::KNIFE;
 
-  float life = 20;
-  float max_life = 20;
+  float life = 15;
+  float max_life = 15;
 
   float init_morale = 10;
-  float max_morale = 35;
+  float max_morale = 30;
 
-  int offense = 4;
-  int defense = 4;
-  int intimid = 4;
-  int persist = 4;
+  int offense = 6;
+  int defense = 6;
+  int intimid = 6;
+  int persist = 6;
 };
 
 struct Companion {

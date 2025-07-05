@@ -34,6 +34,8 @@ Actor("Mary", ActorType::PLAYER, position, direction)
 
   rectExCorrection(bounding_box, collis_box);
   atlas.use();
+
+  sprite = getIdleSprite();
 }
 
 PlayerActor::~PlayerActor() {
@@ -150,8 +152,12 @@ void PlayerActor::update() {
 
   has_moved = !Vector2Equals(old_position, position);
   if (has_moved) {
-    move_clock += Game::time() / move_interval;
+    move_clock += Game::deltaTime() / move_interval;
+    moveAnimation();
     rectExCorrection(bounding_box, collis_box);
+  }
+  else {
+    sprite = getIdleSprite();
   }
 
   if (move_clock >= 1.0) {
@@ -168,6 +174,7 @@ void PlayerActor::moveX() {
 
   float speed = default_speed;
   if (moving_y != 0) {
+    float speed_root = std::sqrt(2);
     speed = Normalize(default_speed, 0, speed_root);
   }
 
@@ -203,19 +210,6 @@ void PlayerActor::moveY() {
   position.y += magnitude * moving_y;
 }
 
-void PlayerActor::draw() {
-  Rectangle *sprite; 
-  if (!has_moved) {
-    sprite = getIdleSprite();
-  }
-  else {
-    sprite = getWalkSprite();
-  }
-
-  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
-                 WHITE);
-}
-
 Rectangle *PlayerActor::getIdleSprite() {
   animation = NULL;
 
@@ -235,7 +229,7 @@ Rectangle *PlayerActor::getIdleSprite() {
   }
 }
 
-Rectangle *PlayerActor::getWalkSprite() {
+void PlayerActor::moveAnimation() {
   Animation *next_anim;
 
   switch (direction) {  
@@ -257,13 +251,14 @@ Rectangle *PlayerActor::getWalkSprite() {
     }
   }
 
-  if (animation != next_anim) {
-    animation = next_anim;
-    animation->current = animation->frames.begin();
-    animation->frame_clock = 0.0;
-  }
+  SpriteAnimation::play(animation, next_anim, true);
+  sprite = &atlas.sprites[*animation->current];
+}
 
-  SpriteAnimation::play(*animation, true);
-  return &atlas.sprites[*animation->current];
+
+void PlayerActor::draw() {
+  assert(sprite != NULL);
+  DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
+                 WHITE);
 }
 

@@ -1,27 +1,41 @@
+#include <cassert>
+#include <cstddef>
 #include "game.h"
 #include "data/animation.h"
 #include "utils/animation.h"
 #include <plog/Log.h>
 
 
-void SpriteAnimation::play(Animation &animation, bool loop) {
-  animation.frame_clock += Game::time() / animation.frame_duration;
+void SpriteAnimation::play(Animation *&anim, Animation *next, bool loop) {
+  bool new_animation = anim != next && next != NULL;
+  if (new_animation) {
+    anim = next;
+    anim->current = anim->frames.begin();
+    anim->frame_clock = 0.0;
+  }
 
-  if (animation.frame_clock < 1.0) {
+  assert(!anim->frames.empty());
+  if (anim->frames.size() == 1) {
     return;
   }
 
-  animation.frame_clock = 0.0;
-  animation.current++;
+  anim->frame_clock += Game::deltaTime() / anim->frame_duration;
 
-  if (animation.current != animation.frames.end()) {
+  if (anim->frame_clock < 1.0) {
+    return;
+  }
+
+  anim->frame_clock = 0.0;
+  anim->current++;
+
+  if (anim->current != anim->frames.end()) {
     return;
   }
 
   if (loop) {
-    animation.current = animation.frames.begin();
+    anim->current = anim->frames.begin();
   }
   else {
-    animation.current--;
+    anim->current--;
   }
 }

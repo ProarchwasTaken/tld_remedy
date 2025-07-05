@@ -12,6 +12,8 @@ public:
   void setup();
   void reset();
 
+  int users() {return user_count;};
+
   void use();
   void release();
 

@@ -3,5 +3,5 @@
 
 
 namespace SpriteAnimation {
-void play(Animation &animation, bool loop);
+void play(Animation *&anim, Animation *next, bool loop);
 }

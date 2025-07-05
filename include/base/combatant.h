@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "data/rect_ex.h"
 #include "base/entity.h"
+#include "system/sound_atlas.h"
 
 class CombatAction;
 struct DamageData;
@@ -19,6 +20,7 @@ struct DamageData;
 class Combatant : public Entity {
 public:
   inline static std::set<Combatant*> existing_combatants;
+  static SoundAtlas sfx;
   static Combatant *getCombatantByID(int entity_id);
 
   Combatant(std::string name, CombatantTeam team, Vector2 position, 
@@ -27,7 +29,7 @@ public:
 
   virtual void behavior() = 0;
 
-  void takeDamage(DamageData &data);
+  virtual void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
 
   virtual void damageLife(float magnitude);
@@ -35,10 +37,11 @@ public:
   virtual void damageMorale(float magnitude);
   virtual void increaseMorale(float magnitude);
 
-  void enterHitstun(DamageData &data);
+  virtual void enterHitstun(DamageData &data);
   void stunLogic();
   void applyKnockback();
-  void exitHitstun();
+  void stunTintLerp();
+  virtual void exitHitstun();
 
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
@@ -53,6 +56,7 @@ public:
 
   float life; 
   float max_life;
+  bool critical_life = false;
 
   int offense;
   int defense;
@@ -62,10 +66,17 @@ public:
   float speed_multiplier = 1.0;
 
   std::unique_ptr<CombatAction> action;
+protected:
+  Color tint = WHITE;
+
+  DamageType damage_type;
+  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
 
   float knockback = 0;
   Direction kb_direction;
+
+  Color start_tint;
 };

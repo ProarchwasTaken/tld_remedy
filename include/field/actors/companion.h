@@ -12,18 +12,19 @@
 
 class CompanionActor : public Actor {
 public:
-  CompanionActor(Vector2 position, enum Direction direction);
+  CompanionActor(CompanionID id, Vector2 position, Direction direction);
   ~CompanionActor();
+  void setupAtlas(CompanionID id);
 
   void behavior() override;
   void processEvents();
 
   void update() override;
   void pathfind();
+  Rectangle *getIdleSprite();
+  void moveAnimation();
 
   void draw() override;
-  Rectangle *getIdleSprite();
-  Rectangle *getWalkSprite();
   void drawDebug() override;
 
   static SpriteAtlas atlas;
@@ -32,9 +33,8 @@ private:
 
   std::list<std::pair<Vector2, enum Direction>> move_points;
   bool moving = false;
-  float movement_speed = 1.1;
+  float movement_speed = 56;
 
-  Animation *animation = NULL;
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
   Animation anim_right = {{3, 4, 5, 4}, 0.2};
   Animation anim_up = {{6, 7, 8, 7}, 0.2};

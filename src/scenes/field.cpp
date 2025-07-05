@@ -15,6 +15,7 @@
 #include "data/entity.h"
 #include "data/field_event.h"
 #include "data/session.h"
+#include "system/sound_atlas.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "utils/text.h"
@@ -23,13 +24,15 @@
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
-
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
-bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+
+SoundAtlas FieldScene::sfx("field");
+
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
@@ -51,6 +54,7 @@ FieldScene::FieldScene(Session *session_data) {
 
 FieldScene::~FieldScene() {
   Entity::clear(entities);
+  sfx.release();
 
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
@@ -68,6 +72,7 @@ void FieldScene::setup() {
   command_system.assignScene(this);
   #endif // !NDEBUG
   
+  sfx.use();
   Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }
@@ -81,16 +86,16 @@ void FieldScene::initCompanionData(CompanionID id) {
       std::strcpy(companion->name, "Erwin");
       companion->id = id;
 
-      companion->life = 30;
-      companion->max_life = 30;
+      companion->life = 20;
+      companion->max_life = 20;
 
       companion->init_morale = 8;
       companion->max_morale = 25;
 
-      companion->offense = 6;
-      companion->defense = 6;
-      companion->intimid = 5;
-      companion->persist = 3;
+      companion->offense = 10;
+      companion->defense = 5;
+      companion->intimid = 8;
+      companion->persist = 6;
     }
   }
 
@@ -131,7 +136,8 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      entity = make_unique<CompanionActor>(position, direction);
+      CompanionID id = session.companion.id;
+      entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
     default: {
@@ -196,7 +202,11 @@ void FieldScene::update() {
   for (Actor *actor : Actor::existing_actors) {
     actor->behavior();
   }
-  ActorHandler::clearEvents();
+  actor_handler.clearEvents();
+
+  if (Game::state() == GameState::SLEEP) {
+    return;
+  }
 
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
@@ -207,20 +217,20 @@ void FieldScene::update() {
 }
 
 void FieldScene::eventProcessing() {
-  EventPool<FieldEvent> *event_pool = field_handler.get();
+  EventPool<FieldEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Field Events raised: " << event_pool->size();
     for (auto &event : *event_pool) {
-      fieldEventHandling(event);
+      eventHandling(event);
     }
 
-    FieldHandler::clear();
+    evt_handler.clear();
   }
 
-  ActorHandler::transferEvents();
+  actor_handler.transferEvents();
 }
 
-void FieldScene::fieldEventHandling(std::unique_ptr<FieldEvent> &event) {
+void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
   switch (event->event_type) {
     case FieldEVT::LOAD_MAP: {
       PLOGD << "Event detected: LoadMapEvent";
@@ -352,7 +362,7 @@ void FieldScene::deleteEntity(int entity_id) {
 }
 
 void FieldScene::draw() {
-  std::sort(entities.begin(), entities.end(), entityAlgorithm);
+  std::sort(entities.begin(), entities.end(), fieldAlgorithm);
 
   BeginMode2D(camera); 
   {
@@ -380,7 +390,7 @@ void FieldScene::draw() {
   #endif // !NDEBUG
 }
 
-bool entityAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
+bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (e1->entity_type != e2->entity_type) {
     return e1->entity_type > e2->entity_type;
   }

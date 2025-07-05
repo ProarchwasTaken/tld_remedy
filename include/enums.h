@@ -7,7 +7,8 @@ enum class GameState {
   INIT_COMBAT,
   END_COMBAT,
   FADING_OUT,
-  FADING_IN
+  FADING_IN,
+  SLEEP,
 };
 
 enum class SceneID {
@@ -19,6 +20,7 @@ enum EntityType {
   ACTOR,
   PICKUP,
   MAP_TRANSITION,
+  DMG_NUMBER,
   COMBATANT,
 };
 
@@ -51,9 +53,9 @@ enum class EnemyID {
 };
 
 enum CombatantState {
+  ACTION,
   NEUTRAL,
   HIT_STUN,
-  ACTION,
   DEAD
 };
 
@@ -115,6 +117,11 @@ enum class ActorEVT {
   PLR_MOVING,
   PICKUP_IN,
   PICKUP_OUT,
+};
+
+enum class CombatEVT {
+  CREATE_DMG_NUM,
+  DELETE_ENTITY,
 };
 
 enum class CommandType {

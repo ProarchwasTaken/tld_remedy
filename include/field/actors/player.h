@@ -1,6 +1,4 @@
 #pragma once
-#include <cstddef>
-#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include "data/keybinds.h"
@@ -26,10 +24,10 @@ public:
   void update() override;
   void moveX();
   void moveY();
+  Rectangle *getIdleSprite();
+  void moveAnimation();
 
   void draw() override;
-  Rectangle *getIdleSprite();
-  Rectangle *getWalkSprite();
 
   static void setControllable(bool value);
   static FieldKeybinds key_bind;
@@ -40,15 +38,13 @@ public:
 private:
   static bool controllable;
 
-  const float default_speed = 1.1;
-  const float speed_root = std::sqrt(default_speed * 2);
+  const float default_speed = 56;
   int moving_x = 0;
   int moving_y = 0;
 
-  float move_clock = 0.0;
-  float move_interval = 0.25;
+  float move_clock = 1.0;
+  float move_interval = 0.30;
 
-  Animation *animation = NULL;
   Animation anim_down = {{0, 1, 2, 1}, 0.2};
   Animation anim_right = {{3, 4, 5, 4}, 0.2};
   Animation anim_up = {{6, 7, 8, 7}, 0.2};
