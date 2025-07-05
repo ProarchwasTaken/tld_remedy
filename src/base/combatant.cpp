@@ -109,6 +109,8 @@ float Combatant::damageCalulation(DamageData &data) {
       if (def_not_set) {
         data.b_def = &defense;
       }
+
+      break;
     }
     case DamageType::MORALE: {
       if (atk_not_set) {
@@ -118,16 +120,21 @@ float Combatant::damageCalulation(DamageData &data) {
       if (def_not_set) {
         data.b_def = &persist;
       }
+
+      break;
     }
   }
 
   float base_damage = data.base_damage;
   int a_atk = *data.a_atk;
+  float atk_mod = data.atk_mod;
+
   int b_def = *data.b_def;
+  float def_mod = data.def_mod;
 
   PLOGD << "Base Damage: " << base_damage;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
-  return (base_damage + a_atk) - b_def;
+  return (base_damage + (a_atk * atk_mod)) - (b_def * def_mod);
 }
 
 void Combatant::damageLife(float magnitude) {

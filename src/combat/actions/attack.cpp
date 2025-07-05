@@ -19,7 +19,6 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   user->rectExCorrection(hitbox);
   this->hitbox = hitbox;
 
-  data.base_damage = 4;
   data.damage_type = DamageType::MORALE;
   data.calulation = DamageType::MORALE;
 
