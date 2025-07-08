@@ -39,11 +39,13 @@ public:
 
   virtual void enterHitstun(DamageData &data);
   void stunLogic();
-  void applyKnockback();
+  void applyKnockback(float clock);
   void stunTintLerp();
   virtual void exitHitstun();
 
   void death();
+  void deathTintLerp();
+  void deathAlphaLerp();
   void deathLogic();
 
   void performAction(std::unique_ptr<CombatAction> &action);
@@ -71,12 +73,15 @@ public:
   std::unique_ptr<CombatAction> action;
 protected:
   Color tint = WHITE;
+  float death_time = 1.0;
 
   DamageType damage_type;
   static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
+
+  float death_clock = 0.0;
 
   float knockback = 0;
   Direction kb_direction;

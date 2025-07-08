@@ -69,7 +69,10 @@ void Combatant::takeDamage(DamageData &data) {
   float damage = Clamp(damageCalulation(data), 0, 9999);
   PLOGI << "Result: " << damage;
 
+  knockback = data.knockback;
+  kb_direction = data.assailant->direction;
   damage_type = data.damage_type;
+
   if (damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
@@ -149,8 +152,6 @@ void Combatant::damageLife(float magnitude) {
   }
 
   if (life <= 0) {
-    PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] is"
-    << " now dead!";
     death();
   }
 }
@@ -188,9 +189,6 @@ void Combatant::enterHitstun(DamageData &data) {
   stun_time = data.stun_time * multiplier;
   stun_clock = 0.0;
 
-  knockback = data.knockback;
-  kb_direction = data.assailant->direction;
-
   data.hit_stop *= multiplier;
   state = CombatantState::HIT_STUN;
 
@@ -216,7 +214,7 @@ void Combatant::stunLogic() {
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
   if (knockback != 0) {
-    applyKnockback();
+    applyKnockback(stun_clock);
   }
 
   stunTintLerp();
@@ -226,8 +224,8 @@ void Combatant::stunLogic() {
   }
 }
 
-void Combatant::applyKnockback() {
-  float percentage = 1.0 - stun_clock;
+void Combatant::applyKnockback(float clock) {
+  float percentage = 1.0 - clock;
   float magnitude = (knockback * percentage) * Game::deltaTime();
 
   position.x += magnitude * kb_direction;
@@ -257,11 +255,55 @@ void Combatant::exitHitstun() {
 }
 
 void Combatant::death() {
+  PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] is"
+  << " now dead!";
+  start_tint = Game::palette[32];
+  tint = start_tint;
+
+  knockback = knockback * 1.2;
   state = CombatantState::DEAD;
 }
 
 void Combatant::deathLogic() {
+  assert(death_time != 0);
+  death_clock += Game::deltaTime() / death_time;
+  death_clock = Clamp(death_clock, 0.0, 1.0);
 
+  if (knockback != 0) {
+    applyKnockback(death_clock);
+  }
+
+  deathTintLerp();
+  deathAlphaLerp();
+
+  if (death_clock == 1.0) {
+    PLOGD << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has"
+    << " reached the end of their death sequence.";
+    CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY, 
+                                         entity_id);
+  }
+}
+
+void Combatant::deathTintLerp() {
+  float percentage = 1.0 - Clamp(death_clock / 0.80, 0.0, 1.0);
+  Color end_tint = WHITE;
+
+  tint.r = Lerp(start_tint.r, end_tint.r, percentage);
+  tint.g = Lerp(start_tint.g, end_tint.g, percentage);
+  tint.b = Lerp(start_tint.b, end_tint.b, percentage);
+}
+
+void Combatant::deathAlphaLerp() {
+  float unflipped = Clamp(-0.20 + death_clock, 0.0, 1.0) / 0.60;
+  float percentage = Clamp(1.0 - unflipped, 0.0, 1.0);
+
+  int value = percentage * 10;
+  if (percentage == 1.0 || value % 2 != 0) {
+    tint.a = 255;
+  }
+  else {
+    tint.a = Lerp(0, 255, percentage);
+  }
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {
