@@ -66,6 +66,10 @@ void Mary::setControllable(bool value) {
 }
 
 void Mary::behavior() {
+  if (!controllable) {
+    return;
+  }
+
   if (state == CombatantState::NEUTRAL) {
     bool gamepad = IsGamepadAvailable(0);
     movementInput(gamepad);
@@ -113,6 +117,8 @@ void Mary::update() {
       break;
     }
     case CombatantState::DEAD: {
+      deathLogic();
+      sprite = &atlas.sprites[7];
       break;
     }
   }

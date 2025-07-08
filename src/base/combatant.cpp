@@ -58,6 +58,7 @@ Combatant::~Combatant() {
 }
 
 void Combatant::takeDamage(DamageData &data) {
+  assert(state != CombatantState::DEAD);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";
@@ -141,10 +142,16 @@ void Combatant::damageLife(float magnitude) {
   life = life - magnitude;
   PLOGI << "Life decreased to: " << life;
 
-  if (life < max_life * LOW_LIFE_THRESHOLD) {
+  if (!critical_life && life < max_life * LOW_LIFE_THRESHOLD) {
     PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has"
     << " entered Critical Life!";
     critical_life = true;
+  }
+
+  if (life <= 0) {
+    PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] is"
+    << " now dead!";
+    death();
   }
 }
 
@@ -157,6 +164,10 @@ void Combatant::increaseMorale(float magnitude) {
 }
 
 void Combatant::enterHitstun(DamageData &data) {
+  if (state == CombatantState::DEAD) {
+    return;
+  }
+
   StunType stun_type = data.stun_type;
 
   float multiplier;
@@ -243,6 +254,14 @@ void Combatant::exitHitstun() {
   stun_clock = 0.0;
   stun_time = 0;
   knockback = 0;
+}
+
+void Combatant::death() {
+  state = CombatantState::DEAD;
+}
+
+void Combatant::deathLogic() {
+
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {

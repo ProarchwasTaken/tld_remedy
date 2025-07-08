@@ -43,6 +43,9 @@ public:
   void stunTintLerp();
   virtual void exitHitstun();
 
+  void death();
+  void deathLogic();
+
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
 

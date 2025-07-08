@@ -49,7 +49,7 @@ void Enemy::takeDamage(DamageData &data) {
 }
 
 void Enemy::enterHitstun(DamageData &data) {
-  if (state != HIT_STUN) {
+  if (state != HIT_STUN || state != DEAD) {
     stunned++;
   }
 
