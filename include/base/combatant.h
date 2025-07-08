@@ -43,7 +43,7 @@ public:
   void stunTintLerp();
   virtual void exitHitstun();
 
-  void death();
+  virtual void death();
   void deathTintLerp();
   void deathAlphaLerp();
   void deathLogic();

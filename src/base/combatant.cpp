@@ -91,7 +91,7 @@ void Combatant::takeDamage(DamageData &data) {
                                          this, data.damage_type, damage);
   }
 
-  if (data.stun_time != 0) {
+  if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
 }
@@ -165,10 +165,7 @@ void Combatant::increaseMorale(float magnitude) {
 }
 
 void Combatant::enterHitstun(DamageData &data) {
-  if (state == CombatantState::DEAD) {
-    return;
-  }
-
+  assert(state != CombatantState::DEAD);
   StunType stun_type = data.stun_type;
 
   float multiplier;
