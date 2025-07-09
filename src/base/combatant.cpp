@@ -221,8 +221,8 @@ void Combatant::stunLogic() {
   }
 }
 
-void Combatant::applyKnockback(float clock) {
-  float percentage = 1.0 - clock;
+void Combatant::applyKnockback(float clock, float minimum) {
+  float percentage = Clamp(1.0 - clock, minimum, 1.0);
   float magnitude = (knockback * percentage) * Game::deltaTime();
 
   position.x += magnitude * kb_direction;
@@ -257,7 +257,7 @@ void Combatant::death() {
   start_tint = Game::palette[32];
   tint = start_tint;
 
-  knockback = knockback * 1.2;
+  knockback = Clamp(knockback * 1.2, 90, 180);
   state = CombatantState::DEAD;
 }
 
@@ -267,7 +267,7 @@ void Combatant::deathLogic() {
   death_clock = Clamp(death_clock, 0.0, 1.0);
 
   if (knockback != 0) {
-    applyKnockback(death_clock);
+    applyKnockback(death_clock, 0.25);
   }
 
   deathTintLerp();

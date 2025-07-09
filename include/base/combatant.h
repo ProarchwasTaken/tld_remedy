@@ -39,7 +39,7 @@ public:
 
   virtual void enterHitstun(DamageData &data);
   void stunLogic();
-  void applyKnockback(float clock);
+  void applyKnockback(float clock, float minimum = 0.0);
   void stunTintLerp();
   virtual void exitHitstun();
 
