@@ -55,9 +55,6 @@ CombatScene::~CombatScene() {
 }
 
 void CombatScene::update() {
-  if (IsKeyPressed(KEY_BACKSPACE)) {
-    Game::endCombat();
-  }
   if (IsKeyPressed(KEY_P)) {
     dummy->attack();
   }
@@ -79,6 +76,10 @@ void CombatScene::update() {
 }
 
 void CombatScene::eventProcessing() {
+  if (player->state == DEAD && player->deathClock() == 1.0) {
+    Game::endCombat();
+  }
+
   EventPool<CombatEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Combat Events raised: " << event_pool->size();
@@ -87,6 +88,10 @@ void CombatScene::eventProcessing() {
     }
 
     evt_handler.clear();
+  }
+
+  if (Enemy::memberCount() == 0) {
+    Game::endCombat();
   }
 }
 

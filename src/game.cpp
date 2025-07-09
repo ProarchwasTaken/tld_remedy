@@ -297,6 +297,10 @@ void Game::initCombat(Session *data) {
 }
 
 void Game::endCombat() {
+  if (game_state == GameState::END_COMBAT) {
+    return;
+  }
+
   PLOGI << "Preparing to end combat.";
   assert(reserve != nullptr);
 

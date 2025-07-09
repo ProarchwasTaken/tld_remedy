@@ -44,6 +44,7 @@ public:
   virtual void exitHitstun();
 
   virtual void death();
+  float deathClock() {return death_clock;}
   void deathTintLerp();
   void deathAlphaLerp();
   void deathLogic();
