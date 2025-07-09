@@ -259,6 +259,7 @@ void Combatant::death() {
 
   knockback = Clamp(knockback * 1.2, 90, 180);
   state = CombatantState::DEAD;
+  sfx.play("death");
 }
 
 void Combatant::deathLogic() {
