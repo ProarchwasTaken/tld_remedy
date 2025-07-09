@@ -42,11 +42,12 @@ private:
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
   Animation anim_move = {{4, 5, 6, 5}, 0.2};
+  Animation anim_dead = {{9, 10}, 0.60};
 
   AttackAnimSet atk_set = {
-    {{9, 10}, 0.05},
-    {{10, 9}, 0.05},
-    11
+    {{11, 12}, 0.05},
+    {{12, 11}, 0.05},
+    13
   };
 
   static bool controllable;

@@ -117,8 +117,15 @@ void Mary::update() {
       break;
     }
     case CombatantState::DEAD: {
+      if (deathClock() == 0) {
+        sprite = &atlas.sprites[7];
+      }
+      else {
+        SpriteAnimation::play(animation, &anim_dead, false);
+        sprite = &atlas.sprites[*animation->current];    
+      }
+
       deathLogic();
-      sprite = &atlas.sprites[7];
       break;
     }
   }
