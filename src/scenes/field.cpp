@@ -21,7 +21,6 @@
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
-#include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
@@ -43,8 +42,6 @@ FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   initCompanionData(companion);
 
   setup();
-  // Remove this later!
-  entities.push_back(make_unique<EnemyActor>((Vector2){288, 96}, DOWN));
 }
 
 FieldScene::FieldScene(Session *session_data) {
