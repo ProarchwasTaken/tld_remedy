@@ -21,6 +21,7 @@
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
+#include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
@@ -140,8 +141,9 @@ void FieldScene::setupActor(ActorData *data) {
       entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
-    default: {
-
+    case ActorType::ENEMY: {
+      entity = make_unique<EnemyActor>(position, direction);
+      break;
     }
   }
 

@@ -389,9 +389,57 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "color":"#ff0000",
+         "draworder":"topdown",
+         "id":8,
+         "name":"Enemies",
+         "objects":[
+                {
+                 "id":9,
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "x":344,
+                 "y":152
+                }, 
+                {
+                 "id":11,
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":2
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "x":304,
+                 "y":248
+                }, 
+                {
+                 "id":12,
+                 "properties":[
+                        {
+                         "name":"direction",
+                         "type":"int",
+                         "value":-2
+                        }],
+                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "x":80,
+                 "y":296
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":8,
- "nextobjectid":9,
+ "nextlayerid":9,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

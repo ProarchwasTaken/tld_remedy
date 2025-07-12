@@ -83,6 +83,9 @@ void FieldMap::parseMapData(Session &session, string &map_name,
     else if (layer_name == "Pickups") {
       findPickups(session, map_name, layer["objects"]);
     }
+    else if (layer_name == "Enemies") {
+      findEnemies(layer["objects"]);
+    }
   }
 
   file.close();
@@ -323,6 +326,27 @@ void FieldMap::findPickups(Session &session, string &map_name,
     if (active == 2) {
       setupCommonData(session, map_name, object_id);
     }
+  }
+}
+
+void FieldMap::findEnemies(json &layer_objects) {
+  PLOGI << "Searching for enemy data";
+
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+
+    Direction direction = Direction::DOWN;
+    for (basic_json property : object["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "direction") {
+        direction = property["value"];
+      }
+    }
+
+    PLOGD << "{X: " << x << ", Y: " << y << "}";
+    ActorData actor_data = {ACTOR, ActorType::ENEMY, {x, y}, direction};
+    entity_queue.push_back(make_unique<ActorData>(actor_data));
   }
 }
 

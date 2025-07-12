@@ -25,6 +25,7 @@ public:
   void findMapTransitions(nlohmann::json &layer_objects);
   void findPickups(Session &session, std::string &map_name, 
                    nlohmann::json &layer_objects);
+  void findEnemies(nlohmann::json &layer_objects);
 
   int activeObject(Session &session, std::string &map_name, 
                     int object_id);
