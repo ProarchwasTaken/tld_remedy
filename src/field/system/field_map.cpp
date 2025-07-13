@@ -336,18 +336,52 @@ void FieldMap::findEnemies(json &layer_objects) {
     float x = object["x"];
     float y = object["y"];
 
-    Direction direction = Direction::DOWN;
+    vector<Direction> routine;
+    float speed;
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
-      if (property_name == "direction") {
-        direction = property["value"];
+      if (property_name == "routine") {
+        string raw_routine = property["value"];
+        routine = parseEnemyRoutine(raw_routine);
+      }
+      else if (property_name == "speed") {
+        speed = property["value"];
       }
     }
 
+    assert(!routine.empty());
+
     PLOGD << "{X: " << x << ", Y: " << y << "}";
-    ActorData actor_data = {ACTOR, ActorType::ENEMY, {x, y}, direction};
-    entity_queue.push_back(make_unique<ActorData>(actor_data));
+    EnemyActorData data = {ACTOR, ActorType::ENEMY, {x, y}, DOWN, 
+      routine, speed};
+    entity_queue.push_back(make_unique<EnemyActorData>(data));
   }
+}
+
+vector<Direction> FieldMap::parseEnemyRoutine(string &raw_routine) {
+  PLOGD << "Attempting to parse enemy direction routine: '" << 
+  raw_routine << "'";
+  vector<Direction> routine;
+  string buffer;
+
+  for (char letter : raw_routine) {
+    if (letter == '-' || std::isdigit(letter)) {
+      buffer.push_back(letter);
+    }
+    else if (letter == ',') {
+      int num = std::stoi(buffer);
+      PLOGD << "Direction number: " << num;
+      buffer.clear();
+
+      routine.push_back(static_cast<Direction>(num));
+    }
+  }
+
+  if (!buffer.empty()) {
+    PLOGW << "Buffer is not empty, this may cause problems!";
+  }
+
+  return routine;
 }
 
 int FieldMap::activeObject(Session &session, string &map_name, 

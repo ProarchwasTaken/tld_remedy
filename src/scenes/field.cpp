@@ -142,7 +142,11 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::ENEMY: {
-      entity = make_unique<EnemyActor>(position, direction);
+      EnemyActorData *enemy_data = static_cast<EnemyActorData*>(data);
+      vector<Direction> routine = enemy_data->routine;
+      float speed = enemy_data->speed;
+
+      entity = make_unique<EnemyActor>(position, routine, speed);
       break;
     }
   }

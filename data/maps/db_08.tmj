@@ -400,9 +400,14 @@
                  "id":9,
                  "properties":[
                         {
-                         "name":"direction",
-                         "type":"int",
-                         "value":-1
+                         "name":"routine",
+                         "type":"string",
+                         "value":"-1,2,"
+                        }, 
+                        {
+                         "name":"speed",
+                         "type":"float",
+                         "value":2
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
                  "x":344,
@@ -412,8 +417,13 @@
                  "id":11,
                  "properties":[
                         {
-                         "name":"direction",
-                         "type":"int",
+                         "name":"routine",
+                         "type":"string",
+                         "value":"2,"
+                        }, 
+                        {
+                         "name":"speed",
+                         "type":"float",
                          "value":2
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
@@ -424,9 +434,14 @@
                  "id":12,
                  "properties":[
                         {
-                         "name":"direction",
-                         "type":"int",
-                         "value":-2
+                         "name":"routine",
+                         "type":"string",
+                         "value":"-2,"
+                        }, 
+                        {
+                         "name":"speed",
+                         "type":"float",
+                         "value":2
                         }],
                  "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
                  "x":80,
