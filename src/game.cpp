@@ -41,6 +41,7 @@ void Game::init() {
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
   SetTargetFPS(60);
+  HideCursor();
   setupCanvas();
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
@@ -88,19 +89,27 @@ void Game::start() {
   assert(scene != nullptr);
 
   while (!WindowShouldClose()) {
-    if (devmode && IsKeyPressed(KEY_F3)) {
-      toggleDebugInfo();
-    }
-    if (IsKeyPressed(KEY_F2)) {
-      takeScreenshot();
-    }
-
+    topLevelInput();
     gameLogic();
     drawScene();
   }
 
   CloseWindow();
   CloseAudioDevice();
+}
+
+void Game::topLevelInput() {
+  if (devmode && IsKeyPressed(KEY_F3)) {
+    toggleDebugInfo();
+  }
+  if (IsKeyPressed(KEY_F2)) {
+    takeScreenshot();
+  }
+  if (IsKeyPressed(KEY_F11)) {
+    ToggleBorderlessWindowed();
+    canvas_dest.width = GetScreenWidth();
+    canvas_dest.height = GetScreenHeight();
+  }
 }
 
 void Game::takeScreenshot() {
@@ -228,7 +237,7 @@ void Game::drawScene() {
   {
     DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
                    screen_tint);
-    if (debug_info) DrawFPS(24, 680);
+    if (debug_info) DrawFPS(0, 0);
   }
   EndDrawing();
 }

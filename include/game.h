@@ -14,6 +14,7 @@ public:
   void defineColorPalette();
 
   void start();
+  void topLevelInput();
   void takeScreenshot();
 
   /* The functionality of this function majorly depends on what state
