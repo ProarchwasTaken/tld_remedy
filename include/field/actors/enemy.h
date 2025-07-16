@@ -4,6 +4,7 @@
 #include "enums.h"
 #include "data/rect_ex.h"
 #include "base/actor.h"
+#include "field/actors/player.h"
 #include "system/sprite_atlas.h"
 
 
@@ -17,6 +18,11 @@ public:
   void behavior() override;
   
   void update() override;
+  void normalLogic();
+  bool sightCheck();
+
+  void pursue();
+
   void directionRoutine();
   Rectangle *getIdleSprite();
 
@@ -24,16 +30,19 @@ public:
   void drawDebug() override;
 
   static SpriteAtlas atlas;
+  static int pursuing_enemy;
 private:
   std::vector<Direction> routine;
   std::vector<Direction>::iterator current_direction;
   float routine_clock = 0.0;
 
   float speed;
+  float movement_speed = 128;
 
   RectEx sight;
-  float sight_range = 64;
+  float sight_range = 96;
+  bool pursuing = false;
 
-  Actor *plr = NULL;
+  PlayerActor *plr = NULL;
   float awaiting_deletion = false;
 };

@@ -56,6 +56,11 @@ void PlayerActor::behavior() {
     movementInput(gamepad);
     interactInput(gamepad);
   }
+  else {
+    moving_x = 0;
+    moving_y = 0;
+    moving = false;
+  }
 }
 
 void PlayerActor::processEvents() {

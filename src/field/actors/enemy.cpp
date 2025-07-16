@@ -3,17 +3,22 @@
 #include <vector>
 #include <cstddef>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
 #include "system/sprite_atlas.h"
 #include "data/field_event.h"
+#include "data/line.h"
 #include "field/system/field_handler.h"
+#include "field/system/field_map.h"
+#include "field/actors/player.h"
 #include "field/actors/enemy.h"
 #include <plog/Log.h>
 
 using std::vector;
 SpriteAtlas EnemyActor::atlas("actors", "enemy_actor");
+int EnemyActor::pursuing_enemy = -1;
 
 
 EnemyActor::EnemyActor(Vector2 position, vector<Direction> routine, 
@@ -36,6 +41,10 @@ Actor("Enemy", ActorType::ENEMY, position, *routine.begin())
 }
 
 EnemyActor::~EnemyActor() {
+  if (pursuing_enemy == entity_id) {
+    pursuing_enemy = -1;
+  }
+
   routine.clear();
   atlas.release();
 }
@@ -62,17 +71,21 @@ void EnemyActor::update() {
   if (awaiting_deletion) {
     FieldHandler::raise<DeleteEntityEvent>(FieldEVT::DELETE_ENTITY, 
                                            this->entity_id);
+    plr->setControllable(true);
     return;
   }
-
-  if (routine.size() != 1) {
-    directionRoutine();
-  }
-  sprite = getIdleSprite();
 
   if (plr == NULL) {
-    plr = Actor::getActor(ActorType::PLAYER);
+    Actor *ptr = Actor::getActor(ActorType::PLAYER);
+    plr = static_cast<PlayerActor*>(ptr);
     return;
+  }
+
+  if (!pursuing) {
+    normalLogic();
+  }
+  else {
+    pursue();
   }
 
   if (CheckCollisionRecs(collis_box.rect, plr->collis_box.rect)) {
@@ -80,6 +93,23 @@ void EnemyActor::update() {
     FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
     direction = static_cast<Direction>(plr->direction * -1);
     awaiting_deletion = true;
+  }
+}
+
+void EnemyActor::normalLogic() {
+  if (routine.size() != 1) {
+    directionRoutine();
+  }
+  sprite = getIdleSprite();
+
+  if (pursuing_enemy == -1 && sightCheck()) {
+    PLOGI << "Player has entered the line of sight of EnemyActor [ID: " 
+    << this->entity_id << "]";
+    pursuing = true;
+    pursuing_enemy = entity_id;
+
+    plr->setControllable(false);
+    Game::sleep(1.0);
   }
 }
 
@@ -116,6 +146,42 @@ Rectangle *EnemyActor::getIdleSprite() {
       return &atlas.sprites[3];
     }
   }
+}
+
+bool EnemyActor::sightCheck() {
+  if (!CheckCollisionRecs(sight.rect, plr->collis_box.rect)) {
+    return false;
+  }
+
+  Rectangle area = GetCollisionRec(sight.rect, plr->collis_box.rect);
+  float half_width = area.width / 2;
+  float half_height = area.height / 2;
+
+  Vector2 end = {area.x + half_width, area.y + half_height};
+
+  Vector2 start;
+  if (direction == LEFT || direction == RIGHT) {
+    start = {position.x, end.y};
+  }
+  else {
+    start = {end.x, position.y};
+  }
+
+  for (Line line : FieldMap::collision_lines) {
+    if (CheckCollisionLines(start, end, line.start, line.end, NULL)) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
+void EnemyActor::pursue() {
+  plr->direction = static_cast<Direction>(direction * -1);
+  float magnitude = movement_speed * Game::deltaTime();
+
+  position = Vector2MoveTowards(position, plr->position, magnitude);
+  rectExCorrection(collis_box, bounding_box);
 }
 
 void EnemyActor::draw() {
