@@ -37,7 +37,7 @@ bool Game::debug_info = false;
 
 
 void Game::init() {
-  InitWindow(WINDOW_RES.x, WINDOW_RES.y, 
+  InitWindow(window_res.x, window_res.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
   SetTargetFPS(60);
@@ -69,9 +69,14 @@ Game::~Game() {
 
 void Game::setupCanvas() {
   PLOGI << "Setting up the canvas...";
-  canvas = LoadRenderTexture(CANVAS_RES.x, CANVAS_RES.y);
+  if (!IsRenderTextureReady(canvas)) {
+    canvas = LoadRenderTexture(CANVAS_RES.x, CANVAS_RES.y);
+  }
+
   canvas_src = {0, 0, CANVAS_RES.x, -CANVAS_RES.y};
-  canvas_dest = {0, 0, WINDOW_RES.x, WINDOW_RES.y};
+  canvas_origin = {window_res.x / 2, window_res.y / 2};
+  canvas_dest = {canvas_origin.x, canvas_origin.y, 
+    window_res.x, window_res.y};
 }
 
 void Game::defineColorPalette() {
@@ -106,9 +111,7 @@ void Game::topLevelInput() {
     takeScreenshot();
   }
   if (IsKeyPressed(KEY_F11)) {
-    ToggleBorderlessWindowed();
-    canvas_dest.width = GetScreenWidth();
-    canvas_dest.height = GetScreenHeight();
+    toggleFullscreen();
   }
 }
 
@@ -128,6 +131,14 @@ void Game::takeScreenshot() {
   Image screenshot = LoadImageFromScreen();
   ExportImage(screenshot, file_path.c_str());
   UnloadImage(screenshot);
+}
+
+void Game::toggleFullscreen() {
+  PLOGI << "Toggling fullscreen.";
+  ToggleBorderlessWindowed();
+  window_res.x = GetScreenWidth();
+  window_res.y = GetScreenHeight();
+  setupCanvas();
 }
 
 void Game::gameLogic() {
@@ -160,6 +171,11 @@ void Game::gameLogic() {
 }
 
 void Game::fadeScreenProcedure() {
+  float value = Lerp(0, 255, fade_percentage);
+  screen_tint.r = value;
+  screen_tint.g = value;
+  screen_tint.b = value;
+
   float magnitude = deltaTime() / fade_time;
   if (magnitude == 0) {
     return;
@@ -174,12 +190,7 @@ void Game::fadeScreenProcedure() {
 
   fade_percentage = Clamp(fade_percentage, 0.0, 1.0);
 
-  float value = Lerp(0, 255, fade_percentage);
-  screen_tint.r = value;
-  screen_tint.g = value;
-  screen_tint.b = value;
-
-  bool finished_fading = value == 0 || value == 255;
+  bool finished_fading = fade_percentage == 0.0 || fade_percentage == 1.0;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
     game_state = GameState::READY;
@@ -235,8 +246,8 @@ void Game::drawScene() {
 
   BeginDrawing(); 
   {
-    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                   screen_tint);
+    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, 
+                   canvas_origin, 0, screen_tint);
     if (debug_info) DrawFPS(0, 0);
   }
   EndDrawing();
@@ -250,6 +261,7 @@ void Game::fadeout(float seconds) {
       Game::fade_percentage = 1.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_OUT;
+      break;
     }
     default: {
       PLOGE << "Function cannot be called in this current gamestate!";
@@ -267,6 +279,7 @@ void Game::fadein(float seconds) {
       Game::fade_percentage = 0.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
+      break;
     }
     default: {
       PLOGE << "Function cannot be called in this current gamestate!";
