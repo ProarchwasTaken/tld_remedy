@@ -2,3 +2,4 @@ log*
 build/
 .cache/
 data/session.data
+screenshots/

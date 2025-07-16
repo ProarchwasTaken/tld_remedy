@@ -1,6 +1,9 @@
+#include <string>
 #include <cassert>
 #include <fstream>
 #include <ios>
+#include <chrono>
+#include <filesystem>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
@@ -12,7 +15,9 @@
 #include "data/session.h"
 #include "game.h"
 
-using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
+using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
+std::filesystem::create_directory, std::chrono::system_clock, 
+std::string;
 
 GameState Game::game_state = GameState::READY;
 unique_ptr<Session> Game::loaded_session;
@@ -86,6 +91,9 @@ void Game::start() {
     if (devmode && IsKeyPressed(KEY_F3)) {
       toggleDebugInfo();
     }
+    if (IsKeyPressed(KEY_F2)) {
+      takeScreenshot();
+    }
 
     gameLogic();
     drawScene();
@@ -93,6 +101,24 @@ void Game::start() {
 
   CloseWindow();
   CloseAudioDevice();
+}
+
+void Game::takeScreenshot() {
+  if (DirectoryExists("screenshots") == false) {
+    PLOGD << "'screenshots' directory not found!";
+    create_directory("screenshots");
+  }
+
+  system_clock::time_point today = system_clock::now();
+  long time = system_clock::to_time_t(today);
+
+  string file_path = "screenshots/remedy_" + 
+    std::to_string(time) + ".png";
+
+  PLOGI << "Saved screenshot: '" << file_path << "'";
+  Image screenshot = LoadImageFromScreen();
+  ExportImage(screenshot, file_path.c_str());
+  UnloadImage(screenshot);
 }
 
 void Game::gameLogic() {

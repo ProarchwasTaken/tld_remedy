@@ -14,6 +14,7 @@ public:
   void defineColorPalette();
 
   void start();
+  void takeScreenshot();
 
   /* The functionality of this function majorly depends on what state
    * the game is in. Updating the scene, fading the screen, and loading
