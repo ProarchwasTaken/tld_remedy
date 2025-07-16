@@ -40,6 +40,8 @@ public:
   static SoundAtlas sfx;
 private:
   FieldMap field;
+  Texture vignette;
+
   FieldHandler evt_handler;
   ActorHandler actor_handler;
   Session session;

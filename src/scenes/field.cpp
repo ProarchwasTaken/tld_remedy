@@ -57,6 +57,8 @@ FieldScene::~FieldScene() {
   Entity::clear(entities);
   sfx.release();
 
+  UnloadTexture(vignette);
+
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the Field scene.";
@@ -74,6 +76,7 @@ void FieldScene::setup() {
   #endif // !NDEBUG
   
   sfx.use();
+  vignette = LoadTexture("graphics/overlays/field_vignette.png");
   Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }
@@ -389,6 +392,8 @@ void FieldScene::draw() {
     #endif // !NDEBUG
   }
   EndMode2D();
+
+  DrawTextureV(vignette, {0, 0}, WHITE);
 
   #ifndef NDEBUG
   CommandSystem::drawBuffer();
