@@ -213,7 +213,7 @@ void Game::initCombatProcedure() {
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
-  game_state = GameState::READY;
+  Game::fadein(0.75);
 }
 
 void Game::endCombatProcedure() {
@@ -252,6 +252,7 @@ void Game::fadeout(float seconds) {
       game_state = GameState::FADING_OUT;
     }
     default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
       return;
     }
   }
@@ -260,13 +261,15 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: {
+    case GameState::LOADING_SESSION: 
+    case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
       Game::fade_percentage = 0.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
     }
     default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
       return;
     }
   }

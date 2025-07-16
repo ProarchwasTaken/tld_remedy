@@ -36,7 +36,7 @@ CombatScene::CombatScene(Session *session) {
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
-  auto dummy = make_unique<Dummy>((Vector2){256, 152}, LEFT);
+  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
   this->dummy = dummy.get();
   entities.push_back(std::move(dummy));
   #endif // !NDEBUG
