@@ -7,6 +7,10 @@
     {
       "name": "pickup",
       "filename": "field/pickup.mp3"
+    },
+    {
+      "name": "enemy_alert",
+      "filename": "field/enemy_alert.mp3"
     }
   ]
 }

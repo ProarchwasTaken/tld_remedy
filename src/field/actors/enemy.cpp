@@ -10,6 +10,7 @@
 #include "system/sprite_atlas.h"
 #include "data/field_event.h"
 #include "data/line.h"
+#include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/field_map.h"
 #include "field/actors/player.h"
@@ -36,6 +37,9 @@ Actor("Enemy", ActorType::ENEMY, position, *routine.begin())
   rectExCorrection(bounding_box, collis_box);
   correctSightRect();
 
+  emotes = &FieldScene::emotes;
+  emotes->use();
+
   atlas.use();
   sprite = getIdleSprite();
 }
@@ -47,6 +51,7 @@ EnemyActor::~EnemyActor() {
 
   routine.clear();
   atlas.release();
+  emotes->release();
 }
 
 void EnemyActor::correctSightRect() {
@@ -106,9 +111,12 @@ void EnemyActor::normalLogic() {
     PLOGI << "Player has entered the line of sight of EnemyActor [ID: " 
     << this->entity_id << "]";
     pursuing = true;
+    show_emote = true;
     pursuing_enemy = entity_id;
 
     plr->setControllable(false);
+
+    FieldScene::sfx.play("enemy_alert");
     Game::sleep(1.0);
   }
 }
@@ -149,7 +157,7 @@ Rectangle *EnemyActor::getIdleSprite() {
 }
 
 bool EnemyActor::sightCheck() {
-  if (!CheckCollisionRecs(sight.rect, plr->collis_box.rect)) {
+  if (!CheckCollisionPointRec(plr->position, sight.rect)) {
     return false;
   }
 
@@ -177,6 +185,10 @@ bool EnemyActor::sightCheck() {
 }
 
 void EnemyActor::pursue() {
+  if (show_emote) {
+    show_emote = false;
+  }
+
   plr->direction = static_cast<Direction>(direction * -1);
   float magnitude = movement_speed * Game::deltaTime();
 
@@ -186,12 +198,19 @@ void EnemyActor::pursue() {
 
 void EnemyActor::draw() {
   assert(sprite != NULL);
+
   Rectangle dest = bounding_box.rect;
 
   float sinY = std::sinf(GetTime() * 2) * 1.5;
   dest.y += sinY;
 
   DrawTexturePro(atlas.sheet, *sprite, dest, {0, 0}, 0, WHITE);
+
+  if (show_emote) {
+    Rectangle dest = {position.x, bounding_box.position.y, 16, 16};
+    Rectangle *emote = &emotes->sprites[0];
+    DrawTexturePro(emotes->sheet, *emote, dest, {8, 16}, 0, WHITE);
+  }
 }
 
 void EnemyActor::drawDebug() {

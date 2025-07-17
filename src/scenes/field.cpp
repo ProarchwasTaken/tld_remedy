@@ -18,6 +18,7 @@
 #include "system/sound_atlas.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
+#include "system/sprite_atlas.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
@@ -33,6 +34,7 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 SoundAtlas FieldScene::sfx("field");
+SpriteAtlas FieldScene::emotes("entities", "emote_balloons");
 
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {

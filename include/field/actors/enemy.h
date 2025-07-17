@@ -39,6 +39,9 @@ private:
   float speed;
   float movement_speed = 128;
 
+  SpriteAtlas *emotes;
+  bool show_emote = false;
+
   RectEx sight;
   float sight_range = 96;
   bool pursuing = false;
