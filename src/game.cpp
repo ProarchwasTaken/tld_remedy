@@ -25,7 +25,9 @@ unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
 Font Game::med_font;
+
 Color *Game::palette;
+Color Game::flash_color = {0, 0, 0, 0};
 
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
@@ -220,11 +222,37 @@ void Game::loadSessionProcedure() {
 }
 
 void Game::initCombatProcedure() {
-  PLOGI << "Switching over to the Combat scene.";
-  scene.swap(reserve);
+  static float clock = 0.0;
+  static float sequence_time = 1.5;
 
-  assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
-  Game::fadein(0.75);
+  clock += deltaTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  if (flash_color.a != 0) {
+    float percentage = 1.0 - (clock / 0.20);
+    percentage = Clamp(percentage, 0.0, 1.0);
+
+    flash_color.a = Lerp(0, 255, percentage);
+  }
+
+  if (clock >= 0.20) {
+    float unflipped = Clamp(-0.20 + clock, 0.0, 1.0) / 0.10;
+    float percentage = Clamp(1.0 - unflipped, 0.0, 1.0);
+
+    canvas_dest.height = Lerp(0, window_res.y, percentage);
+    canvas_origin.y = canvas_dest.height / 2;
+  }
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Combat scene.";
+    scene.swap(reserve);
+    assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
+
+    clock = 0.0;
+    setupCanvas();
+    Game::fadein(0.25);
+    fadeScreenProcedure();
+  }
 }
 
 void Game::endCombatProcedure() {
@@ -246,8 +274,13 @@ void Game::drawScene() {
 
   BeginDrawing(); 
   {
+    ClearBackground(BLACK);
     DrawTexturePro(canvas.texture, canvas_src, canvas_dest, 
                    canvas_origin, 0, screen_tint);
+    if (flash_color.a != 0) {
+      DrawRectangleV({0, 0}, window_res, flash_color);
+    }
+
     if (debug_info) DrawFPS(0, 0);
   }
   EndDrawing();
@@ -344,6 +377,7 @@ void Game::initCombat(Session *data) {
   assert(reserve == nullptr);
 
   reserve = make_unique<CombatScene>(data);
+  flash_color = WHITE;
   game_state = GameState::INIT_COMBAT;
 }
 

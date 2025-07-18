@@ -11,6 +11,10 @@
     {
       "name": "enemy_alert",
       "filename": "field/enemy_alert.mp3"
+    },
+    {
+      "name": "combat_init",
+      "filename": "field/combat_init.mp3"
     }
   ]
 }

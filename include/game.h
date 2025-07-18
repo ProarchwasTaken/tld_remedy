@@ -72,6 +72,8 @@ private:
   static float sleep_time;
   float sleep_clock = 0.0;
 
+  static Color flash_color;
+
   Vector2 window_res = {1280, 720};
   Color screen_tint = WHITE;
 
