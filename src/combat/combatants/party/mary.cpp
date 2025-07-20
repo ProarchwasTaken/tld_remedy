@@ -70,11 +70,12 @@ void Mary::behavior() {
   if (!controllable) {
     return;
   }
+  bool gamepad = IsGamepadAvailable(0);
+  actionInput(gamepad);
 
   if (state == CombatantState::NEUTRAL) {
-    bool gamepad = IsGamepadAvailable(0);
     movementInput(gamepad);
-    actionInput(gamepad);
+    readActionBuffer();
   }
 }
 
@@ -87,17 +88,52 @@ void Mary::movementInput(bool gamepad) {
 }
 
 void Mary::actionInput(bool gamepad) {
-  unique_ptr<CombatAction> action;
-
-  if (Input::pressed(key_bind.attack, gamepad)) {
-    RectEx hitbox;
-    hitbox.scale = {28, 8};
-    hitbox.offset = {-14 + (14.0f * direction), -50};
-
-    action = make_unique<Attack>(this, atlas, hitbox, atk_set);
+  if (buffer != MaryAction::NONE) {
+    return;
   }
 
-  if (action != nullptr) {
+  if (Input::pressed(key_bind.attack, gamepad)) {
+    PLOGI << "Sending Attack input to buffer.";
+    buffer = MaryAction::ATTACK;
+  }
+  else {
+    return;
+  }
+
+  if (state != NEUTRAL) {
+    PLOGD << "Input has been added to buffer while the player is not in"
+      << " neutral!";
+  }
+}
+
+void Mary::readActionBuffer() {
+  if (buffer == MaryAction::NONE) {
+    return;
+  }
+  PLOGI << "Reading action buffer.";
+  PLOGD << "Time since input was added to buffer: " 
+    << buffer_lifetime * buffer_clock;
+  PLOGD << "Timing percentage: " << buffer_clock;
+
+  unique_ptr<CombatAction> action;
+  switch (buffer) {
+    default: {
+      assert(buffer != MaryAction::NONE);
+    }
+    case MaryAction::ATTACK: {
+      RectEx hitbox;
+      hitbox.scale = {28, 8};
+      hitbox.offset = {-14 + (14.0f * direction), -50};
+
+      action = make_unique<Attack>(this, atlas, hitbox, atk_set);
+      break;
+    }
+  }
+
+  buffer = MaryAction::NONE;
+  buffer_clock = 0.0;
+
+  if (action != nullptr) {  
     performAction(action);
   }
 }
@@ -130,6 +166,11 @@ void Mary::update() {
       break;
     }
   }
+
+  if (buffer != MaryAction::NONE) {
+    bufferTimer();
+  }
+
 }
 
 void Mary::neutralLogic() {
@@ -150,6 +191,15 @@ void Mary::neutralLogic() {
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];
+}
+
+void Mary::bufferTimer() {
+  buffer_clock += Game::deltaTime() / buffer_lifetime;
+  if (buffer_clock >= 1.0) {
+    PLOGI << "Resetting action buffer.";
+    buffer = MaryAction::NONE;
+    buffer_clock = 0.0;
+  }
 }
 
 void Mary::movement() {
