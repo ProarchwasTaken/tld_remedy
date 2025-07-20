@@ -34,11 +34,13 @@ CombatScene::CombatScene(Session *session) {
   this->player = player.get();
   entities.push_back(std::move(player));
 
-  #ifndef NDEBUG
-  debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
+  // TODO: Don't forget to remove this when the time comes!
   auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
   this->dummy = dummy.get();
   entities.push_back(std::move(dummy));
+
+  #ifndef NDEBUG
+  debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
   #endif // !NDEBUG
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
@@ -54,6 +56,7 @@ CombatScene::~CombatScene() {
 }
 
 void CombatScene::update() {
+  // TODO: Don't forget to remove this when the time comes!
   if (IsKeyPressed(KEY_P)) {
     dummy->attack();
   }

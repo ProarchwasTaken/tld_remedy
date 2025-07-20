@@ -70,6 +70,7 @@ set(HEADERS
 "include/combat/system/evt_handler.h"
 "include/combat/entities/dmg_number.h"
 "include/combat/combatants/party/mary.h"
+"include/combat/combatants/enemy/dummy.h"
 "include/combat/actions/attack.h"
 )
 set(SOURCE
@@ -102,6 +103,7 @@ set(SOURCE
 "src/combat/system/evt_handler.cpp"
 "src/combat/entities/dmg_number.cpp"
 "src/combat/combatants/party/mary.cpp"
+"src/combat/combatants/enemy/dummy.cpp"
 "src/combat/actions/attack.cpp"
 )
 
@@ -109,11 +111,9 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
-  "include/combat/combatants/enemy/dummy.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
-  "src/combat/combatants/enemy/dummy.cpp"
   )
 endif()
 
