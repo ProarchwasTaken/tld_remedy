@@ -10,6 +10,7 @@
 #include "data/damage.h"
 #include "data/combat_event.h"
 #include "system/sound_atlas.h"
+#include "utils/collision.h"
 #include "base/combat_action.h"
 #include "combat/system/evt_handler.h"
 #include "base/combatant.h"
@@ -106,25 +107,13 @@ float Combatant::damageCalulation(DamageData &data) {
 
   switch (data.calulation) {
     case DamageType::LIFE: {
-      if (atk_not_set) {
-        data.a_atk = &assailant->offense;
-      }
-
-      if (def_not_set) {
-        data.b_def = &defense;
-      }
-
+      if (atk_not_set) data.a_atk = &assailant->offense;
+      if (def_not_set) data.b_def = &defense;
       break;
     }
     case DamageType::MORALE: {
-      if (atk_not_set) {
-        data.a_atk = &assailant->intimid;
-      }
-
-      if (def_not_set) {
-        data.b_def = &persist;
-      }
-
+      if (atk_not_set) data.a_atk = &assailant->intimid;
+      if (def_not_set) data.b_def = &persist; 
       break;
     }
   }
@@ -225,9 +214,15 @@ void Combatant::applyKnockback(float clock, float minimum) {
   float percentage = Clamp(1.0 - clock, minimum, 1.0);
   float magnitude = (knockback * percentage) * Game::deltaTime();
 
-  position.x += magnitude * kb_direction;
-  direction = static_cast<Direction>(kb_direction * -1);
+  if (state != DEAD && Collision::checkX(this, magnitude, kb_direction)) {
+    Collision::snapX(this, kb_direction);
+    stun_clock = Clamp(stun_clock, 0.75, 1.0);
+  }
+  else {
+    position.x += magnitude * kb_direction; 
+  }
 
+  direction = static_cast<Direction>(kb_direction * -1);
   rectExCorrection(bounding_box, hurtbox);
 }
 

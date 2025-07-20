@@ -13,6 +13,7 @@
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/animation.h"
+#include "utils/collision.h"
 #include "combat/actions/attack.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
@@ -159,19 +160,13 @@ void Mary::movement() {
   direction = static_cast<Direction>(moving_x);
 
   float speed = default_speed * speed_multiplier;
-  float magnitude = (speed * direction) * Game::deltaTime();
-  float half_scale = (hurtbox.scale.x / 2) * direction;
-  float offset = magnitude + half_scale;
+  float magnitude = speed * Game::deltaTime();
 
-  float bounds = 512;
-  if (position.x + offset > bounds) {
-    position.x = bounds - half_scale;
-  }
-  else if (position.x + offset < -bounds) {
-    position.x = -bounds - half_scale;
+  if (Collision::checkX(this, magnitude, direction)) {
+    Collision::snapX(this, direction);
   }
   else {
-    position.x += magnitude;
+    position.x += magnitude * direction;
   }
 }
 
