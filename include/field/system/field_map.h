@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include "enums.h"
 #include "data/session.h"
 #include "data/entity.h"
 #include "data/line.h"
@@ -25,6 +26,8 @@ public:
   void findMapTransitions(nlohmann::json &layer_objects);
   void findPickups(Session &session, std::string &map_name, 
                    nlohmann::json &layer_objects);
+  void findEnemies(nlohmann::json &layer_objects);
+  std::vector<Direction> parseEnemyRoutine(std::string &raw_routine);
 
   int activeObject(Session &session, std::string &map_name, 
                     int object_id);

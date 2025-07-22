@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.4.0
+VERSION 1.5.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -61,6 +61,7 @@ set(HEADERS
 "include/field/system/actor_handler.h"
 "include/field/actors/player.h"
 "include/field/actors/companion.h"
+"include/field/actors/enemy.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
 "include/scenes/combat.h"
@@ -69,6 +70,7 @@ set(HEADERS
 "include/combat/system/evt_handler.h"
 "include/combat/entities/dmg_number.h"
 "include/combat/combatants/party/mary.h"
+"include/combat/combatants/enemy/dummy.h"
 "include/combat/actions/attack.h"
 )
 set(SOURCE
@@ -92,6 +94,7 @@ set(SOURCE
 "src/field/system/actor_handler.cpp"
 "src/field/actors/player.cpp"
 "src/field/actors/companion.cpp"
+"src/field/actors/enemy.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
 "src/scenes/combat.cpp"
@@ -100,6 +103,7 @@ set(SOURCE
 "src/combat/system/evt_handler.cpp"
 "src/combat/entities/dmg_number.cpp"
 "src/combat/combatants/party/mary.cpp"
+"src/combat/combatants/enemy/dummy.cpp"
 "src/combat/actions/attack.cpp"
 )
 
@@ -107,11 +111,9 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
-  "include/combat/combatants/enemy/dummy.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
-  "src/combat/combatants/enemy/dummy.cpp"
   )
 endif()
 

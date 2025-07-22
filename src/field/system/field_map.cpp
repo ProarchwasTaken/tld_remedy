@@ -83,6 +83,9 @@ void FieldMap::parseMapData(Session &session, string &map_name,
     else if (layer_name == "Pickups") {
       findPickups(session, map_name, layer["objects"]);
     }
+    else if (layer_name == "Enemies") {
+      findEnemies(layer["objects"]);
+    }
   }
 
   file.close();
@@ -324,6 +327,61 @@ void FieldMap::findPickups(Session &session, string &map_name,
       setupCommonData(session, map_name, object_id);
     }
   }
+}
+
+void FieldMap::findEnemies(json &layer_objects) {
+  PLOGI << "Searching for enemy data";
+
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+
+    vector<Direction> routine;
+    float speed;
+    for (basic_json property : object["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "routine") {
+        string raw_routine = property["value"];
+        routine = parseEnemyRoutine(raw_routine);
+      }
+      else if (property_name == "speed") {
+        speed = property["value"];
+      }
+    }
+
+    assert(!routine.empty());
+
+    PLOGD << "{X: " << x << ", Y: " << y << "}";
+    EnemyActorData data = {ACTOR, ActorType::ENEMY, {x, y}, DOWN, 
+      routine, speed};
+    entity_queue.push_back(make_unique<EnemyActorData>(data));
+  }
+}
+
+vector<Direction> FieldMap::parseEnemyRoutine(string &raw_routine) {
+  PLOGD << "Attempting to parse enemy direction routine: '" << 
+  raw_routine << "'";
+  vector<Direction> routine;
+  string buffer;
+
+  for (char letter : raw_routine) {
+    if (letter == '-' || std::isdigit(letter)) {
+      buffer.push_back(letter);
+    }
+    else if (letter == ',') {
+      int num = std::stoi(buffer);
+      PLOGD << "Direction number: " << num;
+      buffer.clear();
+
+      routine.push_back(static_cast<Direction>(num));
+    }
+  }
+
+  if (!buffer.empty()) {
+    PLOGW << "Buffer is not empty, this may cause problems!";
+  }
+
+  return routine;
 }
 
 int FieldMap::activeObject(Session &session, string &map_name, 

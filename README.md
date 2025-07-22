@@ -24,6 +24,8 @@ This section goes over the game's default controls.
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
 
+* **P Key** - To make Dummy attack. (For testing purposes!)
+
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
 may be different depending on what controller you use.

@@ -18,9 +18,11 @@
 #include "system/sound_atlas.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
+#include "system/sprite_atlas.h"
 #include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
+#include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "scenes/field.h"
@@ -32,6 +34,7 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 SoundAtlas FieldScene::sfx("field");
+SpriteAtlas FieldScene::emotes("entities", "emote_balloons");
 
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
@@ -56,6 +59,8 @@ FieldScene::~FieldScene() {
   Entity::clear(entities);
   sfx.release();
 
+  UnloadTexture(vignette);
+
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
   PLOGI << "Unloaded the Field scene.";
@@ -73,6 +78,7 @@ void FieldScene::setup() {
   #endif // !NDEBUG
   
   sfx.use();
+  vignette = LoadTexture("graphics/overlays/field_vignette.png");
   Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }
@@ -140,8 +146,13 @@ void FieldScene::setupActor(ActorData *data) {
       entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
-    default: {
+    case ActorType::ENEMY: {
+      EnemyActorData *enemy_data = static_cast<EnemyActorData*>(data);
+      vector<Direction> routine = enemy_data->routine;
+      float speed = enemy_data->speed;
 
+      entity = make_unique<EnemyActor>(position, routine, speed);
+      break;
     }
   }
 
@@ -263,6 +274,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::INIT_COMBAT: {
       PLOGI << "Event Detected: InitCombatEvent";
 
+      sfx.play("combat_init");
       Game::initCombat(&session);
       break;
     }
@@ -384,6 +396,8 @@ void FieldScene::draw() {
   }
   EndMode2D();
 
+  DrawTextureV(vignette, {0, 0}, WHITE);
+
   #ifndef NDEBUG
   CommandSystem::drawBuffer();
   if (Game::debugInfo()) drawSessionInfo();
@@ -423,19 +437,7 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
-  string plr_mp = TextFormat("%s Morale: %02.00f / %02.00f", player->name,
-                             player->init_morale, player->max_morale);
-  Vector2 pmp_pos = TextUtils::alignRight(plr_mp.c_str(), {base_x, y}, 
-                                          *font, -3, 0);
-  y += spacing;
 
-  string plr_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
-                                player->name, player->offense,
-                                player->defense, player->intimid,
-                                player->persist);
-  Vector2 pst_pos = TextUtils::alignRight(plr_stats.c_str(), {base_x, y}, 
-                                          *font, -3, 0);
-  y += spacing;
 
   Companion *companion = &session.companion;
   string com_hp = TextFormat("%s Life: %02.00f / %02.00f", 
@@ -445,26 +447,15 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
-  string com_mp = TextFormat("%s Morale: %02.00f / %02.00f", 
-                             companion->name, companion->init_morale,
-                             companion->max_morale);
-  Vector2 cmp_pos = TextUtils::alignRight(com_mp.c_str(), {base_x, y}, 
+  string pursue = TextFormat("Persuing Enemy: %i", 
+                             EnemyActor::pursuing_enemy);
+  Vector2 per_pos = TextUtils::alignRight(pursue.c_str(), {base_x, y}, 
                                           *font, -3, 0);
-  y += spacing;
 
-  string com_stats = TextFormat("%s Stats: {%02i, %02i, %02i, %02i}",
-                                companion->name, companion->offense,
-                                companion->defense, companion->intimid,
-                                companion->persist);
-  Vector2 cst_pos = TextUtils::alignRight(com_stats.c_str(), {base_x, y}, 
-                                          *font, -3, 0);
 
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, plr_mp.c_str(), pmp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, plr_stats.c_str(), pst_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, com_mp.c_str(), cmp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, com_stats.c_str(), cst_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }

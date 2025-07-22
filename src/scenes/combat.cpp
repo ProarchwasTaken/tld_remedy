@@ -26,20 +26,21 @@ CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
   scene_id = SceneID::COMBAT;
+  this->session = session;
 
   stage.loadStage("debug");
 
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
-
   entities.push_back(std::move(player));
+
+  // TODO: Don't forget to remove this when the time comes!
+  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
+  this->dummy = dummy.get();
+  entities.push_back(std::move(dummy));
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
-  auto dummy = make_unique<Dummy>((Vector2){256, 152}, LEFT);
-  this->dummy = dummy.get();
-
-  entities.push_back(std::move(dummy));
   #endif // !NDEBUG
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
@@ -55,9 +56,7 @@ CombatScene::~CombatScene() {
 }
 
 void CombatScene::update() {
-  if (IsKeyPressed(KEY_BACKSPACE)) {
-    Game::endCombat();
-  }
+  // TODO: Don't forget to remove this when the time comes!
   if (IsKeyPressed(KEY_P)) {
     dummy->attack();
   }
@@ -79,6 +78,11 @@ void CombatScene::update() {
 }
 
 void CombatScene::eventProcessing() {
+  game_over = player->state == DEAD && player->deathClock() == 1.0;
+  if (game_over || Enemy::memberCount() == 0) {
+    endCombatProcedure();
+  }
+
   EventPool<CombatEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Combat Events raised: " << event_pool->size();
@@ -136,6 +140,20 @@ void CombatScene::deleteEntity(int entity_id) {
 
   entities.clear();
   temporary.swap(entities);
+}
+
+void CombatScene::endCombatProcedure() {
+  Player *plr_data = &session->player;
+  if (!game_over) {
+    PLOGI << "All enemies are defeated!";
+    plr_data->life = player->life;
+  }
+  else {
+    PLOGI << "The party leader has died...";
+    plr_data->life = 1;
+  }
+
+  Game::endCombat();
 }
 
 void CombatScene::draw() {

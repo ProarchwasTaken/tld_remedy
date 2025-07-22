@@ -14,6 +14,9 @@ public:
   void defineColorPalette();
 
   void start();
+  void topLevelInput();
+  void takeScreenshot();
+  void toggleFullscreen();
 
   /* The functionality of this function majorly depends on what state
    * the game is in. Updating the scene, fading the screen, and loading
@@ -47,7 +50,6 @@ public:
   static void sleep(float seconds);
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr Vector2 WINDOW_RES = {1280, 720};
   static constexpr unsigned int session_version = 1;
 
   static Font sm_font;
@@ -70,11 +72,15 @@ private:
   static float sleep_time;
   float sleep_clock = 0.0;
 
+  static Color flash_color;
+
+  Vector2 window_res = {1280, 720};
   Color screen_tint = WHITE;
 
   RenderTexture canvas;
   Rectangle canvas_src;
   Rectangle canvas_dest;
+  Vector2 canvas_origin;
 
   std::unique_ptr<Scene> scene;
   static std::unique_ptr<Scene> reserve;

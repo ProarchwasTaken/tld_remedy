@@ -83,7 +83,7 @@ void CombatCamera::enemyTargeting(PartyMember *player) {
 }
 
 void CombatCamera::follow(float x) {
-  float bounds = 512 - 213;
+  float bounds = 512 - 212;
 
   if (x >= 0 && x > bounds) {
     x = bounds;

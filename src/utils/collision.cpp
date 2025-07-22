@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include "enums.h"
 #include "base/actor.h"
+#include "base/combatant.h"
 #include "data/line.h"
 #include "data/rect_ex.h"
 #include "field/system/field_map.h"
@@ -139,4 +141,33 @@ void Collision::snapY(Actor *actor, float y, int y_direction) {
 
   float difference = actor->position.y - collis_y;
   actor->position.y = y + difference; 
+}
+
+int Collision::checkX(Combatant *combatant, float magnitude, 
+                      Direction direction) 
+{
+  RectEx *hurtbox = &combatant->hurtbox;
+
+  float half_scale = hurtbox->scale.x / 2;
+  float offset = (magnitude + half_scale) * direction;
+  float bounds = 512;
+
+  float x = combatant->position.x;
+  if (x + offset > bounds) {
+    return 1;
+  }
+  else if (x + offset < -bounds) {
+    return -1;
+  }
+  else {
+    return 0;
+  }
+}
+
+void Collision::snapX(Combatant *combatant, Direction direction) {
+  RectEx *hurtbox = &combatant->hurtbox;
+  float half_scale = hurtbox->scale.x / 2;
+  float bounds = 512;
+
+  combatant->position.x = (bounds - half_scale) * direction;
 }

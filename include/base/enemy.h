@@ -20,6 +20,8 @@ public:
   void enterHitstun(DamageData &data) override;
   void exitHitstun() override;
 
+  void death() override;
+
   EnemyID id;
 private:
   static int member_count;

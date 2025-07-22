@@ -45,10 +45,10 @@ private:
   float move_clock = 1.0;
   float move_interval = 0.30;
 
-  Animation anim_down = {{0, 1, 2, 1}, 0.2};
-  Animation anim_right = {{3, 4, 5, 4}, 0.2};
-  Animation anim_up = {{6, 7, 8, 7}, 0.2};
-  Animation anim_left = {{9, 10, 11, 10}, 0.2};
+  Animation anim_down = {{0, 1, 2, 1}, 0.25};
+  Animation anim_right = {{3, 4, 5, 4}, 0.25};
+  Animation anim_up = {{6, 7, 8, 7}, 0.25};
+  Animation anim_left = {{9, 10, 11, 10}, 0.25};
 
   std::unique_ptr<ActorEvent> pickup_event;
 };

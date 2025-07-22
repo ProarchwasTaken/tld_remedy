@@ -8,6 +8,7 @@
 #include "data/actor.h"
 #include "data/field_event.h"
 #include "data/session.h"
+#include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "field/system/field_map.h"
 #include "field/system/camera.h"
@@ -38,8 +39,11 @@ public:
   void drawSessionInfo();
 
   static SoundAtlas sfx;
+  static SpriteAtlas emotes;
 private:
   FieldMap field;
+  Texture vignette;
+
   FieldHandler evt_handler;
   ActorHandler actor_handler;
   Session session;

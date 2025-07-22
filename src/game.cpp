@@ -1,6 +1,9 @@
+#include <string>
 #include <cassert>
 #include <fstream>
 #include <ios>
+#include <chrono>
+#include <filesystem>
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
@@ -12,7 +15,9 @@
 #include "data/session.h"
 #include "game.h"
 
-using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr;
+using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
+std::filesystem::create_directory, std::chrono::system_clock, 
+std::string;
 
 GameState Game::game_state = GameState::READY;
 unique_ptr<Session> Game::loaded_session;
@@ -20,7 +25,9 @@ unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
 Font Game::med_font;
+
 Color *Game::palette;
+Color Game::flash_color = {0, 0, 0, 0};
 
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
@@ -32,10 +39,11 @@ bool Game::debug_info = false;
 
 
 void Game::init() {
-  InitWindow(WINDOW_RES.x, WINDOW_RES.y, 
+  InitWindow(window_res.x, window_res.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
   SetTargetFPS(60);
+  HideCursor();
   setupCanvas();
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
@@ -63,9 +71,14 @@ Game::~Game() {
 
 void Game::setupCanvas() {
   PLOGI << "Setting up the canvas...";
-  canvas = LoadRenderTexture(CANVAS_RES.x, CANVAS_RES.y);
+  if (!IsRenderTextureReady(canvas)) {
+    canvas = LoadRenderTexture(CANVAS_RES.x, CANVAS_RES.y);
+  }
+
   canvas_src = {0, 0, CANVAS_RES.x, -CANVAS_RES.y};
-  canvas_dest = {0, 0, WINDOW_RES.x, WINDOW_RES.y};
+  canvas_origin = {window_res.x / 2, window_res.y / 2};
+  canvas_dest = {canvas_origin.x, canvas_origin.y, 
+    window_res.x, window_res.y};
 }
 
 void Game::defineColorPalette() {
@@ -83,16 +96,51 @@ void Game::start() {
   assert(scene != nullptr);
 
   while (!WindowShouldClose()) {
-    if (devmode && IsKeyPressed(KEY_F3)) {
-      toggleDebugInfo();
-    }
-
+    topLevelInput();
     gameLogic();
     drawScene();
   }
 
   CloseWindow();
   CloseAudioDevice();
+}
+
+void Game::topLevelInput() {
+  if (devmode && IsKeyPressed(KEY_F3)) {
+    toggleDebugInfo();
+  }
+  if (IsKeyPressed(KEY_F2)) {
+    takeScreenshot();
+  }
+  if (IsKeyPressed(KEY_F11)) {
+    toggleFullscreen();
+  }
+}
+
+void Game::takeScreenshot() {
+  if (DirectoryExists("screenshots") == false) {
+    PLOGD << "'screenshots' directory not found!";
+    create_directory("screenshots");
+  }
+
+  system_clock::time_point today = system_clock::now();
+  long time = system_clock::to_time_t(today);
+
+  string file_path = "screenshots/remedy_" + 
+    std::to_string(time) + ".png";
+
+  PLOGI << "Saved screenshot: '" << file_path << "'";
+  Image screenshot = LoadImageFromScreen();
+  ExportImage(screenshot, file_path.c_str());
+  UnloadImage(screenshot);
+}
+
+void Game::toggleFullscreen() {
+  PLOGI << "Toggling fullscreen.";
+  ToggleBorderlessWindowed();
+  window_res.x = GetScreenWidth();
+  window_res.y = GetScreenHeight();
+  setupCanvas();
 }
 
 void Game::gameLogic() {
@@ -125,6 +173,11 @@ void Game::gameLogic() {
 }
 
 void Game::fadeScreenProcedure() {
+  float value = Lerp(0, 255, fade_percentage);
+  screen_tint.r = value;
+  screen_tint.g = value;
+  screen_tint.b = value;
+
   float magnitude = deltaTime() / fade_time;
   if (magnitude == 0) {
     return;
@@ -139,12 +192,7 @@ void Game::fadeScreenProcedure() {
 
   fade_percentage = Clamp(fade_percentage, 0.0, 1.0);
 
-  float value = Lerp(0, 255, fade_percentage);
-  screen_tint.r = value;
-  screen_tint.g = value;
-  screen_tint.b = value;
-
-  bool finished_fading = value == 0 || value == 255;
+  bool finished_fading = fade_percentage == 0.0 || fade_percentage == 1.0;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
     game_state = GameState::READY;
@@ -174,11 +222,37 @@ void Game::loadSessionProcedure() {
 }
 
 void Game::initCombatProcedure() {
-  PLOGI << "Switching over to the Combat scene.";
-  scene.swap(reserve);
+  static float clock = 0.0;
+  static float sequence_time = 1.5;
 
-  assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
-  game_state = GameState::READY;
+  clock += deltaTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  if (flash_color.a != 0) {
+    float percentage = 1.0 - (clock / 0.20);
+    percentage = Clamp(percentage, 0.0, 1.0);
+
+    flash_color.a = Lerp(0, 255, percentage);
+  }
+
+  if (clock >= 0.20) {
+    float unflipped = Clamp(-0.20 + clock, 0.0, 1.0) / 0.10;
+    float percentage = Clamp(1.0 - unflipped, 0.0, 1.0);
+
+    canvas_dest.height = Lerp(0, window_res.y, percentage);
+    canvas_origin.y = canvas_dest.height / 2;
+  }
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Combat scene.";
+    scene.swap(reserve);
+    assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
+
+    clock = 0.0;
+    setupCanvas();
+    Game::fadein(0.25);
+    fadeScreenProcedure();
+  }
 }
 
 void Game::endCombatProcedure() {
@@ -200,9 +274,14 @@ void Game::drawScene() {
 
   BeginDrawing(); 
   {
-    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, {0, 0}, 0, 
-                   screen_tint);
-    if (debug_info) DrawFPS(24, 680);
+    ClearBackground(BLACK);
+    DrawTexturePro(canvas.texture, canvas_src, canvas_dest, 
+                   canvas_origin, 0, screen_tint);
+    if (flash_color.a != 0) {
+      DrawRectangleV({0, 0}, window_res, flash_color);
+    }
+
+    if (debug_info) DrawFPS(0, 0);
   }
   EndDrawing();
 }
@@ -215,8 +294,10 @@ void Game::fadeout(float seconds) {
       Game::fade_percentage = 1.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_OUT;
+      break;
     }
     default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
       return;
     }
   }
@@ -225,13 +306,16 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: {
+    case GameState::LOADING_SESSION: 
+    case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
       Game::fade_percentage = 0.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
+      break;
     }
     default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
       return;
     }
   }
@@ -293,10 +377,15 @@ void Game::initCombat(Session *data) {
   assert(reserve == nullptr);
 
   reserve = make_unique<CombatScene>(data);
+  flash_color = WHITE;
   game_state = GameState::INIT_COMBAT;
 }
 
 void Game::endCombat() {
+  if (game_state == GameState::END_COMBAT) {
+    return;
+  }
+
   PLOGI << "Preparing to end combat.";
   assert(reserve != nullptr);
 

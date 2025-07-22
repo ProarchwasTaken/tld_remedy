@@ -13,6 +13,10 @@
       "filename": "combat/damage_stagger.mp3"
     },
     {
+      "name": "death",
+      "filename": "combat/death.mp3"
+    },
+    {
       "name": "attack",
       "filename": "combat/attack.mp3"
     }

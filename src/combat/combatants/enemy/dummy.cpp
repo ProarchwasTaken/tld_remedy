@@ -15,7 +15,7 @@ SpriteAtlas Dummy::atlas("combatants", "dummy");
 Dummy::Dummy(Vector2 position, Direction direction) :  
   Enemy("Dummy", EnemyID::DUMMY, position)
 {
-  max_life = 50;
+  max_life = 15;
   life = max_life;
 
   offense = 9;
@@ -63,8 +63,10 @@ void Dummy::update() {
       sprite = &atlas.sprites[1];
       break;
     }
-    default: {
-
+    case CombatantState::DEAD: {
+      deathLogic();
+      sprite = &atlas.sprites[1];
+      break;
     }
   }
 }

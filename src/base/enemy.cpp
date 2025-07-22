@@ -24,6 +24,12 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 
 Enemy::~Enemy() {
   member_count--;
+  assert(member_count == 0);
+
+  if (state == DEAD) {
+    assert(stunned > 0);
+    stunned--;
+  }
 }
 
 void Enemy::takeDamage(DamageData &data) {
@@ -49,6 +55,7 @@ void Enemy::takeDamage(DamageData &data) {
 }
 
 void Enemy::enterHitstun(DamageData &data) {
+  assert(state != DEAD);
   if (state != HIT_STUN) {
     stunned++;
   }
@@ -66,4 +73,15 @@ void Enemy::exitHitstun() {
 
   assert(stunned > 0);
   stunned--;
+}
+
+void Enemy::death() {
+  if (state != HIT_STUN) {
+    stunned++;
+  }
+
+  combo++;
+  PLOGI << "Combo: " << combo;
+
+  Combatant::death();
 }

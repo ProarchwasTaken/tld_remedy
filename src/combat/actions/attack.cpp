@@ -47,13 +47,16 @@ void Attack::windUp() {
 }
 
 void Attack::action() {
-
   if (attack_connected) {
     return;
   }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant->team == user->team) {
+      continue;
+    }
+
+    if (combatant->state == CombatantState::DEAD) {
       continue;
     }
 

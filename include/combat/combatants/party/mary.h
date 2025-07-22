@@ -7,6 +7,11 @@
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 
+enum class MaryAction {
+  NONE = -1,
+  ATTACK,
+};
+
 
 /* Mary is a Combatant whose directly controlled by the player. As such,
  * most of their behavior is determined by user input. This combatant is
@@ -21,9 +26,11 @@ public:
   void behavior() override;
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
+  void readActionBuffer();
 
   void update() override;
   void neutralLogic();
+  void bufferTimer();
   void movement();
 
   Animation *getIdleAnim();
@@ -39,14 +46,19 @@ private:
 
   float last_moved = 0.0;
 
+  MaryAction buffer = MaryAction::NONE;
+  float buffer_lifetime = 0.067;
+  float buffer_clock = 0.0;
+
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
   Animation anim_move = {{4, 5, 6, 5}, 0.2};
+  Animation anim_dead = {{9, 10}, 0.60};
 
   AttackAnimSet atk_set = {
-    {{9, 10}, 0.05},
-    {{10, 9}, 0.05},
-    11
+    {{11, 12}, 0.05},
+    {{12, 11}, 0.05},
+    13
   };
 
   static bool controllable;
