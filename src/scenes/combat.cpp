@@ -57,7 +57,7 @@ CombatScene::~CombatScene() {
 
 void CombatScene::update() {
   // TODO: Don't forget to remove this when the time comes!
-  if (IsKeyPressed(KEY_P)) {
+  if (IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
   }
   // TODO: This too!

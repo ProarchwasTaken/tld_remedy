@@ -76,7 +76,7 @@ void Mary::behavior() {
   movementInput(gamepad);
   actionInput(gamepad);
 
-  if (state == CombatantState::NEUTRAL) {
+  if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
   }
 }
@@ -116,6 +116,25 @@ void Mary::bufferDefensiveAction() {
     PLOGI << "Sending GhostStep input to buffer.";
     buffer = MaryAction::GHOST_STEP;
     return;
+  }
+}
+
+bool Mary::canCancel() {
+  if (state != CombatantState::ACTION || buffer == MaryAction::NONE) {
+    return false;
+  }
+
+  bool in_end_lag = action->phase == ActionPhase::END_LAG;
+  if (!in_end_lag) {
+    return false;
+  }
+
+  ActionID action_id = action->id;
+  if (action_id == ActionID::GHOST_STEP) {
+    return buffer != MaryAction::GHOST_STEP;
+  }
+  else {
+    return buffer == MaryAction::GHOST_STEP;
   }
 }
 

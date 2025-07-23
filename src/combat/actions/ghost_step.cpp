@@ -8,7 +8,7 @@
 
 GhostStep::GhostStep(Combatant *user, int direction_x): 
   CombatAction(ActionID::GHOST_STEP, ActionType::DEFENSE, user, 
-               0.0, 0.20, 0.20)
+               0.0, 0.20, 0.10)
 {
   name = "Ghost Step";
 

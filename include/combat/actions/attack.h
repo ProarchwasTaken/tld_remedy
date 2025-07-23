@@ -22,6 +22,7 @@ class Attack : public CombatAction {
 public:
   Attack(Combatant *user, SpriteAtlas &user_atlas, 
          RectEx hitbox, AttackAnimSet &anim_set);
+  void updateFrameDuration();
 
   void windUp() override;
   void action() override;
