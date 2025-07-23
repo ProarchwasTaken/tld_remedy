@@ -60,6 +60,10 @@ void CombatScene::update() {
   if (IsKeyPressed(KEY_P)) {
     dummy->attack();
   }
+  // TODO: This too!
+  if (IsKeyPressed(KEY_O)) {
+    player->increaseExhaustion(7.5);
+  }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
@@ -235,6 +239,10 @@ void CombatScene::drawDebugInfo() {
   Vector2 pmp_pos = position;
   position.y += spacing;
 
+  string p_ex = TextFormat("Exhaustion: %02.02f", player->exhaustion);
+  Vector2 pex_pos = position;
+  position.y += spacing;
+
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
   Vector2 combo_pos = position;
 
@@ -242,5 +250,6 @@ void CombatScene::drawDebugInfo() {
   DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, p_ex.c_str(), pex_pos, text_size, -3, GREEN);
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }

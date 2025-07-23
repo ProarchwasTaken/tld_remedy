@@ -141,6 +141,10 @@ void Mary::readActionBuffer() {
 void Mary::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
+      if (exhaustion != 0) {
+        depleteExhaustion();
+      }
+
       neutralLogic();
       break;
     }
