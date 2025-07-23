@@ -52,6 +52,10 @@ void Attack::action() {
   }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant->intangible) {
+      continue;
+    }
+
     if (combatant->team == user->team) {
       continue;
     }

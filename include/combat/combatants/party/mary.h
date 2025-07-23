@@ -10,6 +10,7 @@
 enum class MaryAction {
   NONE = -1,
   ATTACK,
+  GHOST_STEP,
 };
 
 
@@ -26,6 +27,8 @@ public:
   void behavior() override;
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
+  void bufferDefensiveAction();
+
   void readActionBuffer();
 
   void update() override;

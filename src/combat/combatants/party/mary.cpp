@@ -15,6 +15,7 @@
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -70,11 +71,12 @@ void Mary::behavior() {
   if (!controllable) {
     return;
   }
+
   bool gamepad = IsGamepadAvailable(0);
+  movementInput(gamepad);
   actionInput(gamepad);
 
   if (state == CombatantState::NEUTRAL) {
-    movementInput(gamepad);
     readActionBuffer();
   }
 }
@@ -96,6 +98,9 @@ void Mary::actionInput(bool gamepad) {
     PLOGI << "Sending Attack input to buffer.";
     buffer = MaryAction::ATTACK;
   }
+  else if (Input::pressed(key_bind.defensive, gamepad)) {
+    bufferDefensiveAction();
+  }
   else {
     return;
   }
@@ -103,6 +108,14 @@ void Mary::actionInput(bool gamepad) {
   if (state != NEUTRAL) {
     PLOGD << "Input has been added to buffer while the player is not in"
       << " neutral!";
+  }
+}
+
+void Mary::bufferDefensiveAction() {
+  if (moving) {
+    PLOGI << "Sending GhostStep input to buffer.";
+    buffer = MaryAction::GHOST_STEP;
+    return;
   }
 }
 
@@ -126,6 +139,13 @@ void Mary::readActionBuffer() {
       hitbox.offset = {-14 + (14.0f * direction), -50};
 
       action = make_unique<Attack>(this, atlas, hitbox, atk_set);
+      break;
+    }
+    case MaryAction::GHOST_STEP: {
+      if (!critical_life) {
+        increaseExhaustion(5.5);
+        action = make_unique<GhostStep>(this, moving_x);
+      }
       break;
     }
   }

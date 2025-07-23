@@ -62,6 +62,8 @@ public:
 
   float life; 
   float max_life;
+
+  bool intangible = false;
   bool critical_life = false;
 
   int offense;
