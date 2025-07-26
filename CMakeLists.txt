@@ -73,6 +73,7 @@ set(HEADERS
 "include/combat/combatants/enemy/dummy.h"
 "include/combat/actions/attack.h"
 "include/combat/actions/ghost_step.h"
+"include/combat/actions/evade.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -107,6 +108,7 @@ set(SOURCE
 "src/combat/combatants/enemy/dummy.cpp"
 "src/combat/actions/attack.cpp"
 "src/combat/actions/ghost_step.cpp"
+"src/combat/actions/evade.cpp"
 )
 
 if(${BUILD_DEV})

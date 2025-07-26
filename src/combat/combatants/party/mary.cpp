@@ -16,6 +16,7 @@
 #include "utils/collision.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -99,7 +100,7 @@ void Mary::actionInput(bool gamepad) {
     buffer = MaryAction::ATTACK;
   }
   else if (Input::pressed(key_bind.defensive, gamepad)) {
-    bufferDefensiveAction();
+    defensiveActionInput(gamepad);
   }
   else {
     return;
@@ -111,10 +112,15 @@ void Mary::actionInput(bool gamepad) {
   }
 }
 
-void Mary::bufferDefensiveAction() {
+void Mary::defensiveActionInput(bool gamepad) {
   if (moving) {
     PLOGI << "Sending GhostStep input to buffer.";
     buffer = MaryAction::GHOST_STEP;
+    return;
+  }
+  else if (Input::down(key_bind.down, gamepad)) {
+    PLOGI << "Sending Evade input to buffer.";
+    buffer = MaryAction::EVADE;
     return;
   }
 }
@@ -130,7 +136,10 @@ bool Mary::canCancel() {
   }
 
   ActionID action_id = action->id;
-  if (action_id == ActionID::GHOST_STEP) {
+  if (action_id == ActionID::EVADE) {
+    return buffer != MaryAction::EVADE;
+  }
+  else if (action_id == ActionID::GHOST_STEP) {
     return buffer != MaryAction::GHOST_STEP;
   }
   else {
@@ -151,6 +160,7 @@ void Mary::readActionBuffer() {
   switch (buffer) {
     default: {
       assert(buffer != MaryAction::NONE);
+      break;
     }
     case MaryAction::ATTACK: {
       RectEx hitbox;
@@ -164,6 +174,17 @@ void Mary::readActionBuffer() {
       if (!critical_life) {
         increaseExhaustion(5.5);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
+      }
+
+      break;
+    }
+    case MaryAction::EVADE: {
+      if (!critical_life) {
+        RectEx hitbox;
+        hitbox.scale = {8, 46};
+        hitbox.offset = {-4 + (8.0f * direction), -48};
+
+        action = make_unique<Evade>(this, hitbox);
       }
       break;
     }

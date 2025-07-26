@@ -27,6 +27,7 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
 
   data.knockback = 90.0;
   data.hit_stop = 0.2;
+
   data.assailant = user;
 
   this->user_atlas = &user_atlas;
@@ -71,6 +72,7 @@ void Attack::action() {
     }
 
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
+      data.hitbox = &hitbox.rect;
       combatant->takeDamage(data);
       attack_connected = true;
 
