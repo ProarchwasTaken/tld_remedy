@@ -21,6 +21,7 @@ public:
 
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();
+  void depleteInstant();
 
   PartyMemberID id;
   bool important = false;

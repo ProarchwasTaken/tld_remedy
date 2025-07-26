@@ -90,3 +90,14 @@ void PartyMember::depleteExhaustion() {
     critical_life = false;
   }
 }
+
+void PartyMember::depleteInstant() {
+  life += exhaustion;
+  exhaustion = 0;
+
+  if (critical_life && life >= max_life * LOW_LIFE_THRESHOLD) {
+    PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
+      "] is no longer Winded.";
+    critical_life = false;
+  }
+}

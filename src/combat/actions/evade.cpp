@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
+#include "game.h"
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
@@ -46,9 +47,17 @@ void Evade::intercept(DamageData &data) {
 
   float damage = Clamp(user->damageCalulation(data), 0, 9999);
   PLOGD << "Result: " << damage;
+  if (user->important && state_clock <= 0.25) {
+    PLOGI << "Perfect Evasion! Exhaustion depleted!";
+    PLOGD << "Timing: " << act_time * state_clock;
+    user->depleteInstant();
+    Game::sleep(0.5);
+  }
+  else {
+    PLOGD << "Redirection damage towards the combatant's exhaustion.";
+    user->increaseExhaustion(damage); 
+  }
 
-  PLOGD << "Redirection damage towards the combatant's exhaustion.";
-  user->increaseExhaustion(damage);
  
   state_clock = 1.0;
   data.intercepted = true;

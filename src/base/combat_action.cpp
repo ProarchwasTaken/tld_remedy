@@ -1,5 +1,7 @@
 #include <cassert>
 #include <cstddef>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "data/damage.h"
@@ -61,6 +63,7 @@ void CombatAction::logic() {
 
   if (*state_time != 0.0 && state_clock < 1.0) {
     state_clock += Game::deltaTime() / *state_time;
+    state_clock = Clamp(state_clock, 0.0, 1.0);
   }
   else {
     proceed();
