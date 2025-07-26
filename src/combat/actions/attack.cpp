@@ -11,7 +11,7 @@
 
 
 Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
-               RectEx hitbox, AttackAnimSet &anim_set): 
+               RectEx hitbox, AtkAnimSet &anim_set): 
   CombatAction(ActionID::ATTACK, ActionType::OFFENSE_MP, user, 
                0.10, 0.05, 0.25)
 {

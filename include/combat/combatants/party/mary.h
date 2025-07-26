@@ -6,6 +6,7 @@
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 
 enum class MaryAction {
   NONE = -1,
@@ -59,11 +60,13 @@ private:
   Animation anim_move = {{4, 5, 6, 5}, 0.2};
   Animation anim_dead = {{9, 10}, 0.60};
 
-  AttackAnimSet atk_set = {
+  AtkAnimSet atk_set = {
     {{11, 12}, 0.05},
     {{12, 11}, 0.05},
     13
   };
+
+  GSSpriteSet gs_set = {14, 8, 15};
 
   static bool controllable;
   static SpriteAtlas atlas;

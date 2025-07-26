@@ -18,7 +18,7 @@ public:
   void draw() override;
   void drawDebug() override;
 
-  AttackAnimSet atk_set = {
+  AtkAnimSet atk_set = {
     {{2, 3}, 0.05},
     {{3, 2}, 0.05},
     4

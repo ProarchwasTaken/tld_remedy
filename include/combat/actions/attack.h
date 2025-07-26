@@ -7,7 +7,7 @@
 #include "system/sprite_atlas.h"
 
 
-struct AttackAnimSet {
+struct AtkAnimSet {
   Animation wind_up;
   Animation end_lag;
   int atk_sprite = 0;
@@ -21,7 +21,7 @@ struct AttackAnimSet {
 class Attack : public CombatAction {
 public:
   Attack(Combatant *user, SpriteAtlas &user_atlas, 
-         RectEx hitbox, AttackAnimSet &anim_set);
+         RectEx hitbox, AtkAnimSet &anim_set);
   void updateFrameDuration();
 
   void windUp() override;
@@ -33,7 +33,7 @@ private:
   RectEx hitbox;
 
   DamageData data;
-  AttackAnimSet *anim_set;
+  AtkAnimSet *anim_set;
   SpriteAtlas *user_atlas;
   bool attack_connected = false;
 };

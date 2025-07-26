@@ -19,6 +19,10 @@
     {
       "name": "attack",
       "filename": "combat/attack.mp3"
+    },
+    {
+      "name": "ghost_step",
+      "filename": "combat/ghost_step.mp3"
     }
   ]
 }
