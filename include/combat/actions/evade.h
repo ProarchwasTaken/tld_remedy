@@ -16,6 +16,8 @@ public:
   void endLag() override;
 
   void drawDebug() override;
+
+  bool evaded_attack = false;
 private:
   PartyMember *user;
   RectEx hitbox;

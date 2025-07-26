@@ -38,6 +38,7 @@ void Evade::intercept(DamageData &data) {
  
   state_clock = 1.0;
   data.intercepted = true;
+  evaded_attack = true;
   PLOGI << "Interception complete.";
 }
 

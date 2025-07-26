@@ -137,7 +137,8 @@ bool Mary::canCancel() {
 
   ActionID action_id = action->id;
   if (action_id == ActionID::EVADE) {
-    return buffer != MaryAction::EVADE;
+    Evade *evade_action = static_cast<Evade*>(action.get());
+    return buffer != MaryAction::EVADE && evade_action->evaded_attack;
   }
   else if (action_id == ActionID::GHOST_STEP) {
     return buffer != MaryAction::GHOST_STEP;
