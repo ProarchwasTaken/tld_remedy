@@ -20,6 +20,20 @@ Evade::Evade(PartyMember *user, RectEx hitbox):
   this->hitbox = hitbox;
 }
 
+Evade::~Evade() {
+  bool user_cancel = !finished && user->state == CombatantState::ACTION;
+  if (!user_cancel) {
+    user->intangible = false;
+    return;
+  }
+
+  ActionID new_action_id = user->action->id;
+
+  if (new_action_id != ActionID::GHOST_STEP) {
+    user->intangible = false;
+  }
+}
+
 void Evade::intercept(DamageData &data) {
   bool valid = data.hitbox != NULL && phase == ActionPhase::ACTIVE;
   if (!valid || !CheckCollisionRecs(hitbox.rect, *data.hitbox)) {
@@ -38,6 +52,8 @@ void Evade::intercept(DamageData &data) {
  
   state_clock = 1.0;
   data.intercepted = true;
+
+  user->intangible = true;
   evaded_attack = true;
   PLOGI << "Interception complete.";
 }
@@ -51,7 +67,10 @@ void Evade::action() {
 }
 
 void Evade::endLag() {
-
+  bool end_phase = state_clock >= 1.0;
+  if (end_phase) {
+    user->intangible = false;
+  }
 }
 
 

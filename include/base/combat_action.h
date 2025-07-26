@@ -37,4 +37,5 @@ public:
   float state_clock = 0.0;
 protected:
   Combatant *user;
+  bool finished = false;
 };

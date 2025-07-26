@@ -77,6 +77,7 @@ void CombatAction::proceed() {
     PLOGI << "COMBATANT: '" << user->name << "' [ID: " << user->entity_id
       << "] has finished performing ACTION: '" << name << "'";
     user->state = CombatantState::NEUTRAL;
+    finished = true;
   }
 
   state_clock = 0.0;

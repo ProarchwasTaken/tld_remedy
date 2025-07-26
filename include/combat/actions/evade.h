@@ -8,6 +8,7 @@
 class Evade : public CombatAction {
 public:
   Evade(PartyMember *user, RectEx hitbox);
+  ~Evade();
 
   void intercept(DamageData &data) override;
 
