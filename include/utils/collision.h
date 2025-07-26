@@ -1,5 +1,4 @@
 #pragma once
-#include "enums.h"
 #include "base/actor.h"
 #include "base/combatant.h"
 

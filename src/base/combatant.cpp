@@ -63,8 +63,14 @@ void Combatant::takeDamage(DamageData &data) {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";
+
   if (state == CombatantState::ACTION) {
     action->intercept(data);
+  }
+
+  if (data.intercepted) {
+    PLOGD << "Damage data has been intercepted. Canceling function.";
+    return;
   }
 
   float damage = Clamp(damageCalulation(data), 0, 9999);

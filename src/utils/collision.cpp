@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
-#include "enums.h"
 #include "base/actor.h"
 #include "base/combatant.h"
 #include "data/line.h"
