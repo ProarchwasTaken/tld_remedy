@@ -4,6 +4,7 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "system/sprite_atlas.h"
+#include "utils/collision.h"
 #include "combat/actions/ghost_step.h"
 
 
@@ -16,6 +17,7 @@ GhostStep::GhostStep(Combatant *user, SpriteAtlas &user_atlas,
 
   assert(direction_x != 0);
   velocity = (120 * direction_x) * user->speed_multiplier;
+  this->direction_x = direction_x;
 
   user->intangible = true;
   this->user_atlas = &user_atlas;
@@ -31,7 +33,15 @@ GhostStep::GhostStep(Combatant *user, SpriteAtlas &user_atlas,
 }
 
 void GhostStep::action() {
-  user->position.x += velocity * Game::deltaTime();
+  float magnitude = velocity * Game::deltaTime();
+  if (Collision::checkX(user, magnitude, direction_x)) {
+    Collision::snapX(user, direction_x);
+    state_clock = 1.0;
+  }
+  else {
+    user->position.x += magnitude;
+  }
+
   user->rectExCorrection(user->bounding_box, user->hurtbox);
 
   bool end_phase = state_clock >= 1.0;
@@ -43,8 +53,14 @@ void GhostStep::action() {
 
 void GhostStep::endLag() {
   float percentage = 1.0 - state_clock;
-  float magnitude = velocity * percentage;
+  float magnitude = (velocity * percentage) * Game::deltaTime();
 
-  user->position.x += magnitude * Game::deltaTime();
+  if (Collision::checkX(user, magnitude, direction_x)) {
+    Collision::snapX(user, direction_x);
+  }
+  else {
+    user->position.x += magnitude;
+  }
+
   user->rectExCorrection(user->bounding_box, user->hurtbox);
 }

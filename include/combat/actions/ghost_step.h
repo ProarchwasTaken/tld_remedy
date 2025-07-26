@@ -25,6 +25,7 @@ public:
   void endLag() override;
 private:
   float velocity; 
+  int direction_x;
 
   GSSpriteSet *sprite_set;
   SpriteAtlas *user_atlas;
