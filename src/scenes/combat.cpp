@@ -73,6 +73,8 @@ void CombatScene::update() {
     return;
   }
 
+  stage.update();
+
   for (unique_ptr<Entity> &entity : entities) {
     entity->update();
   }

@@ -6,6 +6,7 @@
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
+#include "combat/system/stage.h"
 #include "combat/actions/evade.h"
 #include <plog/Log.h>
 
@@ -41,7 +42,9 @@ void Evade::intercept(DamageData &data) {
     CombatAction::intercept(data);
     return;
   }
+
   PLOGI << "Conditions have been met to intercept damage function";
+  PLOGD << "Timing: " << act_time * state_clock;
   data.b_def = &user->persist;
   data.def_mod += 0.40;
 
@@ -49,8 +52,9 @@ void Evade::intercept(DamageData &data) {
   PLOGD << "Result: " << damage;
   if (user->important && state_clock <= 0.25) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
-    PLOGD << "Timing: " << act_time * state_clock;
     user->depleteInstant();
+
+    CombatStage::tintStage(Game::palette[2]);
     Game::sleep(0.5);
   }
   else {
