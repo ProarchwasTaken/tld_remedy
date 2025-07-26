@@ -308,12 +308,12 @@ void Combatant::deathAlphaLerp() {
 void Combatant::performAction(unique_ptr<CombatAction> &action) {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]" <<
     " is performing ACTION: '" << action->name << "'";
-  if (this->action != nullptr) {
-    this->action.reset();
-  }
+  unique_ptr<CombatAction> old_action;
+  old_action.swap(this->action);
 
   this->action.swap(action);
   state = CombatantState::ACTION;
+  old_action.reset();
 } 
 
 void Combatant::cancelAction() {
