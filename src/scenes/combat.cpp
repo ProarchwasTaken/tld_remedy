@@ -152,6 +152,7 @@ void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
   if (!game_over) {
     PLOGI << "All enemies are defeated!";
+    player->depleteInstant();
     plr_data->life = player->life;
   }
   else {
