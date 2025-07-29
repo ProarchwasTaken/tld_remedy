@@ -57,6 +57,7 @@ public:
   std::string name;
   CombatantTeam team;
   CombatantState state;
+
   Direction direction;
   RectEx hurtbox;
 

@@ -7,6 +7,7 @@
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 
 enum class MaryAction {
   NONE = -1,
@@ -68,6 +69,7 @@ private:
   };
 
   GSSpriteSet gs_set = {14, 8, 15};
+  EvadeSpriteSet ev_set = {16, 17, 16, 19, 18};
 
   static bool controllable;
   static SpriteAtlas atlas;

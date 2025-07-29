@@ -185,7 +185,7 @@ void Mary::readActionBuffer() {
         hitbox.scale = {8, 46};
         hitbox.offset = {-4 + (8.0f * direction), -48};
 
-        action = make_unique<Evade>(this, hitbox);
+        action = make_unique<Evade>(this, atlas, hitbox, ev_set);
       }
       break;
     }

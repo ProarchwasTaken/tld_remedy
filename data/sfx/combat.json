@@ -23,6 +23,14 @@
     {
       "name": "ghost_step",
       "filename": "combat/ghost_step.mp3"
+    },
+    {
+      "name": "evade",
+      "filename": "combat/evade.mp3"
+    },
+    {
+      "name": "evade_perfect",
+      "filename": "combat/evade_perfect.mp3"
     }
   ]
 }
