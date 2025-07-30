@@ -65,27 +65,22 @@ void CombatScene::update() {
   if (IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
   }
-  // TODO: This too!
-  if (IsKeyPressed(KEY_O)) {
-    player->increaseExhaustion(7.5);
-  }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
 
-  if (Game::state() == GameState::SLEEP) {
-    return;
+  if (Game::state() == GameState::READY) {
+    stage.update();
+
+    for (unique_ptr<Entity> &entity : entities) {
+      entity->update();
+    }
+
+    camera.update(player);
+    plr_hud.update();
+    eventProcessing();
   }
-
-  stage.update();
-
-  for (unique_ptr<Entity> &entity : entities) {
-    entity->update();
-  }
-
-  camera.update(player);
-  eventProcessing();
 }
 
 void CombatScene::eventProcessing() {

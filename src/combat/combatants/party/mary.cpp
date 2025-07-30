@@ -33,6 +33,7 @@ Mary::Mary(Player *plr):
   important = true;
   life = plr->life;
   max_life = plr->max_life;
+  critical_life = life < max_life * LOW_LIFE_THRESHOLD;
 
   init_morale = plr->init_morale;
   morale = init_morale;

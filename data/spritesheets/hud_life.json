@@ -11,6 +11,18 @@
     {
       "filename": "life_empty",
       "frame": {"x": 7, "y": 16, "w": 6, "h": 3}
+    },
+    {
+      "filename": "morale_frame",
+      "frame": {"x": 0, "y": 20, "w": 78, "h": 12}
+    },
+    {
+      "filename": "morale_bar",
+      "frame": {"x": 0, "y": 33, "w": 69, "h": 2}
+    },
+    {
+      "filename": "morale_empty",
+      "frame": {"x": 0, "y": 36, "w": 69, "h": 2}
     }
   ],
   "meta": {
