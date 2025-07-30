@@ -1,0 +1,19 @@
+{ 
+  "frames": [ 
+    {
+      "filename": "life_frame",
+      "frame": {"x": 0, "y": 0, "w": 78, "h": 13}
+    },
+    {
+      "filename": "life_chunk",
+      "frame": {"x": 0, "y": 16, "w": 6, "h": 3}
+    },
+    {
+      "filename": "life_empty",
+      "frame": {"x": 7, "y": 16, "w": 6, "h": 3}
+    }
+  ],
+  "meta": {
+    "size": {"w": 80, "h": 24}
+  }
+}

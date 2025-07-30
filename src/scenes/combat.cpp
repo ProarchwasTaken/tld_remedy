@@ -29,15 +29,7 @@ CombatScene::CombatScene(Session *session) {
   this->session = session;
 
   stage.loadStage("debug");
-
-  auto player = make_unique<Mary>(&session->player);
-  this->player = player.get();
-  entities.push_back(std::move(player));
-
-  // TODO: Don't forget to remove this when the time comes!
-  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
-  this->dummy = dummy.get();
-  entities.push_back(std::move(dummy));
+  initializeCombatants();
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
@@ -53,6 +45,19 @@ CombatScene::~CombatScene() {
   UnloadTexture(debug_overlay);
   assert(Combatant::existing_combatants.empty());
   PLOGI << "Unloaded the Combat scene.";
+}
+
+void CombatScene::initializeCombatants() {
+  PLOGI << "Initializing combatants.";
+  auto player = make_unique<Mary>(&session->player);
+  this->player = player.get();
+  plr_hud.assign(this->player);
+  entities.push_back(std::move(player));
+
+  // TODO: Don't forget to remove this when the time comes!
+  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
+  this->dummy = dummy.get();
+  entities.push_back(std::move(dummy));
 }
 
 void CombatScene::update() {
@@ -190,6 +195,8 @@ void CombatScene::draw() {
     #endif // !NDEBUG
   }
   EndMode2D();
+
+  plr_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
