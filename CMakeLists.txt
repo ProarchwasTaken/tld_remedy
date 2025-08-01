@@ -76,6 +76,7 @@ set(HEADERS
 "include/combat/actions/attack.h"
 "include/combat/actions/ghost_step.h"
 "include/combat/actions/evade.h"
+"include/combat/status_effects/crippled_arm.h"
 )
 set(SOURCE
 "src/game.cpp"
@@ -113,6 +114,7 @@ set(SOURCE
 "src/combat/actions/attack.cpp"
 "src/combat/actions/ghost_step.cpp"
 "src/combat/actions/evade.cpp"
+"src/combat/status_effects/crippled_arm.cpp"
 )
 
 if(${BUILD_DEV})

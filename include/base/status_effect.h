@@ -5,6 +5,9 @@
 #include "base/combatant.h"
 
 
+/* Status Effects are conditions that temporarily modifies a Combatant's
+ * usual attributes or behavior. They can either be positive, or 
+ * negative depending on the status effect.*/
 class StatusEffect {
 public:
   StatusEffect(StatusID id, StatusType type, Combatant *afflicted);

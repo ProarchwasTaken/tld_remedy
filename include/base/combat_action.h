@@ -7,7 +7,7 @@
 
 /* Actions are something that every combatant can perform. Think of them 
  * as special behavior that the Combatant executes under certain 
- * conditions After which, the Combatant will be locked into using said 
+ * conditions. After which, the Combatant will be locked into using said 
  * special behavior until the Action ends, or they get interrupted.*/
 class CombatAction {
 public:

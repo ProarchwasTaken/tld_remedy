@@ -357,6 +357,7 @@ void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
 
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << "]" <<
   " has been granted StatusEffect: '" << effect->name << "'";
+  effect->init();
   status.push_back(std::move(effect));
 }
 
@@ -371,7 +372,7 @@ void Combatant::statusLogic() {
 
     if (status_effect->end) {
       PLOGD << "Clearing Status Effect: '" << status_effect->name <<
-        "from memory.";
+        "' from memory.";
       status_effect.reset();
       erased = true;
     }

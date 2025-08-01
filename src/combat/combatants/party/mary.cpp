@@ -6,6 +6,7 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
+#include "base/status_effect.h"
 #include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
@@ -17,6 +18,7 @@
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
+#include "combat/status_effects/crippled_arm.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -48,6 +50,10 @@ Mary::Mary(Player *plr):
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
+
+  // Testing! Make sure to remove this later!
+  unique_ptr<StatusEffect> ailment = make_unique<CrippledArm>(this);
+  afflictStatus(ailment);
 
   rectExCorrection(bounding_box, hurtbox);
   atlas.use();
