@@ -26,6 +26,7 @@ public:
   Combatant(std::string name, CombatantTeam team, Vector2 position, 
             Direction direction);
   ~Combatant();
+  Color spriteTint() {return tint;}
 
   virtual void behavior() = 0;
 

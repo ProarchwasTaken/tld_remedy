@@ -1,4 +1,6 @@
+#include <cassert>
 #include <cmath>
+#include <string>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -9,7 +11,9 @@
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
+using std::string;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
+SpriteAtlas LifeHud::bust_atlas("hud", "");
 
 
 LifeHud::LifeHud(Vector2 position) {
@@ -20,10 +24,25 @@ LifeHud::LifeHud(Vector2 position) {
 
 LifeHud::~LifeHud() {
   atlas.release();
+  bust_atlas.release();
 }
 
 void LifeHud::assign(PartyMember *combatant) {
   user = combatant;
+
+  string sprite_group;
+  switch (combatant->id) {
+    case PartyMemberID::MARY: {
+      sprite_group = "mary_bust";
+      break;
+    }
+    default: {
+      PLOGE << "There are no bust graphics for this combatant!";
+    }
+  }
+
+  bust_atlas = SpriteAtlas("hud", sprite_group);
+  bust_atlas.use();
   PLOGD << "Lifehud instance assigned to Combatant: '" 
     << user->name << "'";
 }
@@ -62,11 +81,20 @@ void LifeHud::draw() {
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 
+  drawBustGraphic();
   drawLife(font, txt_size);
 
   if (user->max_morale != 0) {
     drawMorale(font, txt_size);
   }
+}
+
+void LifeHud::drawBustGraphic() {
+  assert(bust_atlas.users() != 0);
+
+  Vector2 position = Vector2Subtract(main_position, {26, 49});
+  DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, 
+                 user->spriteTint());
 }
 
 void LifeHud::drawLife(Font *font, int txt_size) {
@@ -152,7 +180,7 @@ void LifeHud::drawMoraleGauge() {
 }
 
 void LifeHud::drawMoraleText(Font *font, int size) {
-  txt_morale = TextFormat("%02.01f", user->morale);
+  txt_morale = TextFormat("%02.02f", user->morale);
 
   Vector2 position = Vector2Add(main_position, {92, -12});
   position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 

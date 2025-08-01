@@ -17,6 +17,8 @@ public:
 
   void draw();
 
+  void drawBustGraphic();
+
   void drawLife(Font *font, int txt_size);
   void drawLifeText(Font *font, int size);
   void drawLifeSegments();
@@ -26,7 +28,9 @@ public:
   void drawMoraleGauge();
   void drawMoraleText(Font *font, int size);
 
+
   static SpriteAtlas atlas;
+  static SpriteAtlas bust_atlas;
 private:
   PartyMember *user;
 

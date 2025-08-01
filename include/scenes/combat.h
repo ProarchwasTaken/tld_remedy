@@ -37,7 +37,7 @@ private:
   bool game_over = false;
 
   Mary *player;
-  LifeHud plr_hud = LifeHud({32, 215});
+  LifeHud plr_hud = LifeHud({34, 215});
 
   Dummy *dummy;
 
