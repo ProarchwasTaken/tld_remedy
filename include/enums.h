@@ -90,6 +90,24 @@ enum class ActionType {
   SPECIAL
 };
 
+enum class StatusID {
+  NONE = -1,
+  CRIPPLED_ARM,
+  CRIPPED_LEG,
+  BROKEN,
+  BLEEDING, 
+  FEAR,
+  DESPONDENT,
+  MENDING,
+  REFRESHED,
+  ENDURANCE
+};
+
+enum class StatusType {
+  POSITIVE,
+  NEGATIVE
+};
+
 enum Direction {
   UP = -2,
   LEFT = -1,

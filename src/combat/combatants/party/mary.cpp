@@ -233,10 +233,11 @@ void Mary::update() {
     }
   }
 
+  statusLogic();
+
   if (buffer != MaryAction::NONE) {
     bufferTimer();
   }
-
 }
 
 void Mary::neutralLogic() {

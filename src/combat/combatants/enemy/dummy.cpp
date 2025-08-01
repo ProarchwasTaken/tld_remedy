@@ -69,6 +69,8 @@ void Dummy::update() {
       break;
     }
   }
+
+  statusLogic();
 }
 
 void Dummy::draw() {

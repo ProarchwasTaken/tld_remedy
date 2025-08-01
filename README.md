@@ -23,6 +23,7 @@ This section goes over the game's default controls.
 ### Battle
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
+* **X Key** - Defensive (Use in combination with directional inputs!)
 
 * **P Key** - To make Dummy attack. (For testing purposes!)
 
@@ -37,6 +38,7 @@ may be different depending on what controller you use.
 ### Combat 
 * **D-Pad** - Movement
 * **A Button** - Attack
+* **B Button** - Defensive (Use in combination with directional inputs!)
 
 
 # Credits and Contacts
