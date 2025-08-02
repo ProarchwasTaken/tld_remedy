@@ -93,8 +93,9 @@ void LifeHud::drawBustGraphic() {
   assert(bust_atlas.users() != 0);
 
   Vector2 position = Vector2Subtract(main_position, {26, 49});
-  DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, 
-                 user->spriteTint());
+  Color tint = user->spriteTint();
+  tint.a = 255;
+  DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, tint);
 }
 
 void LifeHud::drawLife(Font *font, int txt_size) {

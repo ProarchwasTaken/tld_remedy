@@ -3,6 +3,8 @@
 #include "base/status_effect.h"
 
 
+/* Lowers the afflicted's Offense and Intimidation by 20%. Effectively
+ * hindering the Combatant's damage potential.*/
 class CrippledArm : public StatusEffect {
 public:
   CrippledArm(Combatant *afflicted);
