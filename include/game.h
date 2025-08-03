@@ -1,6 +1,7 @@
 #pragma once
 #include <raylib.h>
 #include <memory>
+#include <random>
 #include "base/scene.h"
 #include "data/session.h"
 #include "enums.h"
@@ -55,6 +56,7 @@ public:
   static Font sm_font;
   static Font med_font;
   static Color* palette;
+  static std::mt19937_64 RNG;
 
   #ifndef NDEBUG
   static constexpr bool devmode = true; 

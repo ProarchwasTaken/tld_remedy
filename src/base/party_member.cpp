@@ -1,14 +1,23 @@
+#include <assert.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <random>
 #include <string>
+#include <memory>
+#include <set>
+#include "game.h"
 #include "enums.h"
 #include "data/damage.h"
 #include "base/combatant.h"
-#include "game.h"
+#include "base/status_effect.h"
 #include "base/party_member.h"
+#include "combat/status_effects/crippled_arm.h"
+#include "combat/status_effects/crippled_leg.h"
+#include "combat/status_effects/broken.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::set, std::uniform_int_distribution, 
+std::unique_ptr, std::make_unique;
 int PartyMember::member_count = 0;
 
 
@@ -32,6 +41,87 @@ void PartyMember::takeDamage(DamageData &data) {
 
   deplete_clock = 0.0;
   deplete_delay = DEFAULT_DEPLETE_DELAY;
+}
+
+void PartyMember::damageLife(float magnitude) {
+  bool in_critical = critical_life;
+
+  Combatant::damageLife(magnitude);
+
+  bool entered_critical = in_critical != critical_life;
+  if (entered_critical && state != CombatantState::DEAD) {
+    afflictPersistent();
+  }
+}
+
+void PartyMember::afflictPersistent() {
+  set<StatusID> effect_pool = getEffectPool();
+
+  PLOGI << "Possible status effect to inflict: " << effect_pool.size();
+  if (effect_pool.empty()) {
+    PLOGI << "PartyMember has reached the end of their rope!";
+    life = 0;
+    death();
+    return;
+  }
+
+  StatusID id = selectRandomID(effect_pool);
+  unique_ptr<StatusEffect> status_effect = nullptr;
+
+  switch (id) {
+    case StatusID::CRIPPLED_ARM: {
+      status_effect = make_unique<CrippledArm>(this);
+      break;
+    }
+    case StatusID::CRIPPED_LEG: {
+      status_effect = make_unique<CrippledLeg>(this);
+      break;
+    }
+    case StatusID::BROKEN: {
+      status_effect = make_unique<Broken>(this);
+      break;
+    }
+    default: {
+      PLOGE << "Invalid ID!";
+      break;
+    }
+  }
+
+  afflictStatus(status_effect);
+}
+
+set<StatusID> PartyMember::getEffectPool() {
+  set<StatusID> pool = {
+    StatusID::CRIPPLED_ARM, 
+    StatusID::CRIPPED_LEG,
+    StatusID::BROKEN
+  };
+
+  for (auto &status_effect : status) {
+    pool.erase(status_effect->id);
+  }
+
+  return pool;
+}
+
+StatusID PartyMember::selectRandomID(set<StatusID> &effect_pool) {
+  StatusID id;
+  int count = effect_pool.size();
+  if (count == 1) {
+    id = *effect_pool.begin();
+  }
+  else {
+    StatusID pool[count];
+    std::copy(effect_pool.begin(), effect_pool.end(), pool);
+
+    uniform_int_distribution<int> range(0, count - 1); 
+    int index = range(Game::RNG);
+    PLOGD << "Retrieving effect id at index: " << index;
+
+    id = pool[index];
+  }
+
+  return id;
 }
 
 void PartyMember::damageMorale(float magnitude) {

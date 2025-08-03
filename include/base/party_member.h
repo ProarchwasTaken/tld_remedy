@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <raylib.h>
+#include <set>
 #include "enums.h"
 #include "data/damage.h"
 #include "base/combatant.h"
@@ -15,6 +16,11 @@ public:
   ~PartyMember();
 
   void takeDamage(DamageData &data) override;
+
+  void damageLife(float magnitude) override;
+  void afflictPersistent();
+  std::set<StatusID> getEffectPool();
+  StatusID selectRandomID(std::set<StatusID> &effect_pool);
 
   void damageMorale(float magnitude) override;
   void increaseMorale(float magnitude) override;

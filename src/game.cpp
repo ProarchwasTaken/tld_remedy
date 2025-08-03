@@ -3,6 +3,7 @@
 #include <fstream>
 #include <ios>
 #include <chrono>
+#include <random>
 #include <filesystem>
 #include <raylib.h>
 #include <raymath.h>
@@ -17,7 +18,7 @@
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
 std::filesystem::create_directory, std::chrono::system_clock, 
-std::string;
+std::string, std::mt19937_64;
 
 GameState Game::game_state = GameState::READY;
 unique_ptr<Session> Game::loaded_session;
@@ -28,6 +29,7 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+mt19937_64 Game::RNG;
 
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
@@ -49,6 +51,11 @@ void Game::init() {
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   med_font = LoadFont("graphics/fonts/med_font.png");
   defineColorPalette();
+  
+  system_clock::time_point today = system_clock::now();
+  long seed = system_clock::to_time_t(today);
+  RNG.seed(seed);
+  PLOGD << "RNG Seed: " << seed;
 
   scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
   PLOGI << "Time Scale: " << time_scale;
