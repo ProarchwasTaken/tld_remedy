@@ -1,4 +1,5 @@
 #include <cassert>
+#include <memory>
 #include <cmath>
 #include <string>
 #include <raylib.h>
@@ -6,25 +7,29 @@
 #include "enums.h"
 #include "game.h"
 #include "base/party_member.h"
+#include "base/status_effect.h"
 #include "system/sprite_atlas.h"
 #include "utils/text.h"
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::unique_ptr;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
 SpriteAtlas LifeHud::bust_atlas("hud", "");
+SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
 
 
 LifeHud::LifeHud(Vector2 position) {
   main_position = position;
   morale_color = Game::palette[42];
   atlas.use();
+  status_atlas.use();
 }
 
 LifeHud::~LifeHud() {
   atlas.release();
   bust_atlas.release();
+  status_atlas.release();
 }
 
 void LifeHud::assign(PartyMember *combatant) {
@@ -82,6 +87,7 @@ void LifeHud::draw() {
   int txt_size = font->baseSize;
 
   drawBustGraphic();
+  drawStatusIcons();
   drawLife(font, txt_size);
 
   if (user->max_morale != 0) {
@@ -96,6 +102,32 @@ void LifeHud::drawBustGraphic() {
   Color tint = user->spriteTint();
   tint.a = 255;
   DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, tint);
+}
+
+void LifeHud::drawStatusIcons() {
+  int count = user->status.size();
+  if (count == 0) {
+    return;
+  }
+
+  Vector2 base_position = Vector2Subtract(main_position, {18, 5});
+
+  for (int x = 0; x < count; x++) {
+    StatusEffect *effect = user->status.at(x).get();
+    StatusID id = effect->id;
+    Rectangle *sprite = getIconSprite(id);
+
+    bool odd = x % 2 != 0;
+
+    Vector2 offset = {10.0f * odd, 10.0f * x};
+    Vector2 position = Vector2Subtract(base_position, offset);
+    DrawTextureRec(status_atlas.sheet, *sprite, position, WHITE);
+  }
+}
+
+Rectangle *LifeHud::getIconSprite(StatusID id) {
+  int index = static_cast<int>(id);
+  return &status_atlas.sprites.at(index);
 }
 
 void LifeHud::drawLife(Font *font, int txt_size) {

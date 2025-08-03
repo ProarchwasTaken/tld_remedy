@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include <string>
+#include "enums.h"
 #include "base/party_member.h"
 #include "system/sprite_atlas.h"
 
@@ -18,6 +19,8 @@ public:
   void draw();
 
   void drawBustGraphic();
+  void drawStatusIcons();
+  Rectangle *getIconSprite(StatusID id);
 
   void drawLife(Font *font, int txt_size);
   void drawLifeText(Font *font, int size);
@@ -31,6 +34,7 @@ public:
 
   static SpriteAtlas atlas;
   static SpriteAtlas bust_atlas;
+  static SpriteAtlas status_atlas;
 private:
   PartyMember *user;
 
