@@ -36,6 +36,7 @@ public:
 
   virtual void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
+  virtual void finalIntercept(float &damage, DamageData &data) {};
   void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);

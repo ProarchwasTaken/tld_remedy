@@ -87,7 +87,8 @@ void Combatant::takeDamage(DamageData &data) {
   }
 
   float damage = Clamp(damageCalulation(data), 0, 9999);
-  PLOGD << "Result: " << damage;
+  PLOGD << "Damage Calculation: " << damage << ", Victim Life: " << life;
+  finalIntercept(damage, data);
   applyDamage(damage, data);
 
   knockback = data.knockback;

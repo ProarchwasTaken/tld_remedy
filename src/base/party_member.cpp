@@ -43,6 +43,22 @@ void PartyMember::takeDamage(DamageData &data) {
   deplete_delay = DEFAULT_DEPLETE_DELAY;
 }
 
+void PartyMember::finalIntercept(float &damage, DamageData &data) {
+  if (critical_life || data.damage_type != DamageType::LIFE) {
+    return;
+  }
+
+  bool fatal_damage = life - damage <= 0;
+  if (fatal_damage) {
+    PLOGI << "Applying Death Protection.";
+    float average = (damage + life) / 2 ;
+    float reduction = 1.0 - ((max_life / average) * 0.20);
+    damage = damage * reduction;
+
+    PLOGD << "Result: " << damage;
+  }
+}
+
 void PartyMember::damageLife(float magnitude) {
   bool in_critical = critical_life;
 

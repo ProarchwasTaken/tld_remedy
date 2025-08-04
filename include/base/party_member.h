@@ -16,6 +16,7 @@ public:
   ~PartyMember();
 
   void takeDamage(DamageData &data) override;
+  void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
   void afflictPersistent();
