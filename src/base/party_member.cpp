@@ -8,6 +8,7 @@
 #include "game.h"
 #include "enums.h"
 #include "data/damage.h"
+#include "data/session.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
@@ -21,7 +22,7 @@ std::unique_ptr, std::make_unique;
 int PartyMember::member_count = 0;
 
 
-PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position): 
+PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position):
   Combatant(name, CombatantTeam::PARTY, position, RIGHT)
 {
   this->id = id;
@@ -82,6 +83,10 @@ void PartyMember::afflictPersistent() {
   }
 
   StatusID id = selectRandomID(effect_pool);
+  afflictPersistent(id);
+}
+
+void PartyMember::afflictPersistent(StatusID id) {
   unique_ptr<StatusEffect> status_effect = nullptr;
 
   switch (id) {
@@ -104,6 +109,15 @@ void PartyMember::afflictPersistent() {
   }
 
   afflictStatus(status_effect);
+}
+
+void PartyMember::afflictPersistent(StatusID status[STATUS_LIMIT]) {
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID status_id = status[x];
+    if (status_id != StatusID::NONE) {
+      afflictPersistent(status_id);
+    } 
+  }
 }
 
 set<StatusID> PartyMember::getEffectPool() {

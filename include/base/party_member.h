@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <set>
 #include "enums.h"
+#include "data/session.h"
 #include "data/damage.h"
 #include "base/combatant.h"
 
@@ -19,7 +20,10 @@ public:
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
+
   void afflictPersistent();
+  void afflictPersistent(StatusID id);
+  void afflictPersistent(StatusID status[STATUS_LIMIT]);
   std::set<StatusID> getEffectPool();
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
 

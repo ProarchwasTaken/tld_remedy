@@ -369,6 +369,7 @@ void Game::loadSession() {
   PLOGD << "Location: " << session.location;
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;
+  PLOGD << "Status Count: " << session.player.status_count;
 
   if (session.version != session_version) {
     PLOGE << "Loaded session data is outdated!";

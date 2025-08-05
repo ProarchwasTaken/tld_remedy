@@ -43,13 +43,14 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+  afflictPersistent(plr->status);
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
-
   rectExCorrection(bounding_box, hurtbox);
+
   atlas.use();
   sprite = &atlas.sprites[0];
 }

@@ -1,14 +1,17 @@
 #include <cassert>
 #include <memory>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/status_effect.h"
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
@@ -152,8 +155,7 @@ void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
   if (!game_over) {
     PLOGI << "All enemies are defeated!";
-    player->depleteInstant();
-    plr_data->life = player->life;
+    updatePlrStats(plr_data);
   }
   else {
     PLOGI << "The party leader has died...";
@@ -161,6 +163,33 @@ void CombatScene::endCombatProcedure() {
   }
 
   Game::endCombat();
+}
+
+void CombatScene::updatePlrStats(Player *plr_data) {
+  player->depleteInstant();
+  float life = std::ceilf(player->life); 
+  plr_data->life = Clamp(life, 0, player->max_life);
+
+  StatusID status[STATUS_LIMIT] = {
+    StatusID::NONE, 
+    StatusID::NONE, 
+    StatusID::NONE
+  };
+
+  int index = 0;
+  plr_data->status_count = 0;
+  int limit = plr_data->status_limit;
+
+  for (unique_ptr<StatusEffect> &effect : player->status) {
+    if (effect->isPersistant()) {
+      status[index] = effect->id;
+      index++;
+      plr_data->status_count++;
+      assert(plr_data->status_count <= limit);
+    }
+  }
+
+  std::copy(status, status + 3, plr_data->status);
 }
 
 void CombatScene::draw() {

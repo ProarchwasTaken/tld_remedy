@@ -26,6 +26,7 @@ public:
 
   void deleteEntity(int entity_id);
   void endCombatProcedure();
+  void updatePlrStats(Player *plr_data);
 
   void draw() override;
   void drawDebugInfo();
