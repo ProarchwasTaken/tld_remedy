@@ -1,5 +1,4 @@
 #include <cassert>
-#include <memory>
 #include <cmath>
 #include <string>
 #include <raylib.h>
@@ -13,7 +12,7 @@
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
-using std::string, std::unique_ptr;
+using std::string;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
 SpriteAtlas LifeHud::bust_atlas("hud", "");
 SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
@@ -139,7 +138,12 @@ void LifeHud::drawLife(Font *font, int txt_size) {
 
 void LifeHud::drawLifeSegments() {
   float life_percentage = user->life / user->max_life;
+
+  float combined = user->life + user->exhaustion;
+  float with_exhaustion = combined / user->max_life;
+
   int segments = life_percentage * 10;
+  int ex_segments = with_exhaustion * 10;
   float leftover = (life_percentage * 10) - segments;
 
   Vector2 position = Vector2Add(main_position, {7, 2});
@@ -155,6 +159,10 @@ void LifeHud::drawLifeSegments() {
       float interval = (1.0 - leftover) * 0.5;
       sprite = segmentBlink(interval);
       leftover = 0;
+    }
+    else if (segments != ex_segments && x <= ex_segments) {
+      sprite = &atlas.sprites[2];
+      color = Game::palette[29];
     }
     else {
       sprite = &atlas.sprites[2];
