@@ -108,8 +108,10 @@ void Game::start() {
     drawScene();
   }
 
-  CloseWindow();
-  CloseAudioDevice();
+  if (PLATFORM == PLATFORM_WINDOWS) {
+    CloseWindow();
+    CloseAudioDevice();
+  }
 }
 
 void Game::topLevelInput() {

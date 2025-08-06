@@ -6,6 +6,9 @@
 #include "data/session.h"
 #include "enums.h"
 
+#define PLATFORM_WINDOWS 0
+#define PLATFORM_LINUX 1
+
 
 class Game {
 public:

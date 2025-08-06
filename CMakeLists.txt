@@ -17,9 +17,16 @@ else()
   set(PROJECT_STAGE "Pre-Alpha")
 endif()
 
+if(WIN32)
+  set(PLATFORM 0)
+else()
+  set(PLATFORM 1)
+endif()
+
 set(META_DATA
 -DVERSION="${CMAKE_PROJECT_VERSION}"
 -DVER_STAGE="${PROJECT_STAGE}"
+-DPLATFORM=${PLATFORM}
 -DAUTHOR="Tyler Dillard"
 -DHOME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
 )
@@ -80,6 +87,7 @@ set(HEADERS
 "include/combat/status_effects/broken.h"
 )
 set(SOURCE
+"src/main.cpp"
 "src/game.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
@@ -131,13 +139,15 @@ if(${BUILD_DEV})
 endif()
 
 
-add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCE})
 if(WIN32)
-  target_link_libraries("remedy" -lraylib -lopengl32 -lgdi32 -lwinmm)
+  target_link_libraries(${PROJECT_NAME} -lraylib -lopengl32 -lgdi32 
+    -lwinmm)
 else()
   find_package(raylib 5.0 QUIET)
-  target_link_libraries("remedy" raylib)
+  target_link_libraries(${PROJECT_NAME} raylib)
 endif()
 
-target_compile_options("remedy" PRIVATE ${COMPILE_OPTIONS} ${META_DATA})
+target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS} 
+  ${META_DATA})
 
