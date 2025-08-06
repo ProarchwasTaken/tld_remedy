@@ -27,7 +27,6 @@ set(META_DATA
 include_directories("include")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(RAYLIB -lraylib -lopengl32 -lgdi32 -lwinmm)
 set(HEADERS 
 "include/enums.h"
 "include/game.h"
@@ -133,6 +132,12 @@ endif()
 
 
 add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
-target_link_libraries("remedy" PRIVATE ${RAYLIB})
+if(WIN32)
+  target_link_libraries("remedy" -lraylib -lopengl32 -lgdi32 -lwinmm)
+else()
+  find_package(raylib 5.0 QUIET)
+  target_link_libraries("remedy" raylib)
+endif()
+
 target_compile_options("remedy" PRIVATE ${COMPILE_OPTIONS} ${META_DATA})
 
