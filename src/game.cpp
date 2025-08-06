@@ -121,7 +121,7 @@ void Game::topLevelInput() {
   if (IsKeyPressed(KEY_F2)) {
     takeScreenshot();
   }
-  if (IsKeyPressed(KEY_F11)) {
+  if (IsKeyPressed(KEY_F11) && PLATFORM == PLATFORM_WINDOWS) {
     toggleFullscreen();
   }
 }
