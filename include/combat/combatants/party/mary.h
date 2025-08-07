@@ -6,10 +6,14 @@
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 
 enum class MaryAction {
   NONE = -1,
   ATTACK,
+  GHOST_STEP,
+  EVADE
 };
 
 
@@ -26,6 +30,9 @@ public:
   void behavior() override;
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
+  void defensiveActionInput(bool gamepad);
+
+  bool canCancel();
   void readActionBuffer();
 
   void update() override;
@@ -55,11 +62,14 @@ private:
   Animation anim_move = {{4, 5, 6, 5}, 0.2};
   Animation anim_dead = {{9, 10}, 0.60};
 
-  AttackAnimSet atk_set = {
+  AtkAnimSet atk_set = {
     {{11, 12}, 0.05},
     {{12, 11}, 0.05},
     13
   };
+
+  GSSpriteSet gs_set = {14, 8, 15};
+  EvadeSpriteSet ev_set = {16, 17, 16, 19, 18};
 
   static bool controllable;
   static SpriteAtlas atlas;

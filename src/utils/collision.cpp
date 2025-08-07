@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
-#include "enums.h"
 #include "base/actor.h"
 #include "base/combatant.h"
 #include "data/line.h"
@@ -144,7 +143,7 @@ void Collision::snapY(Actor *actor, float y, int y_direction) {
 }
 
 int Collision::checkX(Combatant *combatant, float magnitude, 
-                      Direction direction) 
+                      int direction) 
 {
   RectEx *hurtbox = &combatant->hurtbox;
 
@@ -164,7 +163,7 @@ int Collision::checkX(Combatant *combatant, float magnitude,
   }
 }
 
-void Collision::snapX(Combatant *combatant, Direction direction) {
+void Collision::snapX(Combatant *combatant, int direction) {
   RectEx *hurtbox = &combatant->hurtbox;
   float half_scale = hurtbox->scale.x / 2;
   float bounds = 512;

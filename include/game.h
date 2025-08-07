@@ -1,9 +1,13 @@
 #pragma once
 #include <raylib.h>
 #include <memory>
+#include <random>
 #include "base/scene.h"
 #include "data/session.h"
 #include "enums.h"
+
+#define PLATFORM_WINDOWS 0
+#define PLATFORM_LINUX 1
 
 
 class Game {
@@ -50,11 +54,12 @@ public:
   static void sleep(float seconds);
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 1;
+  static constexpr unsigned int session_version = 2;
 
   static Font sm_font;
   static Font med_font;
   static Color* palette;
+  static std::mt19937_64 RNG;
 
   #ifndef NDEBUG
   static constexpr bool devmode = true; 

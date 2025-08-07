@@ -1,5 +1,4 @@
 #pragma once
-#include "enums.h"
 #include "base/actor.h"
 #include "base/combatant.h"
 
@@ -13,6 +12,6 @@ namespace Collision {
   void snapX(Actor *actor, float x, int x_direction);
   void snapY(Actor *actor, float y, int y_direction);
 
-  int checkX(Combatant *combatant, float magnitude, Direction direction);
-  void snapX(Combatant *combatant, Direction direction);
+  int checkX(Combatant *combatant, float magnitude, int direction);
+  void snapX(Combatant *combatant, int direction);
 }

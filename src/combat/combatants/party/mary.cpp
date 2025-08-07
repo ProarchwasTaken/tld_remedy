@@ -15,6 +15,8 @@
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -31,6 +33,7 @@ Mary::Mary(Player *plr):
   important = true;
   life = plr->life;
   max_life = plr->max_life;
+  critical_life = life < max_life * LOW_LIFE_THRESHOLD;
 
   init_morale = plr->init_morale;
   morale = init_morale;
@@ -40,13 +43,14 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+  afflictPersistent(plr->status);
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
-
   rectExCorrection(bounding_box, hurtbox);
+
   atlas.use();
   sprite = &atlas.sprites[0];
 }
@@ -70,11 +74,12 @@ void Mary::behavior() {
   if (!controllable) {
     return;
   }
+
   bool gamepad = IsGamepadAvailable(0);
+  movementInput(gamepad);
   actionInput(gamepad);
 
-  if (state == CombatantState::NEUTRAL) {
-    movementInput(gamepad);
+  if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
   }
 }
@@ -96,6 +101,9 @@ void Mary::actionInput(bool gamepad) {
     PLOGI << "Sending Attack input to buffer.";
     buffer = MaryAction::ATTACK;
   }
+  else if (Input::pressed(key_bind.defensive, gamepad)) {
+    defensiveActionInput(gamepad);
+  }
   else {
     return;
   }
@@ -103,6 +111,42 @@ void Mary::actionInput(bool gamepad) {
   if (state != NEUTRAL) {
     PLOGD << "Input has been added to buffer while the player is not in"
       << " neutral!";
+  }
+}
+
+void Mary::defensiveActionInput(bool gamepad) {
+  if (moving) {
+    PLOGI << "Sending GhostStep input to buffer.";
+    buffer = MaryAction::GHOST_STEP;
+    return;
+  }
+  else if (Input::down(key_bind.down, gamepad)) {
+    PLOGI << "Sending Evade input to buffer.";
+    buffer = MaryAction::EVADE;
+    return;
+  }
+}
+
+bool Mary::canCancel() {
+  if (state != CombatantState::ACTION || buffer == MaryAction::NONE) {
+    return false;
+  }
+
+  bool in_end_lag = action->phase == ActionPhase::END_LAG;
+  if (!in_end_lag) {
+    return false;
+  }
+
+  ActionID action_id = action->id;
+  if (action_id == ActionID::EVADE) {
+    Evade *evade_action = static_cast<Evade*>(action.get());
+    return buffer != MaryAction::EVADE && evade_action->evaded_attack;
+  }
+  else if (action_id == ActionID::GHOST_STEP) {
+    return buffer != MaryAction::GHOST_STEP;
+  }
+  else {
+    return buffer == MaryAction::GHOST_STEP;
   }
 }
 
@@ -119,6 +163,7 @@ void Mary::readActionBuffer() {
   switch (buffer) {
     default: {
       assert(buffer != MaryAction::NONE);
+      break;
     }
     case MaryAction::ATTACK: {
       RectEx hitbox;
@@ -126,6 +171,24 @@ void Mary::readActionBuffer() {
       hitbox.offset = {-14 + (14.0f * direction), -50};
 
       action = make_unique<Attack>(this, atlas, hitbox, atk_set);
+      break;
+    }
+    case MaryAction::GHOST_STEP: {
+      if (!critical_life) {
+        increaseExhaustion(5.5);
+        action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
+      }
+
+      break;
+    }
+    case MaryAction::EVADE: {
+      if (!critical_life) {
+        RectEx hitbox;
+        hitbox.scale = {8, 46};
+        hitbox.offset = {-4 + (8.0f * direction), -48};
+
+        action = make_unique<Evade>(this, atlas, hitbox, ev_set);
+      }
       break;
     }
   }
@@ -141,6 +204,10 @@ void Mary::readActionBuffer() {
 void Mary::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
+      if (exhaustion != 0) {
+        depleteExhaustion();
+      }
+
       neutralLogic();
       break;
     }
@@ -167,10 +234,11 @@ void Mary::update() {
     }
   }
 
+  statusLogic();
+
   if (buffer != MaryAction::NONE) {
     bufferTimer();
   }
-
 }
 
 void Mary::neutralLogic() {

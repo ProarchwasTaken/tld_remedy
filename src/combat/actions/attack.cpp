@@ -11,9 +11,9 @@
 
 
 Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
-               RectEx hitbox, AttackAnimSet &anim_set): 
+               RectEx hitbox, AtkAnimSet &anim_set): 
   CombatAction(ActionID::ATTACK, ActionType::OFFENSE_MP, user, 
-               0.10, 0.05, 0.10)
+               0.10, 0.05, 0.25)
 {
   name = "Attack";
   user->rectExCorrection(hitbox);
@@ -22,15 +22,22 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   data.damage_type = DamageType::MORALE;
   data.calulation = DamageType::MORALE;
 
-  data.stun_time = 0.35;
+  data.stun_time = 0.5;
   data.stun_type = StunType::NORMAL;
 
   data.knockback = 90.0;
   data.hit_stop = 0.2;
+
   data.assailant = user;
 
   this->user_atlas = &user_atlas;
   this->anim_set = &anim_set;
+  updateFrameDuration();
+}
+
+void Attack::updateFrameDuration() {
+  anim_set->wind_up.frame_duration = wind_time * 0.5;
+  anim_set->end_lag.frame_duration = end_time * 0.5;
 }
 
 void Attack::windUp() {
@@ -52,6 +59,10 @@ void Attack::action() {
   }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant->intangible) {
+      continue;
+    }
+
     if (combatant->team == user->team) {
       continue;
     }
@@ -61,8 +72,12 @@ void Attack::action() {
     }
 
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
+      data.hitbox = &hitbox.rect;
       combatant->takeDamage(data);
       attack_connected = true;
+
+      end_time = 0.1;
+      updateFrameDuration();
       break;
     }
   }

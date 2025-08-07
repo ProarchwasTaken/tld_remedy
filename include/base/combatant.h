@@ -3,6 +3,7 @@
 #include <memory>
 #include <raylib.h>
 #include <set>
+#include <vector>
 #include "enums.h"
 #include "data/rect_ex.h"
 #include "base/entity.h"
@@ -10,6 +11,9 @@
 
 class CombatAction;
 struct DamageData;
+
+class StatusEffect;
+typedef std::vector<std::unique_ptr<StatusEffect>> Status;
 
 
 /* Combatants are the main focus of the CombatScene. They are otherwise
@@ -26,11 +30,14 @@ public:
   Combatant(std::string name, CombatantTeam team, Vector2 position, 
             Direction direction);
   ~Combatant();
+  Color spriteTint() {return tint;}
 
   virtual void behavior() = 0;
 
   virtual void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
+  virtual void finalIntercept(float &damage, DamageData &data) {};
+  void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);
 
@@ -52,16 +59,23 @@ public:
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
 
+  void afflictStatus(std::unique_ptr<StatusEffect> &status_effect);
+  void statusLogic();
+  void removeErasedStatus();
+
   virtual void drawDebug() override;
 
   std::string name;
   CombatantTeam team;
   CombatantState state;
+
   Direction direction;
   RectEx hurtbox;
 
   float life; 
   float max_life;
+
+  bool intangible = false;
   bool critical_life = false;
 
   int offense;
@@ -72,6 +86,7 @@ public:
   float speed_multiplier = 1.0;
 
   std::unique_ptr<CombatAction> action;
+  Status status;
 protected:
   Color tint = WHITE;
   float death_time = 1.0;

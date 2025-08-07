@@ -19,6 +19,8 @@ struct FieldKeybinds {
 struct CombatKeybinds {
   KeyBind move_right = {KEY_RIGHT, GAMEPAD_BUTTON_LEFT_FACE_RIGHT};
   KeyBind move_left = {KEY_LEFT, GAMEPAD_BUTTON_LEFT_FACE_LEFT};
+  KeyBind down = {KEY_DOWN, GAMEPAD_BUTTON_LEFT_FACE_DOWN};
 
   KeyBind attack = {KEY_Z, GAMEPAD_BUTTON_RIGHT_FACE_DOWN};
+  KeyBind defensive = {KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT};
 };

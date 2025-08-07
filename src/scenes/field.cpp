@@ -215,16 +215,14 @@ void FieldScene::update() {
   }
   actor_handler.clearEvents();
 
-  if (Game::state() == GameState::SLEEP) {
-    return;
-  }
+  if (Game::state() == GameState::READY) {
+    for (unique_ptr<Entity> &entity : entities) {
+      entity->update();
+    }
 
-  for (unique_ptr<Entity> &entity : entities) {
-    entity->update();
+    camera.follow(camera_target);
+    eventProcessing();
   }
-
-  camera.follow(camera_target);
-  eventProcessing();
 }
 
 void FieldScene::eventProcessing() {

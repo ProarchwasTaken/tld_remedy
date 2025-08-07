@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.5.0
+VERSION 1.6.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -17,9 +17,16 @@ else()
   set(PROJECT_STAGE "Pre-Alpha")
 endif()
 
+if(WIN32)
+  set(PLATFORM 0)
+else()
+  set(PLATFORM 1)
+endif()
+
 set(META_DATA
 -DVERSION="${CMAKE_PROJECT_VERSION}"
 -DVER_STAGE="${PROJECT_STAGE}"
+-DPLATFORM=${PLATFORM}
 -DAUTHOR="Tyler Dillard"
 -DHOME_URL="${CMAKE_PROJECT_HOMEPAGE_URL}"
 )
@@ -27,7 +34,6 @@ set(META_DATA
 include_directories("include")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(RAYLIB -lraylib -lopengl32 -lgdi32 -lwinmm)
 set(HEADERS 
 "include/enums.h"
 "include/game.h"
@@ -36,6 +42,7 @@ set(HEADERS
 "include/base/actor.h"
 "include/base/combatant.h"
 "include/base/combat_action.h"
+"include/base/status_effect.h"
 "include/base/party_member.h"
 "include/base/enemy.h"
 "include/data/keybinds.h"
@@ -68,17 +75,25 @@ set(HEADERS
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
 "include/combat/system/evt_handler.h"
+"include/combat/hud/life.h"
 "include/combat/entities/dmg_number.h"
 "include/combat/combatants/party/mary.h"
 "include/combat/combatants/enemy/dummy.h"
 "include/combat/actions/attack.h"
+"include/combat/actions/ghost_step.h"
+"include/combat/actions/evade.h"
+"include/combat/status_effects/crippled_arm.h"
+"include/combat/status_effects/crippled_leg.h"
+"include/combat/status_effects/broken.h"
 )
 set(SOURCE
+"src/main.cpp"
 "src/game.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
 "src/base/combatant.cpp"
 "src/base/combat_action.cpp"
+"src/base/status_effect.cpp"
 "src/base/party_member.cpp"
 "src/base/enemy.cpp"
 "src/utils/input.cpp"
@@ -101,10 +116,16 @@ set(SOURCE
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
 "src/combat/system/evt_handler.cpp"
+"src/combat/hud/life.cpp"
 "src/combat/entities/dmg_number.cpp"
 "src/combat/combatants/party/mary.cpp"
 "src/combat/combatants/enemy/dummy.cpp"
 "src/combat/actions/attack.cpp"
+"src/combat/actions/ghost_step.cpp"
+"src/combat/actions/evade.cpp"
+"src/combat/status_effects/crippled_arm.cpp"
+"src/combat/status_effects/crippled_leg.cpp"
+"src/combat/status_effects/broken.cpp"
 )
 
 if(${BUILD_DEV})
@@ -118,7 +139,15 @@ if(${BUILD_DEV})
 endif()
 
 
-add_executable("remedy" src/main.cpp ${HEADERS} ${SOURCE})
-target_link_libraries("remedy" PRIVATE ${RAYLIB})
-target_compile_options("remedy" PRIVATE ${COMPILE_OPTIONS} ${META_DATA})
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCE})
+if(WIN32)
+  target_link_libraries(${PROJECT_NAME} -lraylib -lopengl32 -lgdi32 
+    -lwinmm)
+else()
+  find_package(raylib 5.0 QUIET)
+  target_link_libraries(${PROJECT_NAME} raylib)
+endif()
+
+target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_OPTIONS} 
+  ${META_DATA})
 

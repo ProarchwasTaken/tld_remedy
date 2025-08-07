@@ -15,9 +15,13 @@ struct DamageData {
   float knockback = 0;
   float hit_stop = 0;
 
+  bool intercepted = false;
+
   Combatant *assailant = NULL;
+  Rectangle *hitbox = NULL;
   int *a_atk = NULL;
   int *b_def = NULL;
+
   float atk_mod = 1.20;
   float def_mod = 0.80;
 };

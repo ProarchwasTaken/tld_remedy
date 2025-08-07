@@ -23,6 +23,7 @@ This section goes over the game's default controls.
 ### Battle
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
+* **X Key** - Defensive (Use in combination with directional inputs!)
 
 * **P Key** - To make Dummy attack. (For testing purposes!)
 
@@ -37,6 +38,7 @@ may be different depending on what controller you use.
 ### Combat 
 * **D-Pad** - Movement
 * **A Button** - Attack
+* **B Button** - Defensive (Use in combination with directional inputs!)
 
 
 # Credits and Contacts
@@ -70,3 +72,15 @@ that need to met in order for compilation to be successful.
 * Plog v1.1.10 - Header Only Logging Library
 * Raylib v5.0 - Game Framework. Problems may occur on newer versions.
 * Nlohmann Json - Modern C++ Json Library.
+
+# Known Linux Issues
+This game can also be built and ran on Linux. As of now, the game has been
+confirmed to work perfectly fine on Fedora with minimum issues or 
+differences; But even then, there's still lingering problem that aren't 
+exactly gamebreaking, but it might be good to know in advance.
+
+* Sometimes when loading the game, there's a chance where nothing will be
+drawn at all. Like it would just be a completely black screen. The bug 
+only seems to occur during startup, and there has been no confirmed case
+of it happening during gameplay. The only known fix for this is to just
+keep closing and running the game until it works.

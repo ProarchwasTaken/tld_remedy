@@ -12,6 +12,7 @@
 #include "system/sound_atlas.h"
 #include "utils/collision.h"
 #include "base/combat_action.h"
+#include "base/status_effect.h"
 #include "combat/system/evt_handler.h"
 #include "base/combatant.h"
 
@@ -54,6 +55,12 @@ Combatant::~Combatant() {
   assert(erased == 1);
 
   action.reset();
+
+  for (auto &status_effect : status) {
+    status_effect.reset();
+  }
+  status.clear();
+
   sfx.release();
   PLOGI << "Removed combatant: '" << name << "'";
 }
@@ -63,34 +70,29 @@ void Combatant::takeDamage(DamageData &data) {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";
+
+  if (!status.empty()) {
+    for (auto &status_effect : status) {
+      status_effect->intercept(data);
+    }
+  }
+
   if (state == CombatantState::ACTION) {
     action->intercept(data);
   }
 
+  if (data.intercepted) {
+    PLOGD << "Procedure has been intercepted. Canceling function.";
+    return;
+  }
+
   float damage = Clamp(damageCalulation(data), 0, 9999);
-  PLOGI << "Result: " << damage;
+  PLOGD << "Damage Calculation: " << damage << ", Victim Life: " << life;
+  finalIntercept(damage, data);
+  applyDamage(damage, data);
 
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
-  damage_type = data.damage_type;
-
-  if (damage_type == DamageType::LIFE) {
-    PLOGD << "Directing damage towards Combatant's Life.";
-    damageLife(damage);
-    sfx.play("damage_hp");
-  }
-  else {
-    PLOGD << "Directing damage towards Combatant's Morale.";
-    damageMorale(damage);
-    data.assailant->increaseMorale(damage);
-    sfx.play("damage_mp");
-  }
-
-  if (damage != 0) {
-    PLOGD << "Sending a request for a DamageNumber to be created.";
-    CombatHandler::raise<CreateDmgNumCB>(CombatEVT::CREATE_DMG_NUM,
-                                         this, data.damage_type, damage);
-  }
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
@@ -128,6 +130,28 @@ float Combatant::damageCalulation(DamageData &data) {
   PLOGD << "Base Damage: " << base_damage;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
   return (base_damage + (a_atk * atk_mod)) - (b_def * def_mod);
+}
+
+void Combatant::applyDamage(float damage, DamageData &data) {
+  damage_type = data.damage_type;
+
+  if (damage_type == DamageType::LIFE) {
+    PLOGD << "Directing damage towards Combatant's Life.";
+    damageLife(damage);
+    sfx.play("damage_hp");
+  }
+  else {
+    PLOGD << "Directing damage towards Combatant's Morale.";
+    damageMorale(damage);
+    data.assailant->increaseMorale(damage);
+    sfx.play("damage_mp");
+  }
+
+  if (damage != 0) {
+    PLOGD << "Sending a request for a DamageNumber to be created.";
+    CombatHandler::raise<CreateDmgNumCB>(CombatEVT::CREATE_DMG_NUM,
+                                         this, data.damage_type, damage);
+  }
 }
 
 void Combatant::damageLife(float magnitude) {
@@ -300,14 +324,15 @@ void Combatant::deathAlphaLerp() {
 }
 
 void Combatant::performAction(unique_ptr<CombatAction> &action) {
+  assert(action != nullptr);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]" <<
     " is performing ACTION: '" << action->name << "'";
-  if (this->action != nullptr) {
-    this->action.reset();
-  }
+  unique_ptr<CombatAction> old_action;
+  old_action.swap(this->action);
 
   this->action.swap(action);
   state = CombatantState::ACTION;
+  old_action.reset();
 } 
 
 void Combatant::cancelAction() {
@@ -320,6 +345,60 @@ void Combatant::cancelAction() {
   }
 }
 
+void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
+  assert(effect != nullptr);
+  for (auto &status_effect : status) {
+    if (effect->id == status_effect->id) {
+      PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]" <<
+        " is already afflicted with: '" << effect->name << "'";
+      effect.reset();
+      return;
+    }
+  }
+
+  PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << "]" <<
+  " has been granted StatusEffect: '" << effect->name << "'";
+  effect->init();
+  status.push_back(std::move(effect));
+}
+
+void Combatant::statusLogic() {
+  if (status.empty()) {
+    return;
+  }
+
+  bool erased = false;
+  for (auto &status_effect : status) {
+    status_effect->logic();
+
+    if (status_effect->end) {
+      PLOGD << "Clearing Status Effect: '" << status_effect->name <<
+        "' from memory.";
+      status_effect.reset();
+      erased = true;
+    }
+  }
+
+  if (erased) {
+    removeErasedStatus();
+  } 
+}
+
+void Combatant::removeErasedStatus() {
+  Status temporary;
+
+  for (auto &status_effect : status) {
+    if (status_effect != nullptr) {
+      unique_ptr<StatusEffect> temp_status;
+      status_effect.swap(temp_status);
+
+      temporary.push_back(std::move(temp_status));
+    }
+  }
+
+  status.clear();
+  temporary.swap(status);
+}
 
 void Combatant::drawDebug() {
   Entity::drawDebug();

@@ -1,14 +1,17 @@
 #include <cassert>
 #include <memory>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <string>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/status_effect.h"
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
@@ -29,15 +32,7 @@ CombatScene::CombatScene(Session *session) {
   this->session = session;
 
   stage.loadStage("debug");
-
-  auto player = make_unique<Mary>(&session->player);
-  this->player = player.get();
-  entities.push_back(std::move(player));
-
-  // TODO: Don't forget to remove this when the time comes!
-  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
-  this->dummy = dummy.get();
-  entities.push_back(std::move(dummy));
+  initializeCombatants();
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
@@ -55,9 +50,22 @@ CombatScene::~CombatScene() {
   PLOGI << "Unloaded the Combat scene.";
 }
 
+void CombatScene::initializeCombatants() {
+  PLOGI << "Initializing combatants.";
+  auto player = make_unique<Mary>(&session->player);
+  this->player = player.get();
+  plr_hud.assign(this->player);
+  entities.push_back(std::move(player));
+
+  // TODO: Don't forget to remove this when the time comes!
+  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
+  this->dummy = dummy.get();
+  entities.push_back(std::move(dummy));
+}
+
 void CombatScene::update() {
   // TODO: Don't forget to remove this when the time comes!
-  if (IsKeyPressed(KEY_P)) {
+  if (IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
   }
 
@@ -65,16 +73,17 @@ void CombatScene::update() {
     combatant->behavior();
   }
 
-  if (Game::state() == GameState::SLEEP) {
-    return;
-  }
+  if (Game::state() == GameState::READY) {
+    stage.update();
 
-  for (unique_ptr<Entity> &entity : entities) {
-    entity->update();
-  }
+    for (unique_ptr<Entity> &entity : entities) {
+      entity->update();
+    }
 
-  camera.update(player);
-  eventProcessing();
+    camera.update(player);
+    plr_hud.update();
+    eventProcessing();
+  }
 }
 
 void CombatScene::eventProcessing() {
@@ -146,7 +155,7 @@ void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
   if (!game_over) {
     PLOGI << "All enemies are defeated!";
-    plr_data->life = player->life;
+    updatePlrStats(plr_data);
   }
   else {
     PLOGI << "The party leader has died...";
@@ -154,6 +163,33 @@ void CombatScene::endCombatProcedure() {
   }
 
   Game::endCombat();
+}
+
+void CombatScene::updatePlrStats(Player *plr_data) {
+  player->depleteInstant();
+  float life = std::ceilf(player->life); 
+  plr_data->life = Clamp(life, 0, player->max_life);
+
+  StatusID status[STATUS_LIMIT] = {
+    StatusID::NONE, 
+    StatusID::NONE, 
+    StatusID::NONE
+  };
+
+  int index = 0;
+  plr_data->status_count = 0;
+  int limit = plr_data->status_limit;
+
+  for (unique_ptr<StatusEffect> &effect : player->status) {
+    if (effect->isPersistant()) {
+      status[index] = effect->id;
+      index++;
+      plr_data->status_count++;
+      assert(plr_data->status_count <= limit);
+    }
+  }
+
+  std::copy(status, status + 3, plr_data->status);
 }
 
 void CombatScene::draw() {
@@ -183,6 +219,8 @@ void CombatScene::draw() {
     #endif // !NDEBUG
   }
   EndMode2D();
+
+  plr_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
@@ -235,6 +273,10 @@ void CombatScene::drawDebugInfo() {
   Vector2 pmp_pos = position;
   position.y += spacing;
 
+  string p_ex = TextFormat("Exhaustion: %02.02f", player->exhaustion);
+  Vector2 pex_pos = position;
+  position.y += spacing;
+
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
   Vector2 combo_pos = position;
 
@@ -242,5 +284,6 @@ void CombatScene::drawDebugInfo() {
   DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, p_ex.c_str(), pex_pos, text_size, -3, GREEN);
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }

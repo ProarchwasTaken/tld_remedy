@@ -73,7 +73,7 @@ enum class StunType {
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
-  SIDE_STEP
+  EVADE
 };
 
 enum ActionPhase {
@@ -88,6 +88,24 @@ enum class ActionType {
   DEFENSE,
   SUPPORT,
   SPECIAL
+};
+
+enum class StatusID {
+  NONE = -1,
+  CRIPPLED_ARM,
+  CRIPPED_LEG,
+  BROKEN,
+  BLEEDING, 
+  FEAR,
+  DESPONDENT,
+  MENDING,
+  REFRESHED,
+  ENDURANCE
+};
+
+enum class StatusType {
+  POSITIVE,
+  NEGATIVE
 };
 
 enum Direction {

@@ -5,6 +5,8 @@
 #include <plog/Log.h>
 
 using std::string;
+Color CombatStage::tint = WHITE;
+bool CombatStage::tint_changed = false;
 
 
 void CombatStage::loadStage(string name) {
@@ -22,11 +24,24 @@ void CombatStage::loadStage(string name) {
   overlay = LoadTexture(overlay_path.c_str());
 }
 
+void CombatStage::tintStage(Color tint) {
+  PLOGI << "Changing the stage's tint.";
+  CombatStage::tint = tint;
+  tint_changed = true;
+}
+
+void CombatStage::update() {
+  if (tint_changed) {
+    tint = WHITE;
+    tint_changed = false;
+  }
+}
+
 void CombatStage::drawBackground() {
-  DrawTextureV(background, {-512, 0}, WHITE);
+  DrawTextureV(background, {-512, 0}, tint);
 }
 
 void CombatStage::drawOverlay() {
-  DrawTextureV(overlay, {-512, 0}, WHITE);
+  DrawTextureV(overlay, {-512, 0}, tint);
 }
 
