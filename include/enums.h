@@ -123,7 +123,6 @@ enum class PickupType {
 enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
-  LOAD_SESSION,
   INIT_COMBAT,
   UPDATE_COMMON_DATA,
   DELETE_ENTITY,
@@ -146,7 +145,6 @@ enum class CombatEVT {
 enum class CommandType {
   CHANGE_MAP,
   SAVE,
-  LOAD,
   INIT_COMBAT,
   DELETE_ENT,
   SET_SUPPLIES,

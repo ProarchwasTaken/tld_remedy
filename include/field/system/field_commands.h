@@ -27,7 +27,6 @@ private:
   inline static std::map<std::string, CommandType> command_table {
     {"MAP", CommandType::CHANGE_MAP},
     {"SAVE", CommandType::SAVE},
-    {"LOAD", CommandType::LOAD},
     {"COMBAT", CommandType::INIT_COMBAT},
     {"DELETE_ENTITY", CommandType::DELETE_ENT},
     {"SET_SUPPLIES", CommandType::SET_SUPPLIES},

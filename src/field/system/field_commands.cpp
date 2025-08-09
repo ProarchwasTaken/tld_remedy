@@ -17,7 +17,6 @@ string findNextWord(string &buffer, string::iterator &iterator,
 void loadMapCommand(string map_name, string spawn_name);
 void deleteEntityCommand(string argument);
 void saveCommand();
-void loadCommand();
 void initCombatCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
@@ -107,10 +106,6 @@ void CommandSystem::interpretCommand(CommandType type,
       saveCommand();
       break;
     }
-    case CommandType::LOAD: {
-      loadCommand();
-      break;
-    }
     case CommandType::INIT_COMBAT: {
       initCombatCommand();
       break;
@@ -192,11 +187,6 @@ void loadMapCommand(string map_name, string spawn_name) {
 void saveCommand() {
   PLOGD << "Now executing command.";
   FieldHandler::raise<FieldEvent>(FieldEVT::SAVE_SESSION);
-}
-
-void loadCommand() {
-  PLOGD << "Now executing command.";
-  FieldHandler::raise<FieldEvent>(FieldEVT::LOAD_SESSION);
 }
 
 void initCombatCommand() {

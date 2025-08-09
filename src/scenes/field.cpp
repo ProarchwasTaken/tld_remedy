@@ -79,7 +79,6 @@ void FieldScene::setup() {
   
   sfx.use();
   vignette = LoadTexture("graphics/overlays/field_vignette.png");
-  Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }
 
@@ -260,13 +259,6 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
 
       PLOGI << "Saving the session.";
       Game::saveSession(&session);
-      break;
-    }
-    case FieldEVT::LOAD_SESSION: {
-      PLOGD << "Event Detected: LoadSessionEvent";
-
-      PLOGI << "Loading session.";
-      Game::loadSession();
       break;
     }
     case FieldEVT::INIT_COMBAT: {
