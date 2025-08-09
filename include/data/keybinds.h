@@ -7,6 +7,16 @@ struct KeyBind {
   GamepadButton button;
 };
 
+struct MenuKeybinds {
+  KeyBind right = {KEY_RIGHT, GAMEPAD_BUTTON_LEFT_FACE_RIGHT};
+  KeyBind left = {KEY_LEFT, GAMEPAD_BUTTON_LEFT_FACE_LEFT};
+  KeyBind down = {KEY_DOWN, GAMEPAD_BUTTON_LEFT_FACE_DOWN};
+  KeyBind up = {KEY_UP, GAMEPAD_BUTTON_LEFT_FACE_UP};
+
+  KeyBind confirm = {KEY_Z, GAMEPAD_BUTTON_RIGHT_FACE_DOWN};
+  KeyBind cancel = {KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT};
+};
+
 struct FieldKeybinds {
   KeyBind move_right = {KEY_RIGHT, GAMEPAD_BUTTON_LEFT_FACE_RIGHT};
   KeyBind move_left = {KEY_LEFT, GAMEPAD_BUTTON_LEFT_FACE_LEFT};

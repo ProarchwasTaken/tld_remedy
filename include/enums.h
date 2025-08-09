@@ -12,6 +12,7 @@ enum class GameState {
 };
 
 enum class SceneID {
+  TITLE,
   FIELD,
   COMBAT
 };

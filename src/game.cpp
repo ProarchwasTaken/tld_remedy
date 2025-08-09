@@ -10,6 +10,7 @@
 #include <memory>
 #include <plog/Log.h>
 #include <utility>
+#include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/combat.h"
 #include "enums.h"
@@ -57,7 +58,7 @@ void Game::init() {
   RNG.seed(seed);
   PLOGD << "RNG Seed: " << seed;
 
-  scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
+  scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
