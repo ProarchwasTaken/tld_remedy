@@ -20,7 +20,7 @@ This section goes over the game's default controls.
 * **Arrow Keys** - Movement
 * **Z Key** - Interact
 
-### Battle
+### Combat 
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
 * **X Key** - Defensive (Use in combination with directional inputs!)
