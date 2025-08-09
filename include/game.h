@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <memory>
 #include <random>
+#include "data/keybinds.h"
 #include "base/scene.h"
 #include "data/session.h"
 #include "enums.h"
@@ -42,8 +43,10 @@ public:
   static void toggleDebugInfo();
   static void setTimeScale(float number);
 
+  static void newSession(SubWeaponID sub_weapon, CompanionID companion);
   static void saveSession(Session *data);
   static void loadSession();
+  static bool existingSession();
 
   static void initCombat(Session *data);
   static void endCombat();
@@ -59,6 +62,7 @@ public:
   static Font sm_font;
   static Font med_font;
   static Color* palette;
+  static MenuKeybinds menu_keybinds;
   static std::mt19937_64 RNG;
 
   #ifndef NDEBUG
@@ -89,5 +93,4 @@ private:
 
   std::unique_ptr<Scene> scene;
   static std::unique_ptr<Scene> reserve;
-  static std::unique_ptr<Session> loaded_session;
 };

@@ -9,7 +9,7 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
-#include <utility>
+#include "data/keybinds.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/combat.h"
@@ -22,7 +22,6 @@ std::filesystem::create_directory, std::chrono::system_clock,
 std::string, std::mt19937_64;
 
 GameState Game::game_state = GameState::READY;
-unique_ptr<Session> Game::loaded_session;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -30,6 +29,7 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+MenuKeybinds Game::menu_keybinds;
 mt19937_64 Game::RNG;
 
 float Game::fade_percentage = 0.0;
@@ -155,10 +155,6 @@ void Game::toggleFullscreen() {
 
 void Game::gameLogic() {
   switch (game_state) {
-    case GameState::LOADING_SESSION: {
-      loadSessionProcedure();
-      break;
-    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
       break;
@@ -166,6 +162,9 @@ void Game::gameLogic() {
     case GameState::END_COMBAT: {
       endCombatProcedure();
       break;
+    }
+    case GameState::LOADING_SESSION: {
+      loadSessionProcedure();
     }
     case GameState::FADING_IN:
     case GameState::FADING_OUT: {
@@ -222,12 +221,12 @@ void Game::sleepProcedure() {
 void Game::loadSessionProcedure() {
   PLOGI << "Initiating load session procedure.";
   scene.reset();
-  
-  PLOGD << "Loading the field scene with loaded session as argument.";
-  assert(loaded_session != nullptr);
-  scene = make_unique<FieldScene>(loaded_session.get());
+   
+  assert(reserve != nullptr);
+  scene.swap(reserve);
 
-  loaded_session.reset();
+  assert(scene->scene_id == SceneID::FIELD);
+  Game::fadein(1.0);
   PLOGI << "Procedure complete.";
 }
 
@@ -337,6 +336,14 @@ void Game::sleep(float seconds) {
   game_state = GameState::SLEEP;
 }
 
+void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
+  PLOGI << "Starting a new game.";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<FieldScene>(sub_weapon, companion);
+  game_state = GameState::LOADING_SESSION;
+}
+
 void Game::saveSession(Session *data) {
   PLOGI << "Saving the player's current session.";
 
@@ -379,8 +386,37 @@ void Game::loadSession() {
     return;
   }
 
-  loaded_session = make_unique<Session>(std::move(session));
+  assert(reserve == nullptr);
+  reserve = make_unique<FieldScene>(&session);
   game_state = GameState::LOADING_SESSION;
+}
+
+bool Game::existingSession() {
+  ifstream file;
+  file.open("data/session.data", std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGI << "Existing session data not found.";
+    return false;
+  }
+
+  Session session;
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    file.close();
+    return false;
+  }
+
+  file.close();
+
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    return false;
+  }
+
+  PLOGI << "Detected existing session data.";
+  return true;
 }
 
 void Game::initCombat(Session *data) {
