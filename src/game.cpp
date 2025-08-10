@@ -9,7 +9,6 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
-#include "data/keybinds.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/combat.h"
@@ -44,12 +43,19 @@ bool Game::debug_info = false;
 
 
 void Game::init() {
+  loadPersonal();
   InitWindow(window_res.x, window_res.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
+  SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
+
   HideCursor();
   setupCanvas();
+
+  if (settings.fullscreen && PLATFORM == PLATFORM_WINDOWS) {
+    toggleFullscreen();
+  }
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   med_font = LoadFont("graphics/fonts/med_font.png");
@@ -65,6 +71,42 @@ void Game::init() {
   PLOGI << "Everything should be good to go!";
 }
 
+void Game::loadPersonal() {
+  ifstream file;
+  file.open("data/personal.data", std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGI << "Existing personal data not found.";
+    file.close();
+    return;
+  }
+
+  Personal data;
+  file.read(reinterpret_cast<char*>(&data), sizeof(Personal));
+
+  if (file.fail()) {
+    PLOGE << "Something has gone wrong!";
+    file.close();
+    return;
+  }
+
+  file.close();
+
+  if (data.version != personal_version) {
+    PLOGE << "Personal data is outdated!";
+    return;
+  }
+
+
+  settings = data.settings;
+  PLOGD << "Master Volume: " << settings.master_volume;
+  PLOGD << "SFX Volume: " << settings.sfx_volume;
+  PLOGD << "BGM Volume: " << settings.bgm_volume;
+  PLOGD << "Fullscreen: " << settings.fullscreen;
+  PLOGD << "Framerate: " << settings.framerate;
+  PLOGI << "Loaded the player's personal settings.";
+}
+
 Game::~Game() {
   scene.reset();
 
@@ -76,7 +118,19 @@ Game::~Game() {
   UnloadFont(sm_font);
   UnloadFont(med_font);
   UnloadImagePalette(palette);
+  savePersonal();
   PLOGI << "Thanks for playing!";
+}
+
+void Game::savePersonal() {
+  Personal data = {personal_version, settings};
+
+  ofstream file;
+  file.open("data/personal.data", std::ios::binary);
+  file.write(reinterpret_cast<char*>(&data), sizeof(Personal));
+
+  file.close();
+  PLOGI << "Saved the player's personal settings and statistics.";
 }
 
 void Game::setupCanvas() {
@@ -152,6 +206,8 @@ void Game::toggleFullscreen() {
   ToggleBorderlessWindowed();
   window_res.x = GetScreenWidth();
   window_res.y = GetScreenHeight();
+
+  settings.fullscreen = IsWindowState(FLAG_WINDOW_UNDECORATED);
   setupCanvas();
 }
 

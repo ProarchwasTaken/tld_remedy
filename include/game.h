@@ -14,9 +14,12 @@
 class Game {
 public:
   void init();
-  ~Game();
+  void loadPersonal();
   void setupCanvas();
   void defineColorPalette();
+
+  ~Game();
+  void savePersonal();
 
   void start();
   void topLevelInput();
