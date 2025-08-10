@@ -1,0 +1,12 @@
+{
+  "sfx": [
+    {
+      "name": "menu_navigate",
+      "filename": "menu/menu_navigate.mp3"
+    },
+    {
+      "name": "menu_select",
+      "filename": "menu/menu_select.mp3"
+    }
+  ]
+}

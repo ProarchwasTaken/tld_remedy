@@ -13,23 +13,30 @@ using std::string;
 TitleScene::TitleScene() {
   scene_id = SceneID::TITLE;
   keybinds = &Game::settings.menu_keybinds;
+
+  sfx = &Game::menu_sfx;
+  sfx->use();
+
   valid_session = Game::existingSession();
 }
 
 TitleScene::~TitleScene() {
-
+  sfx->release();
 }
 
 void TitleScene::update() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->down, gamepad)) {
     nextOption();
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     prevOption();
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     selectOption();
+    sfx->play("menu_select");
   }
 }
 

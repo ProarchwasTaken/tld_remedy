@@ -3,6 +3,7 @@
 #include <string>
 #include <raylib.h>
 #include "base/scene.h"
+#include "system/sound_atlas.h"
 #include "data/keybinds.h"
 
 enum class TitleOption {
@@ -27,6 +28,8 @@ public:
   void drawOptions(Font *font, int txt_size);
 private:
   MenuKeybinds *keybinds;
+  SoundAtlas *sfx;
+
   std::array<TitleOption, 3> options = {
     TitleOption::NEW_GAME,
     TitleOption::LOAD_GAME,

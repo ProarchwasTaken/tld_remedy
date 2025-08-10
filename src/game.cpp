@@ -9,10 +9,11 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
+#include "enums.h"
+#include "system/sound_atlas.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/combat.h"
-#include "enums.h"
 #include "data/session.h"
 #include "data/personal.h"
 #include "game.h"
@@ -29,6 +30,7 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
 
 Settings Game::settings;
@@ -66,6 +68,7 @@ void Game::init() {
   RNG.seed(seed);
   PLOGD << "RNG Seed: " << seed;
 
+  menu_sfx.use();
   scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
@@ -118,6 +121,9 @@ Game::~Game() {
   UnloadFont(sm_font);
   UnloadFont(med_font);
   UnloadImagePalette(palette);
+  menu_sfx.release();
+  assert(menu_sfx.users() == 0);
+  
   savePersonal();
   PLOGI << "Thanks for playing!";
 }
