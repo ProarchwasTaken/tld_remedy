@@ -15,6 +15,7 @@
 #include "scenes/combat.h"
 #include "enums.h"
 #include "data/session.h"
+#include "data/personal.h"
 #include "game.h"
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
@@ -29,8 +30,9 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
-MenuKeybinds Game::menu_keybinds;
 mt19937_64 Game::RNG;
+
+Settings Game::settings;
 
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
@@ -45,7 +47,7 @@ void Game::init() {
   InitWindow(window_res.x, window_res.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
-  SetTargetFPS(60);
+  SetTargetFPS(settings.framerate);
   HideCursor();
   setupCanvas();
 

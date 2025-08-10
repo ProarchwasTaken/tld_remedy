@@ -2,9 +2,9 @@
 #include <raylib.h>
 #include <memory>
 #include <random>
-#include "data/keybinds.h"
 #include "base/scene.h"
 #include "data/session.h"
+#include "data/personal.h"
 #include "enums.h"
 
 #define PLATFORM_WINDOWS 0
@@ -59,10 +59,12 @@ public:
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr unsigned int session_version = 2;
 
+  static constexpr unsigned int personal_version = 1;
+  static Settings settings;
+
   static Font sm_font;
   static Font med_font;
   static Color* palette;
-  static MenuKeybinds menu_keybinds;
   static std::mt19937_64 RNG;
 
   #ifndef NDEBUG

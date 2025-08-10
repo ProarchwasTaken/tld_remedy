@@ -7,7 +7,6 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
-#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
@@ -23,14 +22,15 @@
 using std::unique_ptr, std::make_unique;
 bool Mary::controllable = true;
 
-CombatKeybinds Mary::key_bind;
 SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
 Mary::Mary(Player *plr): 
   PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
 {
+  keybinds = &Game::settings.combat_keybinds;
   important = true;
+
   life = plr->life;
   max_life = plr->max_life;
   critical_life = life < max_life * LOW_LIFE_THRESHOLD;
@@ -85,8 +85,8 @@ void Mary::behavior() {
 }
 
 void Mary::movementInput(bool gamepad) {
-  bool right = Input::down(key_bind.move_right, gamepad);
-  bool left = Input::down(key_bind.move_left, gamepad);
+  bool right = Input::down(keybinds->move_right, gamepad);
+  bool left = Input::down(keybinds->move_left, gamepad);
 
   moving_x = right - left;
   moving = moving_x != 0;
@@ -97,11 +97,11 @@ void Mary::actionInput(bool gamepad) {
     return;
   }
 
-  if (Input::pressed(key_bind.attack, gamepad)) {
+  if (Input::pressed(keybinds->attack, gamepad)) {
     PLOGI << "Sending Attack input to buffer.";
     buffer = MaryAction::ATTACK;
   }
-  else if (Input::pressed(key_bind.defensive, gamepad)) {
+  else if (Input::pressed(keybinds->defensive, gamepad)) {
     defensiveActionInput(gamepad);
   }
   else {
@@ -120,7 +120,7 @@ void Mary::defensiveActionInput(bool gamepad) {
     buffer = MaryAction::GHOST_STEP;
     return;
   }
-  else if (Input::down(key_bind.down, gamepad)) {
+  else if (Input::down(keybinds->down, gamepad)) {
     PLOGI << "Sending Evade input to buffer.";
     buffer = MaryAction::EVADE;
     return;

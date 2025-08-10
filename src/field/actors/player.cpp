@@ -6,7 +6,6 @@
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
-#include "data/keybinds.h"
 #include "data/actor_event.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
@@ -20,13 +19,13 @@
 using std::unique_ptr;
 
 bool PlayerActor::controllable = true;
-FieldKeybinds PlayerActor::key_bind;
 SpriteAtlas PlayerActor::atlas("actors", "mary_actor");
 
 
 PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
 {
+  keybinds = &Game::settings.field_keybinds;
   bounding_box.scale = {32, 32};
   bounding_box.offset = {-16, -28};
   collis_box.scale = {8, 16};
@@ -113,13 +112,13 @@ void PlayerActor::setControllable(bool value) {
 }
 
 void PlayerActor::movementInput(bool gamepad) {
-  bool right = Input::down(key_bind.move_right, gamepad);
-  bool left = Input::down(key_bind.move_left, gamepad);
+  bool right = Input::down(keybinds->move_right, gamepad);
+  bool left = Input::down(keybinds->move_left, gamepad);
 
   moving_x = right - left;
 
-  bool down = Input::down(key_bind.move_down, gamepad);
-  bool up = Input::down(key_bind.move_up, gamepad);
+  bool down = Input::down(keybinds->move_down, gamepad);
+  bool up = Input::down(keybinds->move_up, gamepad);
 
   moving_y = down - up;
 
@@ -136,7 +135,7 @@ bool PlayerActor::isMoving() {
 }
 
 void PlayerActor::interactInput(bool gamepad) {
-  bool interact = Input::pressed(key_bind.interact, gamepad);
+  bool interact = Input::pressed(keybinds->interact, gamepad);
 
   if (interact && pickup_event != nullptr) {
     Pickup *pickup = static_cast<Pickup*>(pickup_event->sender);

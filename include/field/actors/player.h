@@ -30,13 +30,13 @@ public:
   void draw() override;
 
   static void setControllable(bool value);
-  static FieldKeybinds key_bind;
   static SpriteAtlas atlas;
 
   bool moving = false;
   bool has_moved = false;
 private:
   static bool controllable;
+  FieldKeybinds *keybinds;
 
   const float default_speed = 56;
   int moving_x = 0;

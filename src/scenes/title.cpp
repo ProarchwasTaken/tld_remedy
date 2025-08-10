@@ -12,6 +12,7 @@ using std::string;
 
 TitleScene::TitleScene() {
   scene_id = SceneID::TITLE;
+  keybinds = &Game::settings.menu_keybinds;
   valid_session = Game::existingSession();
 }
 
@@ -21,13 +22,13 @@ TitleScene::~TitleScene() {
 
 void TitleScene::update() {
   bool gamepad = IsGamepadAvailable(0);
-  if (Input::pressed(Game::menu_keybinds.down, gamepad)) {
+  if (Input::pressed(keybinds->down, gamepad)) {
     nextOption();
   }
-  else if (Input::pressed(Game::menu_keybinds.up, gamepad)) {
+  else if (Input::pressed(keybinds->up, gamepad)) {
     prevOption();
   }
-  else if (Input::pressed(Game::menu_keybinds.confirm, gamepad)) {
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
     selectOption();
   }
 }

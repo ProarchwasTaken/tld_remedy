@@ -25,7 +25,6 @@ public:
   Mary(Player *data);
   ~Mary();
   static void setControllable(bool value);
-  static CombatKeybinds key_bind;
 
   void behavior() override;
   void movementInput(bool gamepad);
@@ -46,6 +45,9 @@ public:
   void draw() override;
   void drawDebug() override;
 private:
+  static bool controllable;
+  CombatKeybinds *keybinds;
+
   const float default_speed = 68;
   bool has_moved = false;
   bool moving = true;
@@ -71,6 +73,5 @@ private:
   GSSpriteSet gs_set = {14, 8, 15};
   EvadeSpriteSet ev_set = {16, 17, 16, 19, 18};
 
-  static bool controllable;
   static SpriteAtlas atlas;
 };
