@@ -54,6 +54,7 @@ set(HEADERS
 "include/data/actor_event.h"
 "include/data/combat_event.h"
 "include/data/session.h"
+"include/data/personal.h"
 "include/data/animation.h"
 "include/data/damage.h"
 "include/utils/input.h"
