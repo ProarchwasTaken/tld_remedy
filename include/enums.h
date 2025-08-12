@@ -17,6 +17,10 @@ enum class SceneID {
   COMBAT
 };
 
+enum class PanelID {
+  CONFIG,
+};
+
 enum EntityType {
   ACTOR,
   PICKUP,

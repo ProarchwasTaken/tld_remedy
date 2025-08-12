@@ -1,15 +1,17 @@
 #include <cassert>
 #include <cmath>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
 #include "enums.h"
 #include "game.h"
 #include "utils/input.h"
+#include "menu/panels/config.h"
 #include "scenes/title.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique;
 
 
 TitleScene::TitleScene() {
@@ -26,9 +28,28 @@ TitleScene::TitleScene() {
 TitleScene::~TitleScene() {
   sfx->release();
   menu_atlas.release();
+
+  if (panel != nullptr) {
+    panel.reset();
+  }
 }
 
 void TitleScene::update() {
+  if (!panel_mode) {
+    optionNavigation();
+    return;
+  }
+
+  assert(panel != nullptr);
+  panel->update();
+
+  if (panel->terminate) {
+    panel.reset();
+    panel_mode = false;
+  }
+}
+
+void TitleScene::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->down, gamepad)) {
     nextOption();
@@ -80,7 +101,8 @@ void TitleScene::selectOption() {
       break;
     }
     case TitleOption::CONFIG: {
-      PLOGE << "This doesn't do anything yet!";
+      panel = make_unique<ConfigPanel>((Vector2){97, 39}, &menu_atlas);
+      panel_mode = true;
       break;
     }
   }
@@ -93,6 +115,11 @@ void TitleScene::draw() {
   DrawTextEx(*font, "True Human Tribulation III: Remedy", {8, 8}, 
              txt_size, -2, Game::palette[14]);
   drawOptions(font, txt_size);
+
+  if (panel_mode) {
+    panel->draw();
+    assert(panel != nullptr);
+  }
 }
 
 void TitleScene::drawOptions(Font *font, int txt_size) {
@@ -116,9 +143,11 @@ void TitleScene::drawOptions(Font *font, int txt_size) {
 }
 
 void TitleScene::drawCursor(Vector2 position, Color color) {
-  float sin_a = std::sinf(GetTime() * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+  if (!panel_mode) {
+    float sin_a = std::sinf(GetTime() * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   position = Vector2Add(position, {-11, 2});
   DrawTextureRec(menu_atlas.sheet, menu_atlas.sprites[0], position, 

@@ -1,11 +1,13 @@
 #pragma once
 #include <array>
 #include <string>
+#include <memory>
 #include <raylib.h>
 #include "base/scene.h"
+#include "data/keybinds.h"
 #include "system/sound_atlas.h"
 #include "system/sprite_atlas.h"
-#include "data/keybinds.h"
+#include "menu/panels/config.h"
 
 enum class TitleOption {
   NEW_GAME,
@@ -19,6 +21,8 @@ public:
   ~TitleScene();
 
   void update() override;
+  void optionNavigation();
+
   void nextOption();
   void prevOption();
   void selectOption();
@@ -31,7 +35,6 @@ public:
 private:
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
-
   SpriteAtlas menu_atlas = SpriteAtlas("menu", "menu_elements");
 
   std::array<TitleOption, 3> options = {
@@ -42,4 +45,7 @@ private:
 
   std::array<TitleOption, 3>::iterator selected = options.begin();
   bool valid_session;
+
+  bool panel_mode = false;
+  std::unique_ptr<ConfigPanel> panel;
 };
