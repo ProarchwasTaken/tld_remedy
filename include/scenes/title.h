@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include "base/scene.h"
 #include "system/sound_atlas.h"
+#include "system/sprite_atlas.h"
 #include "data/keybinds.h"
 
 enum class TitleOption {
@@ -26,9 +27,12 @@ public:
 
   std::string getOptionText(TitleOption id);
   void drawOptions(Font *font, int txt_size);
+  void drawCursor(Vector2 position, Color color);
 private:
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
+
+  SpriteAtlas menu_atlas = SpriteAtlas("menu", "menu_elements");
 
   std::array<TitleOption, 3> options = {
     TitleOption::NEW_GAME,
