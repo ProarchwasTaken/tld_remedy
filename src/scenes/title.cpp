@@ -36,6 +36,7 @@ TitleScene::~TitleScene() {
 
 void TitleScene::update() {
   if (!panel_mode) {
+    blink_clock += Game::deltaTime();
     optionNavigation();
     return;
   }
@@ -53,10 +54,12 @@ void TitleScene::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->down, gamepad)) {
     nextOption();
+    blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     prevOption();
+    blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
@@ -145,7 +148,7 @@ void TitleScene::drawOptions(Font *font, int txt_size) {
 
 void TitleScene::drawCursor(Vector2 position, Color color) {
   if (!panel_mode) {
-    float sin_a = std::sinf(GetTime() * 2.5);
+    float sin_a = std::sinf(blink_clock * 2.5);
     sin_a = (sin_a / 2) + 0.5;
     color.a = 255 * sin_a;
   }
