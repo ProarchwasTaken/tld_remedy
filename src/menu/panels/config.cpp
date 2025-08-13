@@ -41,7 +41,7 @@ ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
 void ConfigPanel::setupOptions() {
   options = {
     make_pair(ConfigOption::VOL_MASTER, 55),
-    make_pair(ConfigOption::VOL_SOUND, 72),
+    make_pair(ConfigOption::VOL_SOUND, 71),
     make_pair(ConfigOption::VOL_MUSIC, 87),
     make_pair(ConfigOption::FULLSCREEN, 111),
     make_pair(ConfigOption::FRAMERATE, 127),
@@ -157,7 +157,9 @@ void ConfigPanel::drawOptions() {
       drawCursor(position);
     }
 
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+    if (!on_linux || option.first != ConfigOption::FULLSCREEN) {
+      DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+    }
   }
 }
 
