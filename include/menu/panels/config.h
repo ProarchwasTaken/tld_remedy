@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include "base/panel.h"
 #include "data/keybinds.h"
+#include "data/personal.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
@@ -37,7 +38,13 @@ public:
 
   void draw() override;
   void drawOptions();
+  void drawOptionVisuals(ConfigOption id, Vector2 position, Font *font, 
+                         int txt_size);
+  void drawGuage(Vector2 position, float percentage);
+  void drawCheckbox(Vector2 position, bool enabled);
+  void drawFramerateStepper(Vector2 position, Font *font, int txt_size);
   void drawCursor(Vector2 position);
+
   std::string getOptionName(ConfigOption id);
 private:
   enum {READY, OPENING, CLOSING} state = OPENING;
@@ -55,5 +62,6 @@ private:
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
   MenuKeybinds *keybinds;
+  Settings settings;
   bool on_linux;
 };

@@ -9,6 +9,7 @@
 #include "data/keybinds.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
+#include "utils/text.h"
 #include "menu/panels/config.h"
 #include <plog/Log.h>
 
@@ -25,6 +26,7 @@ ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
   setupOptions();
   selected = options.begin();
 
+  settings = Game::settings;
   keybinds = menu_keybinds;
 
   assert(menu_atlas != NULL);
@@ -149,18 +151,109 @@ void ConfigPanel::drawOptions() {
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
 
-  for (pair<ConfigOption, float> option : options) {
-    string name = getOptionName(option.first);
-    Vector2 position = {113, option.second};
+  for (int x = 0; x < options.size(); x++) {
+    pair<ConfigOption, float> *option = &options.at(x);
+    ConfigOption id = option->first;
 
-    if (option == *selected) {
+    bool dont_draw = on_linux && id == ConfigOption::FULLSCREEN;
+    if (dont_draw) {
+      continue;
+    } 
+
+    Vector2 position = {113, option->second};
+    string name = getOptionName(option->first);
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+
+    if (x <= 4) {
+      drawOptionVisuals(id, position, font, txt_size);
+    }
+
+    if (*option == *selected) {
       drawCursor(position);
     }
+  }
+}
 
-    if (!on_linux || option.first != ConfigOption::FULLSCREEN) {
-      DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+void ConfigPanel::drawOptionVisuals(ConfigOption id, Vector2 position,
+                                    Font *font, int txt_size)
+{
+  Vector2 dash_position = position;
+  dash_position.x = 206;
+  DrawTextEx(*font, "-", dash_position, txt_size, -2, WHITE);
+
+  switch (id) {
+    case ConfigOption::VOL_MASTER: {
+      drawGuage(position, settings.master_volume);
+      break;
+    }
+    case ConfigOption::VOL_SOUND: {
+      drawGuage(position, settings.sfx_volume);
+      break;
+    }
+    case ConfigOption::VOL_MUSIC: {
+      drawGuage(position, settings.bgm_volume);
+      break;
+    }
+    case ConfigOption::FULLSCREEN: {
+      drawCheckbox(position, settings.fullscreen);
+      break;
+    }
+    case ConfigOption::FRAMERATE: {
+      drawFramerateStepper(position, font, txt_size);
+      break;
+    }
+    default: {
+
     }
   }
+}
+
+void ConfigPanel::drawGuage(Vector2 position, float percentage) {
+  position.x = 231;
+  position.y = position.y + 3;
+
+  int segments = percentage * 20;
+  for (int x = 0; x < 20; x++) {
+    Rectangle *sprite;
+
+    if (x < segments)  {
+      sprite = &atlas->sprites[5];
+    }
+    else {
+      sprite = &atlas->sprites[6];
+    }
+
+    DrawTextureRec(atlas->sheet, *sprite, position, WHITE);
+    position.x += 4;
+  }
+}
+
+void ConfigPanel::drawCheckbox(Vector2 position, bool enabled) {
+  position.x = 264;
+
+  Rectangle *sprite = &atlas->sprites[3 + enabled];
+  DrawTextureRec(atlas->sheet, *sprite, position, WHITE);
+}
+
+void ConfigPanel::drawFramerateStepper(Vector2 position, Font *font, 
+                                       int txt_size) 
+{
+  Vector2 left_pos = {231, position.y + 2};
+  Vector2 right_pos = {302, left_pos.y};
+
+  int framerate = settings.framerate;
+  if (framerate != 30) {
+    DrawTextureRec(atlas->sheet, atlas->sprites[1], left_pos, WHITE);
+  }
+
+  if (framerate != 600) {
+    DrawTextureRec(atlas->sheet, atlas->sprites[2], right_pos, WHITE);
+  }
+
+  string txt = TextFormat("%i", framerate); 
+  Vector2 txt_pos = TextUtils::alignCenter(txt.c_str(), {271, position.y},
+                                           *font, -2, 0);
+  DrawTextEx(*font, txt.c_str(), txt_pos, txt_size, -3, WHITE);
 }
 
 void ConfigPanel::drawCursor(Vector2 position) {
