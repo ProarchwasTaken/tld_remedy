@@ -219,6 +219,11 @@ void Game::toggleFullscreen() {
 
 void Game::gameLogic() {
   switch (game_state) {
+    case GameState::TOGGLE_FULLSCREEN: {
+      toggleFullscreen();
+      game_state = GameState::READY;
+      break;
+    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
       break;
@@ -357,6 +362,12 @@ void Game::drawScene() {
     if (debug_info) DrawFPS(0, 0);
   }
   EndDrawing();
+}
+
+void Game::fullscreenCheck() {
+  if (settings.fullscreen != IsWindowState(FLAG_WINDOW_UNDECORATED)) {
+    game_state = GameState::TOGGLE_FULLSCREEN;
+  }
 }
 
 void Game::fadeout(float seconds) {

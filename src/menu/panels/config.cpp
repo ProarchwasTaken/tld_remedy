@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <utility>
 #include <string>
 #include <raylib.h>
@@ -66,7 +67,10 @@ void ConfigPanel::update() {
   }
 
   blink_clock += Game::deltaTime();
-  optionNavigation();
+
+  bool gamepad = IsGamepadAvailable(0);
+  verticalNavigation(gamepad);
+  horizontalInput(gamepad);
 }
 
 void ConfigPanel::frameTransition() {
@@ -97,8 +101,7 @@ void ConfigPanel::frameTransition() {
   }
 }
 
-void ConfigPanel::optionNavigation() {
-  bool gamepad = IsGamepadAvailable(0);
+void ConfigPanel::verticalNavigation(bool gamepad) {
   if (Input::pressed(keybinds->down, gamepad)) {
     nextOption();
     blink_clock = 0.0;
@@ -109,9 +112,74 @@ void ConfigPanel::optionNavigation() {
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
-  if (Input::pressed(keybinds->cancel, gamepad)) {
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectOption();
+  } 
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = CLOSING;
   }
+}
+
+void ConfigPanel::horizontalInput(bool gamepad) {
+  bool right = Input::pressed(keybinds->right, gamepad);
+  bool left = Input::pressed(keybinds->left, gamepad);
+
+  int direction = right - left;
+  if (direction == 0) {
+    return;
+  }
+
+  bool changed = false;
+  switch (selected->first) {
+    case ConfigOption::VOL_MASTER: {
+      changed = changeVolume(direction, &settings.master_volume);
+      break;
+    }
+    case ConfigOption::VOL_SOUND: {
+      changed = changeVolume(direction, &settings.sfx_volume);
+      break;
+    }
+    case ConfigOption::VOL_MUSIC: {
+      changed = changeVolume(direction, &settings.bgm_volume);
+      break;
+    }
+    case ConfigOption::FRAMERATE: {
+      changed = changeFramerate(direction);
+      break;
+    }
+    default: {
+      
+    }
+  }
+
+  if (changed) {
+    unapplied = settings != Game::settings;
+    return;
+  }
+}
+
+bool ConfigPanel::changeVolume(int direction, float *percentage) {
+  assert(percentage != NULL);
+  float old = *percentage;
+  int segments = *percentage * 20;
+  segments = Clamp(segments + direction, 0, 20);
+
+  *percentage = segments / 20.0f;
+
+  PLOGD << "Changed volume percentage to: " << *percentage;
+  sfx->play("menu_navigate");
+  return *percentage != old;
+}
+
+bool ConfigPanel::changeFramerate(int direction) {
+  int *framerate = &settings.framerate;
+  int old = *framerate;
+
+  *framerate = Clamp(*framerate + (5 * direction), 30, 300);
+  
+  PLOGD << "Changed Framerate to: " << *framerate;
+  sfx->play("menu_navigate");
+  return *framerate != old;
 }
 
 void ConfigPanel::nextOption() {
@@ -138,6 +206,47 @@ void ConfigPanel::prevOption() {
   }
 }
 
+void ConfigPanel::selectOption() {
+  switch (selected->first) {
+    case ConfigOption::FULLSCREEN: {
+      settings.fullscreen = !settings.fullscreen;
+      unapplied = settings != Game::settings;
+      sfx->play("menu_select");
+      break;
+    }
+    case ConfigOption::APPLY: {
+      applySettings();
+      sfx->play("menu_select");
+      break;
+    }
+    case ConfigOption::BACK: {
+      state = CLOSING;
+      sfx->play("menu_select");
+      break;
+    }
+    case ConfigOption::CONTROLS: {
+      PLOGE << "Controls Remapping hasn't been implemented yet!";
+    }
+    default: {
+
+    }
+  }
+}
+
+void ConfigPanel::applySettings() {
+  PLOGI << "Applying settings.";
+  Game::settings = settings;
+
+  SetMasterVolume(settings.master_volume);
+  SetTargetFPS(settings.framerate);
+
+  if (!on_linux) {
+    Game::fullscreenCheck();
+  } 
+
+  unapplied = settings != Game::settings;
+}
+
 void ConfigPanel::draw() {
   Rectangle source = {0, 0, 232, frame_height};
   DrawTextureRec(frame, source, position, WHITE);
@@ -160,9 +269,15 @@ void ConfigPanel::drawOptions() {
       continue;
     } 
 
-    Vector2 position = {113, option->second};
     string name = getOptionName(option->first);
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+    Vector2 position = {113, option->second};
+
+    Color color = WHITE;
+    if (unapplied && id == ConfigOption::APPLY) {
+      color = Game::palette[26];
+    }
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
 
     if (x <= 4) {
       drawOptionVisuals(id, position, font, txt_size);
@@ -288,7 +403,12 @@ string ConfigPanel::getOptionName(ConfigOption id) {
       return "CONTROLS";
     }
     case ConfigOption::APPLY: {
-      return "APPLY SETTINGS";
+      if (unapplied) {
+        return "*APPLY SETTINGS";
+      }
+      else { 
+        return "APPLY SETTINGS";
+      }
     }
     case ConfigOption::BACK: {
       return "BACK";

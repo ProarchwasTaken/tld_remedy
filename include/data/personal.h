@@ -13,6 +13,14 @@ struct Settings {
   MenuKeybinds menu_keybinds;
   FieldKeybinds field_keybinds;
   CombatKeybinds combat_keybinds;
+
+  bool operator!=(const Settings &cfg) {
+    return this->master_volume != cfg.master_volume ||
+    this->sfx_volume != cfg.sfx_volume ||
+    this->bgm_volume != cfg.bgm_volume ||
+    this->fullscreen != cfg.fullscreen ||
+    this->framerate != cfg.framerate; 
+  }
 };
 
 struct Personal {

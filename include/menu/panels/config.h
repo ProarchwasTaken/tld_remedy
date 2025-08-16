@@ -32,9 +32,15 @@ public:
   void update() override;
   void frameTransition();
 
-  void optionNavigation();
+  void verticalNavigation(bool gamepad);
+  void horizontalInput(bool gamepad);
+  bool changeVolume(int direction, float *percentage);
+  bool changeFramerate(int direction);
+
   void nextOption();
   void prevOption();
+  void selectOption();
+  void applySettings();
 
   void draw() override;
   void drawOptions();
@@ -62,6 +68,8 @@ private:
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
   MenuKeybinds *keybinds;
+
   Settings settings;
+  bool unapplied = false;
   bool on_linux;
 };

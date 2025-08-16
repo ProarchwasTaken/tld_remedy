@@ -3,6 +3,7 @@
 
 enum class GameState {
   READY,
+  TOGGLE_FULLSCREEN,
   LOADING_SESSION,
   INIT_COMBAT,
   END_COMBAT,
