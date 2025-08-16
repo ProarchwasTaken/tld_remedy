@@ -7,6 +7,10 @@
     {
       "name": "menu_select",
       "filename": "menu/menu_select.mp3"
+    },
+    {
+      "name": "menu_cancel",
+      "filename": "menu/menu_cancel.mp3"
     }
   ]
 }

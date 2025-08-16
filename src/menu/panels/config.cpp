@@ -116,6 +116,7 @@ void ConfigPanel::verticalNavigation(bool gamepad) {
     selectOption();
   } 
   else if (Input::pressed(keybinds->cancel, gamepad)) {
+    sfx->play("menu_cancel");
     state = CLOSING;
   }
 }
@@ -221,14 +222,14 @@ void ConfigPanel::selectOption() {
     }
     case ConfigOption::BACK: {
       state = CLOSING;
-      sfx->play("menu_select");
+      sfx->play("menu_cancel");
       break;
     }
     case ConfigOption::CONTROLS: {
       PLOGE << "Controls Remapping hasn't been implemented yet!";
     }
     default: {
-
+      sfx->play("menu_cancel");
     }
   }
 }
