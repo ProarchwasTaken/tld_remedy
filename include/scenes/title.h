@@ -2,6 +2,7 @@
 #include <array>
 #include <string>
 #include <memory>
+#include <unordered_set>
 #include <raylib.h>
 #include "base/scene.h"
 #include "data/keybinds.h"
@@ -22,9 +23,6 @@ public:
 
   void update() override;
   void optionNavigation();
-
-  void nextOption();
-  void prevOption();
   void selectOption();
 
   void draw() override;
@@ -45,7 +43,9 @@ private:
 
   std::array<TitleOption, 3>::iterator selected = options.begin();
   float blink_clock = 0.0;
+
   bool valid_session;
+  std::unordered_set<TitleOption> disallowed;
 
   bool panel_mode = false;
   std::unique_ptr<ConfigPanel> panel;

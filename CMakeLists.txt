@@ -61,6 +61,7 @@ set(HEADERS
 "include/utils/collision.h"
 "include/utils/text.h"
 "include/utils/animation.h"
+"include/utils/menu.h"
 "include/system/sprite_atlas.h"
 "include/system/sound_atlas.h"
 "include/scenes/title.h"

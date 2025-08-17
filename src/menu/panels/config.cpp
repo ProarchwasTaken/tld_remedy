@@ -1,7 +1,6 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <utility>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -11,10 +10,11 @@
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/text.h"
+#include "utils/menu.h"
 #include "menu/panels/config.h"
 #include <plog/Log.h>
 
-using std::pair, std::make_pair, std::string;
+using std::string;
 
 
 ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
@@ -24,7 +24,6 @@ ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
   this->position = position;
 
   frame = LoadTexture("graphics/menu/config_frame.png");
-  setupOptions();
   selected = options.begin();
 
   settings = Game::settings;
@@ -38,20 +37,10 @@ ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
   sfx->use();
 
   on_linux = PLATFORM == PLATFORM_LINUX;
+  if (on_linux) {
+    disallowed.emplace(ConfigOption::FULLSCREEN);
+  }
   PLOGI << "Configuration Panel: Initialized.";
-}
-
-void ConfigPanel::setupOptions() {
-  options = {
-    make_pair(ConfigOption::VOL_MASTER, 55),
-    make_pair(ConfigOption::VOL_SOUND, 71),
-    make_pair(ConfigOption::VOL_MUSIC, 87),
-    make_pair(ConfigOption::FULLSCREEN, 111),
-    make_pair(ConfigOption::FRAMERATE, 127),
-    make_pair(ConfigOption::CONTROLS, 151),
-    make_pair(ConfigOption::APPLY, 167),
-    make_pair(ConfigOption::BACK, 183)
-  };
 }
 
 ConfigPanel::~ConfigPanel() {
@@ -103,12 +92,12 @@ void ConfigPanel::frameTransition() {
 
 void ConfigPanel::verticalNavigation(bool gamepad) {
   if (Input::pressed(keybinds->down, gamepad)) {
-    nextOption();
+    MenuUtils::nextOption(options, selected, disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    prevOption();
+    MenuUtils::prevOption(options, selected, disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
@@ -131,7 +120,7 @@ void ConfigPanel::horizontalInput(bool gamepad) {
   }
 
   bool changed = false;
-  switch (selected->first) {
+  switch (*selected) {
     case ConfigOption::VOL_MASTER: {
       changed = changeVolume(direction, &settings.master_volume);
       break;
@@ -183,32 +172,8 @@ bool ConfigPanel::changeFramerate(int direction) {
   return *framerate != old;
 }
 
-void ConfigPanel::nextOption() {
-  selected++;
-
-  if (selected == options.end()) {
-    selected = options.begin();
-  }
-
-  if (on_linux && selected->first == ConfigOption::FULLSCREEN) {
-    selected++;
-  }
-}
-
-void ConfigPanel::prevOption() {
-  if (selected == options.begin()) {
-    selected = options.end();
-  }
-
-  selected--;
-
-  if (on_linux && selected->first == ConfigOption::FULLSCREEN) {
-    selected--;
-  }
-}
-
 void ConfigPanel::selectOption() {
-  switch (selected->first) {
+  switch (*selected) {
     case ConfigOption::FULLSCREEN: {
       settings.fullscreen = !settings.fullscreen;
       unapplied = settings != Game::settings;
@@ -262,16 +227,16 @@ void ConfigPanel::drawOptions() {
   int txt_size = font->baseSize;
 
   for (int x = 0; x < options.size(); x++) {
-    pair<ConfigOption, float> *option = &options.at(x);
-    ConfigOption id = option->first;
+    ConfigOption id = options.at(x);
 
     bool dont_draw = on_linux && id == ConfigOption::FULLSCREEN;
     if (dont_draw) {
       continue;
     } 
 
-    string name = getOptionName(option->first);
-    Vector2 position = {113, option->second};
+    string name = getOptionName(id);
+    float y = y_values.at(x);
+    Vector2 position = {113, y};
 
     Color color = WHITE;
     if (unapplied && id == ConfigOption::APPLY) {
@@ -284,7 +249,7 @@ void ConfigPanel::drawOptions() {
       drawOptionVisuals(id, position, font, txt_size);
     }
 
-    if (*option == *selected) {
+    if (id == *selected) {
       drawCursor(position);
     }
   }

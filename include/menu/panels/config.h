@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
-#include <utility>
 #include <string>
+#include <unordered_set>
 #include <raylib.h>
 #include "base/panel.h"
 #include "data/keybinds.h"
@@ -27,7 +27,6 @@ public:
   ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas, 
               MenuKeybinds *keybinds);
   ~ConfigPanel();
-  void setupOptions();
 
   void update() override;
   void frameTransition();
@@ -37,8 +36,6 @@ public:
   bool changeVolume(int direction, float *percentage);
   bool changeFramerate(int direction);
 
-  void nextOption();
-  void prevOption();
   void selectOption();
   void applySettings();
 
@@ -62,8 +59,19 @@ private:
   Vector2 position;
   float frame_height = 161;
 
-  std::array<std::pair<ConfigOption, float>, 8> options;
-  std::array<std::pair<ConfigOption, float>, 8>::iterator selected;
+  std::array<ConfigOption, 8> options {
+    ConfigOption::VOL_MASTER,
+    ConfigOption::VOL_SOUND,
+    ConfigOption::VOL_MUSIC,
+    ConfigOption::FULLSCREEN,
+    ConfigOption::FRAMERATE,
+    ConfigOption::CONTROLS,
+    ConfigOption::APPLY,
+    ConfigOption::BACK
+  };
+  std::array<float, 8> y_values = {55, 71, 87, 111, 127, 151, 167, 183};
+
+  std::array<ConfigOption, 8>::iterator selected;
 
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
@@ -71,5 +79,7 @@ private:
 
   Settings settings;
   bool unapplied = false;
+
   bool on_linux;
+  std::unordered_set<ConfigOption> disallowed;
 };

@@ -7,6 +7,7 @@
 #include "enums.h"
 #include "game.h"
 #include "utils/input.h"
+#include "utils/menu.h"
 #include "menu/panels/config.h"
 #include "scenes/title.h"
 #include <plog/Log.h>
@@ -23,6 +24,9 @@ TitleScene::TitleScene() {
   menu_atlas.use();
 
   valid_session = Game::existingSession();
+  if (!valid_session) {
+    disallowed.emplace(TitleOption::LOAD_GAME);
+  }
 }
 
 TitleScene::~TitleScene() {
@@ -53,42 +57,18 @@ void TitleScene::update() {
 void TitleScene::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->down, gamepad)) {
-    nextOption();
+    MenuUtils::nextOption(options, selected, disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    prevOption();
+    MenuUtils::prevOption(options, selected, disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     selectOption();
     sfx->play("menu_select");
-  }
-}
-
-void TitleScene::nextOption() {
-  selected++;
-
-  if (selected == options.end()) {
-    selected = options.begin();
-  }
-
-  if (!valid_session && *selected == TitleOption::LOAD_GAME) {
-    selected++;
-  }
-}
-
-void TitleScene::prevOption() {
-  if (selected == options.begin()) {
-    selected = options.end();
-  }
-
-  selected--;
-
-  if (!valid_session && *selected == TitleOption::LOAD_GAME) {
-    selected--;
   }
 }
 
