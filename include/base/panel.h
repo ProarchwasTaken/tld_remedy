@@ -10,5 +10,10 @@ public:
   virtual void draw() = 0;
 
   PanelID id;
+
   bool terminate = false;
+protected:
+  PanelState state = PanelState::OPENING;
+  float clock = 0.0;
+  float transition_time = 0.25;
 };

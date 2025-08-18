@@ -22,6 +22,12 @@ enum class PanelID {
   CONFIG,
 };
 
+enum class PanelState {
+  READY,
+  OPENING,
+  CLOSING
+};
+
 enum EntityType {
   ACTOR,
   PICKUP,

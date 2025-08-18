@@ -24,8 +24,7 @@ enum class ConfigOption {
 
 class ConfigPanel : public Panel {
 public:
-  ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas, 
-              MenuKeybinds *keybinds);
+  ConfigPanel(SpriteAtlas *menu_atlas, MenuKeybinds *keybinds);
   ~ConfigPanel();
 
   void update() override;
@@ -50,14 +49,11 @@ public:
 
   std::string getOptionName(ConfigOption id);
 private:
-  enum {READY, OPENING, CLOSING} state = OPENING;
-  float clock = 0.0;
-  float blink_clock = 0;
-  float transition_time = 0.25;
-
   Texture frame;
   Vector2 position;
+
   float frame_height = 161;
+  float blink_clock = 0;
 
   std::array<ConfigOption, 8> options {
     ConfigOption::VOL_MASTER,

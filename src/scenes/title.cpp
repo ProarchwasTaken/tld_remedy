@@ -84,8 +84,7 @@ void TitleScene::selectOption() {
       break;
     }
     case TitleOption::CONFIG: {
-      panel = make_unique<ConfigPanel>((Vector2){97, 39}, &menu_atlas, 
-                                       keybinds);
+      panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
       panel_mode = true;
       break;
     }

@@ -17,11 +17,11 @@
 using std::string;
 
 
-ConfigPanel::ConfigPanel(Vector2 position, SpriteAtlas *menu_atlas,
+ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
                          MenuKeybinds *menu_keybinds) 
 {
   id = PanelID::CONFIG;
-  this->position = position;
+  this->position = {97, 39};
 
   frame = LoadTexture("graphics/menu/config_frame.png");
   selected = options.begin();
@@ -50,7 +50,7 @@ ConfigPanel::~ConfigPanel() {
 }
 
 void ConfigPanel::update() {
-  if (state != READY) {
+  if (state != PanelState::READY) {
     frameTransition();
     return;
   }
@@ -63,12 +63,12 @@ void ConfigPanel::update() {
 }
 
 void ConfigPanel::frameTransition() {
-  assert(state != READY);
+  assert(state != PanelState::READY);
   clock += Game::deltaTime() / transition_time;
   clock = Clamp(clock, 0.0, 1.0);
 
   float percentage;
-  if (state == OPENING) {
+  if (state == PanelState::OPENING) {
     percentage = clock;
   }
   else {
@@ -81,8 +81,8 @@ void ConfigPanel::frameTransition() {
     return;
   }
 
-  if (state == OPENING) {
-    state = READY;
+  if (state == PanelState::OPENING) {
+    state = PanelState::READY;
     clock = 0.0;
   }
   else {
@@ -106,7 +106,7 @@ void ConfigPanel::verticalNavigation(bool gamepad) {
   } 
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     sfx->play("menu_cancel");
-    state = CLOSING;
+    state = PanelState::CLOSING;
   }
 }
 
@@ -186,7 +186,7 @@ void ConfigPanel::selectOption() {
       break;
     }
     case ConfigOption::BACK: {
-      state = CLOSING;
+      state = PanelState::CLOSING;
       sfx->play("menu_cancel");
       break;
     }
@@ -217,7 +217,7 @@ void ConfigPanel::draw() {
   Rectangle source = {0, 0, 232, frame_height};
   DrawTextureRec(frame, source, position, WHITE);
 
-  if (state == READY) {
+  if (state == PanelState::READY) {
     drawOptions();
   }
 }
