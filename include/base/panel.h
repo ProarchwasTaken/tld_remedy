@@ -7,10 +7,11 @@ public:
   virtual ~Panel() = default;
 
   virtual void update() = 0;
+  void transitionLogic();
+
   virtual void draw() = 0;
 
   PanelID id;
-
   bool terminate = false;
 protected:
   PanelState state = PanelState::OPENING;

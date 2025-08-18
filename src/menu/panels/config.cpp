@@ -21,7 +21,6 @@ ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
                          MenuKeybinds *menu_keybinds) 
 {
   id = PanelID::CONFIG;
-  this->position = {97, 39};
 
   frame = LoadTexture("graphics/menu/config_frame.png");
   selected = options.begin();
@@ -51,7 +50,8 @@ ConfigPanel::~ConfigPanel() {
 
 void ConfigPanel::update() {
   if (state != PanelState::READY) {
-    frameTransition();
+    transitionLogic();
+    heightLerp();
     return;
   }
 
@@ -62,11 +62,7 @@ void ConfigPanel::update() {
   horizontalInput(gamepad);
 }
 
-void ConfigPanel::frameTransition() {
-  assert(state != PanelState::READY);
-  clock += Game::deltaTime() / transition_time;
-  clock = Clamp(clock, 0.0, 1.0);
-
+void ConfigPanel::heightLerp() {
   float percentage;
   if (state == PanelState::OPENING) {
     percentage = clock;
@@ -76,18 +72,6 @@ void ConfigPanel::frameTransition() {
   }
 
   frame_height = 161 * percentage;
-
-  if (clock != 1.0) {
-    return;
-  }
-
-  if (state == PanelState::OPENING) {
-    state = PanelState::READY;
-    clock = 0.0;
-  }
-  else {
-    terminate = true;
-  }
 }
 
 void ConfigPanel::verticalNavigation(bool gamepad) {

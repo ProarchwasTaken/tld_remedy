@@ -20,6 +20,7 @@ enum class SceneID {
 
 enum class PanelID {
   CONFIG,
+  CONFIRM
 };
 
 enum class PanelState {

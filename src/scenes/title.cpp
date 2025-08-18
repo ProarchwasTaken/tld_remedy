@@ -9,6 +9,7 @@
 #include "utils/input.h"
 #include "utils/menu.h"
 #include "menu/panels/config.h"
+#include "menu/panels/confirm.h"
 #include "scenes/title.h"
 #include <plog/Log.h>
 
@@ -69,6 +70,12 @@ void TitleScene::optionNavigation() {
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     selectOption();
     sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    panel = make_unique<ConfirmPanel>(&menu_atlas, keybinds, 
+                                     "Close the game?");
+    sfx->play("menu_cancel");
+    panel_mode = true;
   }
 }
 

@@ -66,6 +66,7 @@ set(HEADERS
 "include/system/sound_atlas.h"
 "include/scenes/title.h"
 "include/menu/panels/config.h"
+"include/menu/panels/confirm.h"
 "include/scenes/field.h"
 "include/field/system/field_map.h"
 "include/field/system/camera.h"
@@ -94,6 +95,7 @@ set(HEADERS
 set(SOURCE
 "src/main.cpp"
 "src/game.cpp"
+"src/base/panel.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
 "src/base/combatant.cpp"
@@ -109,6 +111,7 @@ set(SOURCE
 "src/system/sound_atlas.cpp"
 "src/scenes/title.cpp"
 "src/menu/panels/config.cpp"
+"src/menu/panels/confirm.cpp"
 "src/scenes/field.cpp"
 "src/field/system/field_map.cpp"
 "src/field/system/camera.cpp"

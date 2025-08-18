@@ -5,10 +5,10 @@
 #include <unordered_set>
 #include <raylib.h>
 #include "base/scene.h"
+#include "base/panel.h"
 #include "data/keybinds.h"
 #include "system/sound_atlas.h"
 #include "system/sprite_atlas.h"
-#include "menu/panels/config.h"
 
 enum class TitleOption {
   NEW_GAME,
@@ -48,5 +48,5 @@ private:
   std::unordered_set<TitleOption> disallowed;
 
   bool panel_mode = false;
-  std::unique_ptr<ConfigPanel> panel;
+  std::unique_ptr<Panel> panel;
 };

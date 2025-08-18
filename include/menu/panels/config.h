@@ -28,7 +28,7 @@ public:
   ~ConfigPanel();
 
   void update() override;
-  void frameTransition();
+  void heightLerp();
 
   void verticalNavigation(bool gamepad);
   void horizontalInput(bool gamepad);
@@ -50,7 +50,7 @@ public:
   std::string getOptionName(ConfigOption id);
 private:
   Texture frame;
-  Vector2 position;
+  Vector2 position = {97, 39};
 
   float frame_height = 161;
   float blink_clock = 0;
