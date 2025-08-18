@@ -76,12 +76,12 @@ void ConfigPanel::heightLerp() {
 
 void ConfigPanel::verticalNavigation(bool gamepad) {
   if (Input::pressed(keybinds->down, gamepad)) {
-    MenuUtils::nextOption(options, selected, disallowed);
+    MenuUtils::nextOption(options, selected, &disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    MenuUtils::prevOption(options, selected, disallowed);
+    MenuUtils::prevOption(options, selected, &disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }

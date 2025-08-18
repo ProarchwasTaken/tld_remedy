@@ -24,6 +24,7 @@ public:
   void update() override;
   void optionNavigation();
   void selectOption();
+  void panelTermination();
 
   void draw() override;
 

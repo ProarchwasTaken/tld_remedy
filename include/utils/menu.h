@@ -6,7 +6,7 @@ namespace MenuUtils {
 template<typename Type, size_t Num>
 void nextOption(std::array<Type, Num> &options, 
                 typename std::array<Type, Num>::iterator &selected,
-                std::unordered_set<Type> &disallowed) 
+                std::unordered_set<Type> *disallowed = NULL) 
 {
   selected++;
 
@@ -14,16 +14,19 @@ void nextOption(std::array<Type, Num> &options,
     selected = options.begin();
   }
 
-  if (disallowed.find(*selected) != disallowed.end()) {
+  if (disallowed == NULL) {
+    return;
+  }
+  
+  if (disallowed->find(*selected) != disallowed->end()) {
     selected++;
   }
-
 }
 
 template<typename Type, size_t Num>
 void prevOption(std::array<Type, Num> &options, 
                 typename std::array<Type, Num>::iterator &selected,
-                std::unordered_set<Type> &disallowed)
+                std::unordered_set<Type> *disallowed = NULL)
 {
   if (selected == options.begin()) {
     selected = options.end();
@@ -31,7 +34,11 @@ void prevOption(std::array<Type, Num> &options,
 
   selected--;
 
-  if (disallowed.find(*selected) != disallowed.end()) {
+  if (disallowed == NULL) {
+    return;
+  }
+
+  if (disallowed->find(*selected) != disallowed->end()) {
     selected--;
   }
 }

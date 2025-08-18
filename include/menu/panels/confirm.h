@@ -24,7 +24,11 @@ public:
 
   void update() override;
   void heightLerp();
+
   void draw() override;
+  void drawMessage(Font *font, int txt_size, Vector2 position);
+  void drawOptions(Font *font, int txt_size);
+  void drawCursor(Vector2 position);
 
   std::array<ConfirmOption, 2>::iterator selected;
 private:

@@ -50,20 +50,19 @@ void TitleScene::update() {
   panel->update();
 
   if (panel->terminate) {
-    panel.reset();
-    panel_mode = false;
+    panelTermination();
   }
 }
 
 void TitleScene::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->down, gamepad)) {
-    MenuUtils::nextOption(options, selected, disallowed);
+    MenuUtils::nextOption(options, selected, &disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    MenuUtils::prevOption(options, selected, disallowed);
+    MenuUtils::prevOption(options, selected, &disallowed);
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
@@ -96,6 +95,26 @@ void TitleScene::selectOption() {
       break;
     }
   }
+}
+
+void TitleScene::panelTermination() {
+  assert(panel != nullptr);
+
+  switch (panel->id) {
+    case PanelID::CONFIRM: {
+      ConfirmPanel *ptr = static_cast<ConfirmPanel*>(panel.get());
+      if (*ptr->selected == ConfirmOption::YES) {
+        Game::exitGame();
+        break;
+      }
+    }
+    default: {
+
+    }
+  }
+
+  panel.reset();
+  panel_mode = false;
 }
 
 void TitleScene::draw() {
