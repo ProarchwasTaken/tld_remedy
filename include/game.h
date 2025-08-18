@@ -61,6 +61,8 @@ public:
 
   static void sleep(float seconds);
 
+  static void exitGame();
+
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr unsigned int session_version = 2;
 
@@ -80,6 +82,8 @@ public:
   #endif // !NDEBUG
 private:
   static GameState game_state;
+  static bool EXIT_GAME;
+
   static bool debug_info;
   static float time_scale;
 

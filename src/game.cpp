@@ -23,6 +23,7 @@ std::filesystem::create_directory, std::chrono::system_clock,
 std::string, std::mt19937_64;
 
 GameState Game::game_state = GameState::READY;
+bool Game::EXIT_GAME = false;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -165,7 +166,7 @@ void Game::defineColorPalette() {
 void Game::start() {
   assert(scene != nullptr);
 
-  while (!WindowShouldClose()) {
+  while (!EXIT_GAME && !WindowShouldClose()) {
     topLevelInput();
     gameLogic();
     drawScene();
@@ -409,6 +410,11 @@ void Game::sleep(float seconds) {
   PLOGI << "Pausing game logic for: " << seconds << " seconds";
   Game::sleep_time = seconds;
   game_state = GameState::SLEEP;
+}
+
+void Game::exitGame() {
+  PLOGI << "Exit function has been called!";
+  EXIT_GAME = true;
 }
 
 void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
