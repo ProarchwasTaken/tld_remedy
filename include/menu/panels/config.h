@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <string>
+#include <memory>
 #include <unordered_set>
 #include <raylib.h>
 #include "base/panel.h"
@@ -8,6 +9,7 @@
 #include "data/personal.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "menu/panels/confirm.h"
 
 
 enum class ConfigOption {
@@ -29,6 +31,7 @@ public:
 
   void update() override;
   void heightLerp();
+  void terminateConfirmPanel();
 
   void verticalNavigation(bool gamepad);
   void horizontalInput(bool gamepad);
@@ -37,6 +40,7 @@ public:
 
   void selectOption();
   void applySettings();
+  void closePanel();
 
   void draw() override;
   void drawOptions();
@@ -75,6 +79,9 @@ private:
 
   Settings settings;
   bool unapplied = false;
+
+  std::unique_ptr<ConfirmPanel> panel;
+  bool panel_mode;
 
   bool on_linux;
   std::unordered_set<ConfigOption> disallowed;
