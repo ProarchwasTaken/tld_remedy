@@ -45,6 +45,11 @@ Mary::Mary(Player *plr):
   persist = plr->persist;
   afflictPersistent(plr->status);
 
+  int framerate = Game::settings.framerate;
+  float quotient = Game::TARGET_FPS / framerate;
+  buffer_lifetime = buffer_lifetime * quotient;
+  PLOGD << "Buffer Lifetime: " << buffer_lifetime;
+
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};

@@ -175,7 +175,7 @@ bool ConfigPanel::changeFramerate(int direction) {
   int *framerate = &settings.framerate;
   int old = *framerate;
 
-  *framerate = Clamp(*framerate + (5 * direction), 30, 300);
+  *framerate = Clamp(*framerate + (5 * direction), 60, 300);
   
   PLOGD << "Changed Framerate to: " << *framerate;
   sfx->play("menu_navigate");
@@ -350,11 +350,11 @@ void ConfigPanel::drawFramerateStepper(Vector2 position, Font *font,
   Vector2 right_pos = {302, left_pos.y};
 
   int framerate = settings.framerate;
-  if (framerate != 30) {
+  if (framerate != 60) {
     DrawTextureRec(atlas->sheet, atlas->sprites[1], left_pos, WHITE);
   }
 
-  if (framerate != 600) {
+  if (framerate != 300) {
     DrawTextureRec(atlas->sheet, atlas->sprites[2], right_pos, WHITE);
   }
 
