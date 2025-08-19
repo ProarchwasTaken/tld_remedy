@@ -254,6 +254,10 @@ void Mary::neutralLogic() {
   has_moved = old_x != position.x;
   if (has_moved) {
     next_anim = &anim_move;
+    float difference = 1.0 - speed_multiplier;
+    float percentage = 1.0 + difference;
+    next_anim->frame_duration = anim_move_speed * percentage;
+
     last_moved = 0.0;
     rectExCorrection(bounding_box, hurtbox);
   }
