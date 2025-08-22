@@ -15,6 +15,7 @@
 #include "combat/status_effects/crippled_arm.h"
 #include "combat/status_effects/crippled_leg.h"
 #include "combat/status_effects/broken.h"
+#include "combat/status_effects/despondent.h"
 #include <plog/Log.h>
 
 using std::string, std::set, std::uniform_int_distribution, 
@@ -159,6 +160,20 @@ void PartyMember::damageMorale(float magnitude) {
   morale = Clamp(new_morale, -max_morale, max_morale);
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
     "] Morale has been decreased to: " << morale;
+
+  if (morale >= 0) {
+    return;
+  }
+
+  for (auto &effect : status) {
+    if (effect->id == StatusID::DESPONDENT) {
+      return;
+    }
+  }
+
+  PLOGI << "Morale is below 0!";
+  unique_ptr<StatusEffect> effect = make_unique<Despondent>(this);
+  afflictStatus(effect);
 }
 
 void PartyMember::increaseMorale(float magnitude) {

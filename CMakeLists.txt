@@ -91,6 +91,7 @@ set(HEADERS
 "include/combat/status_effects/crippled_arm.h"
 "include/combat/status_effects/crippled_leg.h"
 "include/combat/status_effects/broken.h"
+"include/combat/status_effects/despondent.h"
 )
 set(SOURCE
 "src/main.cpp"
@@ -136,6 +137,7 @@ set(SOURCE
 "src/combat/status_effects/crippled_arm.cpp"
 "src/combat/status_effects/crippled_leg.cpp"
 "src/combat/status_effects/broken.cpp"
+"src/combat/status_effects/despondent.cpp"
 )
 
 if(${BUILD_DEV})
