@@ -15,6 +15,7 @@ public:
   void update();
   Color criticalFlash();
   void decideLifeColor();
+  void decideMoraleColor();
 
   void draw();
 

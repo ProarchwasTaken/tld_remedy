@@ -53,6 +53,7 @@ void LifeHud::assign(PartyMember *combatant) {
 
 void LifeHud::update() {
   decideLifeColor();
+  decideMoraleColor();
 }
 
 void LifeHud::decideLifeColor() {
@@ -65,6 +66,17 @@ void LifeHud::decideLifeColor() {
   else {
     life_color = WHITE;
   }
+}
+
+void LifeHud::decideMoraleColor() {
+  for (auto &effect : user->status) {
+    if (effect->id == StatusID::DESPONDENT) {
+      morale_color = criticalFlash();
+      return;
+    }
+  }
+
+  morale_color = Game::palette[42];
 }
 
 Color LifeHud::criticalFlash() {

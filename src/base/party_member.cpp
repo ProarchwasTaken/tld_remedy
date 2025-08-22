@@ -16,6 +16,7 @@
 #include "combat/status_effects/crippled_leg.h"
 #include "combat/status_effects/broken.h"
 #include "combat/status_effects/despondent.h"
+#include "combat/system/stage.h"
 #include <plog/Log.h>
 
 using std::string, std::set, std::uniform_int_distribution, 
@@ -35,14 +36,32 @@ PartyMember::~PartyMember() {
 }
 
 void PartyMember::takeDamage(DamageData &data) {
+  bool not_demoralized = !demoralized;
   Combatant::takeDamage(data);
-
-  if (important && data.damage_type == DamageType::LIFE) {
-    Game::sleep(data.hit_stop);
-  }
 
   deplete_clock = 0.0;
   deplete_delay = DEFAULT_DEPLETE_DELAY;
+
+  if (!important) {
+    return;
+  }
+
+  bool apply_hitstop = false;
+
+  if (data.damage_type == DamageType::LIFE) {
+    apply_hitstop = true;
+  }
+
+  bool became_demoralized = not_demoralized == demoralized;
+  if (became_demoralized) {
+    data.hit_stop *= 2;
+    apply_hitstop = true;
+    CombatStage::tintStage(Game::palette[40]);
+  }
+
+  if (apply_hitstop) {
+    Game::sleep(data.hit_stop);
+  }
 }
 
 void PartyMember::finalIntercept(float &damage, DamageData &data) {
@@ -161,19 +180,12 @@ void PartyMember::damageMorale(float magnitude) {
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
     "] Morale has been decreased to: " << morale;
 
-  if (morale >= 0) {
-    return;
+  if (!demoralized && morale < 0) {
+    PLOGI << "Morale is below 0!";
+    unique_ptr<StatusEffect> effect = make_unique<Despondent>(this);
+    afflictStatus(effect);
+    sfx.play("despondent");
   }
-
-  for (auto &effect : status) {
-    if (effect->id == StatusID::DESPONDENT) {
-      return;
-    }
-  }
-
-  PLOGI << "Morale is below 0!";
-  unique_ptr<StatusEffect> effect = make_unique<Despondent>(this);
-  afflictStatus(effect);
 }
 
 void PartyMember::increaseMorale(float magnitude) {

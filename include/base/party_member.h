@@ -36,6 +36,7 @@ public:
 
   PartyMemberID id;
   bool important = false;
+  bool demoralized = false;
 
   float morale;
   float init_morale;

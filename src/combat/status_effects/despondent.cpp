@@ -13,6 +13,15 @@ Despondent::Despondent(PartyMember *afflicted) :
   this->afflicted = afflicted;
 }
 
+void Despondent::init() {
+  afflicted->demoralized = true;
+}
+
+Despondent::~Despondent() {
+  afflicted->demoralized = false;
+  afflicted->sfx.play("despondent_recover");
+}
+
 void Despondent::logic() {
   if (delay_clock <= 1.0) {
     delay_clock += Game::deltaTime() / delay_time;

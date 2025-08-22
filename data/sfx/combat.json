@@ -31,6 +31,14 @@
     {
       "name": "evade_perfect",
       "filename": "combat/evade_perfect.mp3"
+    },
+    {
+      "name": "despondent",
+      "filename": "combat/despondent.mp3"
+    },
+    {
+      "name": "despondent_recover",
+      "filename": "combat/despondent_recover.mp3"
     }
   ]
 }
