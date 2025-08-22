@@ -61,7 +61,8 @@ private:
 
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
-  Animation anim_move = {{4, 5, 6, 5}, 0.2};
+  float anim_move_speed = 0.2;
+  Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
   Animation anim_dead = {{9, 10}, 0.60};
 
   AtkAnimSet atk_set = {

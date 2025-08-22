@@ -45,6 +45,11 @@ Mary::Mary(Player *plr):
   persist = plr->persist;
   afflictPersistent(plr->status);
 
+  int framerate = Game::settings.framerate;
+  float quotient = Game::TARGET_FPS / framerate;
+  buffer_lifetime = buffer_lifetime * quotient;
+  PLOGD << "Buffer Lifetime: " << buffer_lifetime;
+
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};
@@ -249,6 +254,10 @@ void Mary::neutralLogic() {
   has_moved = old_x != position.x;
   if (has_moved) {
     next_anim = &anim_move;
+    float difference = 1.0 - speed_multiplier;
+    float percentage = 1.0 + difference;
+    next_anim->frame_duration = anim_move_speed * percentage;
+
     last_moved = 0.0;
     rectExCorrection(bounding_box, hurtbox);
   }

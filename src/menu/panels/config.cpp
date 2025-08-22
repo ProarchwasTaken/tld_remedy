@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <string>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -11,10 +12,11 @@
 #include "utils/input.h"
 #include "utils/text.h"
 #include "utils/menu.h"
+#include "menu/panels/confirm.h"
 #include "menu/panels/config.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique;
 
 
 ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
@@ -43,6 +45,10 @@ ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
 }
 
 ConfigPanel::~ConfigPanel() {
+  if (panel != nullptr) {
+    panel.reset();
+  }
+
   UnloadTexture(frame);
   atlas->release();
   sfx->release();
@@ -55,11 +61,21 @@ void ConfigPanel::update() {
     return;
   }
 
-  blink_clock += Game::deltaTime();
+  if (!panel_mode) {
+    blink_clock += Game::deltaTime();
 
-  bool gamepad = IsGamepadAvailable(0);
-  verticalNavigation(gamepad);
-  horizontalInput(gamepad);
+    bool gamepad = IsGamepadAvailable(0);
+    verticalNavigation(gamepad);
+    horizontalInput(gamepad);
+    return;
+  }
+
+  assert(panel != nullptr);
+  panel->update();
+
+  if (panel->terminate) {
+    terminateConfirmPanel();
+  }
 }
 
 void ConfigPanel::heightLerp() {
@@ -72,6 +88,17 @@ void ConfigPanel::heightLerp() {
   }
 
   frame_height = 161 * percentage;
+}
+
+void ConfigPanel::terminateConfirmPanel() {
+  assert(panel != nullptr);
+
+  if (*panel->selected == ConfirmOption::YES) {
+    state = PanelState::CLOSING;
+  }
+
+  panel.reset();
+  panel_mode = false;
 }
 
 void ConfigPanel::verticalNavigation(bool gamepad) {
@@ -89,8 +116,7 @@ void ConfigPanel::verticalNavigation(bool gamepad) {
     selectOption();
   } 
   else if (Input::pressed(keybinds->cancel, gamepad)) {
-    sfx->play("menu_cancel");
-    state = PanelState::CLOSING;
+    closePanel();
   }
 }
 
@@ -149,7 +175,7 @@ bool ConfigPanel::changeFramerate(int direction) {
   int *framerate = &settings.framerate;
   int old = *framerate;
 
-  *framerate = Clamp(*framerate + (5 * direction), 30, 300);
+  *framerate = Clamp(*framerate + (5 * direction), 60, 300);
   
   PLOGD << "Changed Framerate to: " << *framerate;
   sfx->play("menu_navigate");
@@ -170,8 +196,7 @@ void ConfigPanel::selectOption() {
       break;
     }
     case ConfigOption::BACK: {
-      state = PanelState::CLOSING;
-      sfx->play("menu_cancel");
+      closePanel();
       break;
     }
     case ConfigOption::CONTROLS: {
@@ -197,12 +222,30 @@ void ConfigPanel::applySettings() {
   unapplied = settings != Game::settings;
 }
 
+void ConfigPanel::closePanel() {
+  if (!unapplied) {
+    state = PanelState::CLOSING;
+  }
+  else {
+    string message = "You still have unapplied settings!";
+    panel = make_unique<ConfirmPanel>(atlas, keybinds, 
+                                      message, "GO BACK", "CANCEL");
+    panel_mode = true;
+  }
+
+  sfx->play("menu_cancel");
+}
+
 void ConfigPanel::draw() {
   Rectangle source = {0, 0, 232, frame_height};
   DrawTextureRec(frame, source, position, WHITE);
 
   if (state == PanelState::READY) {
     drawOptions();
+  }
+
+  if (panel_mode) {
+    panel->draw();
   }
 }
 
@@ -307,11 +350,11 @@ void ConfigPanel::drawFramerateStepper(Vector2 position, Font *font,
   Vector2 right_pos = {302, left_pos.y};
 
   int framerate = settings.framerate;
-  if (framerate != 30) {
+  if (framerate != 60) {
     DrawTextureRec(atlas->sheet, atlas->sprites[1], left_pos, WHITE);
   }
 
-  if (framerate != 600) {
+  if (framerate != 300) {
     DrawTextureRec(atlas->sheet, atlas->sprites[2], right_pos, WHITE);
   }
 
@@ -324,9 +367,11 @@ void ConfigPanel::drawFramerateStepper(Vector2 position, Font *font,
 void ConfigPanel::drawCursor(Vector2 position) {
   Color color = WHITE;
 
-  float sin_a = std::sinf(blink_clock * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+  if (!panel_mode) {
+    float sin_a = std::sinf(blink_clock * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   position = Vector2Add(position, {-11, 2});
   DrawTextureRec(atlas->sheet, atlas->sprites[0], position, color);
