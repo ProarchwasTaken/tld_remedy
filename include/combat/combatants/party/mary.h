@@ -1,5 +1,7 @@
 #pragma once
+#include <memory>
 #include <raylib.h>
+#include "enums.h"
 #include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
@@ -9,11 +11,15 @@
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
 
+class SubWeapon;
+
 enum class MaryAction {
   NONE = -1,
   ATTACK,
   GHOST_STEP,
-  EVADE
+  EVADE,
+  LIGHT_TECH,
+  HEAVY_TECH,
 };
 
 
@@ -24,6 +30,8 @@ class Mary : public PartyMember {
 public:
   Mary(Player *data);
   ~Mary();
+
+  void assignSubWeapon(SubWeaponID id);
   static void setControllable(bool value);
 
   void behavior() override;
@@ -58,6 +66,8 @@ private:
   MaryAction buffer = MaryAction::NONE;
   float buffer_lifetime = 0.067;
   float buffer_clock = 0.0;
+
+  std::unique_ptr<SubWeapon> sub_weapon;
 
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};

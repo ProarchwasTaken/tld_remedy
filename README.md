@@ -24,6 +24,8 @@ This section goes over the game's default controls.
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
 * **X Key** - Defensive (Use in combination with directional inputs!)
+* **A Key** - Light Technique
+* **S Key** - Heavy Technique
 
 * **P Key** - To make Dummy attack. (For testing purposes!)
 
@@ -39,6 +41,8 @@ may be different depending on what controller you use.
 * **D-Pad** - Movement
 * **A Button** - Attack
 * **B Button** - Defensive (Use in combination with directional inputs!)
+* **X Button** - Light Technique
+* **Y Button** - Heavy Technique
 
 
 # Credits and Contacts

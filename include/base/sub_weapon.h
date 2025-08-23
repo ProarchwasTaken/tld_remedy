@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <memory>
 #include "enums.h"
@@ -10,7 +11,10 @@ public:
   SubWeapon(std::string name, SubWeaponID id, Mary *user);
   ~SubWeapon() = default;
 
+  bool lightTechCondition();
+  bool heavyTechCondition();
   virtual std::unique_ptr<CombatAction> lightTechnique();
+
   virtual std::unique_ptr<CombatAction> heavyTechnique();
 
   std::string name;

@@ -13,6 +13,7 @@
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -43,6 +44,8 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+
+  assignSubWeapon(plr->sub_weapon);
   afflictPersistent(plr->status);
 
   int framerate = Game::settings.framerate;
@@ -62,6 +65,23 @@ Mary::Mary(Player *plr):
 
 Mary::~Mary() {
   atlas.release();
+}
+
+void Mary::assignSubWeapon(SubWeaponID id) {
+  PLOGI << "Assigning Sub-Weapon.";
+
+  switch (id) {
+    case SubWeaponID::KNIFE: {
+      sub_weapon = make_unique<Knife>(this);
+      break;
+    }
+  }
+
+  tech1_cost = sub_weapon->tech1_cost;
+  tech1_type = sub_weapon->tech1_type;
+
+  tech2_cost = sub_weapon->tech2_cost;
+  tech2_type = sub_weapon->tech2_type;
 }
 
 void Mary::setControllable(bool value) {
@@ -108,6 +128,14 @@ void Mary::actionInput(bool gamepad) {
   }
   else if (Input::pressed(keybinds->defensive, gamepad)) {
     defensiveActionInput(gamepad);
+  }
+  else if (Input::pressed(keybinds->light_tech, gamepad)) {
+    PLOGI << "Sending Light Tech input to buffer.";
+    buffer = MaryAction::LIGHT_TECH;
+  }
+  else if (Input::pressed(keybinds->heavy_tech, gamepad)) {
+    PLOGI << "Sending Heavy Tech input to buffer.";
+    buffer = MaryAction::HEAVY_TECH;
   }
   else {
     return;
@@ -194,6 +222,22 @@ void Mary::readActionBuffer() {
 
         action = make_unique<Evade>(this, atlas, hitbox, ev_set);
       }
+      break;
+    }
+    case MaryAction::LIGHT_TECH: {
+      bool usable = sub_weapon->lightTechCondition();
+      if (usable) {
+        action = sub_weapon->lightTechnique();
+      }
+
+      break;
+    }
+    case MaryAction::HEAVY_TECH: {
+      bool usable = sub_weapon->heavyTechCondition();
+      if (usable) {
+        action = sub_weapon->heavyTechnique();
+      }
+
       break;
     }
   }

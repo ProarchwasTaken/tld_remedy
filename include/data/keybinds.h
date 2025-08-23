@@ -33,4 +33,6 @@ struct CombatKeybinds {
 
   KeyBind attack = {KEY_Z, GAMEPAD_BUTTON_RIGHT_FACE_DOWN};
   KeyBind defensive = {KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT};
+  KeyBind light_tech = {KEY_A, GAMEPAD_BUTTON_RIGHT_FACE_LEFT};
+  KeyBind heavy_tech = {KEY_S, GAMEPAD_BUTTON_RIGHT_FACE_UP};
 };
