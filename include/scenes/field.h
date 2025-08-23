@@ -24,6 +24,7 @@ public:
 
   void setup();
   void initCompanionData(CompanionID id); 
+  void applyStatBonuses(SubWeaponID id);
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupEntities();

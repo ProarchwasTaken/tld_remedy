@@ -42,6 +42,7 @@ FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   session.version = Game::session_version;
 
   session.player.sub_weapon = sub_weapon;
+  applyStatBonuses(sub_weapon);
   initCompanionData(companion);
 
   setup();
@@ -101,10 +102,24 @@ void FieldScene::initCompanionData(CompanionID id) {
       companion->defense = 5;
       companion->intimid = 8;
       companion->persist = 6;
+      break;
     }
   }
 
   PLOGI << "Initialized data for: " << companion->name;
+}
+
+void FieldScene::applyStatBonuses(SubWeaponID id) {
+  Player *player = &session.player;
+
+  switch (id) {
+    case SubWeaponID::KNIFE: {
+      PLOGI << "Applying Knife status bonuses.";
+      player->offense += 2;
+      player->intimid += 1;
+      break;
+    }
+  }
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
