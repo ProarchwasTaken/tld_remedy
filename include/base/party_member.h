@@ -42,11 +42,17 @@ public:
   float init_morale;
   float max_morale;
 
-  float recovery = 1.0;
-
   float exhaustion = 0.0;
   float deplete_delay = 0.5;
   float deplete_clock = 0.0;
+
+  float recovery = 1.0;
+
+  float tech1_cost;
+  TechCostType tech1_type;
+
+  float tech2_cost;
+  TechCostType tech2_type;
 private:
   static int member_count;
   constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;

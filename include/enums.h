@@ -47,6 +47,11 @@ enum class SubWeaponID {
   KNIFE
 };
 
+enum class TechCostType {
+  MORALE,
+  LIFE
+};
+
 enum class CompanionID {
   ERWIN
 };
