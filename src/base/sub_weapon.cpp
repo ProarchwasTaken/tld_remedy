@@ -29,7 +29,7 @@ bool SubWeapon::lightTechCondition() {
     PLOGI << "Decreased Morale to: " << user->morale;
     return true;
   }
-  else if (user->life >= tech1_cost) {
+  else if (!using_mp && user->life >= tech1_cost) {
     user->increaseExhaustion(tech1_cost);
     return true;
   }
@@ -51,7 +51,7 @@ bool SubWeapon::heavyTechCondition() {
     PLOGI << "Decreased Morale to: " << user->morale;
     return true;
   }
-  else if (user->life >= tech2_cost) {
+  else if (!using_mp && user->life >= tech2_cost) {
     user->increaseExhaustion(tech2_cost);
     return true;
   }
