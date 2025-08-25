@@ -7,7 +7,6 @@
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
-#include <plog/Log.h>
 
 
 Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
@@ -32,10 +31,10 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
 
   this->user_atlas = &user_atlas;
   this->anim_set = &anim_set;
-  updateFrameDuration();
+  updateAnimFrameDuration();
 }
 
-void Attack::updateFrameDuration() {
+void Attack::updateAnimFrameDuration() {
   anim_set->wind_up.frame_duration = wind_time * 0.5;
   anim_set->end_lag.frame_duration = end_time * 0.5;
 }
@@ -77,7 +76,7 @@ void Attack::action() {
       attack_connected = true;
 
       end_time = 0.1;
-      updateFrameDuration();
+      updateAnimFrameDuration();
       break;
     }
   }
