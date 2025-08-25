@@ -91,7 +91,8 @@ enum class StunType {
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
-  EVADE
+  EVADE,
+  KNIFE_CLEAVE
 };
 
 enum ActionPhase {
