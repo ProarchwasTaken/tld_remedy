@@ -12,6 +12,7 @@ public:
   KnifeCleave(Mary *user);
   ~KnifeCleave();
 
+  bool cancelCheck();
   void updateAnimFrameDuration();
 
   void windUp() override;
@@ -23,6 +24,7 @@ private:
   RectEx hitbox;
   DamageData data;
 
+  bool canceled_into;
   bool attack_connected = false;
 
   SpriteAtlas *atlas;

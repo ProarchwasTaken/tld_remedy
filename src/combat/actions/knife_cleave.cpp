@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "system/sprite_atlas.h"
@@ -33,20 +34,43 @@ KnifeCleave::KnifeCleave(Mary *user):
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(20);
   updateAnimFrameDuration();
+
+  canceled_into = cancelCheck();
+  if (canceled_into) {
+    wind_time = wind_time * 0.5;
+  }
 }
 
 KnifeCleave::~KnifeCleave() {
   user->animation = NULL;
 }
 
+bool KnifeCleave::cancelCheck() {
+  if (user->action != nullptr && !user->action->finished) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void KnifeCleave::updateAnimFrameDuration() {
-  anim_end.frame_duration = end_time * 0.5;
+  anim_end.frame_duration = end_time * 0.25;
 }
 
 void KnifeCleave::windUp() {
+  if (canceled_into) {
+    float percentage = 1.0 - state_clock;
+    float speed = (128 * percentage) * user->speed_multiplier;
+
+    user->position.x += (speed * user->direction) * Game::deltaTime();
+    user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
+  }
+
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[21];
+    user->sfx.play("knife_cleave");
   }
 }
 
@@ -83,6 +107,7 @@ void KnifeCleave::action() {
 
 void KnifeCleave::endLag() {
   SpriteAnimation::play(user->animation, &anim_end, false);
+  user->sprite = &atlas->sprites[*user->animation->current];
 }
 
 void KnifeCleave::drawDebug() {

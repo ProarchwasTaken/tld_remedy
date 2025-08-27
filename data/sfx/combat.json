@@ -39,6 +39,14 @@
     {
       "name": "despondent_recover",
       "filename": "combat/despondent_recover.mp3"
+    },
+    {
+      "name": "action_denied",
+      "filename": "combat/action_denied.mp3"
+    },
+    {
+      "name": "knife_cleave",
+      "filename": "combat/knife_cleave.mp3"
     }
   ]
 }

@@ -35,7 +35,7 @@ public:
   float end_time;
 
   float state_clock = 0.0;
+  bool finished = false;
 protected:
   Combatant *user;
-  bool finished = false;
 };
