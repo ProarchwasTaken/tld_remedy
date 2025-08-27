@@ -95,11 +95,11 @@ void FieldScene::initCompanionData(CompanionID id) {
       companion->life = 20;
       companion->max_life = 20;
 
-      companion->init_morale = 8;
-      companion->max_morale = 25;
+      companion->init_morale = 5;
+      companion->max_morale = 20;
 
-      companion->offense = 10;
-      companion->defense = 5;
+      companion->offense = 8;
+      companion->defense = 6;
       companion->intimid = 8;
       companion->persist = 6;
       break;

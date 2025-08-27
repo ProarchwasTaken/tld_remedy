@@ -11,12 +11,12 @@ struct Player {
   float max_life = 15;
 
   float init_morale = 10;
-  float max_morale = 30;
+  float max_morale = 25;
 
   int offense = 6;
-  int defense = 6;
+  int defense = 4;
   int intimid = 6;
-  int persist = 6;
+  int persist = 4;
 
   int status_count = 0;
   int status_limit = STATUS_LIMIT;

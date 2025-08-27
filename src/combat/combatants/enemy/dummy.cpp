@@ -15,13 +15,13 @@ SpriteAtlas Dummy::atlas("combatants", "dummy");
 Dummy::Dummy(Vector2 position, Direction direction) :  
   Enemy("Dummy", EnemyID::DUMMY, position)
 {
-  max_life = 15;
+  max_life = 10;
   life = max_life;
 
-  offense = 9;
-  defense = 4;
-  intimid = 14;
-  persist = 2;
+  offense = 8;
+  defense = 6;
+  intimid = 10;
+  persist = 6;
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
