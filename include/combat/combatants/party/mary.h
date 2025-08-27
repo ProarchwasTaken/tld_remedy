@@ -52,6 +52,8 @@ public:
 
   void draw() override;
   void drawDebug() override;
+
+  static SpriteAtlas atlas;
 private:
   static bool controllable;
   CombatKeybinds *keybinds;
@@ -83,6 +85,4 @@ private:
 
   GSSpriteSet gs_set = {14, 8, 15};
   EvadeSpriteSet ev_set = {16, 17, 16, 19, 18};
-
-  static SpriteAtlas atlas;
 };
