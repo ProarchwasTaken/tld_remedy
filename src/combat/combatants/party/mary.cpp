@@ -248,6 +248,9 @@ void Mary::readActionBuffer() {
   if (action != nullptr) {  
     performAction(action);
   }
+  else {
+    sfx.play("action_denied"); 
+  }
 }
 
 void Mary::update() {
