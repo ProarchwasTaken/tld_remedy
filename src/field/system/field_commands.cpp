@@ -18,6 +18,7 @@ void loadMapCommand(string map_name, string spawn_name);
 void deleteEntityCommand(string argument);
 void saveCommand();
 void initCombatCommand();
+void gotoTitleCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
 
@@ -110,6 +111,10 @@ void CommandSystem::interpretCommand(CommandType type,
       initCombatCommand();
       break;
     }
+    case CommandType::TITLE: {
+      gotoTitleCommand();
+      break;
+    }
     case CommandType::DELETE_ENT: {
       string argument = findNextWord(buffer, iterator);
 
@@ -192,6 +197,11 @@ void saveCommand() {
 void initCombatCommand() {
   PLOGD << "Now executing command.";
   FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+}
+
+void gotoTitleCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<FieldEvent>(FieldEVT::GOTO_TITLE);
 }
 
 void deleteEntityCommand(string argument) {

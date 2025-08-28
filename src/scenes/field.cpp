@@ -283,6 +283,11 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::initCombat(&session);
       break;
     }
+    case FieldEVT::GOTO_TITLE: {
+      PLOGI << "Event Detected: GotoTitleEvent";
+      Game::loadTitleScreen();
+      break;
+    }
     case FieldEVT::DELETE_ENTITY: {
       PLOGD << "Event detected: DeleteEntityEvent";
       auto *event_data = static_cast<DeleteEntityEvent*>(event.get());

@@ -28,6 +28,7 @@ private:
     {"MAP", CommandType::CHANGE_MAP},
     {"SAVE", CommandType::SAVE},
     {"COMBAT", CommandType::INIT_COMBAT},
+    {"TITLE", CommandType::TITLE},
     {"DELETE_ENTITY", CommandType::DELETE_ENT},
     {"SET_SUPPLIES", CommandType::SET_SUPPLIES},
     {"SET_LIFE", CommandType::SET_LIFE},
