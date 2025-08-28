@@ -233,8 +233,8 @@ void Game::gameLogic() {
       endCombatProcedure();
       break;
     }
-    case GameState::LOADING_SESSION: {
-      loadSessionProcedure();
+    case GameState::SWITCHING_SCENE: {
+      switchSceneProcedure();
     }
     case GameState::FADING_IN:
     case GameState::FADING_OUT: {
@@ -288,14 +288,13 @@ void Game::sleepProcedure() {
   }
 }
 
-void Game::loadSessionProcedure() {
-  PLOGI << "Initiating load session procedure.";
+void Game::switchSceneProcedure() {
+  PLOGI << "Proceeding to switch to loaded scene.";
   scene.reset();
    
   assert(reserve != nullptr);
   scene.swap(reserve);
 
-  assert(scene->scene_id == SceneID::FIELD);
   Game::fadein(1.0);
   PLOGI << "Procedure complete.";
 }
@@ -374,7 +373,7 @@ void Game::fullscreenCheck() {
 void Game::fadeout(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: {
+    case GameState::SWITCHING_SCENE: {
       PLOGI << "Fading out the screen.";
       Game::fade_percentage = 1.0;
       Game::fade_time = seconds;
@@ -391,7 +390,7 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: 
+    case GameState::SWITCHING_SCENE: 
     case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
       Game::fade_percentage = 0.0;
@@ -422,7 +421,7 @@ void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
   assert(reserve == nullptr);
 
   reserve = make_unique<FieldScene>(sub_weapon, companion);
-  game_state = GameState::LOADING_SESSION;
+  game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::saveSession(Session *data) {
@@ -469,7 +468,7 @@ void Game::loadSession() {
 
   assert(reserve == nullptr);
   reserve = make_unique<FieldScene>(&session);
-  game_state = GameState::LOADING_SESSION;
+  game_state = GameState::SWITCHING_SCENE;
 }
 
 bool Game::existingSession() {
@@ -498,6 +497,14 @@ bool Game::existingSession() {
 
   PLOGI << "Detected existing session data.";
   return true;
+}
+
+void Game::loadTitleScreen() {
+  PLOGI << "Returning to Title Scene";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<TitleScene>();
+  game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::initCombat(Session *data) {

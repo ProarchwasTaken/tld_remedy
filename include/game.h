@@ -33,7 +33,7 @@ public:
    * one of these things per frame to reduce complexity.*/
   void gameLogic();
   void fadeScreenProcedure();
-  void loadSessionProcedure();
+  void switchSceneProcedure();
   void initCombatProcedure();
   void endCombatProcedure();
   void sleepProcedure();
@@ -52,6 +52,8 @@ public:
   static void saveSession(Session *data);
   static void loadSession();
   static bool existingSession();
+
+  static void loadTitleScreen();
 
   static void initCombat(Session *data);
   static void endCombat();
