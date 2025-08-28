@@ -45,7 +45,7 @@ Mary::Mary(Player *plr):
   intimid = plr->intimid;
   persist = plr->persist;
 
-  assignSubWeapon(plr->sub_weapon);
+  assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
 
   int framerate = Game::settings.framerate;

@@ -41,8 +41,7 @@ FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
   session.version = Game::session_version;
 
-  session.player.sub_weapon = sub_weapon;
-  applyStatBonuses(sub_weapon);
+  initPlayerData(sub_weapon);
   initCompanionData(companion);
 
   setup();
@@ -83,14 +82,44 @@ void FieldScene::setup() {
   PLOGI << "Field scene is ready to go!";
 }
 
-void FieldScene::initCompanionData(CompanionID id) {
+void FieldScene::initPlayerData(SubWeaponID weapon_id) {
+  PLOGI << "initializing Player data...";
+  Player *player = &session.player;
+
+  std::strcpy(player->name, "Mary");
+  player->member_id = PartyMemberID::MARY;
+  player->weapon_id = weapon_id;
+
+  player->life = 15;
+  player->max_life = 15;
+
+  player->init_morale = 10;
+  player->max_morale = 25;
+
+  player->offense = 6;
+  player->defense = 4;
+  player->intimid = 6;
+  player->persist = 4;
+
+  switch (weapon_id) {
+    case SubWeaponID::KNIFE: {
+      PLOGI << "Applying Knife status bonuses.";
+      player->offense += 2;
+      player->intimid += 1;
+      break;
+    }
+  }
+}
+
+void FieldScene::initCompanionData(CompanionID companion_id) {
   PLOGI << "Initializing Companion data...";
   Companion *companion = &session.companion;
 
-  switch (id) {
+  switch (companion_id) {
     case CompanionID::ERWIN: {
       std::strcpy(companion->name, "Erwin");
-      companion->id = id;
+      companion->member_id = PartyMemberID::ERWIN;
+      companion->companion_id = companion_id;
 
       companion->life = 20;
       companion->max_life = 20;
@@ -107,19 +136,6 @@ void FieldScene::initCompanionData(CompanionID id) {
   }
 
   PLOGI << "Initialized data for: " << companion->name;
-}
-
-void FieldScene::applyStatBonuses(SubWeaponID id) {
-  Player *player = &session.player;
-
-  switch (id) {
-    case SubWeaponID::KNIFE: {
-      PLOGI << "Applying Knife status bonuses.";
-      player->offense += 2;
-      player->intimid += 1;
-      break;
-    }
-  }
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
@@ -156,7 +172,7 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      CompanionID id = session.companion.id;
+      CompanionID id = session.companion.companion_id;
       entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }

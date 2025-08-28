@@ -66,7 +66,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 2;
+  static constexpr unsigned int session_version = 3;
   static constexpr unsigned int personal_version = 1;
   static constexpr float TARGET_FPS = 60.0;
 
