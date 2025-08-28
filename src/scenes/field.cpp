@@ -327,12 +327,22 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     }
     case FieldEVT::CHANGE_PLR_LIFE: {
       PLOGD << "Event detected: SetPlrLifeEvent";
-      auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
+      auto *event_data = static_cast<SetLifeEvent*>(event.get());
 
       float value = event_data->value;
 
       PLOGI << "Changing the player's life expectancy to: " << value;
       session.player.life = value;
+      break;
+    }
+    case FieldEVT::CHANGE_COM_LIFE: {
+      PLOGI << "Event detected: SetComLifeEvent";
+      auto *event_data = static_cast<SetLifeEvent*>(event.get());
+
+      float value = event_data->value;
+
+      PLOGI << "Changing the Companion's life Expectancy to: " << value;
+      session.companion.life = value;
       break;
     }
   }

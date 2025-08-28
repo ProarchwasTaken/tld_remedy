@@ -147,6 +147,7 @@ enum class FieldEVT {
   CHANGE_SUPPLIES,
   ADD_SUPPLIES,
   CHANGE_PLR_LIFE,
+  CHANGE_COM_LIFE
 };
 
 enum class ActorEVT {

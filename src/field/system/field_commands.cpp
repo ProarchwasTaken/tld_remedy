@@ -263,8 +263,12 @@ void setLifeCommand(string target, string value) {
   float life_value = std::stof(value);
   
   if (target == "PLAYER") {
-    FieldHandler::raise<SetPlrLifeEvent>(FieldEVT::CHANGE_PLR_LIFE, 
-                                         life_value);
+    FieldHandler::raise<SetLifeEvent>(FieldEVT::CHANGE_PLR_LIFE, 
+                                      life_value);
+  }
+  else if (target == "COMPANION") {
+    FieldHandler::raise<SetLifeEvent>(FieldEVT::CHANGE_COM_LIFE, 
+                                      life_value);
   }
   else {
     PLOGD << "'" << target << "' is not a valid target.";
