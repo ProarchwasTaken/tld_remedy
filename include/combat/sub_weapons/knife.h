@@ -10,4 +10,5 @@ public:
   Knife(Mary *user);
 
   std::unique_ptr<CombatAction> lightTechnique() override;
+  std::unique_ptr<CombatAction> heavyTechnique() override;
 };

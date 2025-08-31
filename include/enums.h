@@ -92,7 +92,8 @@ enum class ActionID {
   ATTACK,
   GHOST_STEP,
   EVADE,
-  KNIFE_CLEAVE
+  KNIFE_CLEAVE,
+  KNIFE_PIERCER
 };
 
 enum ActionPhase {
