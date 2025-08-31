@@ -1,8 +1,10 @@
 #include <cstddef>
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combat_action.h"
 #include "utils/animation.h"
+#include "utils/collision.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
 
@@ -16,6 +18,17 @@ KnifePiercer::KnifePiercer(Mary *user):
   hitbox.scale = {32, 6};
   hitbox.offset = {-16 + (16.0f * user->direction), -38};
   user->rectExCorrection(hitbox);
+
+  data.damage_type = DamageType::LIFE;
+  data.calulation = DamageType::LIFE;
+
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+
+  data.knockback = 45.0;
+  data.hit_stop = 0.2;
+
+  data.assailant = user;
 
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(24);
@@ -38,10 +51,36 @@ void KnifePiercer::windUp() {
 }
 
 void KnifePiercer::action() {
+  float speed = velocity * user->speed_multiplier;
+  float magnitude = speed * Game::deltaTime();
 
+  Direction direction = user->direction;
+  if (Collision::checkX(this->user, magnitude, direction)) {
+    Collision::snapX(this->user, direction);
+    state_clock = 1.0;
+  }
+  else {
+    user->position.x += magnitude * direction;
+  }
+
+  user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
 }
 
 void KnifePiercer::endLag() {
+  float percentage = 1.0 - state_clock;
+  float speed = (velocity * percentage) * user->speed_multiplier;
+  float magnitude = speed * Game::deltaTime();
+
+  Direction direction = user->direction;
+  if (Collision::checkX(this->user, magnitude, direction)) {
+    Collision::snapX(this->user, direction);
+  }
+  else {
+    user->position.x += magnitude * direction;
+  }
+
+  user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
+
   SpriteAnimation::play(user->animation, &anim_end, false);
   user->sprite = &atlas->sprites[*user->animation->current];
 }

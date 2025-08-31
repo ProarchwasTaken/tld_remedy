@@ -1,6 +1,7 @@
 #pragma once
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
+#include "data/damage.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
@@ -17,7 +18,10 @@ public:
 
   void drawDebug() override;
 private:
+  float velocity = 90;
+
   RectEx hitbox;
+  DamageData data;
 
   SpriteAtlas *atlas;
   Animation anim_windup = {{24, 25}, 0.15};
