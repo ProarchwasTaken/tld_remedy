@@ -12,7 +12,6 @@ built. Possible the most experimental phase of development as everything
 is subject to change.
 
 # Default Controls
-This section goes over the game's default controls.
 
 ## Keyboard
 
@@ -27,7 +26,6 @@ This section goes over the game's default controls.
 * **A Key** - Light Technique
 * **S Key** - Heavy Technique
 
-* **P Key** - To make Dummy attack. (For testing purposes!)
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they

@@ -10,7 +10,6 @@
 #include "combat/system/evt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/combatants/party/mary.h"
-#include "combat/combatants/enemy/dummy.h"
 
 
 class CombatScene : public Scene {
@@ -39,8 +38,6 @@ private:
 
   Mary *player;
   LifeHud plr_hud = LifeHud({34, 215});
-
-  Dummy *dummy;
 
   std::vector<std::unique_ptr<Entity>> entities;
   Session *session;

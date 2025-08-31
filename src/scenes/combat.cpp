@@ -59,16 +59,13 @@ void CombatScene::initializeCombatants() {
 
   // TODO: Don't forget to remove this when the time comes!
   auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
-  this->dummy = dummy.get();
+  entities.push_back(std::move(dummy));
+
+  dummy = make_unique<Dummy>((Vector2){148, 152}, LEFT);
   entities.push_back(std::move(dummy));
 }
 
 void CombatScene::update() {
-  // TODO: Don't forget to remove this when the time comes!
-  if (IsKeyPressed(KEY_SLASH)) {
-    dummy->attack();
-  }
-
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
