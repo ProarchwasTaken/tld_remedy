@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstddef>
 #include <raylib.h>
 #include "enums.h"
@@ -25,7 +26,7 @@ KnifePiercer::KnifePiercer(Mary *user):
   data.stun_time = 0.5;
   data.stun_type = StunType::NORMAL;
 
-  data.knockback = 45.0;
+  data.knockback = 110;
   data.hit_stop = 0.2;
 
   data.assailant = user;
@@ -51,8 +52,13 @@ void KnifePiercer::windUp() {
 }
 
 void KnifePiercer::action() {
+  movement();
+  hitRegistration();
+}
+
+void KnifePiercer::movement(float percentage) {
   float speed = velocity * user->speed_multiplier;
-  float magnitude = speed * Game::deltaTime();
+  float magnitude = (speed * percentage) * Game::deltaTime();
 
   Direction direction = user->direction;
   if (Collision::checkX(this->user, magnitude, direction)) {
@@ -64,22 +70,43 @@ void KnifePiercer::action() {
   }
 
   user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
+
+}
+
+void KnifePiercer::hitRegistration() {
+  assert(phase == ActionPhase::ACTIVE);
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant->intangible) {
+      continue;
+    }
+
+    if (combatant->team == user->team) {
+      continue;
+    }
+
+    if (combatant->state == CombatantState::DEAD) {
+      continue;
+    }
+
+    bool already_hit = hits.find(combatant) != hits.end();
+    if (already_hit) {
+      continue;
+    }
+
+
+    Rectangle *hurtbox = &combatant->hurtbox.rect;
+    if (CheckCollisionRecs(hitbox.rect, *hurtbox)) {
+      data.hitbox = &hitbox.rect;
+      combatant->takeDamage(data);
+      hits.emplace(combatant);
+    }
+  }
 }
 
 void KnifePiercer::endLag() {
   float percentage = 1.0 - state_clock;
-  float speed = (velocity * percentage) * user->speed_multiplier;
-  float magnitude = speed * Game::deltaTime();
-
-  Direction direction = user->direction;
-  if (Collision::checkX(this->user, magnitude, direction)) {
-    Collision::snapX(this->user, direction);
-  }
-  else {
-    user->position.x += magnitude * direction;
-  }
-
-  user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
+  movement(percentage);
 
   SpriteAnimation::play(user->animation, &anim_end, false);
   user->sprite = &atlas->sprites[*user->animation->current];

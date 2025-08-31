@@ -26,7 +26,7 @@ unique_ptr<CombatAction> Knife::lightTechnique() {
 }
 
 unique_ptr<CombatAction> Knife::heavyTechnique() {
-  user->morale -= tech2_cost;
+  // user->morale -= tech2_cost;
   PLOGI << "Decreased Morale to: " << user->morale;
   return make_unique<KnifePiercer>(user);
 }

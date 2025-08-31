@@ -1,4 +1,6 @@
 #pragma once
+#include <unordered_set>
+#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
@@ -14,6 +16,10 @@ public:
 
   void windUp() override;
   void action() override;
+
+  void movement(float percentage = 1.0);
+  void hitRegistration();
+
   void endLag() override;
 
   void drawDebug() override;
@@ -22,6 +28,7 @@ private:
 
   RectEx hitbox;
   DamageData data;
+  std::unordered_set<Combatant*> hits;
 
   SpriteAtlas *atlas;
   Animation anim_windup = {{24, 25}, 0.15};
