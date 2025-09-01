@@ -28,7 +28,7 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   this->hitbox = hitbox;
 
   data.damage_type = DamageType::MORALE;
-  data.calulation = DamageType::MORALE;
+  data.calculation = DamageType::MORALE;
 
   data.stun_time = 0.5;
   data.stun_type = StunType::NORMAL;

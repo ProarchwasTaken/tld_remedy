@@ -30,7 +30,7 @@ KnifeCleave::KnifeCleave(Mary *user):
   user->rectExCorrection(hitbox);
 
   data.damage_type = DamageType::LIFE;
-  data.calulation = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
 
   data.stun_time = 0.5;
   data.stun_type = StunType::NORMAL;
