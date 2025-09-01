@@ -1,12 +1,21 @@
+#include <algorithm>
+#include <cassert>
+#include <utility>
 #include <raylib.h>
+#include <raymath.h>
+#include <set>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "utils/animation.h"
+#include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
+#include <plog/Log.h>
+
+using std::pair, std::set;
 
 
 Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
@@ -57,6 +66,15 @@ void Attack::action() {
     return;
   }
 
+  set<pair<float, Combatant*>> hits;
+  hitRegistration(hits);
+
+  if (!hits.empty()) {
+    inflictDamage(hits);
+  }
+}
+
+void Attack::hitRegistration(set<pair<float, Combatant*>> &hits) {
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant->intangible) {
       continue;
@@ -71,15 +89,37 @@ void Attack::action() {
     }
 
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
-      data.hitbox = &hitbox.rect;
-      combatant->takeDamage(data);
-      attack_connected = true;
-
-      end_time = 0.1;
-      updateAnimFrameDuration();
-      break;
+      Vector2 difference = Vector2Subtract(user->position,
+                                           combatant->position);
+      float distance = Vector2Length(difference);
+      hits.emplace(std::make_pair(distance, combatant));
+      PLOGD << "Attack hitbox has collided with Combatant [ID: " <<
+      combatant->entity_id << "], Distance: " << distance;
     }
   }
+}
+
+void Attack::inflictDamage(set<pair<float, Combatant*>> &hits) {
+  assert(!hits.empty());
+
+  Combatant *victim;
+  if (hits.size() > 1) {
+    auto closest = std::min_element(hits.begin(), hits.end(), 
+                                    Comparison::combatantDistance);
+    victim = closest->second;
+  }
+  else {
+    victim = hits.begin()->second;
+  }
+  PLOGD << "Victim selected: '" << victim->name << "' [ID: " << 
+    victim->entity_id << "]";
+
+  data.hitbox = &hitbox.rect;
+  victim->takeDamage(data);
+
+  end_time = 0.1;
+  updateAnimFrameDuration();
+  attack_connected = true;
 }
 
 void Attack::endLag() {
