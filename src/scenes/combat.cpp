@@ -59,13 +59,18 @@ void CombatScene::initializeCombatants() {
 
   // TODO: Don't forget to remove this when the time comes!
   auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
+  this->dummy = dummy.get();
   entities.push_back(std::move(dummy));
 
-  dummy = make_unique<Dummy>((Vector2){148, 152}, LEFT);
+  dummy = make_unique<Dummy>((Vector2){164, 152}, LEFT);
   entities.push_back(std::move(dummy));
 }
 
 void CombatScene::update() {
+  if (dummy != NULL && IsKeyPressed(KEY_P)) {
+    dummy->attack();
+  }
+
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
@@ -134,6 +139,9 @@ void CombatScene::deleteEntity(int entity_id) {
   for (auto &entity : entities) {
     if (entity->entity_id == entity_id) {
       PLOGD << "Found Entity [ID: " << entity_id << "]";
+      // Remove this Later!
+      if (dummy == entity.get()) dummy = NULL;
+
       entity.reset();
     }
     else {
