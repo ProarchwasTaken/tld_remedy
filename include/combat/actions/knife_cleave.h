@@ -1,4 +1,7 @@
 #pragma once
+#include <utility>
+#include <set>
+#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/damage.h"
 #include "data/rect_ex.h"
@@ -17,6 +20,9 @@ public:
 
   void windUp() override;
   void action() override;
+  void hitRegistration(std::set<std::pair<float, Combatant*>> &hits);
+  void inflictDamage(std::set<std::pair<float, Combatant*>> &hits);
+
   void endLag() override;
 
   void drawDebug() override;
