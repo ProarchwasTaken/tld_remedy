@@ -47,6 +47,18 @@
     {
       "name": "knife_cleave",
       "filename": "combat/knife_cleave.mp3"
+    },
+    {
+      "name": "knife_piercer",
+      "filename": "combat/knife_piercer.mp3"
+    },
+    {
+      "name": "knife_piercer_hit",
+      "filename": "combat/knife_piercer_hit.mp3"
+    },
+    {
+      "name": "knife_piercer_heave",
+      "filename": "combat/knife_piercer_heave.mp3"
     }
   ]
 }
