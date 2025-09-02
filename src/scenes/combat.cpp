@@ -129,12 +129,37 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       DamageType damage_type = event_data->damage_type;
       float damage_taken = event_data->damage_taken;
 
-      auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
-                                               damage_taken);
-      entities.push_back(std::move(dmg_num));
+      dmgNumberHandling(target, damage_type, damage_taken);
       break;
     }
   }
+}
+
+void CombatScene::dmgNumberHandling(Combatant *target, 
+                                    DamageType damage_type,
+                                    float damage_taken) 
+{
+  for (auto &entity : entities) {
+    if (entity->entity_type != EntityType::DMG_NUMBER) {
+      continue;
+    }
+
+    DamageNumber *dmg_num = static_cast<DamageNumber*>(entity.get());
+    
+    if (target != dmg_num->target) {
+      continue;
+    }
+
+    if (damage_type == dmg_num->type) {
+      dmg_num->incrementValue(damage_taken);
+      return;
+    }
+  }
+
+  PLOGD << "Proceeding to create new Damage Number.";
+  auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
+                                           damage_taken);
+  entities.push_back(std::move(dmg_num));
 }
 
 void CombatScene::deleteEntity(int entity_id) {

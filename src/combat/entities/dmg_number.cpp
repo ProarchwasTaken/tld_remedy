@@ -1,3 +1,5 @@
+#include <cassert>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -15,6 +17,8 @@ DamageNumber::DamageNumber(Combatant *target, DamageType damage_type,
                            float value) 
 {
   entity_type = EntityType::DMG_NUMBER;
+  this->target = target;
+  this->type = damage_type;
   this->value = value;
 
   setStartPosition(target);
@@ -30,17 +34,28 @@ void DamageNumber::setStartPosition(Combatant *target) {
   RectEx *bounds = &target->bounding_box;
 
   position = {target->position.x, bounds->position.y};
-  position = TextUtils::alignCenter(TextFormat("%00.00f", value), 
+  position = TextUtils::alignCenter(TextFormat("-%00.01f", value), 
                                     position, Game::sm_font, -3, 0);
 }
 
 void DamageNumber::setTextColor(DamageType damage_type) {
   if (damage_type == DamageType::LIFE) {
-    color = Game::palette[32];
+    color = Game::palette[33];
   }
   else {
     color = Game::palette[42];
   }
+}
+
+void DamageNumber::incrementValue(float magnitude) {
+  assert(target != NULL);
+  PLOGD << "Incrementing existing Damage Number [ID: " << entity_id <<
+    "] by: " << magnitude;
+  this->value += magnitude;
+
+  setStartPosition(target);
+  setTextColor(type);
+  life_clock = 0.0;
 }
 
 void DamageNumber::update() {
@@ -74,6 +89,6 @@ void DamageNumber::draw() {
   Font *font = &Game::sm_font;
   int fnt_size = font->baseSize;
 
-  const char *text = TextFormat("%00.00f", value);
+  const char *text = TextFormat("-%00.01f", value);
   DrawTextEx(*font, text, position, fnt_size, -3, color);
 }
