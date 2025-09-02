@@ -62,7 +62,10 @@ void CombatScene::initializeCombatants() {
   this->dummy = dummy.get();
   entities.push_back(std::move(dummy));
 
-  dummy = make_unique<Dummy>((Vector2){164, 152}, LEFT);
+  dummy = make_unique<Dummy>((Vector2){-256, 152}, RIGHT);
+  entities.push_back(std::move(dummy));
+
+  dummy = make_unique<Dummy>((Vector2){-288, 152}, RIGHT);
   entities.push_back(std::move(dummy));
 }
 
