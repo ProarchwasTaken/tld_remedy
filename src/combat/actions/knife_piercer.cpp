@@ -12,7 +12,7 @@
 
 KnifePiercer::KnifePiercer(Mary *user): 
   CombatAction(ActionID::KNIFE_PIERCER, ActionType::OFFENSE_HP, user, 
-               0.30, 0.15, 0.50) 
+               0.45, 0.15, 0.30) 
 {
   name = "Knife Piercer";
 
@@ -99,6 +99,12 @@ void KnifePiercer::hitRegistration() {
     if (CheckCollisionRecs(hitbox.rect, *hurtbox)) {
       data.hitbox = &hitbox.rect;
       combatant->takeDamage(data);
+    }
+    else {
+      continue;
+    }
+
+    if (combatant->state != CombatantState::DEAD) {
       hits.emplace(combatant);
     }
   }
@@ -106,10 +112,52 @@ void KnifePiercer::hitRegistration() {
 
 void KnifePiercer::endLag() {
   float percentage = 1.0 - state_clock;
-  movement(percentage);
+  Animation *anim;
 
-  SpriteAnimation::play(user->animation, &anim_end, false);
+  if (!second_hit) {
+    movement(percentage);
+    anim = &anim_end;
+  }
+  else {
+    backwardsMovement(percentage);
+    anim = &anim_heave;
+  }
+
+  SpriteAnimation::play(user->animation, anim, false);
   user->sprite = &atlas->sprites[*user->animation->current];
+
+  bool end_phase = state_clock == 1.0;
+  if (end_phase && !second_hit && !hits.empty()) {
+    performSecondHit();
+  }
+}
+
+void KnifePiercer::backwardsMovement(float percentage) {
+  float speed = velocity * percentage;
+  float magnitude = speed * Game::deltaTime();
+  int direction = user->direction * -1;
+
+  user->position.x += magnitude * direction;
+  user->rectExCorrection(user->bounding_box, user->hurtbox);
+}
+
+void KnifePiercer::performSecondHit() {
+  assert(!hits.empty());
+  data.knockback = 0.0;
+  data.stun_time = 0.30;
+  data.atk_mod = 1.0;
+
+  for (Combatant *combatant : hits) {
+    Rectangle *hurtbox = &combatant->hurtbox.rect;
+    if (CheckCollisionRecs(hitbox.rect, *hurtbox)) {
+      combatant->takeDamage(data);
+    }
+  }
+
+  second_hit = true;
+  state_clock = 0.0;
+  end_time = 0.20;
+  user->sprite = &atlas->sprites[29];
 }
 
 void KnifePiercer::drawDebug() {
