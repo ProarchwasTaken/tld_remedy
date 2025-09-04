@@ -34,6 +34,11 @@ public:
 
   virtual void behavior() = 0;
 
+  /* The process of taking damage is actually a very thorough procedure. 
+   * It is a crucial aspect of any Combatant's functionality afterall.
+   * Built in, it has multiple intercepts of which could be used to
+   * modify the given damage data, execute special code, or cancel the
+   * function all together.*/
   virtual void takeDamage(DamageData &data);
   float damageCalulation(DamageData &data);
   virtual void finalIntercept(float &damage, DamageData &data) {};
@@ -41,6 +46,10 @@ public:
 
   virtual void damageLife(float magnitude);
 
+  /* This function (Along with increaseMorale) does nothing. This is 
+   * because, Combatants at their core do not possess Morale attributes.
+   * Rather theses functions are meant to be overwritten by Combatants
+   * who do have those values. The notable example are PartyMembers.*/
   virtual void damageMorale(float magnitude);
   virtual void increaseMorale(float magnitude);
 
@@ -56,9 +65,18 @@ public:
   void deathAlphaLerp();
   void deathLogic();
 
+  /* Actions are stored on the heap due their volatility. They're not
+   * static, and they could literally be anything for all the game knows.
+   * As such, function must be called if you want a Combatant to perform
+   * an action; With the action created and owned by a separate 
+   * unique_ptr ahead of time as to ensure no problems would occur on
+   * the Combatant's end.*/
   void performAction(std::unique_ptr<CombatAction> &action);
   void cancelAction();
 
+  /* Everything said about performAction can also be mentioned with
+   * this function as well. To afflict an Combatant with a status effect,
+   * call this function to minimize issues.*/
   void afflictStatus(std::unique_ptr<StatusEffect> &status_effect);
   void statusLogic();
   void removeErasedStatus();

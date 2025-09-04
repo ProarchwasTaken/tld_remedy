@@ -6,6 +6,11 @@
 #include "combat/combatants/party/mary.h"
 
 
+/* Sub-Weapons function as extensions to the Player's base moveset.
+ * It's purpose is to provide the player it weapon techniques that's
+ * associated with whatever Sub-Weapon they're using, along with 
+ * functions for checking if said techniques could be used depending
+ * on cost and type.*/
 class SubWeapon {
 public:
   SubWeapon(std::string name, SubWeaponID id, Mary *user);

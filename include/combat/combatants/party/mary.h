@@ -25,7 +25,7 @@ enum class MaryAction {
 
 /* Mary is a Combatant whose directly controlled by the player. As such,
  * most of their behavior is determined by user input. This combatant is
- * very important as the the game will end in a fail state if he dies.*/
+ * very important as the game will end in a fail state if he dies.*/
 class Mary : public PartyMember {
 public:
   Mary(Player *data);

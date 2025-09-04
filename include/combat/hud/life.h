@@ -5,6 +5,9 @@
 #include "system/sprite_atlas.h"
 
 
+/* An hud element that's meant to display critical information about the 
+ * PartyMember it's assigned to. That includes the PartyMember's Life,
+ * active status effects, and Morale if they have any.*/
 class LifeHud {
 public:
   LifeHud(Vector2 position);
