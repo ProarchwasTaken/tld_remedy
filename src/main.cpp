@@ -13,7 +13,7 @@ plog::CsvFormatter, plog::TxtFormatter;
 
 
 void setupLogger() {
-  static RollingFileAppender<CsvFormatter> file("log.csv", 1000000, 5);
+  static RollingFileAppender<CsvFormatter> file("log.txt", 1000000, 5);
   static ColorConsoleAppender<TxtFormatter> console;
   
   plog::Severity severity = plog::info;

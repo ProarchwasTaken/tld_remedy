@@ -23,7 +23,8 @@ public:
   ~FieldScene();
 
   void setup();
-  void initCompanionData(CompanionID id); 
+  void initPlayerData(SubWeaponID weapon_id);
+  void initCompanionData(CompanionID companion_id); 
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupEntities();

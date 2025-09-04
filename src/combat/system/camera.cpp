@@ -4,11 +4,12 @@
 #include <algorithm>
 #include <raylib.h>
 #include <raymath.h>
-#include <map>
+#include <set>
 #include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "base/enemy.h"
+#include "utils/comparisons.h"
 #include "combat/system/camera.h"
 
 Rectangle CombatCamera::area = {
@@ -36,14 +37,8 @@ void CombatCamera::update(PartyMember *player) {
   area.y = target.y;
 }
 
-bool maxAlgorithm(const std::pair<Combatant*, float> &p1, 
-                  const std::pair<Combatant*, float> &p2) 
-{
-  return p1.second < p2.second;
-}
-
 void CombatCamera::enemyTargeting(PartyMember *player) {
-  std::map<Combatant*, float> length_table;
+  std::set<std::pair<float, Combatant*>> enemies;
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant->team != CombatantTeam::ENEMY) {
@@ -53,25 +48,24 @@ void CombatCamera::enemyTargeting(PartyMember *player) {
     if (CheckCollisionRecs(area, combatant->hurtbox.rect)) {
       Vector2 difference = Vector2Subtract(player->position, 
                                            combatant->position);
-      float length = Vector2Length(difference);
+      float distance = Vector2Length(difference);
 
-      length_table.emplace(combatant, length);
+      enemies.emplace(std::make_pair(distance, combatant));
     }
   }
 
   Combatant *enemy = NULL;
-  if (length_table.empty()) {
+  if (enemies.empty()) {
     follow(player->position.x);
     return;
   }
-  else if (length_table.size() == 1) {
-    enemy = length_table.begin()->first;
+  else if (enemies.size() > 1) {
+    auto furthest = std::max_element(enemies.begin(), enemies.end(),
+                                     Comparison::combatantDistance);
+    enemy = furthest->second;
   }
   else {
-    auto furthest = std::max_element(length_table.begin(), 
-                                     length_table.end(),
-                                     maxAlgorithm);
-    enemy = furthest->first;
+    enemy = enemies.begin()->second;
   }
   assert(enemy != NULL);
 

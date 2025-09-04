@@ -7,13 +7,13 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
-#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -23,14 +23,15 @@
 using std::unique_ptr, std::make_unique;
 bool Mary::controllable = true;
 
-CombatKeybinds Mary::key_bind;
 SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
 Mary::Mary(Player *plr): 
   PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
 {
+  keybinds = &Game::settings.combat_keybinds;
   important = true;
+
   life = plr->life;
   max_life = plr->max_life;
   critical_life = life < max_life * LOW_LIFE_THRESHOLD;
@@ -43,7 +44,14 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+
+  assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
+
+  int framerate = Game::settings.framerate;
+  float quotient = Game::TARGET_FPS / framerate;
+  buffer_lifetime = buffer_lifetime * quotient;
+  PLOGD << "Buffer Lifetime: " << buffer_lifetime;
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
@@ -57,6 +65,23 @@ Mary::Mary(Player *plr):
 
 Mary::~Mary() {
   atlas.release();
+}
+
+void Mary::assignSubWeapon(SubWeaponID id) {
+  PLOGI << "Assigning Sub-Weapon.";
+
+  switch (id) {
+    case SubWeaponID::KNIFE: {
+      sub_weapon = make_unique<Knife>(this);
+      break;
+    }
+  }
+
+  tech1_cost = sub_weapon->tech1_cost;
+  tech1_type = sub_weapon->tech1_type;
+
+  tech2_cost = sub_weapon->tech2_cost;
+  tech2_type = sub_weapon->tech2_type;
 }
 
 void Mary::setControllable(bool value) {
@@ -85,8 +110,8 @@ void Mary::behavior() {
 }
 
 void Mary::movementInput(bool gamepad) {
-  bool right = Input::down(key_bind.move_right, gamepad);
-  bool left = Input::down(key_bind.move_left, gamepad);
+  bool right = Input::down(keybinds->move_right, gamepad);
+  bool left = Input::down(keybinds->move_left, gamepad);
 
   moving_x = right - left;
   moving = moving_x != 0;
@@ -97,12 +122,20 @@ void Mary::actionInput(bool gamepad) {
     return;
   }
 
-  if (Input::pressed(key_bind.attack, gamepad)) {
+  if (Input::pressed(keybinds->attack, gamepad)) {
     PLOGI << "Sending Attack input to buffer.";
     buffer = MaryAction::ATTACK;
   }
-  else if (Input::pressed(key_bind.defensive, gamepad)) {
+  else if (Input::pressed(keybinds->defensive, gamepad)) {
     defensiveActionInput(gamepad);
+  }
+  else if (Input::pressed(keybinds->light_tech, gamepad)) {
+    PLOGI << "Sending Light Tech input to buffer.";
+    buffer = MaryAction::LIGHT_TECH;
+  }
+  else if (Input::pressed(keybinds->heavy_tech, gamepad)) {
+    PLOGI << "Sending Heavy Tech input to buffer.";
+    buffer = MaryAction::HEAVY_TECH;
   }
   else {
     return;
@@ -120,7 +153,7 @@ void Mary::defensiveActionInput(bool gamepad) {
     buffer = MaryAction::GHOST_STEP;
     return;
   }
-  else if (Input::down(key_bind.down, gamepad)) {
+  else if (Input::down(keybinds->down, gamepad)) {
     PLOGI << "Sending Evade input to buffer.";
     buffer = MaryAction::EVADE;
     return;
@@ -191,6 +224,22 @@ void Mary::readActionBuffer() {
       }
       break;
     }
+    case MaryAction::LIGHT_TECH: {
+      bool usable = sub_weapon->lightTechCondition();
+      if (usable) {
+        action = sub_weapon->lightTechnique();
+      }
+
+      break;
+    }
+    case MaryAction::HEAVY_TECH: {
+      bool usable = sub_weapon->heavyTechCondition();
+      if (usable) {
+        action = sub_weapon->heavyTechnique();
+      }
+
+      break;
+    }
   }
 
   buffer = MaryAction::NONE;
@@ -198,6 +247,9 @@ void Mary::readActionBuffer() {
 
   if (action != nullptr) {  
     performAction(action);
+  }
+  else {
+    sfx.play("action_denied"); 
   }
 }
 
@@ -249,6 +301,10 @@ void Mary::neutralLogic() {
   has_moved = old_x != position.x;
   if (has_moved) {
     next_anim = &anim_move;
+    float difference = 1.0 - speed_multiplier;
+    float percentage = 1.0 + difference;
+    next_anim->frame_duration = anim_move_speed * percentage;
+
     last_moved = 0.0;
     rectExCorrection(bounding_box, hurtbox);
   }

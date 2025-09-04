@@ -41,7 +41,7 @@ FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
   session.version = Game::session_version;
 
-  session.player.sub_weapon = sub_weapon;
+  initPlayerData(sub_weapon);
   initCompanionData(companion);
 
   setup();
@@ -79,29 +79,59 @@ void FieldScene::setup() {
   
   sfx.use();
   vignette = LoadTexture("graphics/overlays/field_vignette.png");
-  Game::fadein(1.0);
   PLOGI << "Field scene is ready to go!";
 }
 
-void FieldScene::initCompanionData(CompanionID id) {
+void FieldScene::initPlayerData(SubWeaponID weapon_id) {
+  PLOGI << "initializing Player data...";
+  Player *player = &session.player;
+
+  std::strcpy(player->name, "Mary");
+  player->member_id = PartyMemberID::MARY;
+  player->weapon_id = weapon_id;
+
+  player->life = 15;
+  player->max_life = 15;
+
+  player->init_morale = 10;
+  player->max_morale = 25;
+
+  player->offense = 6;
+  player->defense = 4;
+  player->intimid = 6;
+  player->persist = 4;
+
+  switch (weapon_id) {
+    case SubWeaponID::KNIFE: {
+      PLOGI << "Applying Knife status bonuses.";
+      player->offense += 2;
+      player->intimid += 1;
+      break;
+    }
+  }
+}
+
+void FieldScene::initCompanionData(CompanionID companion_id) {
   PLOGI << "Initializing Companion data...";
   Companion *companion = &session.companion;
 
-  switch (id) {
+  switch (companion_id) {
     case CompanionID::ERWIN: {
       std::strcpy(companion->name, "Erwin");
-      companion->id = id;
+      companion->member_id = PartyMemberID::ERWIN;
+      companion->companion_id = companion_id;
 
       companion->life = 20;
       companion->max_life = 20;
 
-      companion->init_morale = 8;
-      companion->max_morale = 25;
+      companion->init_morale = 5;
+      companion->max_morale = 20;
 
-      companion->offense = 10;
-      companion->defense = 5;
+      companion->offense = 8;
+      companion->defense = 6;
       companion->intimid = 8;
       companion->persist = 6;
+      break;
     }
   }
 
@@ -142,7 +172,7 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      CompanionID id = session.companion.id;
+      CompanionID id = session.companion.companion_id;
       entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
@@ -262,18 +292,16 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::saveSession(&session);
       break;
     }
-    case FieldEVT::LOAD_SESSION: {
-      PLOGD << "Event Detected: LoadSessionEvent";
-
-      PLOGI << "Loading session.";
-      Game::loadSession();
-      break;
-    }
     case FieldEVT::INIT_COMBAT: {
       PLOGI << "Event Detected: InitCombatEvent";
 
       sfx.play("combat_init");
       Game::initCombat(&session);
+      break;
+    }
+    case FieldEVT::GOTO_TITLE: {
+      PLOGI << "Event Detected: GotoTitleEvent";
+      Game::loadTitleScreen();
       break;
     }
     case FieldEVT::DELETE_ENTITY: {
@@ -320,12 +348,22 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     }
     case FieldEVT::CHANGE_PLR_LIFE: {
       PLOGD << "Event detected: SetPlrLifeEvent";
-      auto *event_data = static_cast<SetPlrLifeEvent*>(event.get());
+      auto *event_data = static_cast<SetLifeEvent*>(event.get());
 
       float value = event_data->value;
 
       PLOGI << "Changing the player's life expectancy to: " << value;
       session.player.life = value;
+      break;
+    }
+    case FieldEVT::CHANGE_COM_LIFE: {
+      PLOGI << "Event detected: SetComLifeEvent";
+      auto *event_data = static_cast<SetLifeEvent*>(event.get());
+
+      float value = event_data->value;
+
+      PLOGI << "Changing the Companion's life Expectancy to: " << value;
+      session.companion.life = value;
       break;
     }
   }

@@ -15,12 +15,12 @@ Broken::Broken(PartyMember *afflicted) :
   this->afflicted = afflicted;
 
   float defense = afflicted->defense;
-  float dec_defense = std::floorf(defense * 0.75);
+  float dec_defense = std::floorf(defense * 0.50);
   defense_lost = defense - dec_defense;
   PLOGD << "Defense to be lost: " << defense_lost;
 
   float recovery = afflicted->recovery;
-  float dec_recovery = recovery * 0.75;
+  float dec_recovery = recovery * 0.50;
   recovery_lost = recovery - dec_recovery;
   PLOGD << "Recovery to be lost: " << recovery_lost;
 }
@@ -34,7 +34,7 @@ Broken::~Broken() {
 }
 
 void Broken::init() {
-  PLOGI << "Decreasing the afflicted's defense and recovery by 25%";
+  PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
   afflicted->defense -= defense_lost;
   afflicted->recovery -= recovery_lost;
 

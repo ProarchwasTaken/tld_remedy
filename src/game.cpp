@@ -9,11 +9,13 @@
 #include <raymath.h>
 #include <memory>
 #include <plog/Log.h>
-#include <utility>
+#include "enums.h"
+#include "system/sound_atlas.h"
+#include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/combat.h"
-#include "enums.h"
 #include "data/session.h"
+#include "data/personal.h"
 #include "game.h"
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
@@ -21,7 +23,7 @@ std::filesystem::create_directory, std::chrono::system_clock,
 std::string, std::mt19937_64;
 
 GameState Game::game_state = GameState::READY;
-unique_ptr<Session> Game::loaded_session;
+bool Game::EXIT_GAME = false;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -29,7 +31,10 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
+
+Settings Game::settings;
 
 float Game::fade_percentage = 0.0;
 float Game::fade_time = 0.0;
@@ -41,12 +46,19 @@ bool Game::debug_info = false;
 
 
 void Game::init() {
+  loadPersonal();
   InitWindow(window_res.x, window_res.y, 
              "Project Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
-  SetTargetFPS(60);
+  SetMasterVolume(settings.master_volume);
+  SetTargetFPS(settings.framerate);
+
   HideCursor();
   setupCanvas();
+
+  if (settings.fullscreen && PLATFORM == PLATFORM_WINDOWS) {
+    toggleFullscreen();
+  }
 
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   med_font = LoadFont("graphics/fonts/med_font.png");
@@ -57,9 +69,46 @@ void Game::init() {
   RNG.seed(seed);
   PLOGD << "RNG Seed: " << seed;
 
-  scene = make_unique<FieldScene>(SubWeaponID::KNIFE, CompanionID::ERWIN);
+  menu_sfx.use();
+  scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
+}
+
+void Game::loadPersonal() {
+  ifstream file;
+  file.open("data/personal.data", std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGI << "Existing personal data not found.";
+    file.close();
+    return;
+  }
+
+  Personal data;
+  file.read(reinterpret_cast<char*>(&data), sizeof(Personal));
+
+  if (file.fail()) {
+    PLOGE << "Something has gone wrong!";
+    file.close();
+    return;
+  }
+
+  file.close();
+
+  if (data.version != personal_version) {
+    PLOGE << "Personal data is outdated!";
+    return;
+  }
+
+
+  settings = data.settings;
+  PLOGD << "Master Volume: " << settings.master_volume;
+  PLOGD << "SFX Volume: " << settings.sfx_volume;
+  PLOGD << "BGM Volume: " << settings.bgm_volume;
+  PLOGD << "Fullscreen: " << settings.fullscreen;
+  PLOGD << "Framerate: " << settings.framerate;
+  PLOGI << "Loaded the player's personal settings.";
 }
 
 Game::~Game() {
@@ -73,7 +122,22 @@ Game::~Game() {
   UnloadFont(sm_font);
   UnloadFont(med_font);
   UnloadImagePalette(palette);
+  menu_sfx.release();
+  assert(menu_sfx.users() == 0);
+  
+  savePersonal();
   PLOGI << "Thanks for playing!";
+}
+
+void Game::savePersonal() {
+  Personal data = {personal_version, settings};
+
+  ofstream file;
+  file.open("data/personal.data", std::ios::binary);
+  file.write(reinterpret_cast<char*>(&data), sizeof(Personal));
+
+  file.close();
+  PLOGI << "Saved the player's personal settings and statistics.";
 }
 
 void Game::setupCanvas() {
@@ -102,7 +166,7 @@ void Game::defineColorPalette() {
 void Game::start() {
   assert(scene != nullptr);
 
-  while (!WindowShouldClose()) {
+  while (!EXIT_GAME && !WindowShouldClose()) {
     topLevelInput();
     gameLogic();
     drawScene();
@@ -149,13 +213,16 @@ void Game::toggleFullscreen() {
   ToggleBorderlessWindowed();
   window_res.x = GetScreenWidth();
   window_res.y = GetScreenHeight();
+
+  settings.fullscreen = IsWindowState(FLAG_WINDOW_UNDECORATED);
   setupCanvas();
 }
 
 void Game::gameLogic() {
   switch (game_state) {
-    case GameState::LOADING_SESSION: {
-      loadSessionProcedure();
+    case GameState::TOGGLE_FULLSCREEN: {
+      toggleFullscreen();
+      game_state = GameState::READY;
       break;
     }
     case GameState::INIT_COMBAT: {
@@ -165,6 +232,9 @@ void Game::gameLogic() {
     case GameState::END_COMBAT: {
       endCombatProcedure();
       break;
+    }
+    case GameState::SWITCHING_SCENE: {
+      switchSceneProcedure();
     }
     case GameState::FADING_IN:
     case GameState::FADING_OUT: {
@@ -218,15 +288,14 @@ void Game::sleepProcedure() {
   }
 }
 
-void Game::loadSessionProcedure() {
-  PLOGI << "Initiating load session procedure.";
+void Game::switchSceneProcedure() {
+  PLOGI << "Proceeding to switch to loaded scene.";
   scene.reset();
-  
-  PLOGD << "Loading the field scene with loaded session as argument.";
-  assert(loaded_session != nullptr);
-  scene = make_unique<FieldScene>(loaded_session.get());
+   
+  assert(reserve != nullptr);
+  scene.swap(reserve);
 
-  loaded_session.reset();
+  Game::fadein(1.0);
   PLOGI << "Procedure complete.";
 }
 
@@ -295,10 +364,16 @@ void Game::drawScene() {
   EndDrawing();
 }
 
+void Game::fullscreenCheck() {
+  if (settings.fullscreen != IsWindowState(FLAG_WINDOW_UNDECORATED)) {
+    game_state = GameState::TOGGLE_FULLSCREEN;
+  }
+}
+
 void Game::fadeout(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: {
+    case GameState::SWITCHING_SCENE: {
       PLOGI << "Fading out the screen.";
       Game::fade_percentage = 1.0;
       Game::fade_time = seconds;
@@ -315,7 +390,7 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
-    case GameState::LOADING_SESSION: 
+    case GameState::SWITCHING_SCENE: 
     case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
       Game::fade_percentage = 0.0;
@@ -334,6 +409,19 @@ void Game::sleep(float seconds) {
   PLOGI << "Pausing game logic for: " << seconds << " seconds";
   Game::sleep_time = seconds;
   game_state = GameState::SLEEP;
+}
+
+void Game::exitGame() {
+  PLOGI << "Exit function has been called!";
+  EXIT_GAME = true;
+}
+
+void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
+  PLOGI << "Starting a new game.";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<FieldScene>(sub_weapon, companion);
+  game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::saveSession(Session *data) {
@@ -378,8 +466,45 @@ void Game::loadSession() {
     return;
   }
 
-  loaded_session = make_unique<Session>(std::move(session));
-  game_state = GameState::LOADING_SESSION;
+  assert(reserve == nullptr);
+  reserve = make_unique<FieldScene>(&session);
+  game_state = GameState::SWITCHING_SCENE;
+}
+
+bool Game::existingSession() {
+  ifstream file;
+  file.open("data/session.data", std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGI << "Existing session data not found.";
+    return false;
+  }
+
+  Session session;
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    file.close();
+    return false;
+  }
+
+  file.close();
+
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    return false;
+  }
+
+  PLOGI << "Detected existing session data.";
+  return true;
+}
+
+void Game::loadTitleScreen() {
+  PLOGI << "Returning to Title Scene";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<TitleScene>();
+  game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::initCombat(Session *data) {

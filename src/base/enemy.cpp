@@ -24,7 +24,7 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 
 Enemy::~Enemy() {
   member_count--;
-  assert(member_count == 0);
+  assert(member_count >= 0);
 
   if (state == DEAD) {
     assert(stunned > 0);

@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+#include <set>
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/damage.h"
@@ -22,10 +24,13 @@ class Attack : public CombatAction {
 public:
   Attack(Combatant *user, SpriteAtlas &user_atlas, 
          RectEx hitbox, AtkAnimSet &anim_set);
-  void updateFrameDuration();
+  void updateAnimFrameDuration();
 
   void windUp() override;
   void action() override;
+  void hitRegistration(std::set<std::pair<float, Combatant*>> &hits);
+  void inflictDamage(std::set<std::pair<float, Combatant*>> &hits);
+
   void endLag() override;
 
   void drawDebug() override;

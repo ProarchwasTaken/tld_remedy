@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
 #include "data/session.h"
@@ -24,6 +25,8 @@ public:
   void eventProcessing();
   void eventHandling(std::unique_ptr<CombatEvent> &event);
 
+  void dmgNumberHandling(Combatant *target, DamageType damage_type,
+                         float damage_taken);
   void deleteEntity(int entity_id);
   void endCombatProcedure();
   void updatePlrStats(Player *plr_data);
@@ -40,7 +43,8 @@ private:
   Mary *player;
   LifeHud plr_hud = LifeHud({34, 215});
 
-  Dummy *dummy;
+  // Remove this later!
+  Dummy *dummy = NULL;
 
   std::vector<std::unique_ptr<Entity>> entities;
   Session *session;

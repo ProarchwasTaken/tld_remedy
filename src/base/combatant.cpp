@@ -107,7 +107,7 @@ float Combatant::damageCalulation(DamageData &data) {
   bool atk_not_set = data.a_atk == NULL;
   bool def_not_set = data.b_def == NULL;
 
-  switch (data.calulation) {
+  switch (data.calculation) {
     case DamageType::LIFE: {
       if (atk_not_set) data.a_atk = &assailant->offense;
       if (def_not_set) data.b_def = &defense;

@@ -3,7 +3,8 @@
 
 enum class GameState {
   READY,
-  LOADING_SESSION,
+  TOGGLE_FULLSCREEN,
+  SWITCHING_SCENE,
   INIT_COMBAT,
   END_COMBAT,
   FADING_OUT,
@@ -12,8 +13,20 @@ enum class GameState {
 };
 
 enum class SceneID {
+  TITLE,
   FIELD,
   COMBAT
+};
+
+enum class PanelID {
+  CONFIG,
+  CONFIRM
+};
+
+enum class PanelState {
+  READY,
+  OPENING,
+  CLOSING
 };
 
 enum EntityType {
@@ -32,6 +45,11 @@ enum class ActorType {
 
 enum class SubWeaponID {
   KNIFE
+};
+
+enum class TechCostType {
+  MORALE,
+  LIFE
 };
 
 enum class CompanionID {
@@ -73,7 +91,9 @@ enum class StunType {
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
-  EVADE
+  EVADE,
+  KNIFE_CLEAVE,
+  KNIFE_PIERCER
 };
 
 enum ActionPhase {
@@ -122,13 +142,14 @@ enum class PickupType {
 enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
-  LOAD_SESSION,
   INIT_COMBAT,
+  GOTO_TITLE,
   UPDATE_COMMON_DATA,
   DELETE_ENTITY,
   CHANGE_SUPPLIES,
   ADD_SUPPLIES,
   CHANGE_PLR_LIFE,
+  CHANGE_COM_LIFE
 };
 
 enum class ActorEVT {
@@ -145,8 +166,8 @@ enum class CombatEVT {
 enum class CommandType {
   CHANGE_MAP,
   SAVE,
-  LOAD,
   INIT_COMBAT,
+  TITLE,
   DELETE_ENT,
   SET_SUPPLIES,
   SET_LIFE,

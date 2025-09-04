@@ -4,6 +4,7 @@
 #include <cassert>
 #include <string>
 #include <raylib.h>
+#include "game.h"
 #include "system/sound_atlas.h"
 #include <plog/Log.h>
 
@@ -79,6 +80,9 @@ void SoundAtlas::play(string sound_name) {
 
   if (data != sound_table.end()) {
     PlaySound(data->second);
+
+    float volume = Game::settings.sfx_volume;
+    SetSoundVolume(data->second, volume);
   }
   else {
     PLOGE << "Sound: '" << sound_name << "' not found!";

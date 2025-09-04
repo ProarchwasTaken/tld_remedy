@@ -28,6 +28,6 @@ struct AddSuppliesEvent : FieldEvent {
   int magnitude;
 };
 
-struct SetPlrLifeEvent : FieldEvent {
+struct SetLifeEvent : FieldEvent {
   float value;
 };

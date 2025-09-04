@@ -13,12 +13,12 @@ CrippledArm::CrippledArm(Combatant *afflicted) :
   persistant = true;
 
   float offense = afflicted->offense;
-  float dec_offense = std::floorf(offense * 0.80);
+  float dec_offense = std::floorf(offense * 0.90);
   offense_lost = offense - dec_offense;
   PLOGD << "Offense to be lost: " << offense_lost;
 
   float intimid = afflicted->intimid;
-  float dec_intimid = std::floorf(intimid * 0.80);
+  float dec_intimid = std::floorf(intimid * 0.90);
   intimid_lost = intimid - dec_intimid;
   PLOGD << "Intimidation to be lost: " << intimid_lost;
 }
@@ -32,7 +32,7 @@ CrippledArm::~CrippledArm() {
 }
 
 void CrippledArm::init() {
-  PLOGI << "Decreasing afflicted's offense and intimidation by 20%";
+  PLOGI << "Decreasing afflicted's offense and intimidation by 10%";
   afflicted->offense -= offense_lost;
   afflicted->intimid -= intimid_lost;
 

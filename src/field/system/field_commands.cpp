@@ -17,8 +17,8 @@ string findNextWord(string &buffer, string::iterator &iterator,
 void loadMapCommand(string map_name, string spawn_name);
 void deleteEntityCommand(string argument);
 void saveCommand();
-void loadCommand();
 void initCombatCommand();
+void gotoTitleCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
 
@@ -107,12 +107,12 @@ void CommandSystem::interpretCommand(CommandType type,
       saveCommand();
       break;
     }
-    case CommandType::LOAD: {
-      loadCommand();
-      break;
-    }
     case CommandType::INIT_COMBAT: {
       initCombatCommand();
+      break;
+    }
+    case CommandType::TITLE: {
+      gotoTitleCommand();
       break;
     }
     case CommandType::DELETE_ENT: {
@@ -194,14 +194,14 @@ void saveCommand() {
   FieldHandler::raise<FieldEvent>(FieldEVT::SAVE_SESSION);
 }
 
-void loadCommand() {
-  PLOGD << "Now executing command.";
-  FieldHandler::raise<FieldEvent>(FieldEVT::LOAD_SESSION);
-}
-
 void initCombatCommand() {
   PLOGD << "Now executing command.";
   FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+}
+
+void gotoTitleCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<FieldEvent>(FieldEVT::GOTO_TITLE);
 }
 
 void deleteEntityCommand(string argument) {
@@ -273,8 +273,12 @@ void setLifeCommand(string target, string value) {
   float life_value = std::stof(value);
   
   if (target == "PLAYER") {
-    FieldHandler::raise<SetPlrLifeEvent>(FieldEVT::CHANGE_PLR_LIFE, 
-                                         life_value);
+    FieldHandler::raise<SetLifeEvent>(FieldEVT::CHANGE_PLR_LIFE, 
+                                      life_value);
+  }
+  else if (target == "COMPANION") {
+    FieldHandler::raise<SetLifeEvent>(FieldEVT::CHANGE_COM_LIFE, 
+                                      life_value);
   }
   else {
     PLOGD << "'" << target << "' is not a valid target.";

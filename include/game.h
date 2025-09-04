@@ -4,6 +4,8 @@
 #include <random>
 #include "base/scene.h"
 #include "data/session.h"
+#include "data/personal.h"
+#include "system/sound_atlas.h"
 #include "enums.h"
 
 #define PLATFORM_WINDOWS 0
@@ -13,9 +15,12 @@
 class Game {
 public:
   void init();
-  ~Game();
+  void loadPersonal();
   void setupCanvas();
   void defineColorPalette();
+
+  ~Game();
+  void savePersonal();
 
   void start();
   void topLevelInput();
@@ -28,7 +33,7 @@ public:
    * one of these things per frame to reduce complexity.*/
   void gameLogic();
   void fadeScreenProcedure();
-  void loadSessionProcedure();
+  void switchSceneProcedure();
   void initCombatProcedure();
   void endCombatProcedure();
   void sleepProcedure();
@@ -42,8 +47,13 @@ public:
   static void toggleDebugInfo();
   static void setTimeScale(float number);
 
+  static void fullscreenCheck();
+  static void newSession(SubWeaponID sub_weapon, CompanionID companion);
   static void saveSession(Session *data);
   static void loadSession();
+  static bool existingSession();
+
+  static void loadTitleScreen();
 
   static void initCombat(Session *data);
   static void endCombat();
@@ -53,13 +63,20 @@ public:
 
   static void sleep(float seconds);
 
+  static void exitGame();
+
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 2;
+  static constexpr unsigned int session_version = 3;
+  static constexpr unsigned int personal_version = 1;
+  static constexpr float TARGET_FPS = 60.0;
+
+  static Settings settings;
 
   static Font sm_font;
   static Font med_font;
   static Color* palette;
   static std::mt19937_64 RNG;
+  static SoundAtlas menu_sfx;
 
   #ifndef NDEBUG
   static constexpr bool devmode = true; 
@@ -68,6 +85,8 @@ public:
   #endif // !NDEBUG
 private:
   static GameState game_state;
+  static bool EXIT_GAME;
+
   static bool debug_info;
   static float time_scale;
 
@@ -89,5 +108,4 @@ private:
 
   std::unique_ptr<Scene> scene;
   static std::unique_ptr<Scene> reserve;
-  static std::unique_ptr<Session> loaded_session;
 };

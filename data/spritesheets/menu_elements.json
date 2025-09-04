@@ -1,0 +1,35 @@
+{
+  "frames": [
+    {
+      "filename": "cursor",
+      "frame": {"x": 0, "y": 0, "w": 10, "h": 10}
+    },
+    {
+      "filename": "left_arrow",
+      "frame": {"x": 16, "y": 0, "w": 10, "h": 10}
+    },
+    {
+      "filename": "right_arrow",
+      "frame": {"x": 32, "y": 0, "w": 10, "h": 10}
+    },
+    {
+      "filename": "checkbox_empty",
+      "frame": {"x": 0, "y": 16, "w": 14, "h": 14}
+    },
+    {
+      "filename": "checkbox",
+      "frame": {"x": 16, "y": 16, "w": 14, "h": 14}
+    },
+    {
+      "filename": "segment",
+      "frame": {"x": 32, "y": 16, "w": 3, "h": 8}
+    },
+    {
+      "filename": "segment_empty",
+      "frame": {"x": 36, "y": 16, "w": 3, "h": 8}
+    }
+  ],
+  "meta": {
+    "size": {"w": 48, "h": 32}
+  }
+}

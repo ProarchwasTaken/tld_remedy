@@ -12,7 +12,6 @@ built. Possible the most experimental phase of development as everything
 is subject to change.
 
 # Default Controls
-This section goes over the game's default controls.
 
 ## Keyboard
 
@@ -20,12 +19,13 @@ This section goes over the game's default controls.
 * **Arrow Keys** - Movement
 * **Z Key** - Interact
 
-### Battle
+### Combat 
 * **Arrow Keys** - Movement
 * **Z Key** - Attack
 * **X Key** - Defensive (Use in combination with directional inputs!)
+* **A Key** - Light Technique
+* **S Key** - Heavy Technique
 
-* **P Key** - To make Dummy attack. (For testing purposes!)
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
@@ -39,6 +39,8 @@ may be different depending on what controller you use.
 * **D-Pad** - Movement
 * **A Button** - Attack
 * **B Button** - Defensive (Use in combination with directional inputs!)
+* **X Button** - Light Technique
+* **Y Button** - Heavy Technique
 
 
 # Credits and Contacts

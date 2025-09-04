@@ -9,9 +9,13 @@ public:
   DamageNumber(Combatant *target, DamageType damage_type, float value);
   void setStartPosition(Combatant *target);
   void setTextColor(DamageType damage_type);
+  void incrementValue(float magnitude);
 
   void update() override;
   void draw() override;
+
+  Combatant *target;
+  DamageType type;
 private:
   bool visible = false;
   float value;

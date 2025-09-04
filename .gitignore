@@ -2,4 +2,5 @@ log*
 build/
 .cache/
 data/session.data
+data/personal.data
 screenshots/

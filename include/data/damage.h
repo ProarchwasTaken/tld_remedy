@@ -6,7 +6,7 @@
 
 struct DamageData {
   DamageType damage_type;
-  DamageType calulation;
+  DamageType calculation;
 
   float stun_time;
   StunType stun_type;
