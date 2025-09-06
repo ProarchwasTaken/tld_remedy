@@ -24,6 +24,7 @@ std::string, std::mt19937_64;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
+bool Game::SKIP_FRAME = false;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -219,6 +220,12 @@ void Game::toggleFullscreen() {
 }
 
 void Game::gameLogic() {
+  if (SKIP_FRAME) {
+    PLOGD << "Skipping frame.";
+    SKIP_FRAME = false;
+    return;
+  }
+
   switch (game_state) {
     case GameState::TOGGLE_FULLSCREEN: {
       toggleFullscreen();
@@ -513,7 +520,9 @@ void Game::initCombat(Session *data) {
 
   reserve = make_unique<CombatScene>(data);
   flash_color = WHITE;
+
   game_state = GameState::INIT_COMBAT;
+  SKIP_FRAME = true;
 }
 
 void Game::endCombat() {

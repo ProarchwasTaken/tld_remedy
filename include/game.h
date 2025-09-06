@@ -86,6 +86,7 @@ public:
 private:
   static GameState game_state;
   static bool EXIT_GAME;
+  static bool SKIP_FRAME;
 
   static bool debug_info;
   static float time_scale;
