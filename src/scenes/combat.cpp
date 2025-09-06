@@ -30,6 +30,8 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
+  float start_time = GetTime();
+
   scene_id = SceneID::COMBAT;
   this->session = session;
 
@@ -42,6 +44,9 @@ CombatScene::CombatScene(Session *session) {
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Enemy::memberCount(); 
+
+  float end_time = GetTime();
+  PLOGD << "Load Time: " << end_time - start_time;
 }
 
 CombatScene::~CombatScene() {
