@@ -17,6 +17,8 @@ public:
   static int comboCount() {return combo;} 
 
   void takeDamage(DamageData &data) override;
+  void finalIntercept(float &damage, DamageData &data) override;
+
   void enterHitstun(DamageData &data) override;
   void exitHitstun() override;
 
