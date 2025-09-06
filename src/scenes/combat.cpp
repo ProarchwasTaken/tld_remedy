@@ -1,6 +1,7 @@
 #include <cassert>
 #include <memory>
 #include <cmath>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -17,6 +18,7 @@
 #include "data/combat_event.h"
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
+#include "combat/entities/status_text.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
@@ -131,6 +133,17 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
 
       dmgNumberHandling(target, damage_type, damage_taken);
       break;
+    }
+    case CombatEVT::CREATE_STAT_TXT: {
+      PLOGD << "Event detected: CreateStatTxtCB";
+      auto *event_data = static_cast<CreateStatTxtCB*>(event.get());
+
+      Combatant *target = event_data->target;
+      string text = event_data->text;
+      Color color = event_data->color;
+
+      auto status_txt = make_unique<StatusText>(target, text, color);
+      entities.push_back(std::move(status_txt));
     }
   }
 }

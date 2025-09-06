@@ -1,3 +1,4 @@
+#pragma once
 #include <raylib.h>
 #include "enums.h"
 #include "base/entity.h"

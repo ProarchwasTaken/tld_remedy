@@ -34,6 +34,7 @@ enum EntityType {
   PICKUP,
   MAP_TRANSITION,
   DMG_NUMBER,
+  STATUS_TEXT,
   COMBATANT,
 };
 
@@ -160,6 +161,7 @@ enum class ActorEVT {
 
 enum class CombatEVT {
   CREATE_DMG_NUM,
+  CREATE_STAT_TXT,
   DELETE_ENTITY,
 };
 
