@@ -254,6 +254,8 @@ void Mary::readActionBuffer() {
 }
 
 void Mary::update() {
+  tintFlash();
+
   switch (state) {
     case CombatantState::NEUTRAL: {
       if (exhaustion != 0) {

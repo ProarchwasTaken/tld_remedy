@@ -34,6 +34,8 @@ public:
   void depleteExhaustion();
   void depleteInstant();
 
+  void tintFlash();
+
   PartyMemberID id;
   bool important = false;
   bool demoralized = false;
