@@ -28,6 +28,8 @@ void Despondent::init() {
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: " << afflicted->intimid;
+
+  StatusEffect::init();
 }
 
 Despondent::~Despondent() {

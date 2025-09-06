@@ -11,9 +11,9 @@
 class StatusEffect {
 public:
   StatusEffect(StatusID id, StatusType type, Combatant *afflicted);
-  virtual ~StatusEffect() {};
+  virtual ~StatusEffect();
 
-  virtual void init() {};
+  virtual void init();
   bool isPersistant() {return persistant;}
 
   virtual void intercept(DamageData &data) {}

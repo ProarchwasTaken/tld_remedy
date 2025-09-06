@@ -44,6 +44,7 @@ void StatusText::update() {
     position.y += speed * Game::deltaTime();
 
     float alpha = Clamp(percentage / 0.25, 0.0, 1.0);
+    color.a = 255 * alpha;
   }
   else {
     CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY,

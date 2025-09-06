@@ -16,7 +16,7 @@ private:
   std::string text;
   Color color;
 
-  float initial_speed = 32;
-  float life_time = 0.5;
+  float initial_speed = 16;
+  float life_time = 1.0;
   float life_clock = 0.0;
 };

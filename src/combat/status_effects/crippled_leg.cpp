@@ -29,4 +29,6 @@ void CrippledLeg::init() {
   afflicted->speed_multiplier -= speed_lost;
 
   PLOGD << "Result: " << afflicted->speed_multiplier;
+
+  StatusEffect::init();
 }

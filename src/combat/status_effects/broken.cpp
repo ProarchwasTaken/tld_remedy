@@ -40,4 +40,6 @@ void Broken::init() {
 
   PLOGD << "Result: {DEF: " << afflicted->defense << ", REC: " <<
   afflicted->recovery << "}";
+
+  StatusEffect::init();
 }

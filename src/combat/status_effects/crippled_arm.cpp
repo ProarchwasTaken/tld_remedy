@@ -38,4 +38,6 @@ void CrippledArm::init() {
 
   PLOGD << "Result: {OFF: " << afflicted->offense << ", INT: " <<
   afflicted->intimid << "}";
+
+  StatusEffect::init();
 }
