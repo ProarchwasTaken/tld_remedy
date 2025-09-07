@@ -50,9 +50,11 @@ public:
 
   float recovery = 1.0;
 
+  std::string tech1_name;
   float tech1_cost;
   TechCostType tech1_type;
 
+  std::string tech2_name;
   float tech2_cost;
   TechCostType tech2_type;
 private:

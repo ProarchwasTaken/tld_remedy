@@ -6,10 +6,12 @@
 #include "base/entity.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
 #include "combat/system/evt_handler.h"
 #include "combat/hud/life.h"
+#include "combat/hud/cmd_plr.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 
@@ -33,6 +35,8 @@ public:
 
   void draw() override;
   void drawDebugInfo();
+
+  static SpriteAtlas cmd_atlas;
 private:
   CombatHandler evt_handler;
   CombatCamera camera;
@@ -42,6 +46,7 @@ private:
 
   Mary *player;
   LifeHud plr_hud = LifeHud({34, 215});
+  PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
 
   // Remove this later!
   Dummy *dummy = NULL;

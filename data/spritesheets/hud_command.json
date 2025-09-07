@@ -1,0 +1,19 @@
+{
+  "frames": [
+    {
+      "filename": "name_plate",
+      "frame": {"x": 0, "y": 0, "w": 60, "h": 14}
+    },
+    {
+      "filename": "plate_pattern",
+      "frame": {"x": 0, "y": 16, "w": 60, "h": 14}
+    },
+    {
+      "filename": "cmd_frame",
+      "frame": {"x": 0, "y": 32, "w": 64, "h": 14}
+    }
+  ],
+  "meta": {
+    "size": {"w": 64, "h": 48}
+  }
+}

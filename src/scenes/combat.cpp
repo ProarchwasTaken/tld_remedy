@@ -16,6 +16,7 @@
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "system/sprite_atlas.h"
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
@@ -26,6 +27,7 @@
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
 
 CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
@@ -62,6 +64,7 @@ void CombatScene::initializeCombatants() {
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
   plr_hud.assign(this->player);
+  plr_cmd_hud.assign(this->player);
   entities.push_back(std::move(player));
 
   // TODO: Don't forget to remove this when the time comes!
@@ -273,6 +276,7 @@ void CombatScene::draw() {
   EndMode2D();
 
   plr_hud.draw();
+  plr_cmd_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();

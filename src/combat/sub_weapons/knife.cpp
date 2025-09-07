@@ -12,9 +12,11 @@ using std::unique_ptr, std::make_unique;
 
 
 Knife::Knife(Mary *user) : SubWeapon("Knife", SubWeaponID::KNIFE, user) {
+  tech1_name = "Cleave";
   tech1_cost = 8;
   tech1_type = TechCostType::MORALE;
 
+  tech2_name = "Piercer";
   tech2_cost = 12;
   tech2_type = TechCostType::MORALE;
 }

@@ -343,6 +343,8 @@ void Game::initCombatProcedure() {
 void Game::endCombatProcedure() {
   PLOGI << "Switching back to the Field scene";
   scene.reset();
+  assert(CombatScene::cmd_atlas.users() == 0);
+
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
