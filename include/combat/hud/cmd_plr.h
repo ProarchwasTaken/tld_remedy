@@ -15,8 +15,10 @@ public:
 
   void update();
   void updateDefendText();
+  Color determineAttackColor();
   Color determineTechColor(float tech_cost);
   Color determineGSColor();
+  Color determineEvadeColor();
 
   void draw();
   void drawNamePlate(Font *font, int txt_size);
@@ -34,7 +36,9 @@ private:
   Color main_color;
   Vector2 name_position;
 
-  std::string txt_defend;
+  Color attack_color = BLACK;
+
+  std::string txt_defend = "--";
   Color defend_color = BLACK;
 
   Color tech1_color = BLACK;

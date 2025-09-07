@@ -162,8 +162,9 @@ void Mary::defensiveActionInput(bool gamepad) {
   }
 }
 
-bool Mary::canCancel() {
-  if (state != CombatantState::ACTION || buffer == MaryAction::NONE) {
+bool Mary::canCancel(bool ignore_buffer) {
+  bool buffer_empty = !ignore_buffer && buffer == MaryAction::NONE;
+  if (state != CombatantState::ACTION || buffer_empty) {
     return false;
   }
 

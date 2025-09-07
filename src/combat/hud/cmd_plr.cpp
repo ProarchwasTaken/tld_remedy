@@ -1,6 +1,9 @@
+#include <cassert>
 #include <cctype>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
+#include "enums.h"
 #include "game.h"
 #include "data/keybinds.h"
 #include "scenes/combat.h"
@@ -41,9 +44,29 @@ void PlayerCmdHud::assign(Mary *player) {
 }
 
 void PlayerCmdHud::update() {
-  updateDefendText();
-  tech1_color = determineTechColor(player->tech1_cost);
-  tech2_color = determineTechColor(player->tech2_cost);
+  assert(player != NULL);
+
+  if (player->state == NEUTRAL || player->canCancel(true)) {
+    attack_color = determineAttackColor();
+    updateDefendText();
+    tech1_color = determineTechColor(player->tech1_cost);
+    tech2_color = determineTechColor(player->tech2_cost); 
+  }
+  else {
+    attack_color = Game::palette[2];
+    defend_color = Game::palette[2];
+    tech1_color = Game::palette[2];
+    tech2_color = Game::palette[2];
+  }
+}
+
+Color PlayerCmdHud::determineAttackColor() {
+  if (player->state == ACTION) {
+    return Game::palette[51];
+  }
+  else {
+    return WHITE;
+  }
 }
 
 void PlayerCmdHud::updateDefendText() {
@@ -59,17 +82,25 @@ void PlayerCmdHud::updateDefendText() {
   }
   else if (Input::down(keybinds->down, IsGamepadAvailable(0))) {
     txt_defend = "Evade";
-    defend_color = WHITE;
+    defend_color = determineEvadeColor();
   }
   else {
+    txt_defend = "--";
     defend_color = Game::palette[2];
   } 
 }
 
 Color PlayerCmdHud::determineTechColor(float tech_cost)
 {
+  if (player->demoralized) {
+    return Game::palette[32];
+  }
+
   if (player->morale < tech_cost) {
     return Game::palette[2];
+  }
+  else if (player->state == ACTION) {
+    return Game::palette[51]; 
   }
   else if (player->morale - (tech_cost * 2) < 0) {
     return Game::palette[26];
@@ -79,11 +110,27 @@ Color PlayerCmdHud::determineTechColor(float tech_cost)
   }
 }
 
+
 Color PlayerCmdHud::determineGSColor() {
+  bool using_action = player->state == ACTION;
+  if (using_action && player->action->id != ActionID::GHOST_STEP) {
+    return Game::palette[51];
+  }
+
   float gs_cost = player->gs_cost;
   float threshold = player->max_life * player->LOW_LIFE_THRESHOLD;
   if (player->life - gs_cost <= threshold) {
     return Game::palette[26];
+  }
+  else {
+    return WHITE;
+  }
+}
+
+Color PlayerCmdHud::determineEvadeColor() {
+  bool using_action = player->state == ACTION;
+  if (using_action && player->action->id != ActionID::EVADE) {
+    return Game::palette[51];
   }
   else {
     return WHITE;
@@ -97,7 +144,7 @@ void PlayerCmdHud::draw() {
   drawNamePlate(font, txt_size);
   drawCmdFrames();
 
-  drawCmdText("Attack", 0, font, txt_size, WHITE);
+  drawCmdText("Attack", 0, font, txt_size, attack_color);
   drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color);
   drawCmdText(player->tech1_name.c_str(), 2, font, txt_size, tech1_color);
   drawCmdText(player->tech2_name.c_str(), 3, font, txt_size, tech2_color);

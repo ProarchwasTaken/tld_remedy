@@ -81,7 +81,7 @@ void CombatScene::initializeCombatants() {
 
 void CombatScene::update() {
   // Remove this Later!
-  if (dummy != NULL && IsKeyPressed(KEY_P)) {
+  if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
   }
 

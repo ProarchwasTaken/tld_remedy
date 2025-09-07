@@ -39,7 +39,7 @@ public:
   void actionInput(bool gamepad);
   void defensiveActionInput(bool gamepad);
 
-  bool canCancel();
+  bool canCancel(bool ignore_buffer = false);
   void readActionBuffer();
 
   void update() override;
