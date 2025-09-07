@@ -105,12 +105,13 @@ public:
 
   std::unique_ptr<CombatAction> action;
   Status status;
+
+  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 protected:
   Color tint = WHITE;
   float death_time = 1.0;
 
   DamageType damage_type;
-  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;

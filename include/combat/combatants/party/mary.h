@@ -54,13 +54,15 @@ public:
   void drawDebug() override;
 
   static SpriteAtlas atlas;
+  bool has_moved = false;
+  bool moving = true;
+
+  const float gs_cost = 5.5;
 private:
   static bool controllable;
   CombatKeybinds *keybinds;
 
   const float default_speed = 68;
-  bool has_moved = false;
-  bool moving = true;
   int moving_x = 0;
 
   float last_moved = 0.0;

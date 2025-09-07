@@ -97,7 +97,10 @@ void CombatScene::update() {
     }
 
     camera.update(player);
+
     plr_hud.update();
+    plr_cmd_hud.update();
+
     eventProcessing();
   }
 }

@@ -210,7 +210,7 @@ void Mary::readActionBuffer() {
     }
     case MaryAction::GHOST_STEP: {
       if (!critical_life) {
-        increaseExhaustion(5.5);
+        increaseExhaustion(gs_cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
       }
 
