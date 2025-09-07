@@ -132,6 +132,9 @@ Color PlayerCmdHud::determineEvadeColor() {
   if (using_action && player->action->id != ActionID::EVADE) {
     return Game::palette[51];
   }
+  else if (using_action && player->action->id == ActionID::EVADE) {
+    return Game::palette[2];
+  }
   else {
     return WHITE;
   }
