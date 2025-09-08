@@ -6,6 +6,9 @@
 #include "combat/combatants/party/mary.h"
 
 
+/* A hud element that's designed to display what actions the Player
+ * combatant can perform at any given time. The text and color of these 
+ * actions change depending on the Player's state.*/
 class PlayerCmdHud {
 public:
   PlayerCmdHud(Vector2 position);
