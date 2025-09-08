@@ -71,7 +71,6 @@ Color PlayerCmdHud::determineAttackColor() {
 
 void PlayerCmdHud::updateDefendText() {
   if (player->critical_life) {
-    txt_defend = "--";
     defend_color = Game::palette[32];
     return;
   }
@@ -145,9 +144,15 @@ void PlayerCmdHud::draw() {
   drawCmdFrames();
 
   drawCmdText("Attack", 0, font, txt_size, attack_color);
-  drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color);
-  drawCmdText(player->tech1_name.c_str(), 2, font, txt_size, tech1_color);
-  drawCmdText(player->tech2_name.c_str(), 3, font, txt_size, tech2_color);
+
+  drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color,
+              player->critical_life);
+
+  drawCmdText(player->tech1_name.c_str(), 2, font, txt_size, tech1_color,
+              player->demoralized);
+
+  drawCmdText(player->tech2_name.c_str(), 3, font, txt_size, tech2_color,
+              player->demoralized);
 }
 
 void PlayerCmdHud::drawNamePlate(Font *font, int txt_size) {
@@ -171,12 +176,20 @@ void PlayerCmdHud::drawCmdFrames() {
 }
 
 void PlayerCmdHud::drawCmdText(const char *text, int frame, Font *font, 
-                               int txt_size, Color color) 
+                               int txt_size, Color color, bool unusable) 
 {
   float offset = 11 * frame;
+
   Vector2 position = Vector2Add(main_position, {59, 12 + offset});
   position = TextUtils::alignRight(text, position, *font, -3, 0);
 
   DrawTextEx(*font, text, position, txt_size, -3, color);
+
+  if (unusable) {
+    color = Game::palette[33];
+    position = Vector2Add(main_position, {0, 11 + offset});
+
+    DrawTextureRec(atlas->sheet, atlas->sprites[3], position, color);
+  }
 }
 

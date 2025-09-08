@@ -24,7 +24,7 @@ public:
   void drawNamePlate(Font *font, int txt_size);
   void drawCmdFrames();
   void drawCmdText(const char *text, int frame, Font *font, int txt_size, 
-                   Color color);
+                   Color color, bool unusable = false);
 private:
   Mary *player;
   CombatKeybinds *keybinds;

@@ -11,6 +11,10 @@
     {
       "filename": "cmd_frame",
       "frame": {"x": 0, "y": 32, "w": 64, "h": 14}
+    },
+    {
+      "filename": "cmd_unusable",
+      "frame": {"x": 0, "y": 48, "w": 64, "h": 14}
     }
   ],
   "meta": {
