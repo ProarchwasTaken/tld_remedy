@@ -165,6 +165,10 @@ enum class CombatEVT {
   DELETE_ENTITY,
 };
 
+enum class CombatantEVT {
+  TOOK_DAMAGE,
+};
+
 enum class CommandType {
   CHANGE_MAP,
   SAVE,

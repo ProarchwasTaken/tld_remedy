@@ -88,6 +88,7 @@ void CombatScene::update() {
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
+  cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
     stage.update();
@@ -120,6 +121,8 @@ void CombatScene::eventProcessing() {
 
     evt_handler.clear();
   }
+
+  cbt_handler.transferEvents();
 }
 
 void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {

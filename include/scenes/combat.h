@@ -10,6 +10,7 @@
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/hud/cmd_plr.h"
 #include "combat/combatants/party/mary.h"
@@ -38,10 +39,13 @@ public:
 
   static SpriteAtlas cmd_atlas;
 private:
-  CombatHandler evt_handler;
-  CombatCamera camera;
   CombatStage stage;
   Texture debug_overlay;
+
+  CombatCamera camera;
+  CombatHandler evt_handler;
+  CombatantHandler cbt_handler;
+
   bool game_over = false;
 
   Mary *player;
