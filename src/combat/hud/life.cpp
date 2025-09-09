@@ -97,31 +97,31 @@ void LifeHud::draw() {
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 
-  drawBustGraphic();
-  drawStatusIcons();
-  drawLife(font, txt_size);
+  drawBustGraphic(main_position);
+  drawStatusIcons(main_position);
+  drawLife(main_position, font, txt_size);
 
   if (user->max_morale != 0) {
-    drawMorale(font, txt_size);
+    drawMorale(main_position, font, txt_size);
   }
 }
 
-void LifeHud::drawBustGraphic() {
+void LifeHud::drawBustGraphic(Vector2 position) {
   assert(bust_atlas.users() != 0);
 
-  Vector2 position = Vector2Subtract(main_position, {26, 49});
+  position = Vector2Subtract(main_position, {26, 49});
   Color tint = user->spriteTint();
   tint.a = 255;
   DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, tint);
 }
 
-void LifeHud::drawStatusIcons() {
+void LifeHud::drawStatusIcons(Vector2 position) {
   int count = user->status.size();
   if (count == 0) {
     return;
   }
 
-  Vector2 base_position = Vector2Subtract(main_position, {18, 5});
+  Vector2 base_position = Vector2Subtract(position, {18, 5});
 
   for (int x = 0; x < count; x++) {
     StatusEffect *effect = user->status.at(x).get();
@@ -141,14 +141,14 @@ Rectangle *LifeHud::getIconSprite(StatusID id) {
   return &status_atlas.sprites.at(index);
 }
 
-void LifeHud::drawLife(Font *font, int txt_size) {
-  DrawTextureRec(atlas.sheet, atlas.sprites[0], main_position, 
+void LifeHud::drawLife(Vector2 position, Font *font, int txt_size) {
+  DrawTextureRec(atlas.sheet, atlas.sprites[0], position, 
                  life_color);
-  drawLifeSegments();
-  drawLifeText(font, txt_size);
+  drawLifeSegments(position);
+  drawLifeText(position, font, txt_size);
 }
 
-void LifeHud::drawLifeSegments() {
+void LifeHud::drawLifeSegments(Vector2 position) {
   float life_percentage = user->life / user->max_life;
 
   float combined = user->life + user->exhaustion;
@@ -158,7 +158,7 @@ void LifeHud::drawLifeSegments() {
   int ex_segments = with_exhaustion * 10;
   float leftover = (life_percentage * 10) - segments;
 
-  Vector2 position = Vector2Add(main_position, {7, 2});
+  position = Vector2Add(main_position, {7, 2});
 
   for (int x = 0; x < 10; x++) {
     Rectangle *sprite;
@@ -186,6 +186,47 @@ void LifeHud::drawLifeSegments() {
   }
 }
 
+void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
+  float life = std::floorf(user->life);
+  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
+
+  position = Vector2Add(main_position, {78, 3});
+  position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
+                                   0);
+
+  DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
+}
+
+void LifeHud::drawMorale(Vector2 position, Font *font, int txt_size) {
+  position = Vector2Add(main_position, {14, -10});
+  DrawTextureRec(atlas.sheet, atlas.sprites[3], position, morale_color);
+
+  drawMoraleGauge(position);
+  drawMoraleText(position, font, txt_size);
+}
+
+void LifeHud::drawMoraleGauge(Vector2 position) {
+  position = Vector2Add(main_position, {21, -2});
+  float morale_percentage = Clamp(user->morale / user->max_morale, 
+                                  0.0, 1.0);
+
+  Rectangle gauge = atlas.sprites[4];
+  gauge.width = gauge.width * morale_percentage;
+
+  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
+  DrawTextureRec(atlas.sheet, gauge, position, morale_color);
+}
+
+void LifeHud::drawMoraleText(Vector2 position, Font *font, int size) {
+  txt_morale = TextFormat("%02.02f", user->morale);
+
+  position = Vector2Add(main_position, {92, -12});
+  position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 
+                                   -3, 0);
+
+  DrawTextEx(*font, txt_morale.c_str(), position, size, -3, morale_color);
+}
+
 Rectangle *LifeHud::segmentBlink(float interval) {
   blink_clock += Game::deltaTime() / interval;
   if (blink_clock >= 1.0) {
@@ -199,45 +240,4 @@ Rectangle *LifeHud::segmentBlink(float interval) {
   else {
     return &atlas.sprites[2];
   }
-}
-
-void LifeHud::drawLifeText(Font *font, int size) {
-  float life = std::floorf(user->life);
-  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
-
-  Vector2 position = Vector2Add(main_position, {78, 3});
-  position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
-                                   0);
-
-  DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
-}
-
-void LifeHud::drawMorale(Font *font, int txt_size) {
-  Vector2 position = Vector2Add(main_position, {14, -10});
-  DrawTextureRec(atlas.sheet, atlas.sprites[3], position, morale_color);
-
-  drawMoraleGauge();
-  drawMoraleText(font, txt_size);
-}
-
-void LifeHud::drawMoraleGauge() {
-  Vector2 position = Vector2Add(main_position, {21, -2});
-  float morale_percentage = Clamp(user->morale / user->max_morale, 
-                                  0.0, 1.0);
-
-  Rectangle gauge = atlas.sprites[4];
-  gauge.width = gauge.width * morale_percentage;
-
-  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
-  DrawTextureRec(atlas.sheet, gauge, position, morale_color);
-}
-
-void LifeHud::drawMoraleText(Font *font, int size) {
-  txt_morale = TextFormat("%02.02f", user->morale);
-
-  Vector2 position = Vector2Add(main_position, {92, -12});
-  position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 
-                                   -3, 0);
-
-  DrawTextEx(*font, txt_morale.c_str(), position, size, -3, morale_color);
 }

@@ -23,19 +23,19 @@ public:
 
   void draw();
 
-  void drawBustGraphic();
-  void drawStatusIcons();
+  void drawBustGraphic(Vector2 position);
+  void drawStatusIcons(Vector2 position);
   Rectangle *getIconSprite(StatusID id);
 
-  void drawLife(Font *font, int txt_size);
-  void drawLifeText(Font *font, int size);
-  void drawLifeSegments();
+  void drawLife(Vector2 position, Font *font, int txt_size);
+  void drawLifeText(Vector2 position, Font *font, int size);
+  void drawLifeSegments(Vector2 position);
+
+  void drawMorale(Vector2 position, Font *font, int txt_size);
+  void drawMoraleGauge(Vector2 position);
+  void drawMoraleText(Vector2 position, Font *font, int size);
+
   Rectangle *segmentBlink(float interval);
-
-  void drawMorale(Font *font, int txt_size);
-  void drawMoraleGauge();
-  void drawMoraleText(Font *font, int size);
-
 
   static SpriteAtlas atlas;
   static SpriteAtlas bust_atlas;
