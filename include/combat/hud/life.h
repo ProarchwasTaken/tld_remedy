@@ -66,5 +66,5 @@ private:
   float hit_timestamp = 0;
 
   float shake_clock = 0.0;
-  float shake_time = 0.5;
+  float shake_time = 0.25;
 };

@@ -81,11 +81,18 @@ void LifeHud::behavior() {
 }
 
 void LifeHud::damageEventHandling(TookDamageCBT *event) {
-  if (event->damage_type != DamageType::LIFE) {
-    return;
+  PLOGD << "Initiating damage shake effect.";
+  bool in_hitstun = event->resulting_state == HIT_STUN;
+  if (in_hitstun && event->stun_type == StunType::STAGGER) {
+    shake_time = 0.5;
+  }
+  else if (event->damage_type == DamageType::LIFE) {
+    shake_time = 0.25;
+  }
+  else {
+    shake_time = 0.10;
   }
 
-  PLOGD << "Initiating damage shake effect.";
   state = SHAKE;
   shake_clock = 0.0;
   hit_timestamp = GetTime();
