@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <string>
 #include "enums.h"
+#include "data/combatant_event.h"
 #include "base/party_member.h"
 #include "system/sprite_atlas.h"
 
@@ -16,12 +17,16 @@ public:
 
   void assign(PartyMember *combatant);
 
+  void behavior();
+  void damageEventHandling(TookDamageCBT *event);
+
   void update();
   Color criticalFlash();
   void decideLifeColor();
   void decideMoraleColor();
 
   void draw();
+  void shakeTimer();
 
   void drawBustGraphic(Vector2 position);
   void drawStatusIcons(Vector2 position);
@@ -56,4 +61,10 @@ private:
 
   bool flashed = false;
   float flash_clock = 0.0;
+
+  enum {IDLE, SHAKE} state = IDLE;
+  float hit_timestamp = 0;
+
+  float shake_clock = 0.0;
+  float shake_time = 0.5;
 };

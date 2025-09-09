@@ -88,6 +88,7 @@ void CombatScene::update() {
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
+  plr_hud.behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
