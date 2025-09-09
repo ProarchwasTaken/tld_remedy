@@ -9,11 +9,13 @@ struct CombatantEvent {
   CombatantEVT event_type;
 };
 
-struct TookDamageEvent {
+struct TookDamageCBT : CombatantEvent {
   float damage_taken;
   DamageType damage_type;
-  StunType stun_type;
+  CombatantState resulting_state;
 
   float stun_time;
+  StunType stun_type;
+
   Combatant *assailant;
 };

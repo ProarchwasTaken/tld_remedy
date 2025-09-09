@@ -9,11 +9,13 @@
 #include "game.h"
 #include "data/damage.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "system/sound_atlas.h"
 #include "utils/collision.h"
 #include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "base/combatant.h"
 
 using std::string, std::unique_ptr;
@@ -97,6 +99,12 @@ void Combatant::takeDamage(DamageData &data) {
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
+
+  PLOGD << "Proceeding to queue TookDamage event.";
+  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
+                                         damage, data.damage_type, state,
+                                         data.stun_time, data.stun_type,
+                                         data.assailant);
 }
 
 float Combatant::damageCalulation(DamageData &data) {
