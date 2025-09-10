@@ -30,8 +30,8 @@ Actor("Enemy", ActorType::ENEMY, position, *routine.begin())
   this->current_direction = this->routine.begin();
   this->speed = speed;
 
-  bounding_box.scale = {32, 48};
-  bounding_box.offset = {-16, -44};
+  bounding_box.scale = {32, 38};
+  bounding_box.offset = {-16, -34};
   collis_box.scale = {8, 20};
   collis_box.offset = {-4, -16};
   rectExCorrection(bounding_box, collis_box);

@@ -99,7 +99,7 @@ private:
 
   static Color flash_color;
 
-  Vector2 window_res = {1280, 720};
+  Vector2 window_res = {1278, 720};
   Color screen_tint = WHITE;
 
   RenderTexture canvas;
