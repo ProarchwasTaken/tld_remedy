@@ -5,6 +5,7 @@
 #include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -35,6 +36,9 @@ public:
   static void setControllable(bool value);
 
   void behavior() override;
+  void eventHandling();
+  void damageHandling(TookDamageCBT *event);
+
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
   void defensiveActionInput(bool gamepad);
@@ -46,6 +50,7 @@ public:
   void neutralLogic();
   void bufferTimer();
   void movement();
+  void targetLogic();
 
   Animation *getIdleAnim();
   Rectangle *getStunSprite();

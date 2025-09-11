@@ -7,12 +7,14 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
+#include "data/combatant_event.h"
 #include "data/animation.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -102,12 +104,57 @@ void Mary::behavior() {
     return;
   }
 
+  eventHandling();
+
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
   actionInput(gamepad);
 
   if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
+  }
+}
+
+void Mary::eventHandling() {
+  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+
+  for (auto &event : *event_pool) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
+      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+      damageHandling(dmg_event);
+    }
+  }
+}
+
+void Mary::damageHandling(TookDamageCBT *event) {
+  if (target != NULL) {
+    return;
+  }
+
+  Combatant *potential_target = NULL;
+  if (event->sender == this) {
+    assert(event->assailant != NULL);
+    potential_target = event->assailant;
+  }
+  else if (event->assailant == this) {
+    assert(event->sender->entity_type == COMBATANT);
+    potential_target = static_cast<Combatant*>(event->sender);
+  }
+  else {
+    return;
+  }
+
+  PLOGD << "Acknowledging damage event of which the Player Combatant was"
+    " involved in.";
+  float distance = distanceTo(potential_target);
+  if (distance <= 96) {
+    target = potential_target;
+    PLOGI << "Now targeting: '" << target->name << "' [ID: " << 
+    target->entity_id << "]";
   }
 }
 
@@ -292,6 +339,7 @@ void Mary::update() {
   }
 
   statusLogic();
+  targetLogic();
 
   if (buffer != MaryAction::NONE) {
     bufferTimer();
@@ -328,6 +376,19 @@ void Mary::bufferTimer() {
     PLOGI << "Resetting action buffer.";
     buffer = MaryAction::NONE;
     buffer_clock = 0.0;
+  }
+}
+
+void Mary::targetLogic() {
+  if (target == NULL) {
+    return;
+  }
+
+  float distance = distanceTo(target); 
+  if (distance > 128) {
+    PLOGI << "Target: '" << target->name << "' [ID: " << 
+      target->entity_id << "] is outside the player's range.";
+    target = NULL;
   }
 }
 
