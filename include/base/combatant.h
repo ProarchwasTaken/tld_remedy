@@ -32,6 +32,8 @@ public:
   ~Combatant();
   Color spriteTint() {return tint;}
 
+  float distanceTo(Combatant *combatant);
+
   virtual void behavior() = 0;
 
   /* The process of taking damage is actually a very thorough procedure. 
@@ -84,8 +86,9 @@ public:
   virtual void drawDebug() override;
 
   std::string name;
-  CombatantTeam team;
   CombatantState state;
+  CombatantTeam team;
+  Combatant *target = NULL;
 
   Direction direction;
   RectEx hurtbox;

@@ -111,9 +111,7 @@ void KnifeCleave::hitRegistration(set<pair<float, Combatant*>> &hits) {
     }
 
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
-      Vector2 difference = Vector2Subtract(user->position,
-                                           combatant->position);
-      float distance = Vector2Length(difference);
+      float distance = user->distanceTo(combatant);
       hits.emplace(std::make_pair(distance, combatant));
       PLOGD << "Attack hitbox has collided with Combatant [ID: " <<
       combatant->entity_id << "], Distance: " << distance;

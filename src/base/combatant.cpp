@@ -67,6 +67,15 @@ Combatant::~Combatant() {
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
+float Combatant::distanceTo(Combatant *combatant) {
+  assert(combatant != NULL);
+  assert(combatant != this);
+
+  Vector2 difference = Vector2Subtract(position, combatant->position);
+  float distance = Vector2Length(difference);
+  return distance;
+}
+
 void Combatant::takeDamage(DamageData &data) {
   assert(state != CombatantState::DEAD);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
