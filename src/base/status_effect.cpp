@@ -36,7 +36,7 @@ StatusEffect::~StatusEffect() {
                                         afflicted, text, color);
 }
 
-void StatusEffect::init() {
+void StatusEffect::init(bool hide_text) {
   string text = "+" + name;
 
   Color color;
@@ -47,6 +47,8 @@ void StatusEffect::init() {
     color = Game::palette[14];
   }
 
-  CombatHandler::raise<CreateStatTxtCB>(CombatEVT::CREATE_STAT_TXT, 
-                                        afflicted, text, color);
+  if (!hide_text) {
+    CombatHandler::raise<CreateStatTxtCB>(CombatEVT::CREATE_STAT_TXT, 
+                                          afflicted, text, color);
+  }
 }

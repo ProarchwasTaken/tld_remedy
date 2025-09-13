@@ -79,7 +79,8 @@ public:
   /* Everything said about performAction can also be mentioned with
    * this function as well. To afflict an Combatant with a status effect,
    * call this function to minimize issues.*/
-  void afflictStatus(std::unique_ptr<StatusEffect> &status_effect);
+  void afflictStatus(std::unique_ptr<StatusEffect> &status_effect,
+                     bool hide_text = false);
   void statusLogic();
   void removeErasedStatus();
 

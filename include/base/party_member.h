@@ -22,7 +22,7 @@ public:
   void damageLife(float magnitude) override;
 
   void afflictPersistent();
-  void afflictPersistent(StatusID id);
+  void afflictPersistent(StatusID id, bool hide_text = false);
   void afflictPersistent(StatusID status[STATUS_LIMIT]);
   std::set<StatusID> getEffectPool();
   StatusID selectRandomID(std::set<StatusID> &effect_pool);

@@ -11,7 +11,7 @@ class Despondent : public StatusEffect {
 public:
   Despondent(PartyMember *afflicted);
 
-  void init() override;
+  void init(bool hide_text = false) override;
   ~Despondent();
 
   void intercept(DamageData &data) override;

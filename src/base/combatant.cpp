@@ -362,7 +362,9 @@ void Combatant::cancelAction() {
   }
 }
 
-void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
+void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect,
+                              bool hide_text) 
+{
   assert(effect != nullptr);
   for (auto &status_effect : status) {
     if (effect->id == status_effect->id) {
@@ -375,7 +377,7 @@ void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
 
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << "]" <<
   " has been granted StatusEffect: '" << effect->name << "'";
-  effect->init();
+  effect->init(hide_text);
   status.push_back(std::move(effect));
 }
 

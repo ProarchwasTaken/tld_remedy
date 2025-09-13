@@ -10,7 +10,7 @@ public:
   CrippledLeg(Combatant *afflict);
   ~CrippledLeg();
 
-  void init();
+  void init(bool hide_text = false);
 private:
   float speed_lost = 0;
 };

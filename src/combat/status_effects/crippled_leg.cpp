@@ -24,11 +24,11 @@ CrippledLeg::~CrippledLeg() {
   }
 }
 
-void CrippledLeg::init() {
+void CrippledLeg::init(bool hide_text) {
   PLOGI << "Decreasing afflicted's speed multiplier by 25%";
   afflicted->speed_multiplier -= speed_lost;
 
   PLOGD << "Result: " << afflicted->speed_multiplier;
 
-  StatusEffect::init();
+  StatusEffect::init(hide_text);
 }

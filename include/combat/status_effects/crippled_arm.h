@@ -10,7 +10,7 @@ public:
   CrippledArm(Combatant *afflicted);
   ~CrippledArm();
 
-  void init() override;
+  void init(bool hide_text = false) override;
 private:
   int offense_lost = 0;
   int intimid_lost = 0;
