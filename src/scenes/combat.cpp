@@ -101,6 +101,7 @@ void CombatScene::initializeCompanion() {
 
   assert(companion != nullptr);
   this->companion = companion.get();
+  com_hud.assign(this->companion);
   entities.push_back(std::move(companion));
 }
 
@@ -114,6 +115,7 @@ void CombatScene::update() {
     combatant->behavior();
   }
   plr_hud.behavior();
+  com_hud.behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
@@ -127,6 +129,8 @@ void CombatScene::update() {
 
     plr_hud.update();
     plr_cmd_hud.update();
+
+    com_hud.update();
 
     eventProcessing();
   }
@@ -315,6 +319,8 @@ void CombatScene::draw() {
 
   plr_hud.draw();
   plr_cmd_hud.draw();
+
+  com_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();

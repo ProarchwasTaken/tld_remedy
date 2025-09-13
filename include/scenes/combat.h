@@ -61,6 +61,7 @@ private:
   PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
 
   PartyMember *companion;
+  LifeHud com_hud = LifeHud({154, 215});
 
   // Remove this later!
   Dummy *dummy = NULL;

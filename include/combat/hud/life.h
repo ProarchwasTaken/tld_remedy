@@ -43,7 +43,6 @@ public:
   Rectangle *segmentBlink(float interval);
 
   static SpriteAtlas atlas;
-  static SpriteAtlas bust_atlas;
   static SpriteAtlas status_atlas;
 private:
   PartyMember *user;
@@ -67,4 +66,6 @@ private:
 
   float shake_clock = 0.0;
   float shake_time = 0.25;
+
+  SpriteAtlas bust_atlas = SpriteAtlas("hud", "");
 };

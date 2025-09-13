@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <raylib.h>
@@ -18,7 +19,6 @@
 
 using std::string, std::unique_ptr;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
-SpriteAtlas LifeHud::bust_atlas("hud", "");
 SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
 
 
@@ -44,6 +44,10 @@ void LifeHud::assign(PartyMember *combatant) {
       sprite_group = "mary_bust";
       break;
     }
+    case PartyMemberID::ERWIN: {
+      sprite_group = "erwin_bust";
+      break;
+    }
     default: {
       PLOGE << "There are no bust graphics for this combatant!";
     }
@@ -56,6 +60,10 @@ void LifeHud::assign(PartyMember *combatant) {
 }
 
 void LifeHud::behavior() {
+  if (user == NULL) {
+    return;
+  }
+
   EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
   int count = event_pool->size();
 
@@ -99,6 +107,10 @@ void LifeHud::damageEventHandling(TookDamageCBT *event) {
 }
 
 void LifeHud::update() {
+  if (user == NULL) {
+    return;
+  }
+
   decideLifeColor();
   decideMoraleColor();
 }
@@ -141,6 +153,10 @@ Color LifeHud::criticalFlash() {
 }
 
 void LifeHud::draw() {
+  if (user == NULL) {
+    return;
+  }
+
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 
