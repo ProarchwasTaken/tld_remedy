@@ -36,7 +36,7 @@ public:
                          float damage_taken);
   void deleteEntity(int entity_id);
   void endCombatProcedure();
-  void updatePlrStats(Player *plr_data);
+  void updatePartyAttr(PartyMember *member, Character *data);
 
   void draw() override;
 

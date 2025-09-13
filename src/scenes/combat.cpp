@@ -240,22 +240,28 @@ void CombatScene::deleteEntity(int entity_id) {
 
 void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
-  if (!game_over) {
-    PLOGI << "All enemies are defeated!";
-    updatePlrStats(plr_data);
-  }
-  else {
-    PLOGI << "The party leader has died...";
-    plr_data->life = 1;
-  }
+  Companion *com_data = &session->companion;
+
+  PLOGD << "Updating player attributes.";
+  updatePartyAttr(player, plr_data);
+
+  PLOGD << "Updating companion attributes.";
+  updatePartyAttr(companion, com_data);
 
   Game::endCombat();
 }
 
-void CombatScene::updatePlrStats(Player *plr_data) {
-  player->depleteInstant();
-  float life = std::ceilf(player->life); 
-  plr_data->life = Clamp(life, 0, player->max_life);
+void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 
+{
+  if (member == NULL) {
+    PLOGD << "Combatant is assumed to be dead. Setting Life to 1.";
+    data->life = 1;
+    return;
+  }
+
+  member->depleteInstant();
+  float life = std::ceilf(member->life); 
+  data->life = Clamp(life, 0, member->max_life);
 
   StatusID status[STATUS_LIMIT] = {
     StatusID::NONE, 
@@ -264,19 +270,19 @@ void CombatScene::updatePlrStats(Player *plr_data) {
   };
 
   int index = 0;
-  plr_data->status_count = 0;
-  int limit = plr_data->status_limit;
+  data->status_count = 0;
+  int limit = data->status_limit;
 
-  for (unique_ptr<StatusEffect> &effect : player->status) {
+  for (unique_ptr<StatusEffect> &effect : member->status) {
     if (effect->isPersistant()) {
       status[index] = effect->id;
       index++;
-      plr_data->status_count++;
-      assert(plr_data->status_count <= limit);
+      data->status_count++;
+      assert(data->status_count <= limit);
     }
   }
 
-  std::copy(status, status + 3, plr_data->status);
+  std::copy(status, status + 3, data->status);
 }
 
 void CombatScene::draw() {
