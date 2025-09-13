@@ -148,6 +148,10 @@ void Mary::damageHandling(TookDamageCBT *event) {
     return;
   }
 
+  if (potential_target->state == DEAD) {
+    return;
+  }
+
   PLOGD << "Acknowledging damage event of which the Player Combatant was"
     " involved in.";
   float distance = distanceTo(potential_target);
@@ -381,6 +385,13 @@ void Mary::bufferTimer() {
 
 void Mary::targetLogic() {
   if (target == NULL) {
+    return;
+  }
+
+  if (target->state == DEAD) {
+    PLOGI << "Target: '" << target->name << "' [ID: " << 
+      target->entity_id << "] has been found dead.";
+    target = NULL;
     return;
   }
 
