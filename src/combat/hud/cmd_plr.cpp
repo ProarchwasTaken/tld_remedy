@@ -30,6 +30,10 @@ PlayerCmdHud::~PlayerCmdHud() {
 
 void PlayerCmdHud::assign(Mary *player) {
   this->player = player;
+  if (player == NULL) {
+    return;
+  }
+
   player_name = player->name;
 
   for (char &letter : player_name) {
@@ -44,7 +48,9 @@ void PlayerCmdHud::assign(Mary *player) {
 }
 
 void PlayerCmdHud::update() {
-  assert(player != NULL);
+  if (player == NULL) {
+    return;
+  }
 
   if (player->state == NEUTRAL || player->canCancel(true)) {
     attack_color = determineAttackColor();
@@ -140,6 +146,10 @@ Color PlayerCmdHud::determineEvadeColor() {
 }
 
 void PlayerCmdHud::draw() {
+  if (player == NULL) {
+    return;
+  }
+
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 

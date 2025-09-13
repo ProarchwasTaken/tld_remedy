@@ -137,11 +137,6 @@ void CombatScene::update() {
 }
 
 void CombatScene::eventProcessing() {
-  game_over = player->state == DEAD && player->deathClock() == 1.0;
-  if (game_over || Enemy::memberCount() == 0) {
-    endCombatProcedure();
-  }
-
   EventPool<CombatEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Combat Events raised: " << event_pool->size();
@@ -150,6 +145,11 @@ void CombatScene::eventProcessing() {
     }
 
     evt_handler.clear();
+  }
+
+  game_over = player == NULL;
+  if (game_over || Enemy::memberCount() == 0) {
+    endCombatProcedure();
   }
 
   cbt_handler.transferEvents();
@@ -223,19 +223,29 @@ void CombatScene::deleteEntity(int entity_id) {
   vector<unique_ptr<Entity>> temporary;
 
   for (auto &entity : entities) {
-    if (entity->entity_id == entity_id) {
-      PLOGD << "Found Entity [ID: " << entity_id << "]";
-      // Remove this Later!
-      if (dummy == entity.get()) dummy = NULL;
-
-      entity.reset();
-    }
-    else {
+    if (entity->entity_id != entity_id) {
       unique_ptr<Entity> temp_entity = nullptr;
       entity.swap(temp_entity);
 
       temporary.push_back(std::move(temp_entity));
+      continue;
     }
+    PLOGD << "Found Entity [ID: " << entity_id << "]";
+
+    // Remove this Later!
+    if (dummy == entity.get()) dummy = NULL;
+
+    if (player == entity.get()) {
+      player = NULL;
+      plr_hud.assign(player);
+      plr_cmd_hud.assign(player);
+    }
+    else if (companion == entity.get()) {
+      companion = NULL;
+      com_hud.assign(companion);
+    }
+
+    entity.reset();
   }
 
   entities.clear();

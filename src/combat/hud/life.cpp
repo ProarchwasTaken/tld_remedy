@@ -38,6 +38,10 @@ LifeHud::~LifeHud() {
 void LifeHud::assign(PartyMember *combatant) {
   user = combatant;
 
+  if (user == NULL) {
+    return;
+  }
+
   string sprite_group;
   switch (combatant->id) {
     case PartyMemberID::MARY: {
