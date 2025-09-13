@@ -1,9 +1,11 @@
 #pragma once
+#include <raylib.h>
 #include <vector>
 #include <memory>
 #include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
+#include "base/party_member.h"
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "system/sprite_atlas.h"
@@ -23,6 +25,8 @@ public:
   ~CombatScene();
 
   void initializeCombatants();
+  void initializePlayer();
+  void initializeCompanion();
 
   void update() override;
   void eventProcessing();
@@ -35,7 +39,11 @@ public:
   void updatePlrStats(Player *plr_data);
 
   void draw() override;
+
   void drawDebugInfo();
+  void drawPartyStats(PartyMember *member, Vector2 position, Font *font, 
+                      int text_size);
+  void drawDebugCombo(Font *font, int text_size);
 
   static SpriteAtlas cmd_atlas;
 private:
@@ -51,6 +59,8 @@ private:
   Mary *player;
   LifeHud plr_hud = LifeHud({34, 215});
   PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
+
+  PartyMember *companion;
 
   // Remove this later!
   Dummy *dummy = NULL;

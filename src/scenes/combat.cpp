@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <cmath>
 #include <utility>
@@ -21,6 +22,7 @@
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
 #include "combat/combatants/party/mary.h"
+#include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
@@ -61,11 +63,8 @@ CombatScene::~CombatScene() {
 
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
-  auto player = make_unique<Mary>(&session->player);
-  this->player = player.get();
-  plr_hud.assign(this->player);
-  plr_cmd_hud.assign(this->player);
-  entities.push_back(std::move(player));
+  initializePlayer();
+  initializeCompanion();
 
   // TODO: Don't forget to remove this when the time comes!
   auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
@@ -77,6 +76,32 @@ void CombatScene::initializeCombatants() {
 
   dummy = make_unique<Dummy>((Vector2){-288, 152}, RIGHT);
   entities.push_back(std::move(dummy));
+}
+
+void CombatScene::initializePlayer() {
+  PLOGI << "Initializing Player Combatant.";
+  auto player = make_unique<Mary>(&session->player);
+  this->player = player.get();
+
+  plr_hud.assign(this->player);
+  plr_cmd_hud.assign(this->player);
+  entities.push_back(std::move(player));
+}
+
+void CombatScene::initializeCompanion() {
+  PLOGI << "Initializing Companion Combatant.";
+  unique_ptr<PartyMember> companion;
+  Companion *data = &session->companion;
+
+  switch (data->companion_id) {
+    case CompanionID::ERWIN: {
+      companion = make_unique<Erwin>(data);
+    }
+  }
+
+  assert(companion != nullptr);
+  this->companion = companion.get();
+  entities.push_back(std::move(companion));
 }
 
 void CombatScene::update() {
@@ -314,39 +339,54 @@ void CombatScene::drawDebugInfo() {
   Font *font = &Game::sm_font;
   int text_size = font->baseSize;
   
-  Vector2 position = {6, 4};
+  drawPartyStats(player, {6, 4}, font, text_size);
+  drawPartyStats(companion, {128, 4}, font, text_size);
+  drawDebugCombo(font, text_size);
+}
+
+void CombatScene::drawPartyStats(PartyMember *member, Vector2 position, 
+                                 Font *font, int text_size) 
+{
+  if (member == NULL) {
+    return;
+  }
+
   float spacing = 9;
 
-  string p_name = "Player Name: " + player->name;
-  Vector2 pn_pos = position;
+  string name = "Name: " + member->name;
+  Vector2 n_pos = position;
   position.y += spacing;
 
-  string p_state = TextFormat("State: %i", player->state);
-  Vector2 ps_pos = position;
+  string state = TextFormat("State: %i", member->state);
+  Vector2 s_pos = position;
   position.y += spacing;
 
-  string p_hp = TextFormat("Life: %02.02f/%02.02f", player->life,
-                           player->max_life);
-  Vector2 php_pos = position;
+  string hp = TextFormat("Life: %02.02f/%02.02f", member->life,
+                         member->max_life);
+  Vector2 hp_pos = position;
   position.y += spacing;
 
-  string p_mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f",
-                           player->morale, player->init_morale,
-                           player->max_morale);
-  Vector2 pmp_pos = position;
+  string mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f", 
+                         member->morale, member->init_morale,
+                         member->max_morale);
+  Vector2 mp_pos = position;
   position.y += spacing;
 
-  string p_ex = TextFormat("Exhaustion: %02.02f", player->exhaustion);
-  Vector2 pex_pos = position;
+  string ex = TextFormat("Exhaustion: %02.02f", member->exhaustion);
+  Vector2 ex_pos = position;
   position.y += spacing;
 
+
+  DrawTextEx(*font, name.c_str(), n_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, state.c_str(), s_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, hp.c_str(), hp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, mp.c_str(), mp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, ex.c_str(), ex_pos, text_size, -3, GREEN);
+}
+
+void CombatScene::drawDebugCombo(Font *font, int text_size) {
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
-  Vector2 combo_pos = position;
+  Vector2 combo_pos = {6, 49};
 
-  DrawTextEx(*font, p_name.c_str(), pn_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_ex.c_str(), pex_pos, text_size, -3, GREEN);
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }
