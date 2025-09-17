@@ -1,6 +1,7 @@
 #include <cassert>
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/session.h"
@@ -57,9 +58,7 @@ void Erwin::update() {
         depleteExhaustion();
       }
 
-      Animation *next_anim = getIdleAnim();
-      SpriteAnimation::play(animation, next_anim, true);
-      sprite = &atlas.sprites[*animation->current];
+      neutralLogic();
       break;
     }
     case CombatantState::ACTION: {
@@ -78,6 +77,42 @@ void Erwin::update() {
   }
 
   statusLogic();
+}
+
+void Erwin::neutralLogic() {
+  float old_x = position.x;
+  movement();
+
+  Animation *next_anim;
+  has_moved = old_x != position.x;
+  if (has_moved) {
+    
+    float difference = 1.0 - speed_multiplier;
+    float percentage = 1.0 + difference;
+
+    next_anim =  &anim_move;
+    next_anim->frame_duration = anim_move_speed * percentage;
+    rectExCorrection(bounding_box, hurtbox);
+  }
+  else {
+    next_anim = getIdleAnim();
+  }
+
+  SpriteAnimation::play(animation, next_anim, true);
+  sprite = &atlas.sprites[*animation->current];
+}
+
+void Erwin::movement() {
+  if (moving_x == 0) {
+    return;
+  }
+
+  direction = static_cast<Direction>(moving_x);
+
+  float speed = default_speed * speed_multiplier;
+  float magnitude = speed * direction;
+
+  position.x += magnitude * Game::deltaTime();
 }
 
 Animation *Erwin::getIdleAnim() {

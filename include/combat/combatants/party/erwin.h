@@ -14,6 +14,8 @@ public:
   void behavior() override;
 
   void update() override;
+  void neutralLogic();
+  void movement();
 
   void draw() override;
   void drawDebug() override;
@@ -23,6 +25,13 @@ public:
 
   static SpriteAtlas atlas;
 private:
+  const float default_speed = 68;
+  int moving_x = 0;
+  bool has_moved = false;
+
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
+
+  float anim_move_speed = 0.2;
+  Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
 };
