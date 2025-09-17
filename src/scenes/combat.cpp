@@ -42,6 +42,9 @@ CombatScene::CombatScene(Session *session) {
   stage.loadStage("debug");
   initializeCombatants();
 
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
+
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
   #endif // !NDEBUG
@@ -217,6 +220,9 @@ void CombatScene::dmgNumberHandling(Combatant *target,
   auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
                                            damage_taken);
   entities.push_back(std::move(dmg_num));
+
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::deleteEntity(int entity_id) {
@@ -250,6 +256,9 @@ void CombatScene::deleteEntity(int entity_id) {
 
   entities.clear();
   temporary.swap(entities);
+
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::endCombatProcedure() {
@@ -301,7 +310,6 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
 
 void CombatScene::draw() {
   bool debug_info = Game::debugInfo();
-  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 
   BeginMode2D(camera);
   {
@@ -318,7 +326,7 @@ void CombatScene::draw() {
     stage.drawOverlay();
 
     #ifndef NDEBUG
-    if (Game::debugInfo()) {
+    if (debug_info) {
       for (unique_ptr<Entity> &entity : entities) {
         entity->drawDebug();
       }
@@ -343,7 +351,7 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   }
   
   if (e1->entity_type != EntityType::COMBATANT) {
-    return e1->position.y < e2->position.y;
+    return e1->entity_id < e2->entity_id;
   }
 
   Combatant *c1 = static_cast<Combatant*>(e1.get());
@@ -352,8 +360,19 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (c1->state != c2->state) {
     return c1->state > c2->state;
   }
-  else {
+
+  if (c1->team != c2->team){
     return c1->team > c2->team;
+  }
+  
+  if (c1->team == CombatantTeam::PARTY) {
+    PartyMember *p1 = static_cast<PartyMember*>(c1);
+    PartyMember *p2 = static_cast<PartyMember*>(c2);
+
+    return p1->important < p2->important;
+  }
+  else {
+    return c1->entity_id < c2->entity_id;
   }
 }
 
