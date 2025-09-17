@@ -4,6 +4,8 @@
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/session.h"
+#include "data/animation.h"
+#include "utils/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/erwin.h"
 
@@ -55,6 +57,9 @@ void Erwin::update() {
         depleteExhaustion();
       }
 
+      Animation *next_anim = getIdleAnim();
+      SpriteAnimation::play(animation, next_anim, true);
+      sprite = &atlas.sprites[*animation->current];
       break;
     }
     case CombatantState::ACTION: {
@@ -63,6 +68,7 @@ void Erwin::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
+      sprite = getStunSprite();
       break;
     }
     case CombatantState::DEAD: {
@@ -72,6 +78,24 @@ void Erwin::update() {
   }
 
   statusLogic();
+}
+
+Animation *Erwin::getIdleAnim() {
+  if (!critical_life) {
+    return &anim_idle;
+  }
+  else {
+    return &anim_crit;
+  }
+}
+
+Rectangle *Erwin::getStunSprite() {
+  if (damage_type == DamageType::LIFE) {
+    return &atlas.sprites[7];
+  }
+  else {
+    return &atlas.sprites[8];
+  }
 }
 
 void Erwin::draw() {
