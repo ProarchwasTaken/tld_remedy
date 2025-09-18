@@ -1,4 +1,5 @@
 #include <cassert>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -13,6 +14,7 @@
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
 
+using std::uniform_real_distribution;
 SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
 
 
@@ -51,11 +53,28 @@ Erwin::~Erwin() {
 }
 
 void Erwin::behavior() {
+  tick_clock += Game::deltaTime();
+  if (tick_clock >= 1.0) {
+    setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
+    tick_clock = 0.0;
+  }
 }
 
 void Erwin::setGoal(ErwinGoals goal) {
   if (goal > ai_goal) {
-    PLOGD << "Erwin has switched goals.";
+    ai_goal = goal;
+  }
+}
+
+void Erwin::setGoal(ErwinGoals goal, float chance) {
+  if (goal < ai_goal) {
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  if (percentage <= chance) {
     ai_goal = goal;
   }
 }

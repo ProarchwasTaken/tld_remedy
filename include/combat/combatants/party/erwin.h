@@ -18,7 +18,8 @@ public:
   ~Erwin();
 
   void behavior() override;
-  void setGoal(ErwinGoals ai_goal);
+  void setGoal(ErwinGoals goal);
+  void setGoal(ErwinGoals goal, float chance);
 
   void update() override;
   void neutralLogic();
@@ -37,8 +38,8 @@ public:
 
   static SpriteAtlas atlas;
 private:
-  Mary *player;
   ErwinGoals ai_goal = ErwinGoals::IDLE;
+  float tick_clock = 0.0;
 
   const float default_speed = 68;
   int moving_x = 0;
@@ -49,4 +50,6 @@ private:
 
   float anim_move_speed = 0.2;
   Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
+
+  Mary *player;
 };
