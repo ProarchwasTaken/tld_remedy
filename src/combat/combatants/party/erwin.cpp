@@ -58,6 +58,11 @@ void Erwin::behavior() {
     setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
     tick_clock = 0.0;
   }
+
+  float plr_distance = distanceTo(player);
+  if (plr_distance > preferred_plr_distance) {
+    setGoal(ErwinGoals::FOLLOW_PLR);
+  }
 }
 
 void Erwin::setGoal(ErwinGoals goal) {
@@ -110,10 +115,8 @@ void Erwin::update() {
 }
 
 void Erwin::neutralLogic() {
-  goalLogic();
-
   float old_x = position.x;
-  movement();
+  goalLogic();
 
   has_moved = old_x != position.x;
   animationLogic();
@@ -130,6 +133,10 @@ void Erwin::goalLogic() {
       ai_goal = ErwinGoals::IDLE;
       break;
     }
+    case ErwinGoals::FOLLOW_PLR: {
+      followPlayer();
+      break;
+    }
   }
 }
 
@@ -140,6 +147,24 @@ void Erwin::lookAtPlayer() {
   }
   else {
     direction = RIGHT; 
+  }
+}
+
+void Erwin::followPlayer() {
+  float difference = position.x - player->position.x;
+  if (difference > 0) {
+    moving_x = LEFT;
+  }
+  else {
+    moving_x = RIGHT;
+  }
+
+  movement();
+
+  float distance = distanceTo(player);
+  if (distance <= preferred_plr_distance / 2) {
+    ai_goal = ErwinGoals::IDLE;
+    moving_x = 0;
   }
 }
 

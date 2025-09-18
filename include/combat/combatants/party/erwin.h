@@ -9,6 +9,7 @@
 enum class ErwinGoals {
   IDLE = 0,
   LOOK_AT_PLR = 1,
+  FOLLOW_PLR = 2
 };
 
 
@@ -26,6 +27,7 @@ public:
 
   void goalLogic();
   void lookAtPlayer();
+  void followPlayer();
 
   void movement();
   void animationLogic();
@@ -52,4 +54,5 @@ private:
   Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
 
   Mary *player;
+  float preferred_plr_distance = 128;
 };
