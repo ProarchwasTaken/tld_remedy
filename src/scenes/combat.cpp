@@ -98,7 +98,7 @@ void CombatScene::initializeCompanion() {
 
   switch (data->companion_id) {
     case CompanionID::ERWIN: {
-      companion = make_unique<Erwin>(data);
+      companion = make_unique<Erwin>(data, player);
     }
   }
 

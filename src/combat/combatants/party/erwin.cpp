@@ -1,5 +1,6 @@
 #include <cassert>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/party_member.h"
@@ -8,28 +9,32 @@
 #include "data/animation.h"
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
+#include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
+#include <plog/Log.h>
 
 SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
 
 
-Erwin::Erwin(Companion *com): 
+Erwin::Erwin(Companion *data, Mary *player): 
   PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152})
 {
-  life = com->life;
-  max_life = com->max_life;
+  this->player = player;
+
+  life = data->life;
+  max_life = data->max_life;
   critical_life = life < max_life * LOW_LIFE_THRESHOLD;
 
-  init_morale = com->init_morale;
+  init_morale = data->init_morale;
   morale = init_morale;
-  max_morale = com->max_morale;
+  max_morale = data->max_morale;
 
-  offense = com->offense;
-  defense = com->defense;
-  intimid = com->intimid;
-  persist = com->persist;
+  offense = data->offense;
+  defense = data->defense;
+  intimid = data->intimid;
+  persist = data->persist;
 
-  afflictPersistent(com->status);
+  afflictPersistent(data->status);
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
@@ -46,7 +51,13 @@ Erwin::~Erwin() {
 }
 
 void Erwin::behavior() {
+}
 
+void Erwin::setGoal(ErwinGoals goal) {
+  if (goal > ai_goal) {
+    PLOGD << "Erwin has switched goals.";
+    ai_goal = goal;
+  }
 }
 
 void Erwin::update() {
@@ -80,11 +91,54 @@ void Erwin::update() {
 }
 
 void Erwin::neutralLogic() {
+  goalLogic();
+
   float old_x = position.x;
   movement();
 
-  Animation *next_anim;
   has_moved = old_x != position.x;
+  animationLogic();
+}
+
+void Erwin::goalLogic() {
+  switch (ai_goal) {
+    case ErwinGoals::IDLE: {
+      moving_x = 0;
+      break;
+    }
+    case ErwinGoals::LOOK_AT_PLR: {
+      lookAtPlayer();
+      ai_goal = ErwinGoals::IDLE;
+      break;
+    }
+  }
+}
+
+void Erwin::lookAtPlayer() {
+  float difference = position.x - player->position.x;
+  if (difference > 0) {
+    direction = LEFT;
+  }
+  else {
+    direction = RIGHT; 
+  }
+}
+
+void Erwin::movement() {
+  if (moving_x == 0) {
+    return;
+  }
+
+  direction = static_cast<Direction>(moving_x);
+
+  float speed = default_speed * speed_multiplier;
+  float magnitude = speed * direction;
+
+  position.x += magnitude * Game::deltaTime();
+}
+
+void Erwin::animationLogic() {
+  Animation *next_anim;
   if (has_moved) {
     
     float difference = 1.0 - speed_multiplier;
@@ -100,19 +154,6 @@ void Erwin::neutralLogic() {
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];
-}
-
-void Erwin::movement() {
-  if (moving_x == 0) {
-    return;
-  }
-
-  direction = static_cast<Direction>(moving_x);
-
-  float speed = default_speed * speed_multiplier;
-  float magnitude = speed * direction;
-
-  position.x += magnitude * Game::deltaTime();
 }
 
 Animation *Erwin::getIdleAnim() {
