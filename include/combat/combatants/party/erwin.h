@@ -52,6 +52,7 @@ private:
 
   float anim_move_speed = 0.2;
   Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
+  Animation anim_dead = {{7, 9}, 0.25};
 
   Mary *player;
   float preferred_plr_distance = 128;
