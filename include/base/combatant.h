@@ -120,10 +120,12 @@ private:
   float stun_time = 0;
   float stun_clock = 0.0;
 
-  float death_clock = 0.0;
-
   float knockback = 0;
   Direction kb_direction;
+  float kb_time = 0;
+  float kb_clock = 0;
+
+  float death_clock = 0.0;
 
   Color start_tint;
 };

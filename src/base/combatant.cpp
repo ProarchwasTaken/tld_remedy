@@ -104,6 +104,8 @@ void Combatant::takeDamage(DamageData &data) {
 
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
+  kb_time = data.stun_time;
+  kb_clock = 0.0;
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
@@ -240,8 +242,10 @@ void Combatant::stunLogic() {
   stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
-  if (knockback != 0) {
-    applyKnockback(stun_clock);
+  if (knockback != 0 && kb_time != 0) {
+    kb_clock += Game::deltaTime() / kb_time;
+    kb_clock = Clamp(kb_clock, 0.0, 1.0);
+    applyKnockback(kb_clock);
   }
 
   stunTintLerp();
