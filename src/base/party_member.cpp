@@ -36,6 +36,21 @@ PartyMember::~PartyMember() {
   member_count--;
 }
 
+bool PartyMember::isEnabled() {
+  return enabled;
+}
+
+void PartyMember::setEnabled(bool value) {
+  enabled = value;
+
+  if (enabled) {
+    PLOGI << "PartyMember: '" << name << "' behavior has been enabled.";
+  }
+  else {
+    PLOGI << "PartyMember: '" << name << "' behavior has been disabled."; 
+  }
+}
+
 void PartyMember::takeDamage(DamageData &data) {
   bool not_demoralized = !demoralized;
   Combatant::takeDamage(data);

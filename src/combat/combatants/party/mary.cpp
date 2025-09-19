@@ -23,8 +23,6 @@
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique;
-bool Mary::controllable = true;
-
 SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
@@ -69,6 +67,13 @@ Mary::~Mary() {
   atlas.release();
 }
 
+void Mary::setEnabled(bool value) {
+  PartyMember::setEnabled(value);
+
+  moving = false;
+  buffer = MaryAction::NONE;
+}
+
 void Mary::assignSubWeapon(SubWeaponID id) {
   PLOGI << "Assigning Sub-Weapon.";
 
@@ -88,19 +93,8 @@ void Mary::assignSubWeapon(SubWeaponID id) {
   tech2_type = sub_weapon->tech2_type;
 }
 
-void Mary::setControllable(bool value) {
-  controllable = value;
-
-  if (controllable) {
-    PLOGI << "Control has been given to the player.";
-  }
-  else {
-    PLOGI << "Control has been revoked from the player.";
-  }
-}
-
 void Mary::behavior() {
-  if (!controllable) {
+  if (!enabled) {
     return;
   }
 

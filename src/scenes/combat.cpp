@@ -113,6 +113,10 @@ void CombatScene::update() {
   if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
   }
+  if (companion != NULL && IsKeyPressed(KEY_F4)) {
+    bool enabled = companion->isEnabled();
+    companion->setEnabled(!enabled);
+  }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
@@ -398,8 +402,9 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   Vector2 n_pos = position;
   position.y += spacing;
 
-  string state = TextFormat("State: %i", member->state);
-  Vector2 s_pos = position;
+  string coord = TextFormat("Position: (%00.01f, %00.01f)", 
+                            member->position.x, member->position.y);
+  Vector2 c_pos = position;
   position.y += spacing;
 
   string hp = TextFormat("Life: %02.02f/%02.02f", member->life,
@@ -417,12 +422,29 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   Vector2 ex_pos = position;
   position.y += spacing;
 
-
   DrawTextEx(*font, name.c_str(), n_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, state.c_str(), s_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, coord.c_str(), c_pos, text_size, -3, GREEN);
   DrawTextEx(*font, hp.c_str(), hp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, mp.c_str(), mp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, ex.c_str(), ex_pos, text_size, -3, GREEN);
+
+  if (member->important) {
+    return;
+  }
+
+  int goal_id;
+  switch (member->id) {
+    case PartyMemberID::ERWIN: {
+      Erwin *erwin = static_cast<Erwin*>(member);
+      goal_id = static_cast<int>(erwin->ai_goal);
+    }
+    default: {
+      assert(member->id != PartyMemberID::MARY);
+    }
+  }
+
+  string goal = TextFormat("AI Goal: %i", goal_id);
+  DrawTextEx(*font, goal.c_str(), position, text_size, -3, GREEN);
 }
 
 void CombatScene::drawDebugCombo(Font *font, int text_size) {

@@ -16,6 +16,9 @@ public:
   PartyMember(std::string name, PartyMemberID id, Vector2 position);
   ~PartyMember();
 
+  bool isEnabled();
+  virtual void setEnabled(bool value);
+
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
 
@@ -57,6 +60,8 @@ public:
   std::string tech2_name;
   float tech2_cost;
   TechCostType tech2_type;
+protected:
+  bool enabled = true;
 private:
   static int member_count;
   constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;

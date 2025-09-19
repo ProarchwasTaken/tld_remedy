@@ -52,7 +52,18 @@ Erwin::~Erwin() {
   atlas.release();
 }
 
+void Erwin::setEnabled(bool value) {
+  PartyMember::setEnabled(value);
+
+  ai_goal = ErwinGoals::IDLE;
+  tick_clock = 0;
+}
+
 void Erwin::behavior() {
+  if (!enabled) {
+    return;
+  }
+
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
     setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);

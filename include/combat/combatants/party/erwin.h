@@ -18,6 +18,8 @@ public:
   Erwin(Companion *data, Mary *player);
   ~Erwin();
 
+  void setEnabled(bool value) override;
+
   void behavior() override;
   void setGoal(ErwinGoals goal);
   void setGoal(ErwinGoals goal, float chance);
@@ -39,10 +41,10 @@ public:
   Rectangle *getStunSprite();
 
   static SpriteAtlas atlas;
-private:
+
   ErwinGoals ai_goal = ErwinGoals::IDLE;
   float tick_clock = 0.0;
-
+private:
   const float default_speed = 68;
   int moving_x = 0;
   bool has_moved = false;

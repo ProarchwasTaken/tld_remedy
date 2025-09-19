@@ -32,8 +32,8 @@ public:
   Mary(Player *data);
   ~Mary();
 
+  void setEnabled(bool value) override;
   void assignSubWeapon(SubWeaponID id);
-  static void setControllable(bool value);
 
   void behavior() override;
   void eventHandling();
@@ -64,12 +64,10 @@ public:
 
   const float gs_cost = 5.5;
 private:
-  static bool controllable;
   CombatKeybinds *keybinds;
 
   const float default_speed = 68;
   int moving_x = 0;
-
   float last_moved = 0.0;
 
   MaryAction buffer = MaryAction::NONE;
