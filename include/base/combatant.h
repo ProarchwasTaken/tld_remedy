@@ -89,6 +89,7 @@ public:
 
   std::string name;
   CombatantState state;
+
   CombatantTeam team;
   Combatant *target = NULL;
 

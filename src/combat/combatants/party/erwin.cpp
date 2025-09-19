@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cmath>
 #include <random>
 #include <raylib.h>
 #include <raymath.h>

@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <raylib.h>
 #include <memory>
