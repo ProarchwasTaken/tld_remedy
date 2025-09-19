@@ -1,3 +1,4 @@
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include "base/enemy.h"
@@ -77,6 +78,7 @@ void Dummy::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
+  applyStaggerEffect(final);
   DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 

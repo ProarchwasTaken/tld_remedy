@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstddef>
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
@@ -198,7 +199,7 @@ void Combatant::increaseMorale(float magnitude) {
 
 void Combatant::enterHitstun(DamageData &data) {
   assert(state != CombatantState::DEAD);
-  StunType stun_type = data.stun_type;
+  stun_type = data.stun_type;
 
   float multiplier;
   switch (stun_type) {
@@ -421,6 +422,15 @@ void Combatant::removeErasedStatus() {
 
   status.clear();
   temporary.swap(status);
+}
+
+void Combatant::applyStaggerEffect(Rectangle &final) {
+  bool staggered = state == HIT_STUN && stun_type == StunType::STAGGER;
+  if (staggered) {
+    float offset = std::sinf(GetTime() * 100);
+    float percentage = 1.0 - stun_clock;
+    final.x += offset * percentage;
+  }
 }
 
 void Combatant::drawDebug() {

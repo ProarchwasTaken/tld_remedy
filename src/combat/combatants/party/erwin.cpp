@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <random>
 #include <raylib.h>
 #include <raymath.h>
@@ -227,6 +228,7 @@ void Erwin::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
+  applyStaggerEffect(final);
   DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 

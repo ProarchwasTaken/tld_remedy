@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <raylib.h>
 #include <memory>
@@ -445,6 +446,7 @@ void Mary::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
+  applyStaggerEffect(final);
   DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 

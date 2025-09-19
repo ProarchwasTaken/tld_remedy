@@ -84,6 +84,7 @@ public:
   void statusLogic();
   void removeErasedStatus();
 
+  void applyStaggerEffect(Rectangle &final);
   virtual void drawDebug() override;
 
   std::string name;
@@ -113,9 +114,11 @@ public:
   static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 protected:
   Color tint = WHITE;
-  float death_time = 1.0;
-
   DamageType damage_type;
+  StunType stun_type;
+
+  float death_time = 1.0;
+  float death_clock = 0.0;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
@@ -124,8 +127,6 @@ private:
   Direction kb_direction;
   float kb_time = 0;
   float kb_clock = 0;
-
-  float death_clock = 0.0;
 
   Color start_tint;
 };
