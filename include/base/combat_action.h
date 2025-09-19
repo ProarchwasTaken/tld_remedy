@@ -5,6 +5,21 @@
 #include "base/combatant.h"
 
 
+enum ActionPhase {
+  WIND_UP,
+  ACTIVE,
+  END_LAG
+};
+
+enum class ActionType {
+  OFFENSE_HP,
+  OFFENSE_MP,
+  DEFENSE,
+  SUPPORT,
+  SPECIAL
+};
+
+
 /* Actions are something that every combatant can perform. Think of them 
  * as special behavior that the Combatant executes under certain 
  * conditions. After which, the Combatant will be locked into using said 

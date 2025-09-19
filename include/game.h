@@ -6,10 +6,21 @@
 #include "data/session.h"
 #include "data/personal.h"
 #include "system/sound_atlas.h"
-#include "enums.h"
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
+
+
+enum class GameState {
+  READY,
+  TOGGLE_FULLSCREEN,
+  SWITCHING_SCENE,
+  INIT_COMBAT,
+  END_COMBAT,
+  FADING_OUT,
+  FADING_IN,
+  SLEEP,
+};
 
 
 class Game {

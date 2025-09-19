@@ -16,6 +16,25 @@ class StatusEffect;
 typedef std::vector<std::unique_ptr<StatusEffect>> Status;
 
 
+enum CombatantState {
+  ACTION,
+  NEUTRAL,
+  HIT_STUN,
+  DEAD
+};
+
+enum class DamageType {
+  LIFE,
+  MORALE,
+};
+
+enum class StunType {
+  NORMAL,
+  DEFENSIVE,
+  STAGGER
+};
+
+
 /* Combatants are the main focus of the CombatScene. They are otherwise
  * known as CombatActors due the common resemblance with they share with 
  * the Actor class. To summarize, a Combatant is classified as any 

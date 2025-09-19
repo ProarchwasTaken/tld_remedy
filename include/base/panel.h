@@ -2,6 +2,13 @@
 #include "enums.h"
 
 
+enum class PanelState {
+  READY,
+  OPENING,
+  CLOSING
+};
+
+
 class Panel {
 public:
   virtual ~Panel() = default;

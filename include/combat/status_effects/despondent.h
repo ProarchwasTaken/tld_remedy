@@ -1,7 +1,7 @@
 #pragma once
 #include "base/party_member.h"
-#include "data/damage.h"
 #include "base/status_effect.h"
+#include "data/damage.h"
 
 
 /* Despondent is a status effect that make the afflicted very vulnerable

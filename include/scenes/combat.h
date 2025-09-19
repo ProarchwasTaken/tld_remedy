@@ -2,7 +2,6 @@
 #include <raylib.h>
 #include <vector>
 #include <memory>
-#include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
 #include "base/party_member.h"

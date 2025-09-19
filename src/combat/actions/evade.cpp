@@ -70,7 +70,6 @@ void Evade::intercept(DamageData &data) {
     user->increaseExhaustion(damage); 
     Game::sleep(0.05);
   }
-
  
   state_clock = 0.999999;
   data.intercepted = true;

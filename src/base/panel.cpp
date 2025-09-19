@@ -1,7 +1,6 @@
 #include <cassert>
 #include <raylib.h>
 #include <raymath.h>
-#include "enums.h"
 #include "game.h"
 #include "base/panel.h"
 
