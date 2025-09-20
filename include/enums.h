@@ -1,17 +1,6 @@
 #pragma once
 
 
-enum class GameState {
-  READY,
-  TOGGLE_FULLSCREEN,
-  SWITCHING_SCENE,
-  INIT_COMBAT,
-  END_COMBAT,
-  FADING_OUT,
-  FADING_IN,
-  SLEEP,
-};
-
 enum class SceneID {
   TITLE,
   FIELD,
@@ -23,17 +12,12 @@ enum class PanelID {
   CONFIRM
 };
 
-enum class PanelState {
-  READY,
-  OPENING,
-  CLOSING
-};
-
 enum EntityType {
   ACTOR,
   PICKUP,
   MAP_TRANSITION,
   DMG_NUMBER,
+  STATUS_TEXT,
   COMBATANT,
 };
 
@@ -45,11 +29,6 @@ enum class ActorType {
 
 enum class SubWeaponID {
   KNIFE
-};
-
-enum class TechCostType {
-  MORALE,
-  LIFE
 };
 
 enum class CompanionID {
@@ -66,26 +45,13 @@ enum class PartyMemberID {
   ERWIN,
 };
 
+enum class TechCostType {
+  MORALE,
+  LIFE
+};
+
 enum class EnemyID {
   DUMMY,
-};
-
-enum CombatantState {
-  ACTION,
-  NEUTRAL,
-  HIT_STUN,
-  DEAD
-};
-
-enum class DamageType {
-  LIFE,
-  MORALE,
-};
-
-enum class StunType {
-  NORMAL,
-  DEFENSIVE,
-  STAGGER
 };
 
 enum class ActionID {
@@ -94,20 +60,6 @@ enum class ActionID {
   EVADE,
   KNIFE_CLEAVE,
   KNIFE_PIERCER
-};
-
-enum ActionPhase {
-  WIND_UP,
-  ACTIVE,
-  END_LAG
-};
-
-enum class ActionType {
-  OFFENSE_HP,
-  OFFENSE_MP,
-  DEFENSE,
-  SUPPORT,
-  SPECIAL
 };
 
 enum class StatusID {
@@ -121,11 +73,6 @@ enum class StatusID {
   MENDING,
   REFRESHED,
   ENDURANCE
-};
-
-enum class StatusType {
-  POSITIVE,
-  NEGATIVE
 };
 
 enum Direction {
@@ -160,7 +107,12 @@ enum class ActorEVT {
 
 enum class CombatEVT {
   CREATE_DMG_NUM,
+  CREATE_STAT_TXT,
   DELETE_ENTITY,
+};
+
+enum class CombatantEVT {
+  TOOK_DAMAGE,
 };
 
 enum class CommandType {

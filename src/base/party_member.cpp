@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <cmath>
 #include <random>
 #include <string>
 #include <memory>
@@ -33,6 +34,21 @@ PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position):
 
 PartyMember::~PartyMember() {
   member_count--;
+}
+
+bool PartyMember::isEnabled() {
+  return enabled;
+}
+
+void PartyMember::setEnabled(bool value) {
+  enabled = value;
+
+  if (enabled) {
+    PLOGI << "PartyMember: '" << name << "' behavior has been enabled.";
+  }
+  else {
+    PLOGI << "PartyMember: '" << name << "' behavior has been disabled."; 
+  }
 }
 
 void PartyMember::takeDamage(DamageData &data) {
@@ -106,7 +122,7 @@ void PartyMember::afflictPersistent() {
   afflictPersistent(id);
 }
 
-void PartyMember::afflictPersistent(StatusID id) {
+void PartyMember::afflictPersistent(StatusID id, bool hide_text) {
   unique_ptr<StatusEffect> status_effect = nullptr;
 
   switch (id) {
@@ -128,14 +144,14 @@ void PartyMember::afflictPersistent(StatusID id) {
     }
   }
 
-  afflictStatus(status_effect);
+  afflictStatus(status_effect, hide_text);
 }
 
 void PartyMember::afflictPersistent(StatusID status[STATUS_LIMIT]) {
   for (int x = 0; x < STATUS_LIMIT; x++) {
     StatusID status_id = status[x];
     if (status_id != StatusID::NONE) {
-      afflictPersistent(status_id);
+      afflictPersistent(status_id, true);
     } 
   }
 }
@@ -247,4 +263,31 @@ void PartyMember::depleteInstant() {
       "] is no longer Winded.";
     critical_life = false;
   }
+}
+
+void PartyMember::tintFlash() {
+  if (state == HIT_STUN || state == DEAD) {
+    return;
+  }
+
+  Color start_tint;
+  if (critical_life) {
+    start_tint = Game::palette[35];
+  }
+  else if (demoralized) {
+    start_tint = Game::palette[43];
+  }
+  else {
+    tint = WHITE;
+    return;
+  }
+
+  float sine = std::sinf(GetTime() * 15);
+  float percentage = (sine * 0.5) + 0.5;
+
+  unsigned char r = Lerp(start_tint.r, 255, percentage);
+  unsigned char g = Lerp(start_tint.g, 255, percentage);
+  unsigned char b = Lerp(start_tint.b, 255, percentage);
+
+  tint = {r, g, b, 255};
 }

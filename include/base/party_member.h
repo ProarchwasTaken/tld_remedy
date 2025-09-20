@@ -16,13 +16,16 @@ public:
   PartyMember(std::string name, PartyMemberID id, Vector2 position);
   ~PartyMember();
 
+  bool isEnabled();
+  virtual void setEnabled(bool value);
+
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
 
   void afflictPersistent();
-  void afflictPersistent(StatusID id);
+  void afflictPersistent(StatusID id, bool hide_text = false);
   void afflictPersistent(StatusID status[STATUS_LIMIT]);
   std::set<StatusID> getEffectPool();
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
@@ -33,6 +36,8 @@ public:
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();
   void depleteInstant();
+
+  void tintFlash();
 
   PartyMemberID id;
   bool important = false;
@@ -48,11 +53,15 @@ public:
 
   float recovery = 1.0;
 
+  std::string tech1_name;
   float tech1_cost;
   TechCostType tech1_type;
 
+  std::string tech2_name;
   float tech2_cost;
   TechCostType tech2_type;
+protected:
+  bool enabled = true;
 private:
   static int member_count;
   constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;

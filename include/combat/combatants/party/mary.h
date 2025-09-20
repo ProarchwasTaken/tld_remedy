@@ -5,6 +5,7 @@
 #include "base/party_member.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -31,21 +32,25 @@ public:
   Mary(Player *data);
   ~Mary();
 
+  void setEnabled(bool value) override;
   void assignSubWeapon(SubWeaponID id);
-  static void setControllable(bool value);
 
   void behavior() override;
+  void eventHandling();
+  void damageHandling(TookDamageCBT *event);
+
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
   void defensiveActionInput(bool gamepad);
 
-  bool canCancel();
+  bool canCancel(bool ignore_buffer = false);
   void readActionBuffer();
 
   void update() override;
   void neutralLogic();
   void bufferTimer();
   void movement();
+  void targetLogic();
 
   Animation *getIdleAnim();
   Rectangle *getStunSprite();
@@ -54,15 +59,15 @@ public:
   void drawDebug() override;
 
   static SpriteAtlas atlas;
+  bool has_moved = false;
+  bool moving = true;
+
+  const float gs_cost = 5.5;
 private:
-  static bool controllable;
   CombatKeybinds *keybinds;
 
   const float default_speed = 68;
-  bool has_moved = false;
-  bool moving = true;
   int moving_x = 0;
-
   float last_moved = 0.0;
 
   MaryAction buffer = MaryAction::NONE;

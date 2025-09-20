@@ -16,6 +16,25 @@ class StatusEffect;
 typedef std::vector<std::unique_ptr<StatusEffect>> Status;
 
 
+enum CombatantState {
+  ACTION,
+  NEUTRAL,
+  HIT_STUN,
+  DEAD
+};
+
+enum class DamageType {
+  LIFE,
+  MORALE,
+};
+
+enum class StunType {
+  NORMAL,
+  DEFENSIVE,
+  STAGGER
+};
+
+
 /* Combatants are the main focus of the CombatScene. They are otherwise
  * known as CombatActors due the common resemblance with they share with 
  * the Actor class. To summarize, a Combatant is classified as any 
@@ -31,6 +50,8 @@ public:
             Direction direction);
   ~Combatant();
   Color spriteTint() {return tint;}
+
+  float distanceTo(Combatant *combatant);
 
   virtual void behavior() = 0;
 
@@ -77,15 +98,19 @@ public:
   /* Everything said about performAction can also be mentioned with
    * this function as well. To afflict an Combatant with a status effect,
    * call this function to minimize issues.*/
-  void afflictStatus(std::unique_ptr<StatusEffect> &status_effect);
+  void afflictStatus(std::unique_ptr<StatusEffect> &status_effect,
+                     bool hide_text = false);
   void statusLogic();
   void removeErasedStatus();
 
+  void applyStaggerEffect(Rectangle &final);
   virtual void drawDebug() override;
 
   std::string name;
-  CombatantTeam team;
   CombatantState state;
+
+  CombatantTeam team;
+  Combatant *target = NULL;
 
   Direction direction;
   RectEx hurtbox;
@@ -105,20 +130,23 @@ public:
 
   std::unique_ptr<CombatAction> action;
   Status status;
+
+  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 protected:
   Color tint = WHITE;
-  float death_time = 1.0;
-
   DamageType damage_type;
-  static constexpr float LOW_LIFE_THRESHOLD = 0.30;
+  StunType stun_type;
+
+  float death_time = 1.0;
+  float death_clock = 0.0;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
 
-  float death_clock = 0.0;
-
   float knockback = 0;
   Direction kb_direction;
+  float kb_time = 0;
+  float kb_clock = 0;
 
   Color start_tint;
 };

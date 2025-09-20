@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.7.0
+VERSION 1.8.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -54,6 +54,7 @@ set(HEADERS
 "include/data/field_event.h"
 "include/data/actor_event.h"
 "include/data/combat_event.h"
+"include/data/combatant_event.h"
 "include/data/session.h"
 "include/data/personal.h"
 "include/data/animation.h"
@@ -83,10 +84,14 @@ set(HEADERS
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
 "include/combat/system/evt_handler.h"
+"include/combat/system/cbt_handler.h"
 "include/combat/hud/life.h"
+"include/combat/hud/cmd_plr.h"
 "include/combat/entities/dmg_number.h"
+"include/combat/entities/status_text.h"
 "include/combat/sub_weapons/knife.h"
 "include/combat/combatants/party/mary.h"
+"include/combat/combatants/party/erwin.h"
 "include/combat/combatants/enemy/dummy.h"
 "include/combat/actions/attack.h"
 "include/combat/actions/ghost_step.h"
@@ -134,10 +139,14 @@ set(SOURCE
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
 "src/combat/system/evt_handler.cpp"
+"src/combat/system/cbt_handler.cpp"
 "src/combat/hud/life.cpp"
+"src/combat/hud/cmd_plr.cpp"
 "src/combat/entities/dmg_number.cpp"
+"src/combat/entities/status_text.cpp"
 "src/combat/sub_weapons/knife.cpp"
 "src/combat/combatants/party/mary.cpp"
+"src/combat/combatants/party/erwin.cpp"
 "src/combat/combatants/enemy/dummy.cpp"
 "src/combat/actions/attack.cpp"
 "src/combat/actions/ghost_step.cpp"

@@ -1,20 +1,24 @@
 #include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <memory>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
 #include "game.h"
+#include "base/entity.h"
 #include "base/party_member.h"
 #include "base/status_effect.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/text.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::unique_ptr;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
-SpriteAtlas LifeHud::bust_atlas("hud", "");
 SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
 
 
@@ -34,10 +38,18 @@ LifeHud::~LifeHud() {
 void LifeHud::assign(PartyMember *combatant) {
   user = combatant;
 
+  if (user == NULL) {
+    return;
+  }
+
   string sprite_group;
   switch (combatant->id) {
     case PartyMemberID::MARY: {
       sprite_group = "mary_bust";
+      break;
+    }
+    case PartyMemberID::ERWIN: {
+      sprite_group = "erwin_bust";
       break;
     }
     default: {
@@ -51,7 +63,58 @@ void LifeHud::assign(PartyMember *combatant) {
     << user->name << "'";
 }
 
+void LifeHud::behavior() {
+  if (user == NULL) {
+    return;
+  }
+
+  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+  int count = event_pool->size();
+
+  for (int x = 0; x < count; x++) {
+    unique_ptr<CombatantEvent> &event = event_pool->at(x);
+
+    if (event == nullptr) {
+      continue;
+    }
+
+    Entity *sender = event->sender;
+    CombatantEVT type = event->event_type;
+
+    if (sender == user && type == CombatantEVT::TOOK_DAMAGE) {
+      PLOGD << "Aknowledging TookDamage event sent by: '" << user->name
+        << "' [ID: " << user->entity_id << "'";
+      
+      auto *evt_damage = static_cast<TookDamageCBT*>(event.get());
+      damageEventHandling(evt_damage);
+      break;
+    }
+  }
+}
+
+void LifeHud::damageEventHandling(TookDamageCBT *event) {
+  PLOGD << "Initiating damage shake effect.";
+  bool in_hitstun = event->resulting_state == HIT_STUN;
+  if (in_hitstun && event->stun_type == StunType::STAGGER) {
+    shake_time = 0.5;
+  }
+  else if (event->damage_type == DamageType::LIFE) {
+    shake_time = 0.25;
+  }
+  else {
+    shake_time = 0.10;
+  }
+
+  state = SHAKE;
+  shake_clock = 0.0;
+  hit_timestamp = GetTime();
+}
+
 void LifeHud::update() {
+  if (user == NULL) {
+    return;
+  }
+
   decideLifeColor();
   decideMoraleColor();
 }
@@ -94,34 +157,59 @@ Color LifeHud::criticalFlash() {
 }
 
 void LifeHud::draw() {
+  if (user == NULL) {
+    return;
+  }
+
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 
-  drawBustGraphic();
-  drawStatusIcons();
-  drawLife(font, txt_size);
+  Vector2 position = main_position;
+
+  if (state == SHAKE) {
+    float time_elapsed = GetTime() - hit_timestamp;
+    float offset = std::sinf(time_elapsed * 50) * 5;
+    float percentage = 1.0 - shake_clock;
+
+    position.y += offset * percentage;
+    shakeTimer();
+  }
+
+  drawBustGraphic(position);
+  drawStatusIcons(position);
+  drawLife(position, font, txt_size);
 
   if (user->max_morale != 0) {
-    drawMorale(font, txt_size);
+    drawMorale(position, font, txt_size);
   }
 }
 
-void LifeHud::drawBustGraphic() {
+void LifeHud::shakeTimer() {
+  shake_clock += Game::deltaTime() / shake_time;
+
+  if (shake_clock >= 1.0) {
+    PLOGD << "Ended damage shake effect.";
+    state = IDLE;
+    shake_clock = 0.0;
+  }
+}
+
+void LifeHud::drawBustGraphic(Vector2 position) {
   assert(bust_atlas.users() != 0);
 
-  Vector2 position = Vector2Subtract(main_position, {26, 49});
+  position = Vector2Subtract(position, {26, 49});
   Color tint = user->spriteTint();
   tint.a = 255;
   DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, tint);
 }
 
-void LifeHud::drawStatusIcons() {
+void LifeHud::drawStatusIcons(Vector2 position) {
   int count = user->status.size();
   if (count == 0) {
     return;
   }
 
-  Vector2 base_position = Vector2Subtract(main_position, {18, 5});
+  Vector2 base_position = Vector2Subtract(position, {18, 5});
 
   for (int x = 0; x < count; x++) {
     StatusEffect *effect = user->status.at(x).get();
@@ -141,14 +229,14 @@ Rectangle *LifeHud::getIconSprite(StatusID id) {
   return &status_atlas.sprites.at(index);
 }
 
-void LifeHud::drawLife(Font *font, int txt_size) {
-  DrawTextureRec(atlas.sheet, atlas.sprites[0], main_position, 
+void LifeHud::drawLife(Vector2 position, Font *font, int txt_size) {
+  DrawTextureRec(atlas.sheet, atlas.sprites[0], position, 
                  life_color);
-  drawLifeSegments();
-  drawLifeText(font, txt_size);
+  drawLifeSegments(position);
+  drawLifeText(position, font, txt_size);
 }
 
-void LifeHud::drawLifeSegments() {
+void LifeHud::drawLifeSegments(Vector2 position) {
   float life_percentage = user->life / user->max_life;
 
   float combined = user->life + user->exhaustion;
@@ -158,7 +246,7 @@ void LifeHud::drawLifeSegments() {
   int ex_segments = with_exhaustion * 10;
   float leftover = (life_percentage * 10) - segments;
 
-  Vector2 position = Vector2Add(main_position, {7, 2});
+  position = Vector2Add(position, {7, 2});
 
   for (int x = 0; x < 10; x++) {
     Rectangle *sprite;
@@ -186,6 +274,48 @@ void LifeHud::drawLifeSegments() {
   }
 }
 
+void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
+  float life = std::floorf(user->life);
+  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
+
+  position = Vector2Add(position, {78, 3});
+  position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
+                                   0);
+
+  DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
+}
+
+void LifeHud::drawMorale(Vector2 position, Font *font, int txt_size) {
+  Vector2 frame_position = Vector2Add(position, {14, -10});
+  DrawTextureRec(atlas.sheet, atlas.sprites[3], frame_position, 
+                 morale_color);
+
+  drawMoraleGauge(position);
+  drawMoraleText(position, font, txt_size);
+}
+
+void LifeHud::drawMoraleGauge(Vector2 position) {
+  position = Vector2Add(position, {21, -2});
+  float morale_percentage = Clamp(user->morale / user->max_morale, 
+                                  0.0, 1.0);
+
+  Rectangle gauge = atlas.sprites[4];
+  gauge.width = gauge.width * morale_percentage;
+
+  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
+  DrawTextureRec(atlas.sheet, gauge, position, morale_color);
+}
+
+void LifeHud::drawMoraleText(Vector2 position, Font *font, int size) {
+  txt_morale = TextFormat("%02.02f", user->morale);
+
+  position = Vector2Add(position, {92, -12});
+  position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 
+                                   -3, 0);
+
+  DrawTextEx(*font, txt_morale.c_str(), position, size, -3, morale_color);
+}
+
 Rectangle *LifeHud::segmentBlink(float interval) {
   blink_clock += Game::deltaTime() / interval;
   if (blink_clock >= 1.0) {
@@ -199,45 +329,4 @@ Rectangle *LifeHud::segmentBlink(float interval) {
   else {
     return &atlas.sprites[2];
   }
-}
-
-void LifeHud::drawLifeText(Font *font, int size) {
-  float life = std::floorf(user->life);
-  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
-
-  Vector2 position = Vector2Add(main_position, {78, 3});
-  position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
-                                   0);
-
-  DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
-}
-
-void LifeHud::drawMorale(Font *font, int txt_size) {
-  Vector2 position = Vector2Add(main_position, {14, -10});
-  DrawTextureRec(atlas.sheet, atlas.sprites[3], position, morale_color);
-
-  drawMoraleGauge();
-  drawMoraleText(font, txt_size);
-}
-
-void LifeHud::drawMoraleGauge() {
-  Vector2 position = Vector2Add(main_position, {21, -2});
-  float morale_percentage = Clamp(user->morale / user->max_morale, 
-                                  0.0, 1.0);
-
-  Rectangle gauge = atlas.sprites[4];
-  gauge.width = gauge.width * morale_percentage;
-
-  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
-  DrawTextureRec(atlas.sheet, gauge, position, morale_color);
-}
-
-void LifeHud::drawMoraleText(Font *font, int size) {
-  txt_morale = TextFormat("%02.02f", user->morale);
-
-  Vector2 position = Vector2Add(main_position, {92, -12});
-  position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 
-                                   -3, 0);
-
-  DrawTextEx(*font, txt_morale.c_str(), position, size, -3, morale_color);
 }

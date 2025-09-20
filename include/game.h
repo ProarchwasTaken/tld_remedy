@@ -6,10 +6,21 @@
 #include "data/session.h"
 #include "data/personal.h"
 #include "system/sound_atlas.h"
-#include "enums.h"
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
+
+
+enum class GameState {
+  READY,
+  TOGGLE_FULLSCREEN,
+  SWITCHING_SCENE,
+  INIT_COMBAT,
+  END_COMBAT,
+  FADING_OUT,
+  FADING_IN,
+  SLEEP,
+};
 
 
 class Game {
@@ -86,6 +97,7 @@ public:
 private:
   static GameState game_state;
   static bool EXIT_GAME;
+  static bool SKIP_FRAME;
 
   static bool debug_info;
   static float time_scale;
@@ -98,7 +110,7 @@ private:
 
   static Color flash_color;
 
-  Vector2 window_res = {1280, 720};
+  Vector2 window_res = {1278, 720};
   Color screen_tint = WHITE;
 
   RenderTexture canvas;

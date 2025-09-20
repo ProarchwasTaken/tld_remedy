@@ -33,11 +33,13 @@ Broken::~Broken() {
   }
 }
 
-void Broken::init() {
+void Broken::init(bool hide_text) {
   PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
   afflicted->defense -= defense_lost;
   afflicted->recovery -= recovery_lost;
 
   PLOGD << "Result: {DEF: " << afflicted->defense << ", REC: " <<
   afflicted->recovery << "}";
+
+  StatusEffect::init(hide_text);
 }

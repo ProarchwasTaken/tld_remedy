@@ -1,7 +1,7 @@
 #pragma once
 #include "base/party_member.h"
-#include "data/damage.h"
 #include "base/status_effect.h"
+#include "data/damage.h"
 
 
 /* Despondent is a status effect that make the afflicted very vulnerable
@@ -11,7 +11,7 @@ class Despondent : public StatusEffect {
 public:
   Despondent(PartyMember *afflicted);
 
-  void init() override;
+  void init(bool hide_text = false) override;
   ~Despondent();
 
   void intercept(DamageData &data) override;

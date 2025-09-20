@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstddef>
+#include <cmath>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
@@ -9,11 +10,13 @@
 #include "game.h"
 #include "data/damage.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "system/sound_atlas.h"
 #include "utils/collision.h"
 #include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "base/combatant.h"
 
 using std::string, std::unique_ptr;
@@ -65,6 +68,15 @@ Combatant::~Combatant() {
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
+float Combatant::distanceTo(Combatant *combatant) {
+  assert(combatant != NULL);
+  assert(combatant != this);
+
+  Vector2 difference = Vector2Subtract(position, combatant->position);
+  float distance = Vector2Length(difference);
+  return distance;
+}
+
 void Combatant::takeDamage(DamageData &data) {
   assert(state != CombatantState::DEAD);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
@@ -93,10 +105,18 @@ void Combatant::takeDamage(DamageData &data) {
 
   knockback = data.knockback;
   kb_direction = data.assailant->direction;
+  kb_time = data.stun_time;
+  kb_clock = 0.0;
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
+
+  PLOGD << "Proceeding to queue TookDamage event.";
+  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
+                                         damage, data.damage_type, state,
+                                         data.stun_time, data.stun_type,
+                                         data.assailant);
 }
 
 float Combatant::damageCalulation(DamageData &data) {
@@ -179,7 +199,7 @@ void Combatant::increaseMorale(float magnitude) {
 
 void Combatant::enterHitstun(DamageData &data) {
   assert(state != CombatantState::DEAD);
-  StunType stun_type = data.stun_type;
+  stun_type = data.stun_type;
 
   float multiplier;
   switch (stun_type) {
@@ -223,8 +243,10 @@ void Combatant::stunLogic() {
   stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
-  if (knockback != 0) {
-    applyKnockback(stun_clock);
+  if (knockback != 0 && kb_time != 0) {
+    kb_clock += Game::deltaTime() / kb_time;
+    kb_clock = Clamp(kb_clock, 0.0, 1.0);
+    applyKnockback(kb_clock);
   }
 
   stunTintLerp();
@@ -345,7 +367,9 @@ void Combatant::cancelAction() {
   }
 }
 
-void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
+void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect,
+                              bool hide_text) 
+{
   assert(effect != nullptr);
   for (auto &status_effect : status) {
     if (effect->id == status_effect->id) {
@@ -358,7 +382,7 @@ void Combatant::afflictStatus(unique_ptr<StatusEffect> &effect) {
 
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << "]" <<
   " has been granted StatusEffect: '" << effect->name << "'";
-  effect->init();
+  effect->init(hide_text);
   status.push_back(std::move(effect));
 }
 
@@ -398,6 +422,15 @@ void Combatant::removeErasedStatus() {
 
   status.clear();
   temporary.swap(status);
+}
+
+void Combatant::applyStaggerEffect(Rectangle &final) {
+  bool staggered = state == HIT_STUN && stun_type == StunType::STAGGER;
+  if (staggered) {
+    float offset = std::sinf(GetTime() * 100);
+    float percentage = 1.0 - stun_clock;
+    final.x += offset * percentage;
+  }
 }
 
 void Combatant::drawDebug() {

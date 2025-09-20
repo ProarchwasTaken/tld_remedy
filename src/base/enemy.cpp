@@ -1,5 +1,6 @@
 #include <cassert>
 #include <raylib.h>
+#include <raymath.h>
 #include <string>
 #include "enums.h"
 #include "data/damage.h"
@@ -51,6 +52,16 @@ void Enemy::takeDamage(DamageData &data) {
 
   if (data.damage_type == DamageType::LIFE) {
     Game::sleep(data.hit_stop);
+  }
+}
+
+void Enemy::finalIntercept(float &damage, DamageData &data) {
+  if (data.damage_type == DamageType::MORALE) {
+    float damage_mod = 1.0 - (combo / 18.0);
+    damage_mod = Clamp(damage_mod, 0.0, 1.0);
+
+    damage = damage * damage_mod;
+    return;
   }
 }
 

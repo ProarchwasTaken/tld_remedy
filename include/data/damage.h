@@ -1,7 +1,6 @@
 #pragma once
 #include <cstddef>
 #include "base/combatant.h"
-#include "enums.h"
 
 
 struct DamageData {

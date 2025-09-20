@@ -7,12 +7,14 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
+#include "data/combatant_event.h"
 #include "data/animation.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -21,8 +23,6 @@
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique;
-bool Mary::controllable = true;
-
 SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
@@ -67,6 +67,13 @@ Mary::~Mary() {
   atlas.release();
 }
 
+void Mary::setEnabled(bool value) {
+  PartyMember::setEnabled(value);
+
+  moving = false;
+  buffer = MaryAction::NONE;
+}
+
 void Mary::assignSubWeapon(SubWeaponID id) {
   PLOGI << "Assigning Sub-Weapon.";
 
@@ -77,28 +84,21 @@ void Mary::assignSubWeapon(SubWeaponID id) {
     }
   }
 
+  tech1_name = sub_weapon->tech1_name;
   tech1_cost = sub_weapon->tech1_cost;
   tech1_type = sub_weapon->tech1_type;
 
+  tech2_name = sub_weapon->tech2_name;
   tech2_cost = sub_weapon->tech2_cost;
   tech2_type = sub_weapon->tech2_type;
 }
 
-void Mary::setControllable(bool value) {
-  controllable = value;
-
-  if (controllable) {
-    PLOGI << "Control has been given to the player.";
-  }
-  else {
-    PLOGI << "Control has been revoked from the player.";
-  }
-}
-
 void Mary::behavior() {
-  if (!controllable) {
+  if (!enabled) {
     return;
   }
+
+  eventHandling();
 
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
@@ -106,6 +106,53 @@ void Mary::behavior() {
 
   if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
+  }
+}
+
+void Mary::eventHandling() {
+  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+
+  for (auto &event : *event_pool) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
+      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+      damageHandling(dmg_event);
+    }
+  }
+}
+
+void Mary::damageHandling(TookDamageCBT *event) {
+  if (target != NULL) {
+    return;
+  }
+
+  Combatant *potential_target = NULL;
+  if (event->sender == this) {
+    assert(event->assailant != NULL);
+    potential_target = event->assailant;
+  }
+  else if (event->assailant == this) {
+    assert(event->sender->entity_type == COMBATANT);
+    potential_target = static_cast<Combatant*>(event->sender);
+  }
+  else {
+    return;
+  }
+
+  if (potential_target->state == DEAD) {
+    return;
+  }
+
+  PLOGD << "Acknowledging damage event of which the Player Combatant was"
+    " involved in.";
+  float distance = distanceTo(potential_target);
+  if (distance <= 96) {
+    target = potential_target;
+    PLOGI << "Now targeting: '" << target->name << "' [ID: " << 
+    target->entity_id << "]";
   }
 }
 
@@ -160,8 +207,9 @@ void Mary::defensiveActionInput(bool gamepad) {
   }
 }
 
-bool Mary::canCancel() {
-  if (state != CombatantState::ACTION || buffer == MaryAction::NONE) {
+bool Mary::canCancel(bool ignore_buffer) {
+  bool buffer_empty = !ignore_buffer && buffer == MaryAction::NONE;
+  if (state != CombatantState::ACTION || buffer_empty) {
     return false;
   }
 
@@ -208,7 +256,7 @@ void Mary::readActionBuffer() {
     }
     case MaryAction::GHOST_STEP: {
       if (!critical_life) {
-        increaseExhaustion(5.5);
+        increaseExhaustion(gs_cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
       }
 
@@ -254,6 +302,8 @@ void Mary::readActionBuffer() {
 }
 
 void Mary::update() {
+  tintFlash();
+
   switch (state) {
     case CombatantState::NEUTRAL: {
       if (exhaustion != 0) {
@@ -287,6 +337,7 @@ void Mary::update() {
   }
 
   statusLogic();
+  targetLogic();
 
   if (buffer != MaryAction::NONE) {
     bufferTimer();
@@ -323,6 +374,26 @@ void Mary::bufferTimer() {
     PLOGI << "Resetting action buffer.";
     buffer = MaryAction::NONE;
     buffer_clock = 0.0;
+  }
+}
+
+void Mary::targetLogic() {
+  if (target == NULL) {
+    return;
+  }
+
+  if (target->state == DEAD) {
+    PLOGI << "Target: '" << target->name << "' [ID: " << 
+      target->entity_id << "] has been found dead.";
+    target = NULL;
+    return;
+  }
+
+  float distance = distanceTo(target); 
+  if (distance > 128) {
+    PLOGI << "Target: '" << target->name << "' [ID: " << 
+      target->entity_id << "] is outside the player's range.";
+    target = NULL;
   }
 }
 
@@ -368,6 +439,7 @@ void Mary::draw() {
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
+  applyStaggerEffect(final);
   DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 

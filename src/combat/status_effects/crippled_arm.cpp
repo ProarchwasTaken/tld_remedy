@@ -31,11 +31,13 @@ CrippledArm::~CrippledArm() {
   }
 }
 
-void CrippledArm::init() {
+void CrippledArm::init(bool hide_text) {
   PLOGI << "Decreasing afflicted's offense and intimidation by 10%";
   afflicted->offense -= offense_lost;
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: {OFF: " << afflicted->offense << ", INT: " <<
   afflicted->intimid << "}";
+
+  StatusEffect::init(hide_text);
 }

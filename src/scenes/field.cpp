@@ -295,8 +295,8 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::INIT_COMBAT: {
       PLOGI << "Event Detected: InitCombatEvent";
 
-      sfx.play("combat_init");
       Game::initCombat(&session);
+      sfx.play("combat_init");
       break;
     }
     case FieldEVT::GOTO_TITLE: {

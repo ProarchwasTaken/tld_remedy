@@ -11,7 +11,7 @@ public:
   Broken(PartyMember *afflicted);
   ~Broken();
 
-  void init() override;
+  void init(bool hide_text = false) override;
 private:
   PartyMember *afflicted;
 

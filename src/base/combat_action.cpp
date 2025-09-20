@@ -2,7 +2,6 @@
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
-#include "enums.h"
 #include "game.h"
 #include "data/damage.h"
 #include "base/combatant.h"

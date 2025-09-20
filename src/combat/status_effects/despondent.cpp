@@ -21,13 +21,15 @@ Despondent::Despondent(PartyMember *afflicted) :
   PLOGD << "Intimidation to be lost: " << intimid_lost;
 }
 
-void Despondent::init() {
+void Despondent::init(bool hide_text) {
   afflicted->demoralized = true;
 
   PLOGI << "Decreasing afflicted's intimidation by 10%";
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: " << afflicted->intimid;
+
+  StatusEffect::init(hide_text);
 }
 
 Despondent::~Despondent() {

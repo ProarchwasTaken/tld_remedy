@@ -1,15 +1,11 @@
 #include <cassert>
 #include <cstddef>
-#include <utility>
 #include <algorithm>
 #include <raylib.h>
 #include <raymath.h>
-#include <set>
 #include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
-#include "base/enemy.h"
-#include "utils/comparisons.h"
 #include "combat/system/camera.h"
 
 Rectangle CombatCamera::area = {
@@ -25,8 +21,7 @@ CombatCamera::CombatCamera() {
 }
 
 void CombatCamera::update(PartyMember *player) {
-  bool enemies_present = Enemy::memberCount() != 0;
-  if (enemies_present) {
+  if (player->target != NULL) {
     enemyTargeting(player);
   }
   else {
@@ -38,42 +33,13 @@ void CombatCamera::update(PartyMember *player) {
 }
 
 void CombatCamera::enemyTargeting(PartyMember *player) {
-  std::set<std::pair<float, Combatant*>> enemies;
+  Combatant *target = player->target;
 
-  for (Combatant *combatant : Combatant::existing_combatants) {
-    if (combatant->team != CombatantTeam::ENEMY) {
-      continue;
-    }
-
-    if (CheckCollisionRecs(area, combatant->hurtbox.rect)) {
-      Vector2 difference = Vector2Subtract(player->position, 
-                                           combatant->position);
-      float distance = Vector2Length(difference);
-
-      enemies.emplace(std::make_pair(distance, combatant));
-    }
-  }
-
-  Combatant *enemy = NULL;
-  if (enemies.empty()) {
-    follow(player->position.x);
-    return;
-  }
-  else if (enemies.size() > 1) {
-    auto furthest = std::max_element(enemies.begin(), enemies.end(),
-                                     Comparison::combatantDistance);
-    enemy = furthest->second;
-  }
-  else {
-    enemy = enemies.begin()->second;
-  }
-  assert(enemy != NULL);
-
-  Vector2 difference = Vector2Subtract(enemy->position, player->position);
+  Vector2 difference = Vector2Subtract(target->position, player->position);
   Vector2 scale = Vector2Scale(difference, 0.5);
-  Vector2 target = Vector2Add(player->position, scale);
+  Vector2 camera_target = Vector2Add(player->position, scale);
 
-  follow(target.x);
+  follow(camera_target.x);
 }
 
 void CombatCamera::follow(float x) {

@@ -1,6 +1,8 @@
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <cmath>
+#include <utility>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -15,24 +17,33 @@
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "system/sprite_atlas.h"
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
+#include "combat/entities/status_text.h"
 #include "combat/combatants/party/mary.h"
+#include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
 
 CombatScene::CombatScene(Session *session) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
+  float start_time = GetTime();
+
   scene_id = SceneID::COMBAT;
   this->session = session;
 
   stage.loadStage("debug");
   initializeCombatants();
+
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
@@ -40,6 +51,9 @@ CombatScene::CombatScene(Session *session) {
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Enemy::memberCount(); 
+
+  float end_time = GetTime();
+  PLOGD << "Load Time: " << end_time - start_time;
 }
 
 CombatScene::~CombatScene() {
@@ -52,10 +66,8 @@ CombatScene::~CombatScene() {
 
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
-  auto player = make_unique<Mary>(&session->player);
-  this->player = player.get();
-  plr_hud.assign(this->player);
-  entities.push_back(std::move(player));
+  initializePlayer();
+  initializeCompanion();
 
   // TODO: Don't forget to remove this when the time comes!
   auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
@@ -69,15 +81,49 @@ void CombatScene::initializeCombatants() {
   entities.push_back(std::move(dummy));
 }
 
+void CombatScene::initializePlayer() {
+  PLOGI << "Initializing Player Combatant.";
+  auto player = make_unique<Mary>(&session->player);
+  this->player = player.get();
+
+  plr_hud.assign(this->player);
+  plr_cmd_hud.assign(this->player);
+  entities.push_back(std::move(player));
+}
+
+void CombatScene::initializeCompanion() {
+  PLOGI << "Initializing Companion Combatant.";
+  unique_ptr<PartyMember> companion;
+  Companion *data = &session->companion;
+
+  switch (data->companion_id) {
+    case CompanionID::ERWIN: {
+      companion = make_unique<Erwin>(data, player);
+    }
+  }
+
+  assert(companion != nullptr);
+  this->companion = companion.get();
+  com_hud.assign(this->companion);
+  entities.push_back(std::move(companion));
+}
+
 void CombatScene::update() {
   // Remove this Later!
-  if (dummy != NULL && IsKeyPressed(KEY_P)) {
+  if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
+  }
+  if (companion != NULL && IsKeyPressed(KEY_F4)) {
+    bool enabled = companion->isEnabled();
+    companion->setEnabled(!enabled);
   }
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
+  plr_hud.behavior();
+  com_hud.behavior();
+  cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
     stage.update();
@@ -87,17 +133,17 @@ void CombatScene::update() {
     }
 
     camera.update(player);
+
     plr_hud.update();
+    plr_cmd_hud.update();
+
+    com_hud.update();
+
     eventProcessing();
   }
 }
 
 void CombatScene::eventProcessing() {
-  game_over = player->state == DEAD && player->deathClock() == 1.0;
-  if (game_over || Enemy::memberCount() == 0) {
-    endCombatProcedure();
-  }
-
   EventPool<CombatEvent> *event_pool = evt_handler.get();
   if (!event_pool->empty()) {
     PLOGI << "Combat Events raised: " << event_pool->size();
@@ -107,6 +153,13 @@ void CombatScene::eventProcessing() {
 
     evt_handler.clear();
   }
+
+  game_over = player == NULL;
+  if (game_over || Enemy::memberCount() == 0) {
+    endCombatProcedure();
+  }
+
+  cbt_handler.transferEvents();
 }
 
 void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
@@ -131,6 +184,17 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
 
       dmgNumberHandling(target, damage_type, damage_taken);
       break;
+    }
+    case CombatEVT::CREATE_STAT_TXT: {
+      PLOGD << "Event detected: CreateStatTxtCB";
+      auto *event_data = static_cast<CreateStatTxtCB*>(event.get());
+
+      Combatant *target = event_data->target;
+      string text = event_data->text;
+      Color color = event_data->color;
+
+      auto status_txt = make_unique<StatusText>(target, text, color);
+      entities.push_back(std::move(status_txt));
     }
   }
 }
@@ -160,49 +224,71 @@ void CombatScene::dmgNumberHandling(Combatant *target,
   auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
                                            damage_taken);
   entities.push_back(std::move(dmg_num));
+
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::deleteEntity(int entity_id) {
   vector<unique_ptr<Entity>> temporary;
 
   for (auto &entity : entities) {
-    if (entity->entity_id == entity_id) {
-      PLOGD << "Found Entity [ID: " << entity_id << "]";
-      // Remove this Later!
-      if (dummy == entity.get()) dummy = NULL;
-
-      entity.reset();
-    }
-    else {
+    if (entity->entity_id != entity_id) {
       unique_ptr<Entity> temp_entity = nullptr;
       entity.swap(temp_entity);
 
       temporary.push_back(std::move(temp_entity));
+      continue;
     }
+    PLOGD << "Found Entity [ID: " << entity_id << "]";
+
+    // Remove this Later!
+    if (dummy == entity.get()) dummy = NULL;
+
+    if (player == entity.get()) {
+      player = NULL;
+      plr_hud.assign(player);
+      plr_cmd_hud.assign(player);
+    }
+    else if (companion == entity.get()) {
+      companion = NULL;
+      com_hud.assign(companion);
+    }
+
+    entity.reset();
   }
 
   entities.clear();
   temporary.swap(entities);
+
+  PLOGD << "Sorting Combat entities in their intended order.";
+  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
-  if (!game_over) {
-    PLOGI << "All enemies are defeated!";
-    updatePlrStats(plr_data);
-  }
-  else {
-    PLOGI << "The party leader has died...";
-    plr_data->life = 1;
-  }
+  Companion *com_data = &session->companion;
+
+  PLOGD << "Updating player attributes.";
+  updatePartyAttr(player, plr_data);
+
+  PLOGD << "Updating companion attributes.";
+  updatePartyAttr(companion, com_data);
 
   Game::endCombat();
 }
 
-void CombatScene::updatePlrStats(Player *plr_data) {
-  player->depleteInstant();
-  float life = std::ceilf(player->life); 
-  plr_data->life = Clamp(life, 0, player->max_life);
+void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 
+{
+  if (member == NULL) {
+    PLOGD << "Combatant is assumed to be dead. Setting Life to 1.";
+    data->life = 1;
+    return;
+  }
+
+  member->depleteInstant();
+  float life = std::ceilf(member->life); 
+  data->life = Clamp(life, 0, member->max_life);
 
   StatusID status[STATUS_LIMIT] = {
     StatusID::NONE, 
@@ -211,24 +297,23 @@ void CombatScene::updatePlrStats(Player *plr_data) {
   };
 
   int index = 0;
-  plr_data->status_count = 0;
-  int limit = plr_data->status_limit;
+  data->status_count = 0;
+  int limit = data->status_limit;
 
-  for (unique_ptr<StatusEffect> &effect : player->status) {
+  for (unique_ptr<StatusEffect> &effect : member->status) {
     if (effect->isPersistant()) {
       status[index] = effect->id;
       index++;
-      plr_data->status_count++;
-      assert(plr_data->status_count <= limit);
+      data->status_count++;
+      assert(data->status_count <= limit);
     }
   }
 
-  std::copy(status, status + 3, plr_data->status);
+  std::copy(status, status + 3, data->status);
 }
 
 void CombatScene::draw() {
   bool debug_info = Game::debugInfo();
-  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 
   BeginMode2D(camera);
   {
@@ -245,7 +330,7 @@ void CombatScene::draw() {
     stage.drawOverlay();
 
     #ifndef NDEBUG
-    if (Game::debugInfo()) {
+    if (debug_info) {
       for (unique_ptr<Entity> &entity : entities) {
         entity->drawDebug();
       }
@@ -255,6 +340,9 @@ void CombatScene::draw() {
   EndMode2D();
 
   plr_hud.draw();
+  plr_cmd_hud.draw();
+
+  com_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
@@ -267,7 +355,7 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   }
   
   if (e1->entity_type != EntityType::COMBATANT) {
-    return e1->position.y < e2->position.y;
+    return e1->entity_id < e2->entity_id;
   }
 
   Combatant *c1 = static_cast<Combatant*>(e1.get());
@@ -276,8 +364,19 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (c1->state != c2->state) {
     return c1->state > c2->state;
   }
-  else {
+
+  if (c1->team != c2->team){
     return c1->team > c2->team;
+  }
+  
+  if (c1->team == CombatantTeam::PARTY) {
+    PartyMember *p1 = static_cast<PartyMember*>(c1);
+    PartyMember *p2 = static_cast<PartyMember*>(c2);
+
+    return p1->important < p2->important;
+  }
+  else {
+    return c1->entity_id < c2->entity_id;
   }
 }
 
@@ -285,39 +384,72 @@ void CombatScene::drawDebugInfo() {
   Font *font = &Game::sm_font;
   int text_size = font->baseSize;
   
-  Vector2 position = {6, 4};
+  drawPartyStats(player, {6, 4}, font, text_size);
+  drawPartyStats(companion, {128, 4}, font, text_size);
+  drawDebugCombo(font, text_size);
+}
+
+void CombatScene::drawPartyStats(PartyMember *member, Vector2 position, 
+                                 Font *font, int text_size) 
+{
+  if (member == NULL) {
+    return;
+  }
+
   float spacing = 9;
 
-  string p_name = "Player Name: " + player->name;
-  Vector2 pn_pos = position;
+  string name = "Name: " + member->name;
+  Vector2 n_pos = position;
   position.y += spacing;
 
-  string p_state = TextFormat("State: %i", player->state);
-  Vector2 ps_pos = position;
+  string coord = TextFormat("Position: (%00.01f, %00.01f)", 
+                            member->position.x, member->position.y);
+  Vector2 c_pos = position;
   position.y += spacing;
 
-  string p_hp = TextFormat("Life: %02.02f/%02.02f", player->life,
-                           player->max_life);
-  Vector2 php_pos = position;
+  string hp = TextFormat("Life: %02.02f/%02.02f", member->life,
+                         member->max_life);
+  Vector2 hp_pos = position;
   position.y += spacing;
 
-  string p_mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f",
-                           player->morale, player->init_morale,
-                           player->max_morale);
-  Vector2 pmp_pos = position;
+  string mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f", 
+                         member->morale, member->init_morale,
+                         member->max_morale);
+  Vector2 mp_pos = position;
   position.y += spacing;
 
-  string p_ex = TextFormat("Exhaustion: %02.02f", player->exhaustion);
-  Vector2 pex_pos = position;
+  string ex = TextFormat("Exhaustion: %02.02f", member->exhaustion);
+  Vector2 ex_pos = position;
   position.y += spacing;
 
+  DrawTextEx(*font, name.c_str(), n_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, coord.c_str(), c_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, hp.c_str(), hp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, mp.c_str(), mp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, ex.c_str(), ex_pos, text_size, -3, GREEN);
+
+  if (member->important) {
+    return;
+  }
+
+  int goal_id;
+  switch (member->id) {
+    case PartyMemberID::ERWIN: {
+      Erwin *erwin = static_cast<Erwin*>(member);
+      goal_id = static_cast<int>(erwin->ai_goal);
+    }
+    default: {
+      assert(member->id != PartyMemberID::MARY);
+    }
+  }
+
+  string goal = TextFormat("AI Goal: %i", goal_id);
+  DrawTextEx(*font, goal.c_str(), position, text_size, -3, GREEN);
+}
+
+void CombatScene::drawDebugCombo(Font *font, int text_size) {
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
-  Vector2 combo_pos = position;
+  Vector2 combo_pos = {6, 49};
 
-  DrawTextEx(*font, p_name.c_str(), pn_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_state.c_str(), ps_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_hp.c_str(), php_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_mp.c_str(), pmp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, p_ex.c_str(), pex_pos, text_size, -3, GREEN);
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }
