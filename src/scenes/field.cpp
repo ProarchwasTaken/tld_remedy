@@ -292,6 +292,11 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::saveSession(&session);
       break;
     }
+    case FieldEVT::OPEN_MENU: {
+      PLOGI << "Event Detected: OpenMenuEvent";
+      Game::openCampMenu(&session);
+      break;
+    }
     case FieldEVT::INIT_COMBAT: {
       PLOGI << "Event Detected: InitCombatEvent";
 

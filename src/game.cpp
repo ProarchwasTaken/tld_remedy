@@ -13,6 +13,7 @@
 #include "system/sound_atlas.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
+#include "scenes/camp_menu.h"
 #include "scenes/combat.h"
 #include "data/session.h"
 #include "data/personal.h"
@@ -232,6 +233,10 @@ void Game::gameLogic() {
       game_state = GameState::READY;
       break;
     }
+    case GameState::OPEN_CAMPMENU: {
+      openCampMenuProcedure();
+      break;
+    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
       break;
@@ -304,6 +309,13 @@ void Game::switchSceneProcedure() {
 
   Game::fadein(1.0);
   PLOGI << "Procedure complete.";
+}
+
+void Game::openCampMenuProcedure() {
+  PLOGI << "Switching over to the Camp Menu scene.";
+  scene.swap(reserve);
+  assert(scene != nullptr && scene->scene_id == SceneID::CAMP_MENU);
+  game_state = GameState::READY;
 }
 
 void Game::initCombatProcedure() {
@@ -513,6 +525,13 @@ void Game::loadTitleScreen() {
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+}
+
+void Game::openCampMenu(Session *data) {
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CampMenuScene>(data);
+  game_state = GameState::OPEN_CAMPMENU;
 }
 
 void Game::initCombat(Session *data) {

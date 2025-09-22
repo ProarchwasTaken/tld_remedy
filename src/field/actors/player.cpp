@@ -4,6 +4,7 @@
 #include <cmath>
 #include <plog/Log.h>
 #include "enums.h"
+#include "field/system/field_handler.h"
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
@@ -54,6 +55,7 @@ void PlayerActor::behavior() {
 
     movementInput(gamepad);
     interactInput(gamepad);
+    openMenuInput(gamepad);
   }
   else {
     moving_x = 0;
@@ -144,7 +146,13 @@ void PlayerActor::interactInput(bool gamepad) {
     pickup->interact();
 
     pickup_event.reset();
-    return;
+  }
+}
+
+void PlayerActor::openMenuInput(bool gamepad) {
+  if (Input::pressed(keybinds->open_menu, gamepad)) {
+    PLOGI << "Opening Camp Menu.";
+    FieldHandler::raise<FieldEvent>(FieldEVT::OPEN_MENU);
   }
 }
 

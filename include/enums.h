@@ -90,6 +90,7 @@ enum class PickupType {
 enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
+  OPEN_MENU,
   INIT_COMBAT,
   GOTO_TITLE,
   UPDATE_COMMON_DATA,
