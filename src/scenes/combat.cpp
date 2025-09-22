@@ -275,7 +275,7 @@ void CombatScene::endCombatProcedure() {
   PLOGD << "Updating companion attributes.";
   updatePartyAttr(companion, com_data);
 
-  Game::endCombat();
+  Game::returnToField();
 }
 
 void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 

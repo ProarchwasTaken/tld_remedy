@@ -236,8 +236,8 @@ void Game::gameLogic() {
       initCombatProcedure();
       break;
     }
-    case GameState::END_COMBAT: {
-      endCombatProcedure();
+    case GameState::RETURN_TO_FIELD: {
+      returnFieldProcedure();
       break;
     }
     case GameState::SWITCHING_SCENE: {
@@ -340,10 +340,9 @@ void Game::initCombatProcedure() {
   }
 }
 
-void Game::endCombatProcedure() {
+void Game::returnFieldProcedure() {
   PLOGI << "Switching back to the Field scene";
   scene.reset();
-  assert(CombatScene::cmd_atlas.users() == 0);
 
   scene.swap(reserve);
 
@@ -527,15 +526,15 @@ void Game::initCombat(Session *data) {
   SKIP_FRAME = true;
 }
 
-void Game::endCombat() {
-  if (game_state == GameState::END_COMBAT) {
+void Game::returnToField() {
+  if (game_state == GameState::RETURN_TO_FIELD) {
     return;
   }
 
-  PLOGI << "Preparing to end combat.";
+  PLOGI << "Preparing to return to the Field scene..";
   assert(reserve != nullptr);
 
-  game_state = GameState::END_COMBAT;
+  game_state = GameState::RETURN_TO_FIELD;
 }
 
 float Game::deltaTime() {
