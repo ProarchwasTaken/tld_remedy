@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.8.0
+VERSION 1.9.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -102,6 +102,7 @@ set(HEADERS
 "include/combat/status_effects/crippled_leg.h"
 "include/combat/status_effects/broken.h"
 "include/combat/status_effects/despondent.h"
+"include/scenes/camp_menu.h"
 )
 set(SOURCE
 "src/main.cpp"
@@ -157,6 +158,7 @@ set(SOURCE
 "src/combat/status_effects/crippled_leg.cpp"
 "src/combat/status_effects/broken.cpp"
 "src/combat/status_effects/despondent.cpp"
+"src/scenes/camp_menu.cpp"
 )
 
 if(${BUILD_DEV})

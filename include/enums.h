@@ -4,6 +4,7 @@
 enum class SceneID {
   TITLE,
   FIELD,
+  CAMP_MENU,
   COMBAT
 };
 
