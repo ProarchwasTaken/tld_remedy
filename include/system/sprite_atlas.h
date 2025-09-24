@@ -17,6 +17,8 @@ public:
   void use();
   void release();
 
+  Texture getTexturefromSprite(int index);
+
   Rectangle source;
   Texture sheet;
   std::vector<Rectangle> sprites;
