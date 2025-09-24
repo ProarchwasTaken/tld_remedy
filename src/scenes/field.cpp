@@ -488,6 +488,11 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
+  string time = TextFormat("Playtime: %00.03f", Game::playtime());
+  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
+  y += spacing;
+
   string pursue = TextFormat("Persuing Enemy: %i", 
                              EnemyActor::pursuing_enemy);
   Vector2 per_pos = TextUtils::alignRight(pursue.c_str(), {base_x, y}, 
@@ -498,5 +503,6 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }

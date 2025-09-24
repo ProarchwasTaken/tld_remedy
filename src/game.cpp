@@ -43,8 +43,11 @@ float Game::fade_time = 0.0;
 
 float Game::sleep_time = 0.0;
 
-float Game::time_scale = 1.0;
 bool Game::debug_info = false;
+float Game::time_scale = 1.0;
+
+double Game::session_playtime = 0.0;
+bool Game::run_timer = false;
 
 
 void Game::init() {
@@ -225,6 +228,10 @@ void Game::gameLogic() {
     PLOGD << "Skipping frame.";
     SKIP_FRAME = false;
     return;
+  }
+
+  if (run_timer) {
+    session_playtime += GetFrameTime();
   }
 
   switch (game_state) {
@@ -441,11 +448,16 @@ void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
   assert(reserve == nullptr);
 
   reserve = make_unique<FieldScene>(sub_weapon, companion);
+
+  session_playtime = 0;
+  run_timer = true;
+
   game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::saveSession(Session *data) {
   PLOGI << "Saving the player's current session.";
+  data->playtime = session_playtime;
 
   ofstream file;
   file.open("data/session.data", std::ios::binary);
@@ -488,6 +500,10 @@ void Game::loadSession() {
 
   assert(reserve == nullptr);
   reserve = make_unique<FieldScene>(&session);
+
+  session_playtime = session.playtime;
+  run_timer = true;
+
   game_state = GameState::SWITCHING_SCENE;
 }
 
@@ -525,6 +541,7 @@ void Game::loadTitleScreen() {
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+  run_timer = false;
 }
 
 void Game::openCampMenu(Session *data) {

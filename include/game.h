@@ -54,6 +54,7 @@ public:
   void drawScene();
 
   static float deltaTime();
+  static double playtime() {return session_playtime;};
   static GameState state() {return game_state;}
 
   static bool debugInfo();
@@ -80,7 +81,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 3;
+  static constexpr unsigned int session_version = 4;
   static constexpr unsigned int personal_version = 1;
   static constexpr float TARGET_FPS = 60.0;
 
@@ -104,6 +105,9 @@ private:
 
   static bool debug_info;
   static float time_scale;
+
+  static double session_playtime;
+  static bool run_timer;
 
   static float fade_time;
   static float fade_percentage;
