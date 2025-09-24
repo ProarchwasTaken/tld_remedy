@@ -7,6 +7,7 @@
 #include "data/session.h"
 #include "utils/input.h"
 #include "utils/menu.h"
+#include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
@@ -61,8 +62,8 @@ void CampMenuScene::optionNavigation() {
 }
 
 void CampMenuScene::offsetBars() {
-  if (bar_offset > 4) {
-    bar_offset = bar_offset - 4;
+  if (bar_offset > 8) {
+    bar_offset = bar_offset - 8;
   }
 
   bar_offset += offset_speed * Game::deltaTime();
@@ -124,6 +125,20 @@ void CampMenuScene::drawBottomInfo(Vector2 position) {
   Rectangle *sprite = &atlas.sprites[5];
   position = Vector2Add(position, {32, 4});
   DrawTextureRec(atlas.sheet, *sprite, position, WHITE);
+
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+  drawSupplyCount(font, txt_size, position);
+}
+
+void CampMenuScene::drawSupplyCount(Font *font, int txt_size, 
+                                    Vector2 position)
+{
+  const char* text = TextFormat("%03i", session->supplies);
+  position.x = position.x + 104;
+  position = TextUtils::alignRight(text, position, *font, -2, 0);
+
+  DrawTextEx(*font, text, position, txt_size, -2, WHITE);
 }
 
 void CampMenuScene::drawOptions() {

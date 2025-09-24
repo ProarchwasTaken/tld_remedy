@@ -35,6 +35,7 @@ public:
 
   void drawBottomBar();
   void drawBottomInfo(Vector2 position);
+  void drawSupplyCount(Font *font, int txt_size, Vector2 position);
 
   void drawOptions();
   std::string getOptionName(CampMenuOption option);
@@ -59,7 +60,7 @@ private:
 
   Texture main_bar;
   float bar_offset = 0;
-  float offset_speed = 110;
+  float offset_speed = 105;
 
   static constexpr Vector2 top_position = {0, 0};
   static constexpr Vector2 bottom_position = {0, 200};
