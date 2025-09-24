@@ -1,9 +1,21 @@
 #pragma once
+#include <array>
+#include <string>
 #include <raylib.h>
 #include "base/scene.h"
 #include "data/session.h"
 #include "data/keybinds.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
+
+
+enum class CampMenuOption {
+  ITEMS,
+  TECHS,
+  STATUS,
+  CONFIG,
+  END_GAME,
+};
 
 
 class CampMenuScene : public Scene {
@@ -12,7 +24,9 @@ public:
   ~CampMenuScene();
 
   void update() override;
+  void optionNavigation();
   void offsetBars();
+  void optionTimer();
 
   void draw() override;
   void drawTopBar();
@@ -22,16 +36,32 @@ public:
   void drawBottomBar();
   void drawBottomInfo(Vector2 position);
 
+  void drawOptions();
+  std::string getOptionName(CampMenuOption option);
+
   static SpriteAtlas atlas;
 private:
   Session *session;
   MenuKeybinds *keybinds;
+  SoundAtlas *sfx;
+
+  std::array<CampMenuOption, 5> options = {
+    CampMenuOption::ITEMS,
+    CampMenuOption::TECHS,
+    CampMenuOption::STATUS,
+    CampMenuOption::CONFIG,
+    CampMenuOption::END_GAME
+  };
+
+  std::array<CampMenuOption, 5>::iterator selected = options.begin();
+  float opt_switch_clock = 0.0;
+  float opt_switch_time = 0.1;
 
   Texture main_bar;
-
   float bar_offset = 0;
   float offset_speed = 110;
 
-  const Vector2 top_position = {0, 0};
-  const Vector2 bottom_position = {0, 200};
+  static constexpr Vector2 top_position = {0, 0};
+  static constexpr Vector2 bottom_position = {0, 200};
+  static constexpr Vector2 option_position = {9, 42};
 };
