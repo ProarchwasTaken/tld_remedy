@@ -18,6 +18,7 @@ is subject to change.
 ### Field
 * **Arrow Keys** - Movement
 * **Z Key** - Interact
+* **X Key** - Open Menu
 
 ### Combat 
 * **Arrow Keys** - Movement
@@ -34,6 +35,7 @@ may be different depending on what controller you use.
 ### Field
 * **D-Pad** - Movement
 * **A Button** - Interact
+* **B Button** - Open Menu
 
 ### Combat 
 * **D-Pad** - Movement

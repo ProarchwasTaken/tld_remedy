@@ -65,9 +65,9 @@ enum class ActionID {
 
 enum class StatusID {
   NONE = -1,
-  CRIPPLED_ARM,
-  CRIPPED_LEG,
-  BROKEN,
+  BROKEN_ARM,
+  CRIPPLED_LEG,
+  MANGLED,
   BLEEDING, 
   FEAR,
   DESPONDENT,

@@ -13,9 +13,9 @@
 #include "base/combatant.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
-#include "combat/status_effects/crippled_arm.h"
+#include "combat/status_effects/broken_arm.h"
 #include "combat/status_effects/crippled_leg.h"
-#include "combat/status_effects/broken.h"
+#include "combat/status_effects/mangled.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/system/stage.h"
 #include <plog/Log.h>
@@ -126,16 +126,16 @@ void PartyMember::afflictPersistent(StatusID id, bool hide_text) {
   unique_ptr<StatusEffect> status_effect = nullptr;
 
   switch (id) {
-    case StatusID::CRIPPLED_ARM: {
-      status_effect = make_unique<CrippledArm>(this);
+    case StatusID::BROKEN_ARM: {
+      status_effect = make_unique<BrokenArm>(this);
       break;
     }
-    case StatusID::CRIPPED_LEG: {
+    case StatusID::CRIPPLED_LEG: {
       status_effect = make_unique<CrippledLeg>(this);
       break;
     }
-    case StatusID::BROKEN: {
-      status_effect = make_unique<Broken>(this);
+    case StatusID::MANGLED: {
+      status_effect = make_unique<Mangled>(this);
       break;
     }
     default: {
@@ -158,9 +158,9 @@ void PartyMember::afflictPersistent(StatusID status[STATUS_LIMIT]) {
 
 set<StatusID> PartyMember::getEffectPool() {
   set<StatusID> pool = {
-    StatusID::CRIPPLED_ARM, 
-    StatusID::CRIPPED_LEG,
-    StatusID::BROKEN
+    StatusID::BROKEN_ARM, 
+    StatusID::CRIPPLED_LEG,
+    StatusID::MANGLED
   };
 
   for (auto &status_effect : status) {

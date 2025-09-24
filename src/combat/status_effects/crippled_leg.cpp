@@ -6,7 +6,7 @@
 
 
 CrippledLeg::CrippledLeg(Combatant *afflicted) : 
-  StatusEffect(StatusID::CRIPPED_LEG, StatusType::NEGATIVE, afflicted)
+  StatusEffect(StatusID::CRIPPLED_LEG, StatusType::NEGATIVE, afflicted)
 {
   name = "Crippled Leg";
   persistant = true;

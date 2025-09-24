@@ -6,10 +6,10 @@
 
 /* Decreases a PartyMember's defense and recovery by 50%. Making the 
  * Combatant a lot more easy to kill.*/
-class Broken : public StatusEffect {
+class Mangled : public StatusEffect {
 public:
-  Broken(PartyMember *afflicted);
-  ~Broken();
+  Mangled(PartyMember *afflicted);
+  ~Mangled();
 
   void init(bool hide_text = false) override;
 private:
