@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -129,13 +130,30 @@ void CampMenuScene::drawBottomInfo(Vector2 position) {
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
   drawSupplyCount(font, txt_size, position);
+  drawPlaytime(font, txt_size, position);
 }
 
 void CampMenuScene::drawSupplyCount(Font *font, int txt_size, 
                                     Vector2 position)
 {
-  const char* text = TextFormat("%03i", session->supplies);
+  const char *text = TextFormat("%03i", session->supplies);
   position.x = position.x + 104;
+  position = TextUtils::alignRight(text, position, *font, -2, 0);
+
+  DrawTextEx(*font, text, position, txt_size, -2, WHITE);
+}
+
+void CampMenuScene::drawPlaytime(Font *font, int txt_size, 
+                                 Vector2 position)
+{
+  long playtime = std::floor(Game::playtime());
+  int seconds = playtime % 60;
+  int minutes = (playtime / 60) % 60;
+  int hours = playtime / 3600;
+
+  const char *text = TextFormat("%02i:%02i:%02i", hours, minutes, 
+                                seconds);
+  position = Vector2Add(position, {104, 16});
   position = TextUtils::alignRight(text, position, *font, -2, 0);
 
   DrawTextEx(*font, text, position, txt_size, -2, WHITE);

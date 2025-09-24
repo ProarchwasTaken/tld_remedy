@@ -36,6 +36,7 @@ public:
   void drawBottomBar();
   void drawBottomInfo(Vector2 position);
   void drawSupplyCount(Font *font, int txt_size, Vector2 position);
+  void drawPlaytime(Font *font, int txt_size, Vector2 position);
 
   void drawOptions();
   std::string getOptionName(CampMenuOption option);
