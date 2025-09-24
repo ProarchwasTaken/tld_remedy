@@ -1,0 +1,39 @@
+{
+  "frames": [
+    {
+      "filename": "opt_frame_1",
+      "frame": {"x": 0, "y": 0, "w": 88, "h": 16}
+    },
+    {
+      "filename": "opt_frame_2",
+      "frame": {"x": 0, "y": 16, "w": 88, "h": 16} 
+    },
+    {
+      "filename": "opt_frame_connect",
+      "frame": {"x": 96, "y": 16, "w": 6, "h": 16}
+    },
+    {
+      "filename": "main_frame",
+      "frame": {"x": 0, "y": 32, "w": 8, "h": 40}
+    },
+    {
+      "filename": "header",
+      "frame": {"x": 16, "y": 32, "w": 141, "h": 20}
+    },
+    {
+      "filename": "bottom_info",
+      "frame": {"x": 133, "y": 0, "w": 123, "h": 32}
+    },
+    {
+      "filename": "top_separator",
+      "frame": {"x": 96, "y": 0, "w": 6, "h": 14}
+    },
+    {
+      "filename": "party_frame",
+      "frame": {"x": 160, "y": 32, "w": 96, "h": 46}
+    }
+  ],
+  "meta": {
+    "size": {"w": 256, "h": 80}
+  }
+}
