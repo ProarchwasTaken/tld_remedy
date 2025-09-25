@@ -129,8 +129,10 @@ void CampMenuScene::drawBottomInfo(Vector2 position) {
 
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
+
   drawSupplyCount(font, txt_size, position);
   drawPlaytime(font, txt_size, position);
+  drawDescription(font, txt_size, position);
 }
 
 void CampMenuScene::drawSupplyCount(Font *font, int txt_size, 
@@ -157,6 +159,45 @@ void CampMenuScene::drawPlaytime(Font *font, int txt_size,
   position = TextUtils::alignRight(text, position, *font, -2, 0);
 
   DrawTextEx(*font, text, position, txt_size, -2, WHITE);
+}
+
+void CampMenuScene::drawDescription(Font *font, int txt_size, 
+                                    Vector2 position)
+{
+  description = getDescription(*selected);
+  position.x += 136;
+  DrawTextEx(*font, description.c_str(), position, txt_size, -2, 
+             desc_color);
+}
+
+string CampMenuScene::getDescription(CampMenuOption option) {
+  switch (option) {
+    case CampMenuOption::ITEMS: {
+      return 
+      "Use items the party has obtained over the\n"
+      "course of this session.";
+    }
+    case CampMenuOption::TECHS: {
+      return 
+      "View information about the Techniques a\n"
+      "party member can perform in Combat.";
+    }
+    case CampMenuOption::STATUS: {
+      return 
+      "View a party member's stats and overall\n"
+      "condition.";
+    }
+    case CampMenuOption::CONFIG: {
+      return 
+      "Configure the game's settings to your\n"
+      "personal liking.";
+    }
+    case CampMenuOption::END_GAME: {
+      return 
+      "End your current session and return to\n"
+      "the title screen.";
+    }
+  }
 }
 
 void CampMenuScene::drawOptions() {

@@ -38,6 +38,9 @@ public:
   void drawSupplyCount(Font *font, int txt_size, Vector2 position);
   void drawPlaytime(Font *font, int txt_size, Vector2 position);
 
+  void drawDescription(Font *font, int txt_size, Vector2 position);
+  std::string getDescription(CampMenuOption option);
+
   void drawOptions();
   std::string getOptionName(CampMenuOption option);
 
@@ -62,6 +65,9 @@ private:
   Texture main_bar;
   float bar_offset = 0;
   float offset_speed = 105;
+
+  std::string description;
+  Color desc_color = WHITE;
 
   static constexpr Vector2 top_position = {0, 0};
   static constexpr Vector2 bottom_position = {0, 200};

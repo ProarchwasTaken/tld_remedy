@@ -57,6 +57,7 @@ void Game::init() {
   InitAudioDevice();
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
+  SetTextLineSpacing(16);
 
   HideCursor();
   setupCanvas();
