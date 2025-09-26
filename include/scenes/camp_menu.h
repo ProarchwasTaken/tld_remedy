@@ -5,6 +5,7 @@
 #include "base/scene.h"
 #include "data/session.h"
 #include "data/keybinds.h"
+#include "menu/hud/party.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
@@ -65,6 +66,9 @@ private:
   Texture main_bar;
   float bar_offset = 0;
   float offset_speed = 105;
+
+  PartyHud plr_hud = PartyHud({217, 152});
+  PartyHud com_hud = PartyHud({321, 152});
 
   std::string description;
   Color desc_color = WHITE;

@@ -20,8 +20,11 @@ SpriteAtlas CampMenuScene::atlas("menu", "camp_menu");
 CampMenuScene::CampMenuScene(Session *session) {
   PLOGI << "Loading the Camp Menu Scene.";
   this->scene_id = SceneID::CAMP_MENU;
-  this->session = session;
   this->keybinds = &Game::settings.menu_keybinds;
+  this->session = session;
+
+  plr_hud.assign(&session->player);
+  com_hud.assign(&session->companion);
 
   atlas.use();
   main_bar = atlas.getTexturefromSprite(3);
@@ -32,10 +35,8 @@ CampMenuScene::CampMenuScene(Session *session) {
 
 CampMenuScene::~CampMenuScene() {
   atlas.release();
-  UnloadTexture(main_bar);
-  assert(atlas.users() == 0);
-
   sfx->release();
+  UnloadTexture(main_bar);
   PLOGI << "Unloading the Camp Menu Scene.";
 }
 
@@ -83,6 +84,9 @@ void CampMenuScene::draw() {
   drawTopBar();
   drawBottomBar();
   drawOptions();
+
+  plr_hud.draw();
+  com_hud.draw();
 }
 
 void CampMenuScene::drawTopBar() {
