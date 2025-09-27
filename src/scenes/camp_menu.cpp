@@ -9,6 +9,7 @@
 #include "utils/input.h"
 #include "utils/menu.h"
 #include "utils/text.h"
+#include "utils/math.h"
 #include "system/sprite_atlas.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
@@ -116,8 +117,9 @@ void CampMenuScene::drawTopBar() {
   Vector2 position;
   if (state != READY) {
     float percentage = Clamp(state_clock / 0.5, 0.0, 1.0);
+
     position.x = top_position.x;
-    position.y = Lerp(-40, 0, percentage);
+    position.y = Math::smoothstep(-40, 0, percentage);
   }
   else {
     position = top_position; 
@@ -156,8 +158,9 @@ void CampMenuScene::drawBottomBar() {
   Vector2 position;
   if (state != READY) {
     float percentage = Clamp(state_clock / 0.5, 0.0, 1.0);
+
     position.x = bottom_position.x;
-    position.y = Lerp(240, bottom_position.y, percentage);
+    position.y = Math::smoothstep(240, bottom_position.y, percentage);
   }
   else {
     position = bottom_position;
@@ -258,7 +261,9 @@ void CampMenuScene::drawOptions() {
   Color tint = WHITE;
   if (state != READY) {
     float percentage = Clamp((-0.50 + state_clock) / 0.4, 0.0, 1.0);
-    base_position.x = Lerp(-36, option_position.x, percentage);
+
+    base_position.x = Math::smoothstep(-36, option_position.x, 
+                                       percentage);
     base_position.y = option_position.y;
 
     tint.a = Lerp(0, 255, percentage);

@@ -53,7 +53,7 @@ private:
 
   enum {OPENING, READY, CLOSING} state = OPENING;
   float state_clock = 0.0;
-  float state_time = 0.5;
+  float state_time = 0.8;
 
   std::array<CampMenuOption, 5> options = {
     CampMenuOption::ITEMS,
