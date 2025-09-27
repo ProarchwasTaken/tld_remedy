@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <raylib.h>
 #include "system/sprite_atlas.h"
 #include "data/session.h"
@@ -9,7 +10,7 @@ public:
   PartyHud(Vector2 position);
   ~PartyHud();
 
-  void assign(Character *user);
+  void assign(Character *user, float *clock);
 
   void draw();
   void drawName();
@@ -23,4 +24,5 @@ private:
   static SpriteAtlas icon_atlas;
 
   Vector2 main_position;
+  float *clock = NULL;
 };

@@ -1,3 +1,5 @@
+#include <cassert>
+#include <cstddef>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -25,19 +27,28 @@ PartyHud::~PartyHud() {
   icon_atlas.release();
 }
 
-void PartyHud::assign(Character *user) {
+void PartyHud::assign(Character *user, float *clock) {
   this->user = user;
+  this->clock = clock;
   PLOGI << "Assigned PartyHud to: '" << user->name << "'";
 }
 
-void PartyHud::draw() {
-  Rectangle *sprite = &atlas->sprites[7];
-  DrawTextureRec(atlas->sheet, *sprite, main_position, WHITE);
+void PartyHud::draw() { 
+  assert(clock != NULL);
+  bool timer_finished = *clock == 1.0;
+  Rectangle source = atlas->sprites[7];
+  if (!timer_finished) {
+    source.height *= *clock;
+  }
 
-  drawName();
-  drawLife();
-  drawMorale();
-  drawStatusIcons();
+  DrawTextureRec(atlas->sheet, source, main_position, WHITE);
+
+  if (timer_finished) {
+    drawName();
+    drawLife();
+    drawMorale();
+    drawStatusIcons();
+  }
 }
 
 void PartyHud::drawName() {

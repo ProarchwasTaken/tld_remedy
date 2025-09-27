@@ -23,8 +23,8 @@ CampMenuScene::CampMenuScene(Session *session) {
   this->keybinds = &Game::settings.menu_keybinds;
   this->session = session;
 
-  plr_hud.assign(&session->player);
-  com_hud.assign(&session->companion);
+  plr_hud.assign(&session->player, &state_clock);
+  com_hud.assign(&session->companion, &state_clock);
 
   atlas.use();
   main_bar = atlas.getTexturefromSprite(3);
@@ -41,8 +41,31 @@ CampMenuScene::~CampMenuScene() {
 }
 
 void CampMenuScene::update() {
-  optionNavigation();
-  optionTimer();
+  switch (state) { 
+    case OPENING: {
+      state_clock += Game::deltaTime() / state_time;
+      state_clock = Clamp(state_clock, 0.0, 1.0);
+
+      if (state_clock == 1.0) {
+        state = READY;
+      }
+      break;
+    }
+    case CLOSING: {
+      state_clock -= Game::deltaTime() / state_time;
+      state_clock = Clamp(state_clock, 0.0, 1.0);
+
+      if (state_clock == 0.0) {
+        Game::returnToField();    
+      }
+    }
+    case READY: {
+      optionNavigation();
+      optionTimer();
+      break;
+    }
+  }
+
   offsetBars();
 }
 
@@ -59,7 +82,7 @@ void CampMenuScene::optionNavigation() {
     opt_switch_clock = 0.0;
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
-    Game::returnToField();
+    state = CLOSING;
   }
 }
 
@@ -90,12 +113,24 @@ void CampMenuScene::draw() {
 }
 
 void CampMenuScene::drawTopBar() {
+  Vector2 position;
+  if (state != READY) {
+    float percentage = Clamp(state_clock / 0.5, 0.0, 1.0);
+    position.x = top_position.x;
+    position.y = Lerp(-40, 0, percentage);
+  }
+  else {
+    position = top_position; 
+  }
+
   Rectangle source = {0 + bar_offset, 0, 426, 40};
-  Vector2 position = top_position;
   DrawTextureRec(main_bar, source, position, WHITE);
 
   drawHeader(position);
-  drawTopInfo(position);
+
+  if (state == READY) {
+    drawTopInfo(position);
+  }
 }
 
 void CampMenuScene::drawHeader(Vector2 position) {
@@ -118,8 +153,17 @@ void CampMenuScene::drawTopInfo(Vector2 position) {
 }
 
 void CampMenuScene::drawBottomBar() {
+  Vector2 position;
+  if (state != READY) {
+    float percentage = Clamp(state_clock / 0.5, 0.0, 1.0);
+    position.x = bottom_position.x;
+    position.y = Lerp(240, bottom_position.y, percentage);
+  }
+  else {
+    position = bottom_position;
+  }
+
   Rectangle source = {0 + bar_offset, 0, -426, -40};
-  Vector2 position = bottom_position;
   Rectangle dest = {position.x, position.y, 426, 40};
   DrawTexturePro(main_bar, source, dest, {0, 0}, 0, WHITE);
 
@@ -131,12 +175,14 @@ void CampMenuScene::drawBottomInfo(Vector2 position) {
   position = Vector2Add(position, {32, 4});
   DrawTextureRec(atlas.sheet, *sprite, position, WHITE);
 
-  Font *font = &Game::med_font;
-  int txt_size = font->baseSize;
+  if (state == READY) {
+    Font *font = &Game::med_font;
+    int txt_size = font->baseSize;
 
-  drawSupplyCount(font, txt_size, position);
-  drawPlaytime(font, txt_size, position);
-  drawDescription(font, txt_size, position);
+    drawSupplyCount(font, txt_size, position);
+    drawPlaytime(font, txt_size, position);
+    drawDescription(font, txt_size, position);
+  }
 }
 
 void CampMenuScene::drawSupplyCount(Font *font, int txt_size, 
@@ -208,13 +254,26 @@ void CampMenuScene::drawOptions() {
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
 
+  Vector2 base_position;
+  Color tint = WHITE;
+  if (state != READY) {
+    float percentage = Clamp((-0.50 + state_clock) / 0.4, 0.0, 1.0);
+    base_position.x = Lerp(-36, option_position.x, percentage);
+    base_position.y = option_position.y;
+
+    tint.a = Lerp(0, 255, percentage);
+  }
+  else {
+    base_position = option_position;
+  }
+
   for (int index = 0; index < 5; index++) {
     CampMenuOption option = options[index];
 
     string name = getOptionName(option);
     Rectangle *sprite;
 
-    Vector2 position = option_position;
+    Vector2 position = base_position;
     position.y += 16 * index;
 
     if (option == *selected) {
@@ -225,10 +284,10 @@ void CampMenuScene::drawOptions() {
       sprite = &atlas.sprites[0];
     }
 
-    DrawTextureRec(atlas.sheet, *sprite, position, WHITE);
+    DrawTextureRec(atlas.sheet, *sprite, position, tint);
 
     position = Vector2Add(position, {6, 1});
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, tint);
   }
 }
 
