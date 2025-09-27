@@ -1,11 +1,9 @@
 #pragma once
 #include <array>
 #include <string>
-#include <memory>
 #include <unordered_set>
 #include <raylib.h>
 #include "base/scene.h"
-#include "base/panel.h"
 #include "data/keybinds.h"
 #include "system/sound_atlas.h"
 #include "system/sprite_atlas.h"
@@ -47,7 +45,4 @@ private:
 
   bool valid_session;
   std::unordered_set<TitleOption> disallowed;
-
-  bool panel_mode = false;
-  std::unique_ptr<Panel> panel;
 };
