@@ -36,9 +36,15 @@ void PartyHud::assign(Character *user, float *clock) {
 void PartyHud::draw() { 
   assert(clock != NULL);
   bool timer_finished = *clock == 1.0;
+
+  float percentage = *clock;
+  if (reverse) {
+    percentage = 1.0 - percentage;
+  }
+
   Rectangle source = atlas->sprites[7];
   if (!timer_finished) {
-    source.height *= *clock;
+    source.height *= percentage;
   }
 
   DrawTextureRec(atlas->sheet, source, main_position, WHITE);

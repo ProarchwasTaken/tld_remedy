@@ -18,11 +18,12 @@ public:
   void drawMorale();
   void drawStatusIcons();
 
+  bool reverse = false;
+  float *clock = NULL;
 private:
   Character *user;
   SpriteAtlas *atlas;
   static SpriteAtlas icon_atlas;
 
   Vector2 main_position;
-  float *clock = NULL;
 };

@@ -26,6 +26,9 @@ public:
 
   void update() override;
   void optionNavigation();
+  void selectOption();
+  void panelTermination();
+
   void offsetBars();
   void optionTimer();
 
@@ -43,17 +46,31 @@ public:
   std::string getDescription(CampMenuOption option);
 
   void drawOptions();
+  void baseOptionLerp(Vector2 &base_position, Color &base_tint);
+  void selectedOptionLerp(Vector2 &position);
+  void unselectedOptionLerp(float &x, unsigned char &alpha);
   std::string getOptionName(CampMenuOption option);
 
   static SpriteAtlas atlas;
+  static SpriteAtlas menu_atlas;
 private:
   Session *session;
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
 
-  enum {OPENING, READY, CLOSING} state = OPENING;
+  enum {
+    OPENING, 
+    READY, 
+    CLOSING, 
+    OPENING_PANEL, 
+    CLOSING_PANEL
+  } state = OPENING;
+
   float state_clock = 0.0;
   float state_time = 0.8;
+
+  float panel_clock = 0.0;
+  float panel_time = 0.4;
 
   std::array<CampMenuOption, 5> options = {
     CampMenuOption::ITEMS,

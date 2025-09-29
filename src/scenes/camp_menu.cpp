@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <memory>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -11,11 +12,13 @@
 #include "utils/text.h"
 #include "utils/math.h"
 #include "system/sprite_atlas.h"
+#include "menu/panels/config.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique;
 SpriteAtlas CampMenuScene::atlas("menu", "camp_menu");
+SpriteAtlas CampMenuScene::menu_atlas("menu", "menu_elements");
 
 
 CampMenuScene::CampMenuScene(Session *session) {
@@ -38,6 +41,7 @@ CampMenuScene::~CampMenuScene() {
   atlas.release();
   sfx->release();
   UnloadTexture(main_bar);
+  assert(menu_atlas.users() == 0);
   PLOGI << "Unloading the Camp Menu Scene.";
 }
 
@@ -59,10 +63,46 @@ void CampMenuScene::update() {
       if (state_clock == 0.0) {
         Game::returnToField();    
       }
+      break;
+    }
+    case OPENING_PANEL: {
+      panel_clock += Game::deltaTime() / panel_time;
+      panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+      if (panel_clock == 1.0) {
+        panel_mode = true;
+        state = READY;
+      }
+      break;
+    }
+    case CLOSING_PANEL: {
+      panel_clock -= Game::deltaTime() / panel_time;
+      panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+      if (panel_clock == 0.0) {
+        plr_hud.clock = &state_clock;
+        plr_hud.reverse = false;
+
+        com_hud.clock = &state_clock;
+        com_hud.reverse = false;
+        state = READY;
+      }
+
+      break;
     }
     case READY: {
-      optionNavigation();
-      optionTimer();
+      if (!panel_mode) {
+        optionNavigation();
+        optionTimer();
+        break;
+      }
+
+      assert(panel != nullptr);
+      panel->update();
+
+      if (panel->terminate) {
+        panelTermination();
+      }
       break;
     }
   }
@@ -82,9 +122,41 @@ void CampMenuScene::optionNavigation() {
     sfx->play("menu_navigate");
     opt_switch_clock = 0.0;
   }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectOption();
+    sfx->play("menu_select");
+  }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = CLOSING;
+    sfx->play("menu_cancel");
   }
+}
+
+void CampMenuScene::selectOption() {
+  switch (*selected) {
+    case CampMenuOption::CONFIG: {
+      panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
+      state = OPENING_PANEL;
+
+      plr_hud.clock = &panel_clock;
+      plr_hud.reverse = true;
+
+      com_hud.clock = &panel_clock;
+      com_hud.reverse = true;
+      break;
+    }
+    default: {
+
+    }
+  }
+}
+
+void CampMenuScene::panelTermination() {
+  assert(panel != nullptr);
+
+  panel.reset();
+  panel_mode = false;
+  state = CLOSING_PANEL;
 }
 
 void CampMenuScene::offsetBars() {
@@ -107,10 +179,16 @@ void CampMenuScene::optionTimer() {
 void CampMenuScene::draw() {
   drawTopBar();
   drawBottomBar();
+
   drawOptions();
 
-  plr_hud.draw();
-  com_hud.draw();
+  if (!panel_mode) {
+    plr_hud.draw();
+    com_hud.draw();
+  }
+  else {
+    panel->draw();
+  }
 }
 
 void CampMenuScene::drawTopBar() {
@@ -217,7 +295,10 @@ void CampMenuScene::drawPlaytime(Font *font, int txt_size,
 void CampMenuScene::drawDescription(Font *font, int txt_size, 
                                     Vector2 position)
 {
-  description = getDescription(*selected);
+  if (!panel_mode) {
+    description = getDescription(*selected);
+  }
+
   position.x += 136;
   DrawTextEx(*font, description.c_str(), position, txt_size, -2, 
              desc_color);
@@ -258,34 +339,25 @@ void CampMenuScene::drawOptions() {
   int txt_size = font->baseSize;
 
   Vector2 base_position;
-  Color tint = WHITE;
-  if (state != READY) {
-    float percentage = Clamp((-0.50 + state_clock) / 0.4, 0.0, 1.0);
-
-    base_position.x = Math::smoothstep(-36, option_position.x, 
-                                       percentage);
-    base_position.y = option_position.y;
-
-    tint.a = Lerp(0, 255, percentage);
-  }
-  else {
-    base_position = option_position;
-  }
+  Color base_tint = WHITE;
+  baseOptionLerp(base_position, base_tint);
 
   for (int index = 0; index < 5; index++) {
     CampMenuOption option = options[index];
 
     string name = getOptionName(option);
     Rectangle *sprite;
+    Color tint = base_tint;
 
     Vector2 position = base_position;
     position.y += 16 * index;
 
     if (option == *selected) {
-      position.x += 16 * opt_switch_clock;
+      selectedOptionLerp(position);
       sprite = &atlas.sprites[1];
     }
     else {
+      unselectedOptionLerp(position.x, tint.a);
       sprite = &atlas.sprites[0];
     }
 
@@ -293,6 +365,48 @@ void CampMenuScene::drawOptions() {
 
     position = Vector2Add(position, {6, 1});
     DrawTextEx(*font, name.c_str(), position, txt_size, -2, tint);
+  }
+}
+
+void CampMenuScene::baseOptionLerp(Vector2 &base_position, 
+                                   Color &base_tint) 
+{
+  if (state == OPENING || state == CLOSING) {
+    float percentage = Clamp((-0.50 + state_clock) / 0.4, 0.0, 1.0);
+
+    base_position.x = Math::smoothstep(-36, option_position.x, 
+                                       percentage);
+    base_position.y = option_position.y;
+
+    base_tint.a = Lerp(0, 255, percentage);
+  }
+  else {
+    base_position = option_position;
+  }
+}
+
+void CampMenuScene::selectedOptionLerp(Vector2 &position) {
+  position.x += 16 * opt_switch_clock;
+
+  if (state == OPENING_PANEL || state == CLOSING_PANEL) {
+    float start_y = position.y;
+    float end_y = option_position.y;
+    position.y = Lerp(start_y, end_y, panel_clock);
+  }
+  else if (state == READY && panel_mode) {
+    position.y = option_position.y;
+  }
+}
+
+void CampMenuScene::unselectedOptionLerp(float &x, unsigned char &alpha) {
+  if (state == OPENING_PANEL || state == CLOSING_PANEL) {
+    float percentage = Clamp(panel_clock / 0.5, 0.0, 1.0);
+
+    x = Lerp(option_position.x, -36 , percentage);
+    alpha = Lerp(255, 0, percentage);
+  }
+  else if (state == READY && panel_mode) {
+    alpha = 0;
   }
 }
 
