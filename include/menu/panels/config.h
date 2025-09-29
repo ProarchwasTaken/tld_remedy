@@ -56,7 +56,7 @@ private:
   Texture frame;
   Vector2 position = {97, 39};
 
-  float frame_height = 161;
+  float frame_height = 0;
   float blink_clock = 0;
 
   std::array<ConfigOption, 8> options {

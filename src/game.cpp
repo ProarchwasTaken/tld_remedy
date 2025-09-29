@@ -544,7 +544,9 @@ bool Game::existingSession() {
 
 void Game::loadTitleScreen() {
   PLOGI << "Returning to Title Scene";
-  assert(reserve == nullptr);
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;

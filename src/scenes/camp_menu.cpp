@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <raylib.h>
@@ -13,6 +14,7 @@
 #include "utils/math.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/config.h"
+#include "menu/panels/confirm.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
 
@@ -46,6 +48,13 @@ CampMenuScene::~CampMenuScene() {
 }
 
 void CampMenuScene::update() {
+  assert(session != NULL);
+  if (end_session) {
+    Game::loadTitleScreen();
+    session = NULL;
+    return;
+  }
+
   switch (state) { 
     case OPENING: {
       state_clock += Game::deltaTime() / state_time;
@@ -136,23 +145,46 @@ void CampMenuScene::selectOption() {
   switch (*selected) {
     case CampMenuOption::CONFIG: {
       panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
-      state = OPENING_PANEL;
+      break;
+    }
+    case CampMenuOption::END_GAME: {
+      string message = "Return to the Title Screen?\n"
+      "(Unsaved progress will be lost.)";
 
-      plr_hud.clock = &panel_clock;
-      plr_hud.reverse = true;
+      panel = make_unique<ConfirmPanel>(&menu_atlas, keybinds, message);
+    }
+    default: {
 
-      com_hud.clock = &panel_clock;
-      com_hud.reverse = true;
+    }
+  }
+
+  if (panel != nullptr) {
+    plr_hud.clock = &panel_clock;
+    plr_hud.reverse = true;
+
+    com_hud.clock = &panel_clock;
+    com_hud.reverse = true;
+
+    state = OPENING_PANEL;
+  }
+}
+
+void CampMenuScene::panelTermination() {
+  assert(panel != nullptr);
+
+  switch (panel->id) {
+    case PanelID::CONFIRM: {
+      ConfirmPanel *ptr = static_cast<ConfirmPanel*>(panel.get());
+      if (*ptr->selected == ConfirmOption::YES) {
+        end_session = true;
+        Game::fadeout(1.0);
+      }
       break;
     }
     default: {
 
     }
   }
-}
-
-void CampMenuScene::panelTermination() {
-  assert(panel != nullptr);
 
   panel.reset();
   panel_mode = false;
@@ -177,6 +209,10 @@ void CampMenuScene::optionTimer() {
 } 
 
 void CampMenuScene::draw() {
+  if (session == NULL) {
+    return;
+  }
+
   drawTopBar();
   drawBottomBar();
 

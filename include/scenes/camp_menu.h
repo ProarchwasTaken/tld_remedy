@@ -63,8 +63,9 @@ private:
     READY, 
     CLOSING, 
     OPENING_PANEL, 
-    CLOSING_PANEL
+    CLOSING_PANEL,
   } state = OPENING;
+  bool end_session = false;
 
   float state_clock = 0.0;
   float state_time = 0.8;
