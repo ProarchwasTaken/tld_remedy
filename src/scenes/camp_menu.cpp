@@ -181,12 +181,10 @@ void CampMenuScene::draw() {
   drawBottomBar();
 
   drawOptions();
+  plr_hud.draw();
+  com_hud.draw();
 
-  if (!panel_mode) {
-    plr_hud.draw();
-    com_hud.draw();
-  }
-  else {
+  if (panel_mode) {
     panel->draw();
   }
 }
@@ -402,7 +400,7 @@ void CampMenuScene::unselectedOptionLerp(float &x, unsigned char &alpha) {
   if (state == OPENING_PANEL || state == CLOSING_PANEL) {
     float percentage = Clamp(panel_clock / 0.5, 0.0, 1.0);
 
-    x = Lerp(option_position.x, -36 , percentage);
+    x = Lerp(option_position.x, -18, percentage);
     alpha = Lerp(255, 0, percentage);
   }
   else if (state == READY && panel_mode) {

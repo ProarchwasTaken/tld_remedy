@@ -110,7 +110,7 @@ private:
   static bool run_timer;
 
   static float fade_time;
-  static float fade_percentage;
+  static float fade_clock;
 
   static float sleep_time;
   float sleep_clock = 0.0;
@@ -118,7 +118,7 @@ private:
   static Color flash_color;
 
   Vector2 window_res = {1278, 720};
-  Color screen_tint = WHITE;
+  static Color screen_tint;
 
   RenderTexture canvas;
   Rectangle canvas_src;

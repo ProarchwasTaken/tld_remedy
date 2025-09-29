@@ -38,7 +38,8 @@ mt19937_64 Game::RNG;
 
 Settings Game::settings;
 
-float Game::fade_percentage = 0.0;
+Color Game::screen_tint = WHITE;
+float Game::fade_clock = 0.0;
 float Game::fade_time = 0.0;
 
 float Game::sleep_time = 0.0;
@@ -272,7 +273,7 @@ void Game::gameLogic() {
 }
 
 void Game::fadeScreenProcedure() {
-  float value = Lerp(0, 255, fade_percentage);
+  float value = Lerp(0, 255, fade_clock);
   screen_tint.r = value;
   screen_tint.g = value;
   screen_tint.b = value;
@@ -283,15 +284,15 @@ void Game::fadeScreenProcedure() {
   }
 
   if (game_state == GameState::FADING_OUT) {
-    fade_percentage -= magnitude;
+    fade_clock -= magnitude;
   }
   else if (game_state == GameState::FADING_IN){
-    fade_percentage += magnitude;
+    fade_clock += magnitude;
   }
 
-  fade_percentage = Clamp(fade_percentage, 0.0, 1.0);
+  fade_clock = Clamp(fade_clock, 0.0, 1.0);
 
-  bool finished_fading = fade_percentage == 0.0 || fade_percentage == 1.0;
+  bool finished_fading = fade_clock == 0.0 || fade_clock == 1.0;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
     game_state = GameState::READY;
@@ -316,6 +317,7 @@ void Game::switchSceneProcedure() {
   scene.swap(reserve);
 
   Game::fadein(1.0);
+  SKIP_FRAME = true;
   PLOGI << "Procedure complete.";
 }
 
@@ -367,7 +369,8 @@ void Game::returnFieldProcedure() {
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
-  game_state = GameState::READY;
+  Game::fadein(0.5);
+  SKIP_FRAME = true;
 }
 
 void Game::drawScene() {
@@ -403,7 +406,8 @@ void Game::fadeout(float seconds) {
     case GameState::READY:
     case GameState::SWITCHING_SCENE: {
       PLOGI << "Fading out the screen.";
-      Game::fade_percentage = 1.0;
+      Game::screen_tint = WHITE;
+      Game::fade_clock = 1.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_OUT;
       break;
@@ -418,10 +422,12 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
+    case GameState::RETURN_TO_FIELD:
     case GameState::SWITCHING_SCENE: 
     case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
-      Game::fade_percentage = 0.0;
+      Game::screen_tint = BLACK;
+      Game::fade_clock = 0.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
       break;

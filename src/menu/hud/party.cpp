@@ -35,12 +35,12 @@ void PartyHud::assign(Character *user, float *clock) {
 
 void PartyHud::draw() { 
   assert(clock != NULL);
-  bool timer_finished = *clock == 1.0;
 
   float percentage = *clock;
   if (reverse) {
     percentage = 1.0 - percentage;
   }
+  bool timer_finished = percentage == 1.0;
 
   Rectangle source = atlas->sprites[7];
   if (!timer_finished) {
@@ -126,7 +126,7 @@ void PartyHud::drawStatusIcons() {
   Vector2 position = Vector2Add(main_position, {64, 4});
 
   for (int x = 0; x < user->status_limit; x++) {
-    StatusID effect=  user->status[x];
+    StatusID effect = user->status[x];
 
     if (effect != StatusID::NONE) {
       int id = static_cast<int>(effect);
