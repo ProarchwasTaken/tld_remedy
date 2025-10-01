@@ -10,7 +10,8 @@ enum class SceneID {
 
 enum class PanelID {
   CONFIG,
-  CONFIRM
+  CONFIRM,
+  STATUS
 };
 
 enum EntityType {

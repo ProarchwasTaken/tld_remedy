@@ -14,6 +14,7 @@
 #include "utils/math.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/config.h"
+#include "menu/panels/status.h"
 #include "menu/panels/confirm.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
@@ -43,7 +44,6 @@ CampMenuScene::~CampMenuScene() {
   atlas.release();
   sfx->release();
   UnloadTexture(main_bar);
-  assert(menu_atlas.users() == 0);
   PLOGI << "Unloading the Camp Menu Scene.";
 }
 
@@ -143,6 +143,11 @@ void CampMenuScene::optionNavigation() {
 
 void CampMenuScene::selectOption() {
   switch (*selected) {
+    case CampMenuOption::STATUS: {
+      panel = make_unique<StatusPanel>(&menu_atlas, keybinds, session,
+                                       &description);
+      break;
+    }
     case CampMenuOption::CONFIG: {
       panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
       break;

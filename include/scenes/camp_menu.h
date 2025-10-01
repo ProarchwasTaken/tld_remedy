@@ -71,7 +71,7 @@ private:
   float state_time = 0.8;
 
   float panel_clock = 0.0;
-  float panel_time = 0.4;
+  float panel_time = 0.3;
 
   std::array<CampMenuOption, 5> options = {
     CampMenuOption::ITEMS,
