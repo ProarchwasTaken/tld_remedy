@@ -144,8 +144,7 @@ void CampMenuScene::optionNavigation() {
 void CampMenuScene::selectOption() {
   switch (*selected) {
     case CampMenuOption::STATUS: {
-      panel = make_unique<StatusPanel>(&menu_atlas, keybinds, session,
-                                       &description);
+      panel = make_unique<StatusPanel>(session, &description);
       break;
     }
     case CampMenuOption::CONFIG: {
