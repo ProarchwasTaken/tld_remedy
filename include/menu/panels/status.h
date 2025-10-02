@@ -47,6 +47,8 @@ private:
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
 
+  float percentage = 0.0;
+
   Texture frame;
   float frame_height = 0;
   constexpr static Vector2 frame_position = {257, 48};

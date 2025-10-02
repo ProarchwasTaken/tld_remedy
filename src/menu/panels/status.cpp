@@ -76,15 +76,16 @@ void StatusPanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
     heightLerp();
-    return;
+  }
+  else {
+    blink_clock += Game::deltaTime();
+    optionNavigation();  
   }
 
-  blink_clock += Game::deltaTime();
-  optionNavigation();
+  portrait.update(percentage);
 }
 
 void StatusPanel::heightLerp() {
-  float percentage;
   if (state == PanelState::OPENING) {
     percentage = clock;
   }
@@ -101,14 +102,18 @@ void StatusPanel::optionNavigation() {
   if (Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected);
     updateDescription();
+
     sfx->play("menu_navigate");
     blink_clock = 0.0;
+    portrait.fade_clock = 0.0;
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected);
     updateDescription();
+
     sfx->play("menu_navigate");
     blink_clock = 0.0;
+    portrait.fade_clock = 0.0;
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
@@ -309,7 +314,11 @@ string StatusPanel::getStatusName(StatusID id) {
 void StatusPanel::drawOptions() {
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
-  Rectangle *sprite = &camp_atlas->sprites[0];
+
+  Rectangle sprite = camp_atlas->sprites[0];
+  if (state != PanelState::READY) {
+    sprite.width *= percentage;
+  }
 
   for (int index = 0; index < 2; index++) {
     Character *party_member = options[index];
@@ -318,7 +327,7 @@ void StatusPanel::drawOptions() {
     Vector2 position = option_position;
     position.y += 16 * index;
 
-    DrawTextureRec(camp_atlas->sheet, *sprite, position, WHITE);
+    DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
     Character *current = *selected;
     if (current->member_id == id) {
