@@ -6,6 +6,7 @@
 #include "base/panel.h"
 #include "data/keybinds.h"
 #include "data/session.h"
+#include "menu/hud/portrait.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
@@ -15,13 +16,15 @@ public:
   StatusPanel(Session *session, std::string *description);
   ~StatusPanel();
 
+  void updateDescription();
+
   void update() override;
   void heightLerp();
 
   void optionNavigation();
   void draw() override;
 
-  void drawPartyMemberInfo();
+  void drawPartyMemberInfo(Character *party_member);
   void drawName(Font *font, int txt_size, const char *name);
   void drawTitle(Font *font, int txt_size, PartyMemberID id);
   void drawLife(Font *font, int txt_size, float value, float max);
@@ -47,9 +50,11 @@ private:
   Texture frame;
   float frame_height = 0;
   constexpr static Vector2 frame_position = {257, 48};
-  constexpr static Vector2 option_position = {41, 58};
 
+  constexpr static Vector2 option_position = {41, 58};
   std::array<Character*, 2> options;
   std::array<Character*, 2>::iterator selected;
   float blink_clock = 0.0;
+
+  Portrait portrait = Portrait({185, 48});
 };

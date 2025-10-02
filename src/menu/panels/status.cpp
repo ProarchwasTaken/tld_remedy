@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <string>
 #include <raylib.h>
@@ -31,6 +32,7 @@ StatusPanel::StatusPanel(Session *session, string *description)
 
   this->keybinds = &Game::settings.menu_keybinds;
   this->description = description;
+  updateDescription();
 
   menu_atlas = &CampMenuScene::menu_atlas;
   menu_atlas->use();
@@ -47,6 +49,27 @@ StatusPanel::~StatusPanel() {
   menu_atlas->release();
   camp_atlas->release();
   sfx->release();
+}
+
+void StatusPanel::updateDescription() {
+  assert(description != NULL);
+  assert(selected != NULL);
+
+  Character *party_member = *selected;
+  switch (party_member->member_id) {
+    case PartyMemberID::MARY: {
+      *description = 
+        "A young man who used to work as a nurse\n"
+        "for the Grand Hills hospital.";
+      break;
+    }
+    case PartyMemberID::ERWIN: {
+      *description = 
+        "A middle-aged man who had already gone\n"
+        "throught the wringer multiple times before.";
+      break;
+    }
+  }
 }
 
 void StatusPanel::update() {
@@ -77,11 +100,13 @@ void StatusPanel::optionNavigation() {
 
   if (Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected);
+    updateDescription();
     sfx->play("menu_navigate");
     blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected);
+    updateDescription();
     sfx->play("menu_navigate");
     blink_clock = 0.0;
   }
@@ -95,19 +120,20 @@ void StatusPanel::draw() {
   Rectangle source = {0, 0, 160, frame_height};
   DrawTextureRec(frame, source, frame_position, WHITE);
 
+  Character *party_member = *selected;
   if (state == PanelState::READY) {
-    drawPartyMemberInfo();
+    drawPartyMemberInfo(party_member);
   }
 
+  portrait.draw(party_member->member_id);
   drawOptions();
 }
 
-void StatusPanel::drawPartyMemberInfo() {
+void StatusPanel::drawPartyMemberInfo(Character *party_member) {
   Font *sm_font = &Game::sm_font;
   int sm_size = sm_font->baseSize;
   Font *med_font = &Game::med_font;
   int med_size = med_font->baseSize;
-  Character *party_member = *selected;
 
   drawName(med_font, med_size, party_member->name);
   drawTitle(med_font, med_size, party_member->member_id);
