@@ -2,6 +2,7 @@
 #include <array>
 #include <string>
 #include <raylib.h>
+#include "enums.h"
 #include "base/panel.h"
 #include "data/keybinds.h"
 #include "data/session.h"
@@ -19,6 +20,17 @@ public:
 
   void optionNavigation();
   void draw() override;
+
+  void drawPartyMemberInfo();
+  void drawName(Font *font, int txt_size, const char *name);
+  void drawTitle(Font *font, int txt_size, PartyMemberID id);
+  void drawLife(Font *font, int txt_size, float value, float max);
+  void drawMorale(Font *font, int txt_size, float initial, float max);
+
+  void drawClass(Font *font, int txt_size, PartyMemberID id);
+  void drawStyle(Font *font, int txt_size, PartyMemberID id);
+  void drawStats(Font *font, int txt_size, Character *member);
+
   void drawOptions();
   void drawCursor(Vector2 position);
 private:
