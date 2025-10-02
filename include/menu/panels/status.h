@@ -29,7 +29,11 @@ public:
 
   void drawClass(Font *font, int txt_size, PartyMemberID id);
   void drawStyle(Font *font, int txt_size, PartyMemberID id);
+
   void drawStats(Font *font, int txt_size, Character *member);
+  void drawStatus(Font *font, int txt_size, Character *member);
+
+  std::string getStatusName(StatusID id);
 
   void drawOptions();
   void drawCursor(Vector2 position);

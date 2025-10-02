@@ -120,6 +120,7 @@ void StatusPanel::drawPartyMemberInfo() {
   drawStyle(sm_font, sm_size, party_member->member_id);
 
   drawStats(sm_font, sm_size, party_member);
+  drawStatus(sm_font, sm_size, party_member);
 }
 
 void StatusPanel::drawName(Font *font, int txt_size, const char *name) {
@@ -235,6 +236,48 @@ void StatusPanel::drawStats(Font *font, int txt_size, Character *member) {
   std::strcpy(stat, TextFormat("%02i", member->persist));
   position.x += 80;
   DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
+}
+
+void StatusPanel::drawStatus(Font *font, int txt_size, Character *member)
+{
+  Vector2 position = Vector2Add(frame_position, {80, 105});
+
+  if (member->status_count == 0) {
+    Color color = Game::palette[14];
+    DrawTextEx(*font, "FINE :D", position, txt_size, -3, color);
+    return;
+  } 
+
+  Color color = Game::palette[32];
+  for (int index = 0; index < member->status_limit; index++) {
+    StatusID effect = member->status[index];
+    if (effect == StatusID::NONE) {
+      continue;
+    }
+
+    string name = getStatusName(effect);
+    assert(name != "");
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -3, color);
+    position.y += 12;
+  }
+}
+
+string StatusPanel::getStatusName(StatusID id) {
+  switch (id) {
+    case StatusID::BROKEN_ARM: {
+      return "BROKEN ARM";
+    }
+    case StatusID::CRIPPLED_LEG: {
+      return "CRIPPLED LEG";
+    }
+    case StatusID::MANGLED: {
+      return "MANGLED";
+    }
+    default: {
+      return "";
+    }
+  }
 }
 
 void StatusPanel::drawOptions() {
