@@ -11,7 +11,8 @@ enum class SceneID {
 enum class PanelID {
   CONFIG,
   CONFIRM,
-  STATUS
+  STATUS,
+  ITEMS
 };
 
 enum EntityType {
