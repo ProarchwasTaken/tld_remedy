@@ -15,6 +15,7 @@
 #include "system/sprite_atlas.h"
 #include "menu/panels/config.h"
 #include "menu/panels/status.h"
+#include "menu/panels/items.h"
 #include "menu/panels/confirm.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
@@ -142,7 +143,14 @@ void CampMenuScene::optionNavigation() {
 }
 
 void CampMenuScene::selectOption() {
+  bool hide_party_hud = true;
+
   switch (*selected) {
+    case CampMenuOption::ITEMS: {
+      panel = make_unique<ItemsPanel>(session, &description);
+      hide_party_hud = false;
+      break;
+    }
     case CampMenuOption::STATUS: {
       panel = make_unique<StatusPanel>(session, &description);
       break;
@@ -162,15 +170,19 @@ void CampMenuScene::selectOption() {
     }
   }
 
-  if (panel != nullptr) {
+  if (panel == nullptr) {
+    return;
+  }
+
+  if (hide_party_hud) {
     plr_hud.clock = &panel_clock;
     plr_hud.reverse = true;
 
     com_hud.clock = &panel_clock;
     com_hud.reverse = true;
-
-    state = OPENING_PANEL;
   }
+
+  state = OPENING_PANEL;
 }
 
 void CampMenuScene::panelTermination() {
