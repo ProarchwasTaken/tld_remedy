@@ -37,6 +37,12 @@ enum class CompanionID {
   ERWIN
 };
 
+enum class ItemID {
+  NONE = -1,
+  I_BANDAGE,
+  M_SPLINT
+};
+
 enum class CombatantTeam {
   PARTY,
   ENEMY
