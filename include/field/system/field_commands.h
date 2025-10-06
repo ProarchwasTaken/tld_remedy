@@ -1,8 +1,21 @@
 #pragma once
 #include <string>
 #include <map>
-#include "enums.h"
 #include "scenes/field.h"
+
+
+enum class CommandType {
+  CHANGE_MAP,
+  SAVE,
+  INIT_COMBAT,
+  TITLE,
+  DELETE_ENT,
+  SET_SUPPLIES,
+  SET_LIFE,
+  ADD_ITEM,
+  RM_ITEM,
+  CLR_INV
+};
 
 
 /* The command system allows for the possibility of manually triggering
@@ -32,6 +45,9 @@ private:
     {"DELETE_ENTITY", CommandType::DELETE_ENT},
     {"SET_SUPPLIES", CommandType::SET_SUPPLIES},
     {"SET_LIFE", CommandType::SET_LIFE},
+    {"ADD_ITEM", CommandType::ADD_ITEM},
+    {"RM_ITEM", CommandType::RM_ITEM},
+    {"CLEAR_INV", CommandType::CLR_INV}
   };
 
   inline static std::string buffer;

@@ -31,3 +31,12 @@ struct AddSuppliesEvent : FieldEvent {
 struct SetLifeEvent : FieldEvent {
   float value;
 };
+
+struct AddItemEvent : FieldEvent {
+  ItemID item;
+};
+
+struct RemoveItemEvent : FieldEvent {
+  ItemID item;
+};
+

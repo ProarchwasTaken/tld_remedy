@@ -33,6 +33,10 @@ public:
   void update() override;
   void eventProcessing();
   void eventHandling(std::unique_ptr<FieldEvent> &event);
+
+  void addItem(ItemID item);
+  void removeItem(ItemID item);
+  void clearInventory();
   void updateCommonData(int object_id, bool active);
   void deleteEntity(int entity_id);
 
