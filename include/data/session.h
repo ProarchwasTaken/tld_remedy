@@ -59,7 +59,8 @@ struct Session {
     ItemID::NONE,
     ItemID::NONE,
     ItemID::NONE,
-    ItemID::NONE
+    ItemID::NONE,
+    ItemID::NONE,
   };
 
   int common_count = 0;
