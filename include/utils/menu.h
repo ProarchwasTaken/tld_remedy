@@ -19,7 +19,7 @@ void nextOption(std::array<Type, Num> &options,
   }
   
   if (disallowed->find(*selected) != disallowed->end()) {
-    selected++;
+    nextOption(options, selected, disallowed);
   }
 }
 
@@ -39,7 +39,7 @@ void prevOption(std::array<Type, Num> &options,
   }
 
   if (disallowed->find(*selected) != disallowed->end()) {
-    selected--;
+    prevOption(options, selected);
   }
 }
 
