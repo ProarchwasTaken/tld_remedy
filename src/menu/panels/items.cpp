@@ -37,6 +37,14 @@ ItemsPanel::ItemsPanel(Session *session, string *description) {
   sfx->use();
   camp_atlas->use();
   menu_atlas->use();
+
+  if (Game::devmode) {
+    PLOGD << "Player's Inventory";
+    for (int index = 0; index < session->item_limit; index++) {
+      ItemID id = options.at(index);
+      PLOGD << "Index " << index << ": " << static_cast<int>(id);
+    }
+  }
   PLOGI << "Items Panel: Initialized.";
 }
 
@@ -69,10 +77,7 @@ void ItemsPanel::update() {
     return;
   }
 
-  if (selected != NULL) {
-    optionNavigation();
-  }
-
+  optionNavigation();
   blink_clock += Game::deltaTime();
 }
 
@@ -90,12 +95,12 @@ void ItemsPanel::heightLerp() {
 void ItemsPanel::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
 
-  if (Input::pressed(keybinds->down, gamepad)) {
+  if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
     blink_clock = 0.0;
   }
-  else if (Input::pressed(keybinds->up, gamepad)) {
+  else if (selected != NULL && Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
     blink_clock = 0.0;
@@ -130,26 +135,28 @@ void ItemsPanel::drawOptions() {
     DrawTextEx(*font, "NO ITEMS", position, txt_size, -2, WHITE);
   }
 
-  int index = 0;
-  for (ItemID item : options) {
-    if (item == ItemID::NONE) {
+  int multiplier = 0;
+  for (int index = 0; index < options.size(); index++) {
+    ItemID *item = &options.at(index);
+
+    if (*item == ItemID::NONE) {
       continue;
     }
 
-    string name = getShortenedName(item);
+    string name = getShortenedName(*item);
     Vector2 position = option_position;
-    position.y += 16 * index;
+    position.y += 16 * multiplier;
 
     DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
-    if (*selected == item) {
+    if (options.begin() + index == selected) {
       drawCursor(position);
     }
 
     position = Vector2Add(position, {6, 1});
     DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
 
-    index += 1;
+    multiplier += 1;
   }
 }
 
