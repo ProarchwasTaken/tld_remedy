@@ -12,6 +12,7 @@
 #include "utils/input.h"
 #include "utils/math.h"
 #include "utils/menu.h"
+#include "utils/text.h"
 #include "scenes/camp_menu.h"
 #include "menu/panels/items.h"
 #include <plog/Log.h>
@@ -25,6 +26,7 @@ ItemsPanel::ItemsPanel(Session *session, string *description) {
 
   this->session = session;
   this->description = description;
+  description->clear();
 
   this->keybinds = &Game::settings.menu_keybinds;
 
@@ -62,6 +64,7 @@ void ItemsPanel::updateSelected() {
 
     if (*item != ItemID::NONE) {
       selected = options.begin() + index;
+      item_name = getName(*selected);
       PLOGD << "Selected set to: " << static_cast<int>(*item);
       return;
     }
@@ -69,6 +72,59 @@ void ItemsPanel::updateSelected() {
 
   PLOGD << "Player has no items.";
   selected = NULL;
+}
+
+string ItemsPanel::getName(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE: {
+      return "Improvised Bandage";
+    }
+    case ItemID::M_SPLINT: {
+      return "Makeshift Splint";
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return "";
+    }
+  }
+}
+
+string ItemsPanel::getShortenedName(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE: {
+      return "I.Bandage";
+    }
+    case ItemID::M_SPLINT: {
+      return "M.Splint";
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return "N / A";
+    }
+  }
+}
+
+string ItemsPanel::getDescription(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE: {
+      return 
+      "Restores 35% of a Combatant's\n"
+      "Life.\n"
+      "In Combat: Instead applies the\n"
+      "\"Mending\" status effect.";
+    }
+    case ItemID::M_SPLINT: {
+      return
+      "Cures \"Broken Arm\",\n"
+      "\"Crippled Leg\", and \"Mangled\".\n"
+      "In Combat: Also cures the\n"
+      "\"Despondent\" status ailment.";
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return "DESCRIPTION NOT\nAVAILIABLE";
+    }
+  }
 }
 
 void ItemsPanel::update() {
@@ -99,11 +155,13 @@ void ItemsPanel::optionNavigation() {
   if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
+    item_name = getName(*selected);
     blink_clock = 0.0;
   }
   else if (selected != NULL && Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
+    item_name = getName(*selected);
     blink_clock = 0.0;
   }
   if (Input::pressed(keybinds->cancel, gamepad)) {
@@ -118,6 +176,10 @@ void ItemsPanel::draw() {
 
   drawItemCount();
   drawOptions();
+
+  if (selected != NULL) {
+    drawItemInfo();
+  }
 }
 
 void ItemsPanel::drawItemCount() {
@@ -196,20 +258,6 @@ void ItemsPanel::drawOptions() {
   }
 }
 
-string ItemsPanel::getShortenedName(ItemID item) {
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      return "I.Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "M.Splint";
-    }
-    default: {
-      return "N / A";
-    }
-  }
-}
-
 void ItemsPanel::drawCursor(Vector2 position) {
   if (state != PanelState::READY) {
     return;
@@ -224,4 +272,69 @@ void ItemsPanel::drawCursor(Vector2 position) {
   color.a = 255 * sin_a;
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
+}
+
+void ItemsPanel::drawItemInfo() {
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  drawItemName(font, txt_size);
+  drawItemType(font, txt_size);
+  drawItemUsable(font, txt_size);
+  drawItemDesc(font, txt_size);
+}
+
+void ItemsPanel::drawItemName(Font *font, int txt_size) {
+  Vector2 position = Vector2Add(frame_position, {42, 1});
+  Color color = Game::palette[22];
+
+  DrawTextEx(*font, item_name.c_str(), position, txt_size, -2, color);
+}
+
+void ItemsPanel::drawItemType(Font *font, int txt_size) {
+  string type;
+  switch (*selected) {
+    case ItemID::I_BANDAGE: {
+      type = "Restorative Item";
+      break;
+    }
+    case ItemID::M_SPLINT: {
+      type = "Curative Item";
+      break;
+    }
+    default: {
+      assert(*selected != ItemID::NONE);
+    }
+  }
+
+  Vector2 position = Vector2Add(frame_position, {196, 14});
+  position = TextUtils::alignRight(type.c_str(), position, *font, -2, 0);
+
+  DrawTextEx(*font, type.c_str(), position, txt_size, -2, WHITE);
+}
+
+void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
+  string usable;
+  switch (*selected) {
+    case ItemID::I_BANDAGE:
+    case ItemID::M_SPLINT: {
+      usable = "Always";
+      break;
+    }
+    default: {
+      assert(*selected != ItemID::NONE);
+    }
+  }
+
+  Vector2 position = Vector2Add(frame_position, {196, 27});
+  position = TextUtils::alignRight(usable.c_str(), position, *font, -2, 
+                                   0);
+
+  DrawTextEx(*font, usable.c_str(), position, txt_size, -2, WHITE);
+}
+
+void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
+  string desc = getDescription(*selected);
+  Vector2 position = Vector2Add(frame_position, {2, 40});
+  DrawTextEx(*font, desc.c_str(), position, txt_size, -2, WHITE);
 }

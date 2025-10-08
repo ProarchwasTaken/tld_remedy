@@ -18,6 +18,9 @@ public:
   ~ItemsPanel();
 
   void updateSelected();
+  std::string getName(ItemID item);
+  std::string getShortenedName(ItemID item);
+  std::string getDescription(ItemID item);
 
   void update() override;
   void heightLerp();
@@ -25,9 +28,15 @@ public:
 
   void draw() override;
   void drawItemCount();
+
   void drawOptions();
-  std::string getShortenedName(ItemID item);
   void drawCursor(Vector2 position);
+
+  void drawItemInfo();
+  void drawItemName(Font *font, int txt_size);
+  void drawItemType(Font *font, int txt_size);
+  void drawItemUsable(Font *font, int txt_size);
+  void drawItemDesc(Font *font, int txt_size);
 private:
   Session *session;
   std::string *description;
@@ -42,6 +51,8 @@ private:
   float frame_height = 0;
   float percentage = 0;
   constexpr static Vector2 frame_position = {217, 42};
+
+  std::string item_name;
 
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
