@@ -122,6 +122,8 @@ void CampMenuScene::update() {
 
 void CampMenuScene::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
+  bool finished = opt_switch_clock == 1.0;
+
   if (Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected);
     sfx->play("menu_navigate");
@@ -132,11 +134,11 @@ void CampMenuScene::optionNavigation() {
     sfx->play("menu_navigate");
     opt_switch_clock = 0.0;
   }
-  else if (Input::pressed(keybinds->confirm, gamepad)) {
+  else if (finished && Input::pressed(keybinds->confirm, gamepad)) {
     selectOption();
     sfx->play("menu_select");
   }
-  else if (Input::pressed(keybinds->cancel, gamepad)) {
+  else if (finished && Input::pressed(keybinds->cancel, gamepad)) {
     state = CLOSING;
     sfx->play("menu_cancel");
   }

@@ -24,6 +24,7 @@ public:
   void optionNavigation();
 
   void draw() override;
+  void drawItemCount();
   void drawOptions();
   std::string getShortenedName(ItemID item);
   void drawCursor(Vector2 position);
@@ -48,4 +49,6 @@ private:
   constexpr static Vector2 option_position = {41, 58};
 
   float blink_clock = 0.0;
+
+  constexpr static Vector2 count_position = {107, 42};
 };

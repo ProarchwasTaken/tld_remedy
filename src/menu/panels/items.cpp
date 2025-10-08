@@ -10,6 +10,7 @@
 #include "base/panel.h"
 #include "data/session.h"
 #include "utils/input.h"
+#include "utils/math.h"
 #include "utils/menu.h"
 #include "scenes/camp_menu.h"
 #include "menu/panels/items.h"
@@ -115,7 +116,42 @@ void ItemsPanel::draw() {
   Rectangle source = {0, 0, 200, frame_height};
   DrawTextureRec(frame, source, frame_position, WHITE);
 
+  drawItemCount();
   drawOptions();
+}
+
+void ItemsPanel::drawItemCount() {
+  Rectangle *connector = &camp_atlas->sprites[2];
+  DrawTextureRec(camp_atlas->sheet, *connector, count_position, WHITE);
+
+  Vector2 position = Vector2Add(count_position, {6, 0});
+  Rectangle frame = camp_atlas->sprites[0];
+  frame.x = Math::smoothstep(82, 38, percentage);
+  frame.width = Math::smoothstep(6, 50, percentage);
+
+  DrawTextureRec(camp_atlas->sheet, frame, position, WHITE);
+  
+  if (state != PanelState::READY) {
+    return;
+  }
+
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+  Color color = WHITE;
+
+  int item_count = session->item_count;
+  int item_limit = session->item_limit;
+
+  if (item_count == 0) {
+    color = Game::palette[32];
+  }
+  else if (item_count == item_limit) {
+    color = Game::palette[29];
+  }
+
+  const char *text = TextFormat("%i / %i", item_count, item_limit);
+  position = Vector2Add(position, {7, 1});
+  DrawTextEx(*font, text, position, txt_size, -2, color);
 }
 
 void ItemsPanel::drawOptions() {
