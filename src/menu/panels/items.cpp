@@ -37,6 +37,9 @@ ItemsPanel::ItemsPanel(Session *session, string *description) {
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();
 
+  party = {&session->player, &session->companion};
+  target = party.begin();
+
   sfx->use();
   camp_atlas->use();
   menu_atlas->use();
@@ -134,8 +137,13 @@ void ItemsPanel::update() {
     return;
   }
 
-  optionNavigation();
-  blink_clock += Game::deltaTime();
+  if (!target_mode) {
+    optionNavigation();
+    blink_clock += Game::deltaTime();
+  }
+  else {
+    targetNavigation();
+  }
 }
 
 void ItemsPanel::heightLerp() {
@@ -151,7 +159,6 @@ void ItemsPanel::heightLerp() {
 
 void ItemsPanel::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
-
   if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
@@ -164,8 +171,35 @@ void ItemsPanel::optionNavigation() {
     item_name = getName(*selected);
     blink_clock = 0.0;
   }
-  if (Input::pressed(keybinds->cancel, gamepad)) {
+  else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
+  {
+    *description = "Select a combatant to use item:\n"
+      "\"" + item_name + "\"";
+    target = party.begin();
+    sfx->play("menu_select");
+    target_mode = true;
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
+    sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::targetNavigation() {
+  assert(selected != NULL);
+  bool gamepad = IsGamepadAvailable(0);
+
+  if (Input::pressed(keybinds->right, gamepad)) {
+    MenuUtils::nextOption(party, target);
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->left, gamepad)) {
+    MenuUtils::prevOption(party, target);
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    target_mode = false;
+    *description = "";
     sfx->play("menu_cancel");
   }
 }
@@ -177,8 +211,16 @@ void ItemsPanel::draw() {
   drawItemCount();
   drawOptions();
 
-  if (selected != NULL) {
+  if (selected != NULL && state == PanelState::READY) {
     drawItemInfo();
+  }
+
+  if (target_mode) {
+    Character *party_member = *target;
+    bool leader = party_member->member_id == PartyMemberID::MARY;
+
+    Vector2 position = {213.0f + (104.0f * !leader), 148};
+    reticle.draw(position);
   }
 }
 
@@ -267,9 +309,12 @@ void ItemsPanel::drawCursor(Vector2 position) {
   position = Vector2Add(position, {-13, 3});
 
   Color color = WHITE;
-  float sin_a = std::sinf(blink_clock * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+
+  if (!target_mode) {
+    float sin_a = std::sinf(blink_clock * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
 }

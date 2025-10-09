@@ -10,6 +10,7 @@
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "menu/hud/reticle.h"
 
 
 class ItemsPanel : public Panel {
@@ -25,6 +26,7 @@ public:
   void update() override;
   void heightLerp();
   void optionNavigation();
+  void targetNavigation();
 
   void draw() override;
   void drawItemCount();
@@ -52,14 +54,17 @@ private:
   float percentage = 0;
   constexpr static Vector2 frame_position = {217, 42};
 
-  std::string item_name;
-
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
   std::unordered_set<ItemID> disallowed = {ItemID::NONE};
   constexpr static Vector2 option_position = {41, 58};
-
+  std::string item_name;
   float blink_clock = 0.0;
+
+  bool target_mode = false;
+  std::array<Character*, 2> party;
+  std::array<Character*, 2>::iterator target;
+  TargetReticle reticle;
 
   constexpr static Vector2 count_position = {107, 42};
 };
