@@ -7,7 +7,7 @@ public:
   TargetReticle();
   ~TargetReticle();
 
-  void draw(Vector2 position);
+  void draw(Vector2 position, float clock);
 private:
   SpriteAtlas *menu_atlas;
 };

@@ -139,11 +139,12 @@ void ItemsPanel::update() {
 
   if (!target_mode) {
     optionNavigation();
-    blink_clock += Game::deltaTime();
   }
   else {
     targetNavigation();
   }
+
+  blink_clock += Game::deltaTime();
 }
 
 void ItemsPanel::heightLerp() {
@@ -192,10 +193,12 @@ void ItemsPanel::targetNavigation() {
   if (Input::pressed(keybinds->right, gamepad)) {
     MenuUtils::nextOption(party, target);
     sfx->play("menu_navigate");
+    blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->left, gamepad)) {
     MenuUtils::prevOption(party, target);
     sfx->play("menu_navigate");
+    blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     target_mode = false;
@@ -220,7 +223,7 @@ void ItemsPanel::draw() {
     bool leader = party_member->member_id == PartyMemberID::MARY;
 
     Vector2 position = {213.0f + (104.0f * !leader), 148};
-    reticle.draw(position);
+    reticle.draw(position, blink_clock);
   }
 }
 
