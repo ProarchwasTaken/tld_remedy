@@ -15,13 +15,16 @@
 
 class ItemsPanel : public Panel {
 public:
-  ItemsPanel(Session *session, std::string *description);
+  ItemsPanel(Session *session, std::string *description, 
+             Color *desc_color);
   ~ItemsPanel();
 
   void updateSelected();
   std::string getName(ItemID item);
   std::string getShortenedName(ItemID item);
   std::string getDescription(ItemID item);
+
+  void useItem();
 
   void update() override;
   void heightLerp();
@@ -42,6 +45,7 @@ public:
 private:
   Session *session;
   std::string *description;
+  Color *desc_color;
 
   SpriteAtlas *camp_atlas;
   SpriteAtlas *menu_atlas;

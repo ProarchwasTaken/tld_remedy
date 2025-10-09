@@ -20,13 +20,17 @@
 using std::string;
 
 
-ItemsPanel::ItemsPanel(Session *session, string *description) {
+ItemsPanel::ItemsPanel(Session *session, string *description, 
+                       Color *desc_color) {
   id = PanelID::ITEMS;
   frame = LoadTexture("graphics/menu/items_frame.png");
 
   this->session = session;
   this->description = description;
   description->clear();
+
+  this->desc_color = desc_color;
+  *desc_color = Game::palette[22];
 
   this->keybinds = &Game::settings.menu_keybinds;
 
@@ -55,6 +59,9 @@ ItemsPanel::ItemsPanel(Session *session, string *description) {
 }
 
 ItemsPanel::~ItemsPanel() {
+  std::copy(options.begin(), options.end(), session->inventory);
+  *desc_color = WHITE;
+
   UnloadTexture(frame);
   sfx->release();
   camp_atlas->release();
@@ -130,6 +137,45 @@ string ItemsPanel::getDescription(ItemID item) {
   }
 }
 
+void ItemsPanel::useItem() {
+  assert(target_mode);
+  assert(selected != NULL);
+  ItemID item = *selected;
+  Character *member = *target;
+  PLOGI << "Attempting to use item on: '" << member->name << "'";
+
+  switch (item) {
+    case ItemID::I_BANDAGE: {
+      float heal = std::ceilf(member->max_life * 0.35);
+      PLOGI << "Healing combatant by: " << heal << " Life";
+
+      member->life = Clamp(member->life + heal, 0, member->max_life);
+      break;
+    }
+    case ItemID::M_SPLINT: {
+      for (int index = member->status_limit - 1; index >= 0; index--) {
+        StatusID *effect = &member->status[index];
+
+        if (*effect != StatusID::NONE) {
+          PLOGI << "Curing persistant status ailment.";
+          *effect = StatusID::NONE;
+          member->status_count--;
+          assert(member->status_count >= 0);
+        }
+      }
+
+      break;
+    }
+    default: {
+      assert(item != ItemID::NONE);
+    }
+  }
+
+  *selected = ItemID::NONE;
+  session->item_count--;
+  updateSelected();
+}
+
 void ItemsPanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
@@ -199,6 +245,12 @@ void ItemsPanel::targetNavigation() {
     MenuUtils::prevOption(party, target);
     sfx->play("menu_navigate");
     blink_clock = 0.0;
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    useItem();
+    target_mode = false;
+    *description = "";
+    sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     target_mode = false;

@@ -149,7 +149,7 @@ void CampMenuScene::selectOption() {
 
   switch (*selected) {
     case CampMenuOption::ITEMS: {
-      panel = make_unique<ItemsPanel>(session, &description);
+      panel = make_unique<ItemsPanel>(session, &description, &desc_color);
       hide_party_hud = false;
       break;
     }

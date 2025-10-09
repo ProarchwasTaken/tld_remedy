@@ -569,6 +569,12 @@ void FieldScene::drawSessionInfo() {
                                            *font, -3, 0);
   y += spacing;
 
+  string common = TextFormat("Common Count: %i / %i", 
+                             session.common_count, session.common_limit);
+  Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
+                                             *font, -3, 0);
+  y += spacing;
+
   string pursue = TextFormat("Persuing Enemy: %i", 
                              EnemyActor::pursuing_enemy);
   Vector2 per_pos = TextUtils::alignRight(pursue.c_str(), {base_x, y}, 
@@ -580,5 +586,6 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }
