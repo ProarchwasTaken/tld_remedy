@@ -161,6 +161,7 @@ void ItemsPanel::useItem() {
           *effect = StatusID::NONE;
           member->status_count--;
           assert(member->status_count >= 0);
+          break;
         }
       }
 
