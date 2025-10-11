@@ -13,11 +13,13 @@
 #include "utils/math.h"
 #include "utils/menu.h"
 #include "utils/text.h"
+#include "system/sprite_atlas.h"
 #include "scenes/camp_menu.h"
 #include "menu/panels/items.h"
 #include <plog/Log.h>
 
 using std::string;
+SpriteAtlas ItemsPanel::portraits("menu", "item_portraits");
 
 
 ItemsPanel::ItemsPanel(Session *session, string *description, 
@@ -44,6 +46,7 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
   party = {&session->player, &session->companion};
   target = party.begin();
 
+  portraits.use();
   sfx->use();
   camp_atlas->use();
   menu_atlas->use();
@@ -63,6 +66,7 @@ ItemsPanel::~ItemsPanel() {
   *desc_color = WHITE;
 
   UnloadTexture(frame);
+  portraits.release();
   sfx->release();
   camp_atlas->release();
   menu_atlas->release();
@@ -383,6 +387,7 @@ void ItemsPanel::drawItemInfo() {
   drawItemType(font, txt_size);
   drawItemUsable(font, txt_size);
   drawItemDesc(font, txt_size);
+  drawItemPortrait();
 }
 
 void ItemsPanel::drawItemName(Font *font, int txt_size) {
@@ -438,4 +443,13 @@ void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
   string desc = getDescription(*selected);
   Vector2 position = Vector2Add(frame_position, {2, 40});
   DrawTextEx(*font, desc.c_str(), position, txt_size, -2, WHITE);
+}
+
+void ItemsPanel::drawItemPortrait() {
+  assert(*selected != ItemID::NONE);
+  int id = static_cast<int>(*selected);
+  Rectangle *sprite = &portraits.sprites[id];
+  Vector2 position = Vector2Add(frame_position, {5, 5});
+
+  DrawTextureRec(portraits.sheet, *sprite, position, WHITE);
 }

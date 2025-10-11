@@ -42,6 +42,9 @@ public:
   void drawItemType(Font *font, int txt_size);
   void drawItemUsable(Font *font, int txt_size);
   void drawItemDesc(Font *font, int txt_size);
+  void drawItemPortrait();
+
+  static SpriteAtlas portraits;
 private:
   Session *session;
   std::string *description;
