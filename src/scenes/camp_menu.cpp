@@ -37,6 +37,10 @@ CampMenuScene::CampMenuScene(Session *session) {
   atlas.use();
   main_bar = atlas.getTexturefromSprite(3);
 
+  background = LoadTexture("graphics/menu/camp_background.png");
+  gradient1 = LoadTexture("graphics/overlays/camp_gradient.png");
+  gradient2 = atlas.getTexturefromSprite(8);
+
   sfx = &Game::menu_sfx;
   sfx->use();
 }
@@ -44,6 +48,9 @@ CampMenuScene::CampMenuScene(Session *session) {
 CampMenuScene::~CampMenuScene() {
   atlas.release();
   sfx->release();
+  UnloadTexture(background);
+  UnloadTexture(gradient1);
+  UnloadTexture(gradient2);
   UnloadTexture(main_bar);
   PLOGI << "Unloading the Camp Menu Scene.";
 }
@@ -118,6 +125,7 @@ void CampMenuScene::update() {
   }
 
   offsetBars();
+  offsetGradient();
 }
 
 void CampMenuScene::optionNavigation() {
@@ -214,7 +222,15 @@ void CampMenuScene::offsetBars() {
     bar_offset = bar_offset - 8;
   }
 
-  bar_offset += offset_speed * Game::deltaTime();
+  bar_offset += bar_speed * Game::deltaTime();
+}
+
+void CampMenuScene::offsetGradient() {
+  if (grad_offset > 4) {
+    grad_offset = grad_offset - 4;
+  }
+
+  grad_offset += grad_speed * Game::deltaTime();
 }
 
 void CampMenuScene::optionTimer() {
@@ -231,6 +247,8 @@ void CampMenuScene::draw() {
     return;
   }
 
+  drawBackground();
+
   drawTopBar();
   drawBottomBar();
 
@@ -241,6 +259,21 @@ void CampMenuScene::draw() {
   if (panel_mode) {
     panel->draw();
   }
+}
+
+void CampMenuScene::drawBackground() {
+  float percentage = Clamp((-0.80 + state_clock) / 0.20 , 0.0, 1.0);
+  Color tint = WHITE;
+  tint.a *= percentage;
+
+  DrawTexture(background, 0, 0, tint);
+
+  float offset = std::floor(grad_offset);
+  bool push = offset == 1 || offset == 3;
+  DrawTexture(gradient1, push, 0, WHITE);
+
+  Rectangle source = {offset, 0, 426, 240};
+  DrawTextureRec(gradient2, source, {0, 0}, WHITE);
 }
 
 void CampMenuScene::drawTopBar() {

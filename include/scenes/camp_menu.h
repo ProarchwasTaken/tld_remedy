@@ -30,9 +30,11 @@ public:
   void panelTermination();
 
   void offsetBars();
+  void offsetGradient();
   void optionTimer();
 
   void draw() override;
+  void drawBackground();
   void drawTopBar();
   void drawHeader(Vector2 position);
   void drawTopInfo(Vector2 position);
@@ -57,6 +59,13 @@ private:
   Session *session;
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
+
+  Texture background;
+  Texture gradient1;
+
+  Texture gradient2;
+  float grad_offset = 0;
+  float grad_speed = 16;
 
   enum {
     OPENING, 
@@ -87,7 +96,7 @@ private:
 
   Texture main_bar;
   float bar_offset = 0;
-  float offset_speed = 105;
+  float bar_speed = 105;
 
   PartyHud plr_hud = PartyHud({217, 152});
   PartyHud com_hud = PartyHud({321, 152});

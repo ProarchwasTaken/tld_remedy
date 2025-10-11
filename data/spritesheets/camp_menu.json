@@ -31,6 +31,10 @@
     {
       "filename": "party_frame",
       "frame": {"x": 160, "y": 32, "w": 96, "h": 46}
+    },
+    {
+      "filename": "gradient_pattern",
+      "frame": {"x": 16, "y": 64, "w": 4, "h": 4}
     }
   ],
   "meta": {
