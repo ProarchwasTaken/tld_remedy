@@ -11,6 +11,10 @@
     {
       "name": "menu_cancel",
       "filename": "menu/menu_cancel.mp3"
+    },
+    {
+      "name": "menu_item",
+      "filename": "menu/menu_item.mp3"
     }
   ]
 }

@@ -221,7 +221,7 @@ void StatusPanel::drawClass(Font *font, int txt_size, PartyMemberID id) {
   string text;
   switch (id) {
     case PartyMemberID::MARY: {
-      text = "HUMAN - HEIR";
+      text = "HUMAN - MARTYR";
       break;
     }
     case PartyMemberID::ERWIN: {

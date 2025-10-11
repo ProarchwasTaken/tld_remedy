@@ -179,6 +179,7 @@ void ItemsPanel::useItem() {
   *selected = ItemID::NONE;
   session->item_count--;
   updateSelected();
+  sfx->play("menu_item");
 }
 
 void ItemsPanel::update() {
