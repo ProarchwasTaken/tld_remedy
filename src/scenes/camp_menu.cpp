@@ -65,68 +65,87 @@ void CampMenuScene::update() {
 
   switch (state) { 
     case OPENING: {
-      state_clock += Game::deltaTime() / state_time;
-      state_clock = Clamp(state_clock, 0.0, 1.0);
-
-      if (state_clock == 1.0) {
-        state = READY;
-        sfx->play("menu_navigate");
-      }
+      openingLogic();
       break;
     }
     case CLOSING: {
-      state_clock -= Game::deltaTime() / state_time;
-      state_clock = Clamp(state_clock, 0.0, 1.0);
-
-      if (state_clock == 0.0) {
-        Game::returnToField();    
-      }
+      closingLogic();
       break;
     }
     case OPENING_PANEL: {
-      panel_clock += Game::deltaTime() / panel_time;
-      panel_clock = Clamp(panel_clock, 0.0, 1.0);
-
-      if (panel_clock == 1.0) {
-        panel_mode = true;
-        state = READY;
-      }
+      openingPanel();
       break;
     }
     case CLOSING_PANEL: {
-      panel_clock -= Game::deltaTime() / panel_time;
-      panel_clock = Clamp(panel_clock, 0.0, 1.0);
-
-      if (panel_clock == 0.0) {
-        plr_hud.clock = &state_clock;
-        plr_hud.reverse = false;
-
-        com_hud.clock = &state_clock;
-        com_hud.reverse = false;
-        state = READY;
-      }
-
+      closingPanel();
       break;
     }
     case READY: {
-      if (!panel_mode) {
-        optionNavigation();
-        optionTimer();
-        break;
-      }
-
-      assert(panel != nullptr);
-      panel->update();
-
-      if (panel->terminate) {
-        panelTermination();
-      }
+      normalLogic();
       break;
     }
   }
 
   offsetBars();
   offsetGradient();
+}
+
+void CampMenuScene::openingLogic() {
+  state_clock += Game::deltaTime() / state_time;
+  state_clock = Clamp(state_clock, 0.0, 1.0);
+
+  if (state_clock == 1.0) {
+    state = READY;
+    sfx->play("menu_navigate");
+  }
+}
+
+void CampMenuScene::closingLogic() {
+  state_clock -= Game::deltaTime() / state_time;
+  state_clock = Clamp(state_clock, 0.0, 1.0);
+
+  if (state_clock == 0.0) {
+    Game::returnToField();    
+  }
+}
+
+void CampMenuScene::openingPanel() {
+  panel_clock += Game::deltaTime() / panel_time;
+  panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+  if (panel_clock == 1.0) {
+    panel_mode = true;
+    state = READY;
+  }
+}
+
+void CampMenuScene::closingPanel() {
+  panel_clock -= Game::deltaTime() / panel_time;
+  panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+  if (panel_clock == 0.0) {
+    plr_hud.clock = &state_clock;
+    plr_hud.reverse = false;
+
+    com_hud.clock = &state_clock;
+    com_hud.reverse = false;
+    state = READY;
+  }
+}
+
+void CampMenuScene::normalLogic() {
+  if (!panel_mode) {
+    optionNavigation();
+    optionTimer();
+    return;;
+  }
+
+  assert(panel != nullptr);
+  panel->update();
+
+  if (panel->terminate) {
+    panelTermination();
+  }
 }
 
 void CampMenuScene::optionNavigation() {

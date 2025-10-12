@@ -25,6 +25,12 @@ public:
   ~CampMenuScene();
 
   void update() override;
+  void openingLogic();
+  void closingLogic();
+  void openingPanel();
+  void closingPanel();
+  void normalLogic();
+
   void optionNavigation();
   void selectOption();
   void panelTermination();
