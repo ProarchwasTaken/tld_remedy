@@ -129,7 +129,7 @@ string ItemsPanel::getDescription(ItemID item) {
     }
     case ItemID::M_SPLINT: {
       return
-      "Cures \"Broken Arm\",\n"
+      "Can cure \"Broken Arm\",\n"
       "\"Crippled Leg\", and \"Mangled\".\n"
       "In Combat: Also cures the\n"
       "\"Despondent\" status ailment.";

@@ -70,6 +70,7 @@ void CampMenuScene::update() {
 
       if (state_clock == 1.0) {
         state = READY;
+        sfx->play("menu_navigate");
       }
       break;
     }
@@ -148,7 +149,7 @@ void CampMenuScene::optionNavigation() {
   }
   else if (finished && Input::pressed(keybinds->cancel, gamepad)) {
     state = CLOSING;
-    sfx->play("menu_cancel");
+    sfx->play("menu_camp_reverse");
   }
 }
 

@@ -17,6 +17,7 @@
 #include "scenes/combat.h"
 #include "data/session.h"
 #include "data/personal.h"
+#include "utils/math.h"
 #include "game.h"
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
@@ -322,10 +323,36 @@ void Game::switchSceneProcedure() {
 }
 
 void Game::openCampMenuProcedure() {
-  PLOGI << "Switching over to the Camp Menu scene.";
-  scene.swap(reserve);
-  assert(scene != nullptr && scene->scene_id == SceneID::CAMP_MENU);
-  game_state = GameState::READY;
+  static float clock = 0.0;
+  static float sequence_time = 1.0;
+
+  clock += deltaTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  float percentage = Clamp(clock / 0.30, 0.0, 1.0);
+  flash_color.a = Lerp(0, 255, percentage);
+
+  float end_height = window_res.y * 0.008;
+  canvas_dest.height = Lerp(window_res.y, end_height, percentage);
+  canvas_origin.y = canvas_dest.height / 2;
+
+  percentage = Clamp((-0.30 + clock) / 0.20, 0.0, 1.0);
+  canvas_dest.width = Math::smoothstep(window_res.x, 0, percentage);
+  canvas_origin.x = canvas_dest.width / 2;
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Camp Menu scene.";
+    scene.swap(reserve);
+    assert(scene != nullptr && scene->scene_id == SceneID::CAMP_MENU);
+    setupCanvas();
+
+    clock = 0.0;
+    flash_color.a = 0;
+
+    game_state = GameState::READY;
+    menu_sfx.play("menu_camp");
+    return;
+  }
 }
 
 void Game::initCombatProcedure() {
@@ -386,8 +413,9 @@ void Game::drawScene() {
     ClearBackground(BLACK);
     DrawTexturePro(canvas.texture, canvas_src, canvas_dest, 
                    canvas_origin, 0, screen_tint);
+
     if (flash_color.a != 0) {
-      DrawRectangleV({0, 0}, window_res, flash_color);
+      DrawRectanglePro(canvas_dest, canvas_origin, 0, flash_color);
     }
 
     if (debug_info) DrawFPS(0, 0);
@@ -557,7 +585,12 @@ void Game::openCampMenu(Session *data) {
   assert(reserve == nullptr);
 
   reserve = make_unique<CampMenuScene>(data);
+  flash_color = WHITE;
+  flash_color.a = 0;
+
   game_state = GameState::OPEN_CAMPMENU;
+  menu_sfx.play("menu_camp_open");
+  SKIP_FRAME = true;
 }
 
 void Game::initCombat(Session *data) {
