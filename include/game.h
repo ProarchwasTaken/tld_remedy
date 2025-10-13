@@ -15,8 +15,9 @@ enum class GameState {
   READY,
   TOGGLE_FULLSCREEN,
   SWITCHING_SCENE,
+  OPEN_CAMPMENU,
   INIT_COMBAT,
-  END_COMBAT,
+  RETURN_TO_FIELD,
   FADING_OUT,
   FADING_IN,
   SLEEP,
@@ -45,13 +46,15 @@ public:
   void gameLogic();
   void fadeScreenProcedure();
   void switchSceneProcedure();
+  void openCampMenuProcedure();
   void initCombatProcedure();
-  void endCombatProcedure();
+  void returnFieldProcedure();
   void sleepProcedure();
 
   void drawScene();
 
   static float deltaTime();
+  static double playtime() {return session_playtime;};
   static GameState state() {return game_state;}
 
   static bool debugInfo();
@@ -66,8 +69,9 @@ public:
 
   static void loadTitleScreen();
 
+  static void openCampMenu(Session *data);
   static void initCombat(Session *data);
-  static void endCombat();
+  static void returnToField();
 
   static void fadeout(float seconds);
   static void fadein(float seconds);
@@ -77,7 +81,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 3;
+  static constexpr unsigned int session_version = 5;
   static constexpr unsigned int personal_version = 1;
   static constexpr float TARGET_FPS = 60.0;
 
@@ -102,8 +106,11 @@ private:
   static bool debug_info;
   static float time_scale;
 
+  static double session_playtime;
+  static bool run_timer;
+
   static float fade_time;
-  static float fade_percentage;
+  static float fade_clock;
 
   static float sleep_time;
   float sleep_clock = 0.0;
@@ -111,7 +118,7 @@ private:
   static Color flash_color;
 
   Vector2 window_res = {1278, 720};
-  Color screen_tint = WHITE;
+  static Color screen_tint;
 
   RenderTexture canvas;
   Rectangle canvas_src;

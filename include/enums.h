@@ -4,12 +4,15 @@
 enum class SceneID {
   TITLE,
   FIELD,
+  CAMP_MENU,
   COMBAT
 };
 
 enum class PanelID {
   CONFIG,
-  CONFIRM
+  CONFIRM,
+  STATUS,
+  ITEMS
 };
 
 enum EntityType {
@@ -33,6 +36,12 @@ enum class SubWeaponID {
 
 enum class CompanionID {
   ERWIN
+};
+
+enum class ItemID {
+  NONE = -1,
+  I_BANDAGE,
+  M_SPLINT
 };
 
 enum class CombatantTeam {
@@ -64,9 +73,9 @@ enum class ActionID {
 
 enum class StatusID {
   NONE = -1,
-  CRIPPLED_ARM,
-  CRIPPED_LEG,
-  BROKEN,
+  BROKEN_ARM,
+  CRIPPLED_LEG,
+  MANGLED,
   BLEEDING, 
   FEAR,
   DESPONDENT,
@@ -89,6 +98,7 @@ enum class PickupType {
 enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
+  OPEN_MENU,
   INIT_COMBAT,
   GOTO_TITLE,
   UPDATE_COMMON_DATA,
@@ -96,7 +106,10 @@ enum class FieldEVT {
   CHANGE_SUPPLIES,
   ADD_SUPPLIES,
   CHANGE_PLR_LIFE,
-  CHANGE_COM_LIFE
+  CHANGE_COM_LIFE,
+  ADD_ITEM,
+  REMOVE_ITEM,
+  CLEAR_INV
 };
 
 enum class ActorEVT {
@@ -115,12 +128,3 @@ enum class CombatantEVT {
   TOOK_DAMAGE,
 };
 
-enum class CommandType {
-  CHANGE_MAP,
-  SAVE,
-  INIT_COMBAT,
-  TITLE,
-  DELETE_ENT,
-  SET_SUPPLIES,
-  SET_LIFE,
-};

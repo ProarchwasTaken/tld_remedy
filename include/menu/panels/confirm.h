@@ -35,7 +35,7 @@ private:
   Texture frame;
   Vector2 position = {109, 80};
 
-  float frame_height = 80;
+  float frame_height = 0;
   float blink_clock = 0;
 
   std::array<ConfirmOption, 2> options {

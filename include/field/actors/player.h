@@ -20,6 +20,7 @@ public:
   void movementInput(bool gamepad);
   bool isMoving();
   void interactInput(bool gamepad);
+  void openMenuInput(bool gamepad);
 
   void update() override;
   void moveX();

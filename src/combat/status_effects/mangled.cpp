@@ -3,14 +3,14 @@
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "base/status_effect.h"
-#include "combat/status_effects/broken.h"
+#include "combat/status_effects/mangled.h"
 #include <plog/Log.h>
 
 
-Broken::Broken(PartyMember *afflicted) : 
-  StatusEffect(StatusID::BROKEN, StatusType::NEGATIVE, afflicted)
+Mangled::Mangled(PartyMember *afflicted) : 
+  StatusEffect(StatusID::MANGLED, StatusType::NEGATIVE, afflicted)
 {
-  name = "Broken";
+  name = "Mangled";
   persistant = true;
   this->afflicted = afflicted;
 
@@ -25,7 +25,7 @@ Broken::Broken(PartyMember *afflicted) :
   PLOGD << "Recovery to be lost: " << recovery_lost;
 }
 
-Broken::~Broken() {
+Mangled::~Mangled() {
   if (end) {
     PLOGI << "Reversing stat penalties.";
     afflicted->defense += defense_lost;
@@ -33,7 +33,7 @@ Broken::~Broken() {
   }
 }
 
-void Broken::init(bool hide_text) {
+void Mangled::init(bool hide_text) {
   PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
   afflicted->defense -= defense_lost;
   afflicted->recovery -= recovery_lost;

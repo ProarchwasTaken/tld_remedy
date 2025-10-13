@@ -2,6 +2,8 @@
 #include "enums.h"
 
 #define STATUS_LIMIT 3
+#define ITEM_LIMIT 8
+
 
 struct Character {
   char name[9];
@@ -40,12 +42,26 @@ struct CommonData {
 
 struct Session {
   unsigned int version;
+  double playtime = 0.0;
   char location[16] = "db_05";
 
   Player player;
   Companion companion;
   
   int supplies = 0;
+
+  int item_count = 2;
+  int item_limit = ITEM_LIMIT;
+  ItemID inventory[8] = {
+    ItemID::I_BANDAGE,
+    ItemID::M_SPLINT,
+    ItemID::NONE,
+    ItemID::NONE,
+    ItemID::NONE,
+    ItemID::NONE,
+    ItemID::NONE,
+    ItemID::NONE,
+  };
 
   int common_count = 0;
   int common_limit = 64;

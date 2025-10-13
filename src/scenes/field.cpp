@@ -292,6 +292,11 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::saveSession(&session);
       break;
     }
+    case FieldEVT::OPEN_MENU: {
+      PLOGI << "Event Detected: OpenMenuEvent";
+      Game::openCampMenu(&session);
+      break;
+    }
     case FieldEVT::INIT_COMBAT: {
       PLOGI << "Event Detected: InitCombatEvent";
 
@@ -366,7 +371,83 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       session.companion.life = value;
       break;
     }
+    case FieldEVT::ADD_ITEM: {
+      PLOGI << "Event detected: AddItemEvent";
+      auto *event_data = static_cast<AddItemEvent*>(event.get());
+      addItem(event_data->item);
+      break;
+    }
+    case FieldEVT::REMOVE_ITEM: {
+      PLOGI << "Event detected: RemovedItemEvent";
+      auto *event_data = static_cast<RemoveItemEvent*>(event.get());
+      removeItem(event_data->item);
+      break;
+    }
+    case FieldEVT::CLEAR_INV: {
+      PLOGI << "Event detected: ClearInvEvent";
+      clearInventory();
+      break;
+    }
   }
+}
+
+void FieldScene::addItem(ItemID item) {
+  assert(item != ItemID::NONE);
+  int limit = session.item_limit;
+
+  if (session.item_count == limit) {
+    PLOGE << "Player's inventory is full!";
+    return;
+  }
+
+  for (int index = 0; index < limit; index++) {
+    ItemID *slot = &session.inventory[index];
+
+    bool empty_slot = *slot == ItemID::NONE;
+    if (empty_slot) {
+      *slot = item;
+      session.item_count++;
+      PLOGI << "Added Item: " << static_cast<int>(*slot) <<
+        " to player's inventory.";
+      break;
+    }
+  }
+
+  assert(session.item_count <= limit);
+}
+
+void FieldScene::removeItem(ItemID item) {
+  assert(item != ItemID::NONE);
+  if (session.item_count == 0) {
+    PLOGE << "Player's inventory is empty!";
+    return;
+  }
+
+  int limit = session.item_limit;
+  for (int index = 0; index < limit; index++) {
+    ItemID *slot = &session.inventory[index];
+
+    if (*slot == item) {
+      PLOGI << "Removed Item: " << static_cast<int>(*slot) <<
+        " from player's inventory.";
+      *slot = ItemID::NONE;
+      session.item_count--;
+      break;
+    }
+  }
+
+  assert(session.item_count >= 0);
+}
+
+void FieldScene::clearInventory() {
+  int limit = session.item_limit;
+  for (int index = 0; index < limit; index++) {
+    ItemID *slot = &session.inventory[index];
+    *slot = ItemID::NONE;
+  }
+
+  session.item_count = 0;
+  PLOGI << "Cleared the player's inventory.";
 }
 
 void FieldScene::updateCommonData(int object_id, bool active) {
@@ -483,6 +564,17 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
+  string time = TextFormat("Playtime: %00.03f", Game::playtime());
+  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
+  y += spacing;
+
+  string common = TextFormat("Common Count: %i / %i", 
+                             session.common_count, session.common_limit);
+  Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
+                                             *font, -3, 0);
+  y += spacing;
+
   string pursue = TextFormat("Persuing Enemy: %i", 
                              EnemyActor::pursuing_enemy);
   Vector2 per_pos = TextUtils::alignRight(pursue.c_str(), {base_x, y}, 
@@ -493,5 +585,7 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }

@@ -21,6 +21,9 @@ void initCombatCommand();
 void gotoTitleCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
+void addItemCommand(string item_id);
+void removeItemCommand(string item_id);
+void clearInventoryCommand();
 
 
 CommandSystem::CommandSystem() {
@@ -132,6 +135,20 @@ void CommandSystem::interpretCommand(CommandType type,
       string value = findNextWord(buffer, iterator);
 
       setLifeCommand(target, value);
+      break;
+    }
+    case CommandType::ADD_ITEM: {
+      string item_id = findNextWord(buffer, iterator);
+      addItemCommand(item_id);
+      break;
+    }
+    case CommandType::RM_ITEM: {
+      string item_id = findNextWord(buffer, iterator);
+      removeItemCommand(item_id);
+      break;
+    }
+    case CommandType::CLR_INV: {
+      clearInventoryCommand();
       break;
     }
   }
@@ -283,5 +300,46 @@ void setLifeCommand(string target, string value) {
   else {
     PLOGD << "'" << target << "' is not a valid target.";
   }
+}
+
+void addItemCommand(string item_id) {
+  if (item_id.empty()) {
+    PLOGE << "Item ID not specified!";
+    return;
+  }
+
+  for (char letter : item_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  ItemID id = static_cast<ItemID>(std::stoi(item_id));
+  FieldHandler::raise<AddItemEvent>(FieldEVT::ADD_ITEM, id);
+}
+
+void removeItemCommand(string item_id) {
+  if (item_id.empty()) {
+    PLOGE << "Item ID not specified!";
+    return;
+  }
+
+  for (char letter : item_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  ItemID id = static_cast<ItemID>(std::stoi(item_id));
+  FieldHandler::raise<RemoveItemEvent>(FieldEVT::REMOVE_ITEM, id);
+}
+
+void clearInventoryCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<FieldEvent>(FieldEVT::CLEAR_INV);
 }
 

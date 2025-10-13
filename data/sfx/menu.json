@@ -11,6 +11,22 @@
     {
       "name": "menu_cancel",
       "filename": "menu/menu_cancel.mp3"
+    },
+    {
+      "name": "menu_item",
+      "filename": "menu/menu_item.mp3"
+    },
+    {
+      "name": "menu_camp_open",
+      "filename": "menu/menu_camp_open.mp3"
+    },
+    {
+      "name": "menu_camp",
+      "filename": "menu/menu_camp.mp3"
+    },
+    {
+      "name": "menu_camp_reverse",
+      "filename": "menu/menu_camp_reverse.mp3"
     }
   ]
 }

@@ -5,10 +5,10 @@
 
 /* Lowers the afflicted's Offense and Intimidation by 10%. Effectively
  * hindering the Combatant's damage potential.*/
-class CrippledArm : public StatusEffect {
+class BrokenArm : public StatusEffect {
 public:
-  CrippledArm(Combatant *afflicted);
-  ~CrippledArm();
+  BrokenArm(Combatant *afflicted);
+  ~BrokenArm();
 
   void init(bool hide_text = false) override;
 private:

@@ -13,9 +13,11 @@
 #include "system/sound_atlas.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
+#include "scenes/camp_menu.h"
 #include "scenes/combat.h"
 #include "data/session.h"
 #include "data/personal.h"
+#include "utils/math.h"
 #include "game.h"
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
@@ -37,13 +39,17 @@ mt19937_64 Game::RNG;
 
 Settings Game::settings;
 
-float Game::fade_percentage = 0.0;
+Color Game::screen_tint = WHITE;
+float Game::fade_clock = 0.0;
 float Game::fade_time = 0.0;
 
 float Game::sleep_time = 0.0;
 
-float Game::time_scale = 1.0;
 bool Game::debug_info = false;
+float Game::time_scale = 1.0;
+
+double Game::session_playtime = 0.0;
+bool Game::run_timer = false;
 
 
 void Game::init() {
@@ -53,6 +59,7 @@ void Game::init() {
   InitAudioDevice();
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
+  SetTextLineSpacing(16);
 
   HideCursor();
   setupCanvas();
@@ -226,18 +233,26 @@ void Game::gameLogic() {
     return;
   }
 
+  if (run_timer) {
+    session_playtime += GetFrameTime();
+  }
+
   switch (game_state) {
     case GameState::TOGGLE_FULLSCREEN: {
       toggleFullscreen();
       game_state = GameState::READY;
       break;
     }
+    case GameState::OPEN_CAMPMENU: {
+      openCampMenuProcedure();
+      break;
+    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
       break;
     }
-    case GameState::END_COMBAT: {
-      endCombatProcedure();
+    case GameState::RETURN_TO_FIELD: {
+      returnFieldProcedure();
       break;
     }
     case GameState::SWITCHING_SCENE: {
@@ -259,7 +274,7 @@ void Game::gameLogic() {
 }
 
 void Game::fadeScreenProcedure() {
-  float value = Lerp(0, 255, fade_percentage);
+  float value = Lerp(0, 255, fade_clock);
   screen_tint.r = value;
   screen_tint.g = value;
   screen_tint.b = value;
@@ -270,15 +285,15 @@ void Game::fadeScreenProcedure() {
   }
 
   if (game_state == GameState::FADING_OUT) {
-    fade_percentage -= magnitude;
+    fade_clock -= magnitude;
   }
   else if (game_state == GameState::FADING_IN){
-    fade_percentage += magnitude;
+    fade_clock += magnitude;
   }
 
-  fade_percentage = Clamp(fade_percentage, 0.0, 1.0);
+  fade_clock = Clamp(fade_clock, 0.0, 1.0);
 
-  bool finished_fading = fade_percentage == 0.0 || fade_percentage == 1.0;
+  bool finished_fading = fade_clock == 0.0 || fade_clock == 1.0;
   if (finished_fading) {
     PLOGI << "Screen fade complete.";
     game_state = GameState::READY;
@@ -303,7 +318,41 @@ void Game::switchSceneProcedure() {
   scene.swap(reserve);
 
   Game::fadein(1.0);
+  SKIP_FRAME = true;
   PLOGI << "Procedure complete.";
+}
+
+void Game::openCampMenuProcedure() {
+  static float clock = 0.0;
+  static float sequence_time = 1.0;
+
+  clock += deltaTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  float percentage = Clamp(clock / 0.30, 0.0, 1.0);
+  flash_color.a = Lerp(0, 255, percentage);
+
+  float end_height = window_res.y * 0.008;
+  canvas_dest.height = Lerp(window_res.y, end_height, percentage);
+  canvas_origin.y = canvas_dest.height / 2;
+
+  percentage = Clamp((-0.30 + clock) / 0.20, 0.0, 1.0);
+  canvas_dest.width = Math::smoothstep(window_res.x, 0, percentage);
+  canvas_origin.x = canvas_dest.width / 2;
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Camp Menu scene.";
+    scene.swap(reserve);
+    assert(scene != nullptr && scene->scene_id == SceneID::CAMP_MENU);
+    setupCanvas();
+
+    clock = 0.0;
+    flash_color.a = 0;
+
+    game_state = GameState::READY;
+    menu_sfx.play("menu_camp");
+    return;
+  }
 }
 
 void Game::initCombatProcedure() {
@@ -340,15 +389,15 @@ void Game::initCombatProcedure() {
   }
 }
 
-void Game::endCombatProcedure() {
+void Game::returnFieldProcedure() {
   PLOGI << "Switching back to the Field scene";
   scene.reset();
-  assert(CombatScene::cmd_atlas.users() == 0);
 
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
-  game_state = GameState::READY;
+  Game::fadein(0.5);
+  SKIP_FRAME = true;
 }
 
 void Game::drawScene() {
@@ -364,8 +413,9 @@ void Game::drawScene() {
     ClearBackground(BLACK);
     DrawTexturePro(canvas.texture, canvas_src, canvas_dest, 
                    canvas_origin, 0, screen_tint);
+
     if (flash_color.a != 0) {
-      DrawRectangleV({0, 0}, window_res, flash_color);
+      DrawRectanglePro(canvas_dest, canvas_origin, 0, flash_color);
     }
 
     if (debug_info) DrawFPS(0, 0);
@@ -384,7 +434,8 @@ void Game::fadeout(float seconds) {
     case GameState::READY:
     case GameState::SWITCHING_SCENE: {
       PLOGI << "Fading out the screen.";
-      Game::fade_percentage = 1.0;
+      Game::screen_tint = WHITE;
+      Game::fade_clock = 1.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_OUT;
       break;
@@ -399,10 +450,12 @@ void Game::fadeout(float seconds) {
 void Game::fadein(float seconds) {
   switch (game_state) {
     case GameState::READY:
+    case GameState::RETURN_TO_FIELD:
     case GameState::SWITCHING_SCENE: 
     case GameState::INIT_COMBAT: {
       PLOGI << "Fading in the screen.";
-      Game::fade_percentage = 0.0;
+      Game::screen_tint = BLACK;
+      Game::fade_clock = 0.0;
       Game::fade_time = seconds;
       game_state = GameState::FADING_IN;
       break;
@@ -430,11 +483,16 @@ void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
   assert(reserve == nullptr);
 
   reserve = make_unique<FieldScene>(sub_weapon, companion);
+
+  session_playtime = 0;
+  run_timer = true;
+
   game_state = GameState::SWITCHING_SCENE;
 }
 
 void Game::saveSession(Session *data) {
   PLOGI << "Saving the player's current session.";
+  data->playtime = session_playtime;
 
   ofstream file;
   file.open("data/session.data", std::ios::binary);
@@ -477,6 +535,10 @@ void Game::loadSession() {
 
   assert(reserve == nullptr);
   reserve = make_unique<FieldScene>(&session);
+
+  session_playtime = session.playtime;
+  run_timer = true;
+
   game_state = GameState::SWITCHING_SCENE;
 }
 
@@ -510,10 +572,25 @@ bool Game::existingSession() {
 
 void Game::loadTitleScreen() {
   PLOGI << "Returning to Title Scene";
-  assert(reserve == nullptr);
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+  run_timer = false;
+}
+
+void Game::openCampMenu(Session *data) {
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CampMenuScene>(data);
+  flash_color = WHITE;
+  flash_color.a = 0;
+
+  game_state = GameState::OPEN_CAMPMENU;
+  menu_sfx.play("menu_camp_open");
+  SKIP_FRAME = true;
 }
 
 void Game::initCombat(Session *data) {
@@ -527,15 +604,15 @@ void Game::initCombat(Session *data) {
   SKIP_FRAME = true;
 }
 
-void Game::endCombat() {
-  if (game_state == GameState::END_COMBAT) {
+void Game::returnToField() {
+  if (game_state == GameState::RETURN_TO_FIELD) {
     return;
   }
 
-  PLOGI << "Preparing to end combat.";
+  PLOGI << "Preparing to return to the Field scene..";
   assert(reserve != nullptr);
 
-  game_state = GameState::END_COMBAT;
+  game_state = GameState::RETURN_TO_FIELD;
 }
 
 float Game::deltaTime() {

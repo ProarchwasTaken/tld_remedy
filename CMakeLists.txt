@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.8.0
+VERSION 1.9.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -65,11 +65,17 @@ set(HEADERS
 "include/utils/animation.h"
 "include/utils/menu.h"
 "include/utils/comparisons.h"
+"include/utils/math.h"
 "include/system/sprite_atlas.h"
 "include/system/sound_atlas.h"
 "include/scenes/title.h"
 "include/menu/panels/config.h"
 "include/menu/panels/confirm.h"
+"include/menu/panels/status.h"
+"include/menu/panels/items.h"
+"include/menu/hud/party.h"
+"include/menu/hud/portrait.h"
+"include/menu/hud/reticle.h"
 "include/scenes/field.h"
 "include/field/system/field_map.h"
 "include/field/system/camera.h"
@@ -98,10 +104,11 @@ set(HEADERS
 "include/combat/actions/evade.h"
 "include/combat/actions/knife_cleave.h"
 "include/combat/actions/knife_piercer.h"
-"include/combat/status_effects/crippled_arm.h"
+"include/combat/status_effects/broken_arm.h"
 "include/combat/status_effects/crippled_leg.h"
-"include/combat/status_effects/broken.h"
+"include/combat/status_effects/mangled.h"
 "include/combat/status_effects/despondent.h"
+"include/scenes/camp_menu.h"
 )
 set(SOURCE
 "src/main.cpp"
@@ -120,11 +127,17 @@ set(SOURCE
 "src/utils/text.cpp"
 "src/utils/animation.cpp"
 "src/utils/comparisons.cpp"
+"src/utils/math.cpp"
 "src/system/sprite_atlas.cpp"
 "src/system/sound_atlas.cpp"
 "src/scenes/title.cpp"
 "src/menu/panels/config.cpp"
 "src/menu/panels/confirm.cpp"
+"src/menu/panels/status.cpp"
+"src/menu/panels/items.cpp"
+"src/menu/hud/party.cpp"
+"src/menu/hud/portrait.cpp"
+"src/menu/hud/reticle.cpp"
 "src/scenes/field.cpp"
 "src/field/system/field_map.cpp"
 "src/field/system/camera.cpp"
@@ -153,10 +166,11 @@ set(SOURCE
 "src/combat/actions/evade.cpp"
 "src/combat/actions/knife_cleave.cpp"
 "src/combat/actions/knife_piercer.cpp"
-"src/combat/status_effects/crippled_arm.cpp"
+"src/combat/status_effects/broken_arm.cpp"
 "src/combat/status_effects/crippled_leg.cpp"
-"src/combat/status_effects/broken.cpp"
+"src/combat/status_effects/mangled.cpp"
 "src/combat/status_effects/despondent.cpp"
+"src/scenes/camp_menu.cpp"
 )
 
 if(${BUILD_DEV})
