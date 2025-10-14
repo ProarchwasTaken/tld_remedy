@@ -117,6 +117,8 @@ void Combatant::takeDamage(DamageData &data) {
                                          damage, data.damage_type, state,
                                          data.stun_time, data.stun_type,
                                          data.assailant);
+
+  PLOGI << "Damage procedure has reached it's conclusion.";
 }
 
 float Combatant::damageCalulation(DamageData &data) {
@@ -193,7 +195,7 @@ void Combatant::damageMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to damage.";
 }
 
-void Combatant::increaseMorale(float magnitude) {
+void Combatant::increaseMorale(float magnitude, bool mp_share) {
   PLOGD << "Combatant does not possess Morale to increase.";
 }
 

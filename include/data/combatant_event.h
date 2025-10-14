@@ -19,3 +19,7 @@ struct TookDamageCBT : CombatantEvent {
 
   Combatant *assailant;
 };
+
+struct GainedMoraleCBT : CombatantEvent {
+  float morale_gained;
+};

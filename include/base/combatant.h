@@ -72,7 +72,7 @@ public:
    * Rather theses functions are meant to be overwritten by Combatants
    * who do have those values. The notable example are PartyMembers.*/
   virtual void damageMorale(float magnitude);
-  virtual void increaseMorale(float magnitude);
+  virtual void increaseMorale(float magnitude, bool mp_share = true);
 
   virtual void enterHitstun(DamageData &data);
   void stunLogic();

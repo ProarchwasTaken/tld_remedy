@@ -5,7 +5,9 @@
 #include "enums.h"
 #include "data/session.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
+#include "combat/system/cbt_handler.h"
 
 
 /* The PartyMember subclass is used by Combatants who are on the player's
@@ -19,6 +21,9 @@ public:
   bool isEnabled();
   virtual void setEnabled(bool value);
 
+  virtual void eventHandling(EventPool<CombatantEvent> *event_pool);
+  void moraleShare(GainedMoraleCBT *event);
+
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
 
@@ -31,7 +36,7 @@ public:
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
 
   void damageMorale(float magnitude) override;
-  void increaseMorale(float magnitude) override;
+  void increaseMorale(float magnitude, bool mp_share) override;
 
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();

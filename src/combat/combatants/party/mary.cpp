@@ -98,7 +98,8 @@ void Mary::behavior() {
     return;
   }
 
-  eventHandling();
+  auto *event_pool = CombatantHandler::get();
+  eventHandling(event_pool);
 
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
@@ -109,8 +110,8 @@ void Mary::behavior() {
   }
 }
 
-void Mary::eventHandling() {
-  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+void Mary::eventHandling(EventPool<CombatantEvent> *event_pool) {
+  PartyMember::eventHandling(event_pool);
 
   for (auto &event : *event_pool) {
     if (event == nullptr) {

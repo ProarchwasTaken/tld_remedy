@@ -10,6 +10,7 @@
 #include "data/animation.h"
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
@@ -63,6 +64,9 @@ void Erwin::behavior() {
   if (!enabled) {
     return;
   }
+
+  auto *event_pool = CombatantHandler::get();
+  eventHandling(event_pool);
 
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {

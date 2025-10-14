@@ -126,5 +126,6 @@ enum class CombatEVT {
 
 enum class CombatantEVT {
   TOOK_DAMAGE,
+  GAINED_MORALE,
 };
 

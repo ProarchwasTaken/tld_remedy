@@ -10,6 +10,7 @@
 #include "enums.h"
 #include "data/damage.h"
 #include "data/session.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
@@ -18,6 +19,7 @@
 #include "combat/status_effects/mangled.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/system/stage.h"
+#include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
 using std::string, std::set, std::uniform_int_distribution, 
@@ -48,6 +50,33 @@ void PartyMember::setEnabled(bool value) {
   }
   else {
     PLOGI << "PartyMember: '" << name << "' behavior has been disabled."; 
+  }
+}
+
+void PartyMember::eventHandling(EventPool<CombatantEvent> *event_pool) {
+  for (auto &event : *event_pool) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    if (event->event_type == CombatantEVT::GAINED_MORALE) {
+      auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
+      moraleShare(mp_event);
+    }
+  }
+}
+
+void PartyMember::moraleShare(GainedMoraleCBT *event) {
+  assert(event->sender->entity_type == EntityType::COMBATANT);
+  Combatant *sender = static_cast<Combatant*>(event->sender);
+
+  if (this != sender || this->team != sender->team) {
+    PLOGD << this->name <<  ": acknowledging Morale Gain event sent by: " 
+      << sender->name << " [ID: " << sender->entity_id << "]";
+
+    float magnitude = event->morale_gained / 2;
+    increaseMorale(magnitude, false);
+    return;
   }
 }
 
@@ -204,11 +233,20 @@ void PartyMember::damageMorale(float magnitude) {
   }
 }
 
-void PartyMember::increaseMorale(float magnitude) {
+void PartyMember::increaseMorale(float magnitude, bool mp_share) {
   float new_morale = morale + magnitude;
   morale = Clamp(new_morale, -max_morale, max_morale);
+
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
-    "] Morale has been increased to: " << morale;
+    "] Morale has been increased by: " << magnitude;
+
+  bool eligible = mp_share && !demoralized && memberCount() > 1;
+  if (eligible) {
+    PLOGD << "'" << name << "' is eligible to trigger MP Share";
+    CombatantHandler::queue<GainedMoraleCBT>(this, 
+                                             CombatantEVT::GAINED_MORALE, 
+                                             magnitude);
+  }
 }
 
 void PartyMember::increaseExhaustion(float magnitude) {
