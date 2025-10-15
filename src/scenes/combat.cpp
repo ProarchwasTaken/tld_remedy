@@ -224,6 +224,7 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
 
       auto status_txt = make_unique<StatusText>(target, text, color);
       entities.push_back(std::move(status_txt));
+      break;
     }
     case CombatEVT::CREATE_AFTERIMAGE: {
       PLOGD << "Event detected: CreateAfterImageCB";
@@ -238,6 +239,7 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       auto afterimage = make_unique<AfterImage>(atlas, sprite, position, 
                                                 life_time, tint);
       entities.push_back(std::move(afterimage));
+      break;
     }
   }
 
