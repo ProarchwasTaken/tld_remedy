@@ -5,8 +5,10 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/enemy_troops.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
@@ -26,6 +28,9 @@ public:
   void initializeCombatants();
   void initializePlayer();
   void initializeCompanion();
+
+  void initializeTroop(EnemyTroop *troop);
+  std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
   void update() override;
   void eventProcessing();

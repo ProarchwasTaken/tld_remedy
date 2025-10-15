@@ -69,16 +69,9 @@ void CombatScene::initializeCombatants() {
   initializePlayer();
   initializeCompanion();
 
-  // TODO: Don't forget to remove this when the time comes!
-  auto dummy = make_unique<Dummy>((Vector2){128, 152}, LEFT);
-  this->dummy = dummy.get();
-  entities.push_back(std::move(dummy));
-
-  dummy = make_unique<Dummy>((Vector2){-256, 152}, RIGHT);
-  entities.push_back(std::move(dummy));
-
-  dummy = make_unique<Dummy>((Vector2){-288, 152}, RIGHT);
-  entities.push_back(std::move(dummy));
+  EnemyTroop troop = DBTroop1();
+  assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
+  initializeTroop(&troop);
 }
 
 void CombatScene::initializePlayer() {
@@ -106,6 +99,39 @@ void CombatScene::initializeCompanion() {
   this->companion = companion.get();
   com_hud.assign(this->companion);
   entities.push_back(std::move(companion));
+}
+
+void CombatScene::initializeTroop(EnemyTroop *troop) {
+  PLOGI << "Initializing Enemy Troop of ID: " << 
+  static_cast<int>(troop->id);
+
+  for (EnemyData &data : troop->enemies) {
+    unique_ptr<Enemy> enemy = createEnemy(data);
+
+    assert(enemy != nullptr);
+    #ifndef NDEBUG
+    if (dummy == NULL && enemy->id == EnemyID::DUMMY) {
+      dummy = static_cast<Dummy*>(enemy.get());
+    } 
+    #endif // NDEBUG
+
+    entities.push_back(std::move(enemy));
+  }
+}
+
+unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
+  EnemyID id = data.enemy;
+  Vector2 position = data.position;
+  Direction direction = data.direction;
+
+  switch (id) {
+    case EnemyID::DUMMY: {
+      return make_unique<Dummy>(position, direction);
+    }
+    default: {
+      return nullptr;
+    }
+  }
 }
 
 void CombatScene::update() {

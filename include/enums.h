@@ -63,6 +63,11 @@ enum class EnemyID {
   DUMMY,
 };
 
+enum class TroopID {
+  INVALID = -1,
+  DB_TROOP1
+};
+
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
