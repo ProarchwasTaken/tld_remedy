@@ -22,6 +22,7 @@ enum EntityType {
   DMG_NUMBER,
   STATUS_TEXT,
   COMBATANT,
+  AFTERIMAGE
 };
 
 enum class ActorType {
