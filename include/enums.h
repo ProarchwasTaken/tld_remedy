@@ -127,6 +127,7 @@ enum class ActorEVT {
 enum class CombatEVT {
   CREATE_DMG_NUM,
   CREATE_STAT_TXT,
+  CREATE_AFTERIMAGE,
   DELETE_ENTITY,
 };
 

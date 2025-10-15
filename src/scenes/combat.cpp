@@ -21,6 +21,7 @@
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
+#include "combat/entities/afterimage.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
@@ -189,9 +190,11 @@ void CombatScene::eventProcessing() {
 }
 
 void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
+  int count = entities.size();
+
   switch (event->event_type) { 
     case CombatEVT::DELETE_ENTITY: {
-      PLOGD << "Event detected: DeleteEntityEvent";
+      PLOGD << "Event detected: DeleteEntityCB";
       auto *event_data = static_cast<DeleteEntityCB*>(event.get());
 
       int entity_id = event_data->entity_id;
@@ -201,7 +204,7 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       break;
     }
     case CombatEVT::CREATE_DMG_NUM: {
-      PLOGD << "Event detected: CreateDmgNumEvent";
+      PLOGD << "Event detected: CreateDmgNumCB";
       auto *event_data = static_cast<CreateDmgNumCB*>(event.get());
 
       Combatant *target = event_data->target;
@@ -222,6 +225,26 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       auto status_txt = make_unique<StatusText>(target, text, color);
       entities.push_back(std::move(status_txt));
     }
+    case CombatEVT::CREATE_AFTERIMAGE: {
+      PLOGD << "Event detected: CreateAfterImageCB";
+      auto *event_data = static_cast<CreateAfterImgCB*>(event.get());
+
+      SpriteAtlas *atlas = event_data->atlas;
+      Rectangle *sprite = event_data->sprite;
+      Vector2 position = event_data->position;
+      float life_time = event_data->life_time;
+      Color tint = event_data->tint;
+
+      auto afterimage = make_unique<AfterImage>(atlas, sprite, position, 
+                                                life_time, tint);
+      entities.push_back(std::move(afterimage));
+    }
+  }
+
+  int new_count = entities.size();
+  if (count != new_count) {
+    PLOGD << "Sorting Combat entities in their intended order.";
+    std::sort(entities.begin(), entities.end(), combatAlgorithm);
   }
 }
 
@@ -250,9 +273,6 @@ void CombatScene::dmgNumberHandling(Combatant *target,
   auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
                                            damage_taken);
   entities.push_back(std::move(dmg_num));
-
-  PLOGD << "Sorting Combat entities in their intended order.";
-  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::deleteEntity(int entity_id) {
@@ -286,9 +306,6 @@ void CombatScene::deleteEntity(int entity_id) {
 
   entities.clear();
   temporary.swap(entities);
-
-  PLOGD << "Sorting Combat entities in their intended order.";
-  std::sort(entities.begin(), entities.end(), combatAlgorithm);
 }
 
 void CombatScene::endCombatProcedure() {

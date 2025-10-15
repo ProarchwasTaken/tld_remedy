@@ -6,8 +6,10 @@
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
+#include "data/combat_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
+#include "combat/system/evt_handler.h"
 #include "combat/actions/evade.h"
 #include <plog/Log.h>
 
@@ -56,18 +58,25 @@ void Evade::intercept(DamageData &data) {
 
   float damage = Clamp(user->damageCalulation(data), 0, 9999);
   PLOGD << "Result: " << damage;
+
+  float life_time;
+  Color tint;
+
   if (user->important && state_clock <= 0.25) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
     user->sprite = &user_atlas->sprites[sprite_set->id_perfect];
     user->depleteInstant();
 
     CombatStage::tintStage(Game::palette[2]);
-    Game::sleep(0.25);
+    tint = Game::palette[14];
+
     Combatant::sfx.play("evade_perfect");
+    Game::sleep(0.25);
   }
   else {
     PLOGD << "Redirection damage towards the combatant's exhaustion.";
     user->increaseExhaustion(damage); 
+    tint = WHITE;
     Game::sleep(0.05);
   }
  
@@ -76,6 +85,10 @@ void Evade::intercept(DamageData &data) {
 
   user->intangible = true;
   evaded_attack = true;
+
+  CombatHandler::raise<CreateAfterImgCB>(
+    CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
+    user->bounding_box.position, 0.25f, tint);
   PLOGI << "Interception complete.";
 }
 
