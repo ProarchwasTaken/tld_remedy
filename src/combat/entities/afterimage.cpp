@@ -9,22 +9,20 @@
 #include <plog/Log.h>
 
 
-AfterImage::AfterImage(SpriteAtlas *atlas, Rectangle *sprite, 
-                       Vector2 position, Direction direction, 
-                       float life_time, Color tint)
+AfterImage::AfterImage(CreateAfterImgCB *data)
 {
   entity_type = EntityType::AFTERIMAGE;
 
-  this->atlas = atlas;
-  this->sprite = sprite;
+  atlas = data->atlas;
+  sprite = data->sprite;
   atlas->use();
 
-  this->position = position;
-  this->tint = tint;
+  position = data->position;
+  tint = data->tint;
   tint.a = 180;
 
-  this->life_time = life_time;
-  this->direction = direction;
+  life_time = data->life_time;
+  direction = data->direction;
 
   bounding_box.scale = {sprite->width, sprite->height};
   bounding_box.offset = {0, 0};

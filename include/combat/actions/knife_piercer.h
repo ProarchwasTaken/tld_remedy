@@ -27,6 +27,7 @@ public:
   void drawDebug() override;
 private:
   float velocity = 128;
+  float distance_traveled = 0;
 
   RectEx hitbox;
   DamageData data;

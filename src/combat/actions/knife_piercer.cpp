@@ -4,8 +4,10 @@
 #include "enums.h"
 #include "game.h"
 #include "base/combat_action.h"
+#include "data/combat_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/evt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
 
@@ -68,10 +70,19 @@ void KnifePiercer::movement(float percentage) {
   }
   else {
     user->position.x += magnitude * direction;
+    distance_traveled += magnitude;
+  }
+
+  if (percentage == 1.0 && distance_traveled >= 6) {
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, atlas, user->sprite,
+      user->bounding_box.position, user->direction
+    );
+
+    distance_traveled = 0.0;
   }
 
   user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
-
 }
 
 void KnifePiercer::hitRegistration() {

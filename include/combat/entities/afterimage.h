@@ -2,14 +2,13 @@
 #include <raylib.h>
 #include "enums.h"
 #include "base/entity.h"
+#include "data/combat_event.h"
 #include "system/sprite_atlas.h"
 
 
 class AfterImage : public Entity {
 public:
-  AfterImage(SpriteAtlas *atlas, Rectangle *sprite, Vector2 position,
-             Direction Direction, float life_time = 0.25, 
-             Color tint = WHITE);
+  AfterImage(CreateAfterImgCB *data);
   ~AfterImage();
 
   void update() override;

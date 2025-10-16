@@ -230,16 +230,7 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       PLOGD << "Event detected: CreateAfterImageCB";
       auto *event_data = static_cast<CreateAfterImgCB*>(event.get());
 
-      SpriteAtlas *atlas = event_data->atlas;
-      Rectangle *sprite = event_data->sprite;
-      Vector2 position = event_data->position;
-      Direction direction = event_data->direction;
-      float life_time = event_data->life_time;
-      Color tint = event_data->tint;
-
-      auto afterimage = make_unique<AfterImage>(atlas, sprite, position, 
-                                                direction, life_time, 
-                                                tint);
+      auto afterimage = make_unique<AfterImage>(event_data);
       entities.push_back(std::move(afterimage));
       break;
     }
