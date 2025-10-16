@@ -68,7 +68,7 @@ void Evade::intercept(DamageData &data) {
     user->depleteInstant();
 
     CombatStage::tintStage(Game::palette[2]);
-    tint = Game::palette[14];
+    tint = Game::palette[51];
 
     Combatant::sfx.play("evade_perfect");
     Game::sleep(0.25);
@@ -76,7 +76,7 @@ void Evade::intercept(DamageData &data) {
   else {
     PLOGD << "Redirection damage towards the combatant's exhaustion.";
     user->increaseExhaustion(damage); 
-    tint = WHITE;
+    tint = Game::palette[29];
     Game::sleep(0.05);
   }
  

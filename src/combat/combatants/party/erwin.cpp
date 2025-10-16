@@ -20,7 +20,7 @@ SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
 
 
 Erwin::Erwin(Companion *data, Mary *player): 
-  PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152})
+  PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152}, &atlas)
 {
   this->player = player;
 

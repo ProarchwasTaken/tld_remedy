@@ -27,7 +27,7 @@ SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
 Mary::Mary(Player *plr): 
-  PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
+  PartyMember("Mary", PartyMemberID::MARY, {-64, 152}, &atlas)
 {
   keybinds = &Game::settings.combat_keybinds;
   important = true;

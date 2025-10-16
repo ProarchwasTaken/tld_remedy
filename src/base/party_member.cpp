@@ -10,15 +10,18 @@
 #include "enums.h"
 #include "data/damage.h"
 #include "data/session.h"
+#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
+#include "system/sprite_atlas.h"
 #include "combat/status_effects/broken_arm.h"
 #include "combat/status_effects/crippled_leg.h"
 #include "combat/status_effects/mangled.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/system/stage.h"
+#include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
@@ -27,10 +30,12 @@ std::unique_ptr, std::make_unique;
 int PartyMember::member_count = 0;
 
 
-PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position):
+PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position,
+                         SpriteAtlas *atlas):
   Combatant(name, CombatantTeam::PARTY, position, RIGHT)
 {
   this->id = id;
+  this->atlas = atlas;
   member_count++;
 }
 
@@ -86,6 +91,14 @@ void PartyMember::takeDamage(DamageData &data) {
 
   deplete_clock = 0.0;
   deplete_delay = DEFAULT_DEPLETE_DELAY;
+
+  if (data.damage_type == DamageType::MORALE && state == HIT_STUN) {
+    Color tint = Game::palette[42];
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, atlas, sprite, bounding_box.position, 
+      0.25f, tint
+    );
+  }
 
   if (!important) {
     return;

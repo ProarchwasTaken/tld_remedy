@@ -7,6 +7,7 @@
 #include "data/damage.h"
 #include "data/combatant_event.h"
 #include "base/combatant.h"
+#include "system/sprite_atlas.h"
 #include "combat/system/cbt_handler.h"
 
 
@@ -15,7 +16,8 @@
 class PartyMember : public Combatant {
 public:
   static int memberCount() {return member_count;}
-  PartyMember(std::string name, PartyMemberID id, Vector2 position);
+  PartyMember(std::string name, PartyMemberID id, Vector2 position,
+              SpriteAtlas *atlas);
   ~PartyMember();
 
   bool isEnabled();
@@ -70,4 +72,6 @@ protected:
 private:
   static int member_count;
   constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;
+
+  SpriteAtlas *atlas;
 };
