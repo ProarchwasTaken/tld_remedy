@@ -27,6 +27,8 @@ private:
   float velocity; 
   int direction_x;
 
+  float distance_traveled = 99;
+
   GSSpriteSet *sprite_set;
   SpriteAtlas *user_atlas;
 };

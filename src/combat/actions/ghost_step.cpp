@@ -1,10 +1,13 @@
 #include <cassert>
+#include <cstdlib>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
-#include "system/sprite_atlas.h"
+#include "data/combat_event.h"
 #include "utils/collision.h"
+#include "system/sprite_atlas.h"
+#include "combat/system/evt_handler.h"
 #include "combat/actions/ghost_step.h"
 
 
@@ -40,7 +43,17 @@ void GhostStep::action() {
   }
   else {
     user->position.x += magnitude;
+    distance_traveled += std::abs(magnitude);
   }
+
+  if (distance_traveled >= 8) {
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
+      user->bounding_box.position, user->direction, 0.10f
+    );
+
+    distance_traveled = 0.0;
+  } 
 
   user->rectExCorrection(user->bounding_box, user->hurtbox);
 

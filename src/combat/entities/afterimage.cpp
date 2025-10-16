@@ -10,7 +10,8 @@
 
 
 AfterImage::AfterImage(SpriteAtlas *atlas, Rectangle *sprite, 
-                       Vector2 position, float life_time, Color tint)
+                       Vector2 position, Direction direction, 
+                       float life_time, Color tint)
 {
   entity_type = EntityType::AFTERIMAGE;
 
@@ -23,6 +24,7 @@ AfterImage::AfterImage(SpriteAtlas *atlas, Rectangle *sprite,
   tint.a = 180;
 
   this->life_time = life_time;
+  this->direction = direction;
 
   bounding_box.scale = {sprite->width, sprite->height};
   bounding_box.offset = {0, 0};
@@ -49,5 +51,7 @@ void AfterImage::update() {
 }
 
 void AfterImage::draw() {
-  DrawTextureRec(atlas->sheet, *sprite, position, tint);
+  Rectangle source = *sprite;
+  source.width *= direction;
+  DrawTextureRec(atlas->sheet, source, position, tint);
 }

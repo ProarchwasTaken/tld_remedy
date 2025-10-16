@@ -96,7 +96,7 @@ void PartyMember::takeDamage(DamageData &data) {
     Color tint = Game::palette[42];
     CombatHandler::raise<CreateAfterImgCB>(
       CombatEVT::CREATE_AFTERIMAGE, atlas, sprite, bounding_box.position, 
-      0.25f, tint
+      direction, 0.25f, tint
     );
   }
 

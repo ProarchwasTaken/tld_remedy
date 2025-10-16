@@ -30,6 +30,7 @@ struct CreateAfterImgCB : CombatEvent {
   SpriteAtlas *atlas;
   Rectangle *sprite;
   Vector2 position;
+  Direction direction;
   float life_time = 0.25;
   Color tint = WHITE;
 };
