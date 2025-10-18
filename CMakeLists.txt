@@ -111,6 +111,7 @@ set(HEADERS
 "include/combat/status_effects/crippled_leg.h"
 "include/combat/status_effects/mangled.h"
 "include/combat/status_effects/despondent.h"
+"include/combat/status_effects/mending.h"
 "include/scenes/camp_menu.h"
 )
 set(SOURCE
@@ -175,6 +176,7 @@ set(SOURCE
 "src/combat/status_effects/crippled_leg.cpp"
 "src/combat/status_effects/mangled.cpp"
 "src/combat/status_effects/despondent.cpp"
+"src/combat/status_effects/mending.cpp"
 "src/scenes/camp_menu.cpp"
 )
 
