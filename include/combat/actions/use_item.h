@@ -14,6 +14,7 @@ public:
 
   void windUp() override;
   void action() override;
+  void endLag() override {};
 private:
   Mary *user;
   PartyMember *target;

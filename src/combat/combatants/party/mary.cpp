@@ -19,6 +19,7 @@
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
+#include "combat/actions/use_item.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -93,6 +94,14 @@ void Mary::assignSubWeapon(SubWeaponID id) {
   tech2_type = sub_weapon->tech2_type;
 }
 
+void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
+  PLOGI << "Sending Use Item input to buffer.";
+  buffer = MaryAction::USE_ITEM;
+  this->item = item;
+  item_use_time = use_time;
+  item_target = target;
+}
+
 void Mary::behavior() {
   if (!enabled) {
     return;
@@ -104,6 +113,11 @@ void Mary::behavior() {
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
   actionInput(gamepad);
+
+  // Remove this later!
+  if (IsKeyPressed(KEY_E)) {
+    useItem(ItemID::I_BANDAGE, 1.0, this);
+  }
 
   if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
@@ -271,6 +285,18 @@ void Mary::readActionBuffer() {
 
         action = make_unique<Evade>(this, atlas, hitbox, ev_set);
       }
+      break;
+    }
+    case MaryAction::USE_ITEM: {
+      assert(item_target != NULL);
+      assert(item != ItemID::NONE);
+      assert(item_use_time != 0);
+
+      action = make_unique<UseItem>(this, item_target, item, 
+                                    item_use_time);
+      item_target = NULL;
+      item = ItemID::NONE;
+      item_use_time = 0;
       break;
     }
     case MaryAction::LIGHT_TECH: {
