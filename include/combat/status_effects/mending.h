@@ -7,7 +7,6 @@
 class Mending : public StatusEffect {
 public:
   Mending(PartyMember *afflicted, float percentage, float speed);
-  ~Mending();
 
   void intercept(DamageData &data) override;
   void logic() override;

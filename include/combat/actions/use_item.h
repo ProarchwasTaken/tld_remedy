@@ -12,6 +12,8 @@ public:
   UseItem(Mary *user, PartyMember *target, ItemID item, float wind_up);
   ~UseItem();
 
+  void applyItemEffect();
+
   void windUp() override;
   void action() override;
   void endLag() override {};

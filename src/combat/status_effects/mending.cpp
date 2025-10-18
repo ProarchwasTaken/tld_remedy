@@ -18,7 +18,7 @@ Mending::Mending(PartyMember *afflicted, float percentage, float speed):
   persistant = false;
   this->afflicted = afflicted;
 
-  to_be_healed = afflicted->life * percentage;
+  to_be_healed = afflicted->max_life * percentage;
   PLOGI << "Life to be healed: " << to_be_healed;
 
   this->speed = speed;
@@ -47,21 +47,21 @@ void Mending::intercept(DamageData &data) {
 }
 
 void Mending::logic() {
+  float max_life = afflicted->max_life;
   float recovery = afflicted->recovery;
-  float magnitude = (afflicted->life * speed) * recovery;
+
+  float magnitude = (max_life * speed) * recovery;
   magnitude = magnitude * Game::deltaTime();
 
   if (magnitude > to_be_healed) {
     magnitude = to_be_healed;
   } 
 
-  float *life = &afflicted->life;
-  float max_life = afflicted->max_life;
-
-  *life = Clamp(*life + magnitude, 0, max_life);
+  afflicted->increaseLife(magnitude);
   to_be_healed -= magnitude;
 
-  if (to_be_healed <= 0 || *life == max_life) {
+  float life = afflicted->life;
+  if (to_be_healed <= 0 || life == max_life) {
     PLOGI << "Healing complete.";
     end = true;
   }
