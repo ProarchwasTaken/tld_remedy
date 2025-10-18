@@ -74,7 +74,8 @@ enum class ActionID {
   GHOST_STEP,
   EVADE,
   KNIFE_CLEAVE,
-  KNIFE_PIERCER
+  KNIFE_PIERCER,
+  USE_ITEM
 };
 
 enum class StatusID {
