@@ -26,8 +26,7 @@ CombatAction::~CombatAction() {
 }
 
 void CombatAction::intercept(DamageData &data) {
-  if (phase == ActionPhase::END_LAG) {
-    PLOGI << "User had taken damage while Action is in End Lag phase.";
+  if (phase == ActionPhase::END_LAG || type == ActionType::SUPPORT) {
     data.stun_type = StunType::STAGGER;
     data.calculation = DamageType::LIFE;
     data.damage_type = DamageType::LIFE;
