@@ -66,6 +66,7 @@ public:
   void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);
+  void increaseLife(float magnitude);
 
   /* This function (Along with increaseMorale) does nothing. This is 
    * because, Combatants at their core do not possess Morale attributes.

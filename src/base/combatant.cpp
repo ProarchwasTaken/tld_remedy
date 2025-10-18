@@ -191,6 +191,16 @@ void Combatant::damageLife(float magnitude) {
   }
 }
 
+void Combatant::increaseLife(float magnitude) {
+  life = Clamp(life + magnitude, 0, max_life);
+
+  if (critical_life && life >= max_life * LOW_LIFE_THRESHOLD) {
+    PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] is"
+    << " no longer in Critical Life!";
+    critical_life = false;
+  }
+}
+
 void Combatant::damageMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to damage.";
 }
