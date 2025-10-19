@@ -23,3 +23,11 @@ struct TookDamageCBT : CombatantEvent {
 struct GainedMoraleCBT : CombatantEvent {
   float morale_gained;
 };
+
+struct EffectGainedCBT : CombatantEvent {
+  StatusID effect_id;
+};
+
+struct EffectLostCBT : CombatantEvent {
+  StatusID effect_id;
+};

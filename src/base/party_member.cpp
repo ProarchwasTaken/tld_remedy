@@ -64,7 +64,7 @@ void PartyMember::eventHandling(EventPool<CombatantEvent> *event_pool) {
       continue;
     }
 
-    if (event->event_type == CombatantEVT::GAINED_MORALE) {
+    if (event->event_type == CombatantEVT::MORALE_GAINED) {
       auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
       moraleShare(mp_event);
     }
@@ -257,7 +257,7 @@ void PartyMember::increaseMorale(float magnitude, bool mp_share) {
   if (eligible) {
     PLOGD << "'" << name << "' is eligible to trigger MP Share";
     CombatantHandler::queue<GainedMoraleCBT>(this, 
-                                             CombatantEVT::GAINED_MORALE, 
+                                             CombatantEVT::MORALE_GAINED, 
                                              magnitude);
   }
 }

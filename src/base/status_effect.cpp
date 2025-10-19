@@ -4,7 +4,9 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
+#include "data/combatant_event.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 
 using std::string;
 
@@ -34,6 +36,7 @@ StatusEffect::~StatusEffect() {
 
   CombatHandler::raise<CreateStatTxtCB>(CombatEVT::CREATE_STAT_TXT, 
                                         afflicted, text, color);
+  CombatantHandler::queue<EffectLostCBT>(CombatantEVT::EFFECT_LOST, id);
 }
 
 void StatusEffect::init(bool hide_text) {
@@ -51,4 +54,7 @@ void StatusEffect::init(bool hide_text) {
     CombatHandler::raise<CreateStatTxtCB>(CombatEVT::CREATE_STAT_TXT, 
                                           afflicted, text, color);
   }
+
+  CombatantHandler::queue<EffectGainedCBT>(CombatantEVT::EFFECT_GAINED, 
+                                           id);
 }
