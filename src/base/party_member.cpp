@@ -295,6 +295,10 @@ void PartyMember::depleteExhaustion() {
   float magnitude = recovery * (max_life * 0.125);
   magnitude *= Game::deltaTime();
 
+  if (magnitude > exhaustion) {
+    magnitude = exhaustion;
+  }
+
   exhaustion = Clamp(exhaustion - magnitude, 0, max_life);
   life = Clamp(life + magnitude, 0, max_life);
 
