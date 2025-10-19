@@ -36,7 +36,8 @@ StatusEffect::~StatusEffect() {
 
   CombatHandler::raise<CreateStatTxtCB>(CombatEVT::CREATE_STAT_TXT, 
                                         afflicted, text, color);
-  CombatantHandler::queue<EffectLostCBT>(CombatantEVT::EFFECT_LOST, id);
+  CombatantHandler::queue<EffectLostCBT>(afflicted,
+                                         CombatantEVT::EFFECT_LOST, id);
 }
 
 void StatusEffect::init(bool hide_text) {
@@ -55,6 +56,7 @@ void StatusEffect::init(bool hide_text) {
                                           afflicted, text, color);
   }
 
-  CombatantHandler::queue<EffectGainedCBT>(CombatantEVT::EFFECT_GAINED, 
+  CombatantHandler::queue<EffectGainedCBT>(afflicted,
+                                           CombatantEVT::EFFECT_GAINED, 
                                            id);
 }

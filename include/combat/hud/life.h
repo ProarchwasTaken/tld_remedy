@@ -18,6 +18,7 @@ public:
   void assign(PartyMember *combatant);
 
   void behavior();
+  void eventHandling(CombatantEvent *event);
   void damageEventHandling(TookDamageCBT *event);
 
   void update();
@@ -51,6 +52,7 @@ private:
 
   Color life_color = WHITE;
   std::string txt_life;
+  bool has_mending = false;
 
   Color morale_color;
   std::string txt_morale;

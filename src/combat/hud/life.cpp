@@ -81,13 +81,46 @@ void LifeHud::behavior() {
     Entity *sender = event->sender;
     CombatantEVT type = event->event_type;
 
-    if (sender == user && type == CombatantEVT::TOOK_DAMAGE) {
-      PLOGD << "Aknowledging TookDamage event sent by: '" << user->name
+    if (sender == user) {
+      eventHandling(event.get());
+    }
+  }
+}
+
+void LifeHud::eventHandling(CombatantEvent *event) {
+  assert(event->sender == user);
+  switch (event->event_type) {
+    case CombatantEVT::TOOK_DAMAGE: {
+      PLOGD << "Acknowledging TookDamage event sent by: '" << user->name
         << "' [ID: " << user->entity_id << "'";
       
-      auto *evt_damage = static_cast<TookDamageCBT*>(event.get());
+      auto *evt_damage = static_cast<TookDamageCBT*>(event);
       damageEventHandling(evt_damage);
       break;
+    }
+    case CombatantEVT::EFFECT_GAINED: {
+      auto *effect_gained = static_cast<EffectGainedCBT*>(event);
+      if (effect_gained->effect_id == StatusID::MENDING) {
+        PLOGD << "Acknowledging EffectGained event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "'";
+        has_mending = true;
+      }
+
+      break;
+    }
+    case CombatantEVT::EFFECT_LOST: {
+      auto *effect_lost = static_cast<EffectLostCBT*>(event);
+      StatusID id = effect_lost->effect_id;
+      if (id == StatusID::MENDING) {
+        PLOGD << "Acknowledging EffectLost event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "'";
+        has_mending = false;
+      }
+
+      break;
+    }
+    default: {
+
     }
   }
 }
@@ -122,6 +155,9 @@ void LifeHud::update() {
 void LifeHud::decideLifeColor() {
   if (user->state == CombatantState::DEAD) {
     life_color = Game::palette[32];
+  }
+  else if (has_mending) {
+    life_color = Game::palette[14];
   }
   else if (user->critical_life) {
     life_color = criticalFlash();
