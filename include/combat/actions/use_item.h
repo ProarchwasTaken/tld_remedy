@@ -25,5 +25,8 @@ private:
   SpriteAtlas *atlas;
   Animation anim_windup = {{31, 32}, 0.25};
   Animation anim_use = {{33, 34, 35, 36, 37}, 0.10};
+
+  float interval = 0.25;
+  float interval_clock = 1.0;
 };
 

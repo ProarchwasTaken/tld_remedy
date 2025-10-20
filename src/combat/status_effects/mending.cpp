@@ -24,6 +24,17 @@ Mending::Mending(PartyMember *afflicted, float percentage, float speed):
   this->speed = speed;
 }
 
+Mending::~Mending() {
+  if (end) {
+    afflicted->sfx.play("mending_loss");
+  }
+}
+
+void Mending::init(bool hide_text) {
+  StatusEffect::init(hide_text);
+  afflicted->sfx.play("mending_gain");
+}
+
 void Mending::intercept(DamageData &data) {
   if (data.damage_type != DamageType::LIFE) {
     return;

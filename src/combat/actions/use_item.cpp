@@ -2,6 +2,7 @@
 #include <memory>
 #include <cstddef>
 #include "enums.h"
+#include "game.h"
 #include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
@@ -51,9 +52,16 @@ void UseItem::applyItemEffect() {
 void UseItem::windUp() {
   SpriteAnimation::play(user->animation, &anim_windup, true);
 
+  interval_clock += Game::deltaTime() / interval;
+  if (interval_clock >= 1.0) {
+    user->sfx.play("item_windup");
+    interval_clock = 0.0;
+  }
+
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[33];
+    user->sfx.play("item_use");
   }
   else {
     user->sprite = &atlas->sprites[*user->animation->current]; 

@@ -59,6 +59,26 @@
     {
       "name": "knife_piercer_heave",
       "filename": "combat/knife_piercer_heave.mp3"
+    },
+    {
+      "name": "item_windup",
+      "filename": "combat/item_windup.mp3"
+    },
+    {
+      "name": "item_use",
+      "filename": "combat/item_use.mp3"
+    },
+    {
+      "name": "item_splint",
+      "filename": "combat/item_splint.mp3"
+    },
+    {
+      "name": "mending_gain",
+      "filename": "combat/mending_gain.mp3"
+    },
+    {
+      "name": "mending_loss",
+      "filename": "combat/mending_loss.mp3"
     }
   ]
 }
