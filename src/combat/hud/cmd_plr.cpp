@@ -48,7 +48,7 @@ void PlayerCmdHud::assign(Mary *player) {
 }
 
 void PlayerCmdHud::update() {
-  if (player == NULL) {
+  if (player == NULL || !player->isEnabled()) {
     return;
   }
 

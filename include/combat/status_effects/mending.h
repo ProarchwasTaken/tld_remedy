@@ -4,6 +4,10 @@
 #include "data/damage.h"
 
 
+/* A positive status effect that gradually restores a percentage of the
+ * afflicted's Life. The speed of which varies depending on the 
+ * party member's recovery. If the afflicted sustains Life damage,
+ * the effect will end prematurely.*/
 class Mending : public StatusEffect {
 public:
   Mending(PartyMember *afflicted, float percentage, float speed);
