@@ -70,6 +70,8 @@ void CombatScene::initializeCombatants() {
   initializePlayer();
   initializeCompanion();
 
+  item_hud.assign(player, companion, session);
+
   EnemyTroop troop = DBTroop1();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
@@ -148,6 +150,7 @@ void CombatScene::update() {
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
   }
+
   plr_hud.behavior();
   com_hud.behavior();
   cbt_handler.clearEvents();
@@ -163,8 +166,8 @@ void CombatScene::update() {
 
     plr_hud.update();
     plr_cmd_hud.update();
-
     com_hud.update();
+    item_hud.update();
 
     eventProcessing();
   }
@@ -232,6 +235,11 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
 
       auto afterimage = make_unique<AfterImage>(event_data);
       entities.push_back(std::move(afterimage));
+      break;
+    }
+    case CombatEVT::OPEN_ITEM_HUD: {
+      PLOGD << "Event detected: OpenItemHud";
+      item_hud.enable();
       break;
     }
   }
@@ -379,8 +387,8 @@ void CombatScene::draw() {
 
   plr_hud.draw();
   plr_cmd_hud.draw();
-
   com_hud.draw();
+  item_hud.draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();

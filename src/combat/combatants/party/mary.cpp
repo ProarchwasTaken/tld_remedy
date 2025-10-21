@@ -7,6 +7,7 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
+#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "data/animation.h"
 #include "data/session.h"
@@ -14,6 +15,7 @@
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
@@ -103,24 +105,16 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
 }
 
 void Mary::behavior() {
+  auto *event_pool = CombatantHandler::get();
+  eventHandling(event_pool);
+
   if (!enabled) {
     return;
   }
 
-  auto *event_pool = CombatantHandler::get();
-  eventHandling(event_pool);
-
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
   actionInput(gamepad);
-
-  // Remove this later!
-  if (IsKeyPressed(KEY_E)) {
-    useItem(ItemID::I_BANDAGE, 1.0, this);
-  }
-  if (IsKeyPressed(KEY_R)) {
-    useItem(ItemID::M_SPLINT, 1.5, this);
-  }
 
   if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
@@ -201,6 +195,10 @@ void Mary::actionInput(bool gamepad) {
   else if (Input::pressed(keybinds->heavy_tech, gamepad)) {
     PLOGI << "Sending Heavy Tech input to buffer.";
     buffer = MaryAction::HEAVY_TECH;
+  }
+  else if (Input::pressed(keybinds->use_item, gamepad)) {
+    PLOGI << "Sending a event to open the Item Hud";
+    CombatHandler::raise<CombatEvent>(CombatEVT::OPEN_ITEM_HUD);
   }
   else {
     return;

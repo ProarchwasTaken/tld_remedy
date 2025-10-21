@@ -130,6 +130,7 @@ enum class CombatEVT {
   CREATE_STAT_TXT,
   CREATE_AFTERIMAGE,
   DELETE_ENTITY,
+  OPEN_ITEM_HUD,
 };
 
 enum class CombatantEVT {

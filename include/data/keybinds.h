@@ -36,4 +36,5 @@ struct CombatKeybinds {
   KeyBind defensive = {KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT};
   KeyBind light_tech = {KEY_A, GAMEPAD_BUTTON_RIGHT_FACE_LEFT};
   KeyBind heavy_tech = {KEY_S, GAMEPAD_BUTTON_RIGHT_FACE_UP};
+  KeyBind use_item = {KEY_LEFT_SHIFT, GAMEPAD_BUTTON_MIDDLE_LEFT};
 };

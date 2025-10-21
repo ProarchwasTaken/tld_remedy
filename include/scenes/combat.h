@@ -16,6 +16,7 @@
 #include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_item.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 
@@ -66,6 +67,8 @@ private:
 
   PartyMember *companion;
   LifeHud com_hud = LifeHud({154, 215});
+
+  ItemCmdHud item_hud = ItemCmdHud({350, 222});
 
   // Remove this later!
   Dummy *dummy = NULL;
