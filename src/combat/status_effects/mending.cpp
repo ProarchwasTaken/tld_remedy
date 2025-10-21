@@ -30,6 +30,20 @@ Mending::~Mending() {
   }
 }
 
+void Mending::refresh(float percentage, float speed) {
+  float new_value = afflicted->max_life * percentage;
+  if (new_value > to_be_healed) {
+    to_be_healed = new_value;
+  }
+
+  if (this->speed < speed) {
+    this->speed = speed;
+  }
+
+  PLOGI << "Refreshed status effect.";
+  afflicted->sfx.play("mending_gain");
+}
+
 void Mending::init(bool hide_text) {
   StatusEffect::init(hide_text);
   afflicted->sfx.play("mending_gain");

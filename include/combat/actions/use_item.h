@@ -13,6 +13,8 @@ public:
   ~UseItem();
 
   void applyItemEffect();
+  void applyMending(float percentage, float speed);
+  void applySplint();
 
   void windUp() override;
   void action() override;

@@ -9,6 +9,8 @@ public:
   Mending(PartyMember *afflicted, float percentage, float speed);
   ~Mending();
 
+  void refresh(float percentage, float speed);
+
   void init(bool hide_text = false) override;
   void intercept(DamageData &data) override;
   void logic() override;

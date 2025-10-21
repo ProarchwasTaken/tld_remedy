@@ -8,6 +8,7 @@
 #include "base/party_member.h"
 #include "utils/animation.h"
 #include "combat/status_effects/mending.h"
+#include "combat/status_effects/despondent.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/use_item.h"
 #include <plog/Log.h>
@@ -33,19 +34,68 @@ UseItem::~UseItem() {
 }
 
 void UseItem::applyItemEffect() {
+  assert(target != NULL);
+
   switch (item) {
     case ItemID::I_BANDAGE: {
       PLOGI << "Applying effect of Item: Improvised Bandage.";
-      assert(target != NULL);
-
-      unique_ptr<StatusEffect> effect = make_unique<Mending>(target, 0.35,
-                                                             0.05);
-      target->afflictStatus(effect);
+      applyMending(0.35, 0.05);
+      break;
+    }
+    case ItemID::M_SPLINT: {
+      PLOGI << "Applying effect of Item: Makeshift Splint.";
+      applySplint();
       break;
     }
     default: {
       PLOGE << "Invalid Item!!";
     }
+  }
+}
+
+void UseItem::applyMending(float percentage, float speed) {
+  for (auto &effect : target->status) {
+    if (effect->id == StatusID::MENDING) {
+      Mending *mending = static_cast<Mending*>(effect.get());
+      mending->refresh(percentage, speed);
+      return;
+    }
+  }
+
+  unique_ptr<StatusEffect> effect = make_unique<Mending>(target, 
+                                                         percentage,
+                                                         speed);
+  target->afflictStatus(effect);
+}
+
+void UseItem::applySplint() {
+  Despondent *despondent = NULL;
+  bool cured = false;
+
+  for (auto &effect : target->status) {
+    if (effect->id == StatusID::DESPONDENT) {
+      despondent = static_cast<Despondent*>(effect.get());
+      continue;
+    }
+
+    if (!cured && effect->isPersistant()) {
+      PLOGI << "Cured Statis Ailment: '" << effect->name << "'";
+      effect->end = true;
+      cured = true;
+    }
+  }
+
+  user->sfx.play("item_splint");
+
+  if (!cured || despondent == NULL) {
+    return;
+  }
+
+  PLOGI << "Cured Despondence as well.";
+  despondent->end = true;
+
+  if (target->morale < 0) {
+    target->morale = 0;
   }
 }
 

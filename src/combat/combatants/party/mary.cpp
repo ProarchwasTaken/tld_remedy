@@ -118,6 +118,9 @@ void Mary::behavior() {
   if (IsKeyPressed(KEY_E)) {
     useItem(ItemID::I_BANDAGE, 1.0, this);
   }
+  if (IsKeyPressed(KEY_R)) {
+    useItem(ItemID::M_SPLINT, 1.5, this);
+  }
 
   if (state == CombatantState::NEUTRAL || canCancel()) {
     readActionBuffer();
