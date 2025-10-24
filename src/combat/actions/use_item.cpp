@@ -54,6 +54,12 @@ void UseItem::applyItemEffect() {
 }
 
 void UseItem::applyMending(float percentage, float speed) {
+  if (target->life == target->max_life) {
+    PLOGI << "Target is already at full Life!";
+    user->sfx.play("mending_loss");
+    return;
+  }
+
   for (auto &effect : target->status) {
     if (effect->id == StatusID::MENDING) {
       Mending *mending = static_cast<Mending*>(effect.get());

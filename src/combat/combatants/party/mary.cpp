@@ -73,8 +73,10 @@ Mary::~Mary() {
 void Mary::setEnabled(bool value) {
   PartyMember::setEnabled(value);
 
-  moving = false;
-  buffer = MaryAction::NONE;
+  if (value == false) {
+    moving = false;
+    buffer = MaryAction::NONE;
+  }
 }
 
 void Mary::assignSubWeapon(SubWeaponID id) {

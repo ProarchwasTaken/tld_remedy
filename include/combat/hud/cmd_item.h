@@ -26,12 +26,23 @@ public:
 
   void update();
   void optionNavigation();
+  void selectOption();
+  bool enterTargetMode();
+
+  void targetNavigation();
+  void useItem();
 
   void draw();
-  void drawNamePlate(Font *font, int txt_size);
+  void drawNamePlate(const char *text, Font *font, int txt_size, 
+                     Vector2 position, Color main_color, 
+                     Color col_pattern);
   void drawOptions(Font *font, int txt_size);
   void drawOptionText(ItemID item, Vector2 position, Font *font, 
                       int txt_size);
+  void drawMemberName(PartyMember *member, Vector2 position, Font *font, 
+                      int txt_size);
+
+  void drawTargetOptions(Font *font, int txt_size);
 
   bool enabled = false;
 private:
@@ -47,6 +58,13 @@ private:
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
   std::unordered_set<ItemID> disallowed = {ItemID::NONE};
+
+  Vector2 target_position;
+  Color target_color;
+  bool target_mode = false;
+
+  std::array<PartyMember*, 2> party;
+  std::array<PartyMember*, 2>::iterator target = NULL;
 
   float opt_switch_clock = 0.0;
   float opt_switch_time = 0.15;

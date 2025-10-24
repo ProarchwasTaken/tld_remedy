@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
+#include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
 #include "data/session.h"
@@ -26,6 +27,9 @@ ItemCmdHud::ItemCmdHud(Vector2 position) {
   base_y = position.y;
   main_color = Game::palette[13];
 
+  target_position = Vector2Add(position, {-32, -22});
+  target_color = Game::palette[33];
+
   atlas = &CombatScene::cmd_atlas;
   sfx = &Game::menu_sfx;
   keybinds = &Game::settings.menu_keybinds;
@@ -44,6 +48,8 @@ void ItemCmdHud::assign(Mary *&player, PartyMember *&companion,
   this->player = &player;
   this->companion = &companion;
   this->session = session;
+
+  party = {player, companion};
   PLOGI << "Assigned ItemCmdHud to Party.";
 }
 
@@ -60,6 +66,8 @@ void ItemCmdHud::enable() {
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();
+
+  target = party.begin();
   
   main_position.y = base_y - (11 * session->item_count);
   opt_switch_clock = 0;
@@ -97,6 +105,7 @@ void ItemCmdHud::disable() {
   mary->setEnabled(true);
 
   enabled = false;
+  target_mode = false;
   PLOGI << "Disabled Item Command Hud.";
 }
 
@@ -105,7 +114,26 @@ void ItemCmdHud::update() {
     return;
   }
 
-  optionNavigation();
+  Mary *mary = *player;
+  if (mary->state == HIT_STUN || mary->state == DEAD) {
+    disable();
+    sfx->play("menu_cancel"); 
+    return;
+  }
+
+  if (target_mode && !enterTargetMode()) {
+    target_mode = false;
+    opt_switch_clock = 0.0;
+    target = party.begin();
+    sfx->play("menu_cancel"); 
+  }
+
+  if (!target_mode) {
+    optionNavigation();
+  }
+  else {
+    targetNavigation();
+  }
 
   if (opt_switch_clock != 1.0) {
     opt_switch_clock += Game::deltaTime() / opt_switch_time;
@@ -125,10 +153,92 @@ void ItemCmdHud::optionNavigation() {
     opt_switch_clock = 0.0;
     sfx->play("menu_navigate");
   }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectOption();
+    sfx->play("menu_select");
+  }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     disable();
     sfx->play("menu_cancel");
   }
+}
+
+void ItemCmdHud::selectOption() {
+  if (enterTargetMode()) {
+    target_mode = true;
+    opt_switch_clock = 0.0;
+  }
+  else {
+    useItem();
+    disable();
+  }
+}
+
+bool ItemCmdHud::enterTargetMode() {
+  if (*companion == NULL) {
+    return false;
+  }
+
+  PartyMember *companion = *this->companion;
+  if (companion->state == DEAD) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
+void ItemCmdHud::targetNavigation() {
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(party, target);
+    opt_switch_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(party, target);
+    opt_switch_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    target_mode = false;
+    opt_switch_clock = 0.0;
+    sfx->play("menu_cancel");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    useItem();
+    disable();
+    sfx->play("menu_select");
+  }
+}
+
+void ItemCmdHud::useItem() {
+  Mary *mary = *player;
+
+  float use_time;
+
+  assert(selected != NULL);
+  switch (*selected) {
+    case ItemID::I_BANDAGE: {
+      PLOGD << "Item Selected: Improvised Bandage.";
+      use_time = 1.0;
+      break;
+    }
+    case ItemID::M_SPLINT: {
+      PLOGD << "Item Selected: Makeshift Splint.";
+      use_time = 2.0;
+      break;
+    }
+    default: {
+      assert(*selected != ItemID::NONE);
+      PLOGE << "Invalid Item!";
+      return;
+    }
+  }
+
+  PartyMember *target = *this->target;
+  PLOGD << "Target Selected: '" << target->name << "'";
+  mary->useItem(*selected, use_time, target);
 }
 
 void ItemCmdHud::draw() {
@@ -139,22 +249,33 @@ void ItemCmdHud::draw() {
   Font *font = &Game::sm_font;
   int txt_size = font->baseSize;
 
-  drawNamePlate(font, txt_size);
+  drawNamePlate("ITEMS", font, txt_size, main_position, main_color,
+                Game::palette[12]);
   drawOptions(font, txt_size);
+
+  if (target_mode) {
+    assert(*companion != NULL);
+    drawNamePlate("PARTY", font, txt_size, target_position, target_color, 
+                  Game::palette[32]);
+    drawTargetOptions(font, txt_size);
+  }
 }
 
-void ItemCmdHud::drawNamePlate(Font *font, int txt_size) {
-  Vector2 position = Vector2Add(main_position, {12, 0});
-  Color col_pattern = Game::palette[12];
+void ItemCmdHud::drawNamePlate(const char *text, Font *font, 
+                               int txt_size, Vector2 position, 
+                               Color main_color, Color col_pattern) 
+{
+  Vector2 frame_position = Vector2Add(position, {12, 0});
+  DrawTextureRec(atlas->sheet, atlas->sprites[0], frame_position, 
+                 main_color);
+  DrawTextureRec(atlas->sheet, atlas->sprites[1], frame_position, 
+                 col_pattern);
 
-  DrawTextureRec(atlas->sheet, atlas->sprites[0], position, main_color);
-  DrawTextureRec(atlas->sheet, atlas->sprites[1], position, col_pattern);
-
-  Vector2 name_position = Vector2Add(main_position, {66, 1});
-  name_position = TextUtils::alignRight("ITEMS", name_position, *font, 
+  Vector2 name_position = Vector2Add(position, {66, 1});
+  name_position = TextUtils::alignRight(text, name_position, *font, 
                                         -3, 0);
 
-  DrawTextEx(*font, "ITEMS", name_position, txt_size, -3, WHITE);
+  DrawTextEx(*font, text, name_position, txt_size, -3, WHITE);
 }
 
 void ItemCmdHud::drawOptions(Font *font, int txt_size) {
@@ -168,7 +289,8 @@ void ItemCmdHud::drawOptions(Font *font, int txt_size) {
     }
 
     if (options.begin() + index == selected) {
-      position.x -= 8 * opt_switch_clock;
+      float percentage = Clamp(opt_switch_clock + target_mode, 0.0, 1.0);
+      position.x -= 8 * percentage;
     }
     position.y += 11;
 
@@ -201,3 +323,32 @@ void ItemCmdHud::drawOptionText(ItemID item, Vector2 position,
 
   DrawTextEx(*font, name.c_str(), position, txt_size, -3, WHITE);
 }
+
+void ItemCmdHud::drawTargetOptions(Font *font, int txt_size) {
+  Rectangle *sprite = &atlas->sprites[2];
+  Vector2 position = target_position;
+
+  for (int index = 0; index < 2; index++) {
+    if (party.begin() + index == target) {
+      position.x -= 8 * opt_switch_clock;
+    }
+    position.y += 11;
+
+    DrawTextureRec(atlas->sheet, *sprite, position, target_color);
+
+    PartyMember *member = party.at(index);
+    drawMemberName(member, position, font, txt_size);
+    
+    position.x = target_position.x; 
+  }
+}
+
+void ItemCmdHud::drawMemberName(PartyMember *member, Vector2 position,
+                                Font *font, int txt_size)
+{
+  const char *name = member->name.c_str();
+  position = Vector2Add(position, {59, 1});
+  position = TextUtils::alignRight(name, position, *font, -3, 0);
+  DrawTextEx(*font, name, position, txt_size, -3, WHITE);
+}
+
