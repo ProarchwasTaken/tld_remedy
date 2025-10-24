@@ -24,3 +24,12 @@ struct DBTroop1 : EnemyTroop {
     };
   }
 };
+
+struct DBTroop2 : EnemyTroop {
+  DBTroop2() {
+    id = TroopID::DB_TROOP2;
+    enemies = {
+      {EnemyID::DUMMY, {128, 152}, LEFT},
+    };
+  }
+};

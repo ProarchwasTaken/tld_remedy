@@ -18,6 +18,7 @@
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "system/sprite_atlas.h"
+#include "scenes/field.h"
 #include "combat/system/evt_handler.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
@@ -72,7 +73,7 @@ void CombatScene::initializeCombatants() {
 
   item_hud.assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop1();
+  EnemyTroop troop = DBTroop2();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
@@ -240,6 +241,12 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
     case CombatEVT::OPEN_ITEM_HUD: {
       PLOGD << "Event detected: OpenItemHud";
       item_hud.enable();
+      break;
+    }
+    case CombatEVT::REMOVE_ITEM: {
+      PLOGD << "Event detected: RemoveItemCB";
+      auto *event_data = static_cast<RemoveItemCB*>(event.get());
+      FieldScene::removeItem(session, event_data->item);
       break;
     }
   }

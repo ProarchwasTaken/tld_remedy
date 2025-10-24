@@ -66,7 +66,8 @@ enum class EnemyID {
 
 enum class TroopID {
   INVALID = -1,
-  DB_TROOP1
+  DB_TROOP1,
+  DB_TROOP2
 };
 
 enum class ActionID {
@@ -131,6 +132,7 @@ enum class CombatEVT {
   CREATE_AFTERIMAGE,
   DELETE_ENTITY,
   OPEN_ITEM_HUD,
+  REMOVE_ITEM,
 };
 
 enum class CombatantEVT {

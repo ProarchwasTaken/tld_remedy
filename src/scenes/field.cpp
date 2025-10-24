@@ -293,19 +293,19 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::OPEN_MENU: {
-      PLOGI << "Event Detected: OpenMenuEvent";
+      PLOGD << "Event Detected: OpenMenuEvent";
       Game::openCampMenu(&session);
       break;
     }
     case FieldEVT::INIT_COMBAT: {
-      PLOGI << "Event Detected: InitCombatEvent";
+      PLOGD << "Event Detected: InitCombatEvent";
 
       Game::initCombat(&session);
       sfx.play("combat_init");
       break;
     }
     case FieldEVT::GOTO_TITLE: {
-      PLOGI << "Event Detected: GotoTitleEvent";
+      PLOGD << "Event Detected: GotoTitleEvent";
       Game::loadTitleScreen();
       break;
     }
@@ -362,7 +362,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::CHANGE_COM_LIFE: {
-      PLOGI << "Event detected: SetComLifeEvent";
+      PLOGD << "Event detected: SetComLifeEvent";
       auto *event_data = static_cast<SetLifeEvent*>(event.get());
 
       float value = event_data->value;
@@ -372,19 +372,19 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::ADD_ITEM: {
-      PLOGI << "Event detected: AddItemEvent";
+      PLOGD << "Event detected: AddItemEvent";
       auto *event_data = static_cast<AddItemEvent*>(event.get());
       addItem(event_data->item);
       break;
     }
     case FieldEVT::REMOVE_ITEM: {
-      PLOGI << "Event detected: RemovedItemEvent";
+      PLOGD << "Event detected: RemoveItemEvent";
       auto *event_data = static_cast<RemoveItemEvent*>(event.get());
-      removeItem(event_data->item);
+      removeItem(&session, event_data->item);
       break;
     }
     case FieldEVT::CLEAR_INV: {
-      PLOGI << "Event detected: ClearInvEvent";
+      PLOGD << "Event detected: ClearInvEvent";
       clearInventory();
       break;
     }
@@ -416,27 +416,27 @@ void FieldScene::addItem(ItemID item) {
   assert(session.item_count <= limit);
 }
 
-void FieldScene::removeItem(ItemID item) {
+void FieldScene::removeItem(Session *session, ItemID item) {
   assert(item != ItemID::NONE);
-  if (session.item_count == 0) {
+  if (session->item_count == 0) {
     PLOGE << "Player's inventory is empty!";
     return;
   }
 
-  int limit = session.item_limit;
+  int limit = session->item_limit;
   for (int index = 0; index < limit; index++) {
-    ItemID *slot = &session.inventory[index];
+    ItemID *slot = &session->inventory[index];
 
     if (*slot == item) {
       PLOGI << "Removed Item: " << static_cast<int>(*slot) <<
         " from player's inventory.";
       *slot = ItemID::NONE;
-      session.item_count--;
+      session->item_count--;
       break;
     }
   }
 
-  assert(session.item_count >= 0);
+  assert(session->item_count >= 0);
 }
 
 void FieldScene::clearInventory() {

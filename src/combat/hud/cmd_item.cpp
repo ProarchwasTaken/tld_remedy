@@ -54,14 +54,21 @@ void ItemCmdHud::assign(Mary *&player, PartyMember *&companion,
 }
 
 void ItemCmdHud::enable() {
+  assert(player != NULL);
+  Mary *mary = *player;
+
   if (session->item_count == 0) {
     PLOGI << "Player has no usable items!";
-    Combatant::sfx.play("action_denied");
+    mary->sfx.play("action_denied");
     return;
   }
 
-  assert(player != NULL);
-  Mary *mary = *player;
+  if (mary->state == ACTION && mary->action->id == ActionID::USE_ITEM) {
+    PLOGI << "Player is already using an item!";
+    mary->sfx.play("action_denied");
+    return;
+  }
+
   mary->setEnabled(false);
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
@@ -84,11 +91,11 @@ void ItemCmdHud::updateSelected() {
   selected = NULL;
 
   for (int index = 0; index < session->item_limit; index++) {
-    ItemID *item = &options.at(index);
+    ItemID item = options.at(index);
 
-    if (*item != ItemID::NONE) {
+    if (item != ItemID::NONE) {
       selected = options.begin() + index;
-      PLOGD << "Selected set to: " << static_cast<int>(*item);
+      PLOGD << "Selected set to: " << static_cast<int>(item);
       break;
     }
   }
@@ -282,7 +289,7 @@ void ItemCmdHud::drawOptions(Font *font, int txt_size) {
   Rectangle *sprite = &atlas->sprites[2];
   Vector2 position = main_position;
 
-  for (int index = 0; index < session->item_count; index++) {
+  for (int index = 0; index < session->item_limit; index++) {
     ItemID item = options.at(index);
     if (item == ItemID::NONE) {
       continue;

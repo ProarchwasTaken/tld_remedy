@@ -6,7 +6,9 @@
 #include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
+#include "data/combat_event.h"
 #include "utils/animation.h"
+#include "combat/system/evt_handler.h"
 #include "combat/status_effects/mending.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/combatants/party/mary.h"
@@ -131,5 +133,6 @@ void UseItem::action() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     applyItemEffect();
+    CombatHandler::raise<RemoveItemCB>(CombatEVT::REMOVE_ITEM, item);
   }
 }

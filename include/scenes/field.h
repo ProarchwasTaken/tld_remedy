@@ -35,7 +35,7 @@ public:
   void eventHandling(std::unique_ptr<FieldEvent> &event);
 
   void addItem(ItemID item);
-  void removeItem(ItemID item);
+  static void removeItem(Session *session, ItemID item);
   void clearInventory();
   void updateCommonData(int object_id, bool active);
   void deleteEntity(int entity_id);

@@ -34,3 +34,8 @@ struct CreateAfterImgCB : CombatEvent {
   float life_time = 0.25;
   Color tint = WHITE;
 };
+
+struct RemoveItemCB : CombatEvent {
+  ItemID item;
+};
+
