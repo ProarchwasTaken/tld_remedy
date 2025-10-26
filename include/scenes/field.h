@@ -41,7 +41,10 @@ public:
   void deleteEntity(int entity_id);
 
   void draw() override;
-  void drawSessionInfo();
+
+  #ifndef NDEBUG
+  void drawSessionInfo();  
+  #endif // !NDEBUG
 
   static SoundAtlas sfx;
   static SpriteAtlas emotes;

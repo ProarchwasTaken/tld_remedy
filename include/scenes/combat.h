@@ -45,10 +45,12 @@ public:
 
   void draw() override;
 
+  #ifndef NDEBUG
   void drawDebugInfo();
   void drawPartyStats(PartyMember *member, Vector2 position, Font *font, 
                       int text_size);
-  void drawDebugCombo(Font *font, int text_size);
+  void drawDebugCombo(Font *font, int text_size); 
+  #endif // !NDEBUG
 
   static SpriteAtlas cmd_atlas;
 private:

@@ -530,6 +530,7 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   }
 }
 
+#ifndef NDEBUG
 void FieldScene::drawSessionInfo() {
   Font *font = &Game::sm_font;
   int text_size = Game::sm_font.baseSize;
@@ -589,3 +590,4 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }
+#endif // !NDEBUG

@@ -433,6 +433,7 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   }
 }
 
+#ifndef NDEBUG
 void CombatScene::drawDebugInfo() {
   Font *font = &Game::sm_font;
   int text_size = font->baseSize;
@@ -475,11 +476,22 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   Vector2 ex_pos = position;
   position.y += spacing;
 
+  string spd = TextFormat("Speed Multiplier: %01.02f", 
+                          member->speed_multiplier);
+  Vector2 spd_pos = position;
+  position.y += spacing;
+
+  string rec = TextFormat("Recovery: %01.02f", member->recovery);
+  Vector2 rec_pos = position;
+  position.y += spacing;
+
   DrawTextEx(*font, name.c_str(), n_pos, text_size, -3, GREEN);
   DrawTextEx(*font, coord.c_str(), c_pos, text_size, -3, GREEN);
   DrawTextEx(*font, hp.c_str(), hp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, mp.c_str(), mp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, ex.c_str(), ex_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, spd.c_str(), spd_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, rec.c_str(), rec_pos, text_size, -3, GREEN);
 
   if (member->important) {
     return;
@@ -502,7 +514,8 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
 
 void CombatScene::drawDebugCombo(Font *font, int text_size) {
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
-  Vector2 combo_pos = {6, 49};
+  Vector2 combo_pos = {6, 67};
 
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }
+#endif // !NDEBUG
