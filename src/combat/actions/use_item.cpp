@@ -49,6 +49,11 @@ void UseItem::applyItemEffect() {
       applySplint();
       break;
     }
+    case ItemID::S_BANDAGE: {
+      PLOGI << "Applying effect of Item: Sterilized Bandage.";
+      applyMending(0.50, 0.10);
+      break;
+    }
     default: {
       PLOGE << "Invalid Item!!";
     }

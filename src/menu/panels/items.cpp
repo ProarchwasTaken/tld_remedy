@@ -96,6 +96,9 @@ string ItemsPanel::getName(ItemID item) {
     case ItemID::M_SPLINT: {
       return "Makeshift Splint";
     }
+    case ItemID::S_BANDAGE: {
+      return "Sterilized Bandage";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "";
@@ -110,6 +113,9 @@ string ItemsPanel::getShortenedName(ItemID item) {
     }
     case ItemID::M_SPLINT: {
       return "M.Splint";
+    }
+    case ItemID::S_BANDAGE: {
+      return "S.Bandage";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -133,6 +139,13 @@ string ItemsPanel::getDescription(ItemID item) {
       "\"Crippled Leg\", and \"Mangled\".\n"
       "In Combat: Also cures the\n"
       "\"Despondent\" status ailment.";
+    }
+    case ItemID::S_BANDAGE: {
+      return
+      "Restores 50% of a Combatant's\n"
+      "Life.\n"
+      "In Combat: Applies \"Mending\"\n"
+      "that heals at a faster rate.";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -169,6 +182,13 @@ void ItemsPanel::useItem() {
         }
       }
 
+      break;
+    }
+    case ItemID::S_BANDAGE: {
+      float heal = std::ceilf(member->max_life * 0.50);
+      PLOGI << "Healing combatant by: " << heal << " Life";
+
+      member->life = Clamp(member->life + heal, 0, member->max_life);
       break;
     }
     default: {
@@ -401,7 +421,8 @@ void ItemsPanel::drawItemName(Font *font, int txt_size) {
 void ItemsPanel::drawItemType(Font *font, int txt_size) {
   string type;
   switch (*selected) {
-    case ItemID::I_BANDAGE: {
+    case ItemID::I_BANDAGE:
+    case ItemID::S_BANDAGE: {
       type = "Restorative Item";
       break;
     }
@@ -424,7 +445,8 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
   string usable;
   switch (*selected) {
     case ItemID::I_BANDAGE:
-    case ItemID::M_SPLINT: {
+    case ItemID::M_SPLINT: 
+    case ItemID::S_BANDAGE: {
       usable = "Always";
       break;
     }
@@ -449,7 +471,7 @@ void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
 void ItemsPanel::drawItemPortrait() {
   assert(*selected != ItemID::NONE);
   int id = static_cast<int>(*selected);
-  Rectangle *sprite = &portraits.sprites[id];
+  Rectangle *sprite = &portraits.sprites.at(id);
   Vector2 position = Vector2Add(frame_position, {5, 5});
 
   DrawTextureRec(portraits.sheet, *sprite, position, WHITE);

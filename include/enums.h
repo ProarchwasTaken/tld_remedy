@@ -42,7 +42,8 @@ enum class CompanionID {
 enum class ItemID {
   NONE = -1,
   I_BANDAGE,
-  M_SPLINT
+  M_SPLINT,
+  S_BANDAGE,
 };
 
 enum class CombatantTeam {

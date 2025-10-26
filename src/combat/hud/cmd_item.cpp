@@ -236,6 +236,11 @@ void ItemCmdHud::useItem() {
       use_time = 2.0;
       break;
     }
+    case ItemID::S_BANDAGE: {
+      PLOGD << "Item Selected: Sterilized Bandage.";
+      use_time = 1.5;
+      break;
+    }
     default: {
       assert(*selected != ItemID::NONE);
       PLOGE << "Invalid Item!";
@@ -318,6 +323,10 @@ void ItemCmdHud::drawOptionText(ItemID item, Vector2 position,
     }
     case ItemID::M_SPLINT: {
       name = "M.Splint";
+      break;
+    }
+    case ItemID::S_BANDAGE: {
+      name = "S.Bandage";
       break;
     }
     default: {
