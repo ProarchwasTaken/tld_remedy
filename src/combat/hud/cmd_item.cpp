@@ -241,6 +241,11 @@ void ItemCmdHud::useItem() {
       use_time = 1.5;
       break;
     }
+    case ItemID::S_WATER: {
+      PLOGD << "Item Selected: Sparkling Item.";
+      use_time = 1.5;
+      break;
+    }
     default: {
       assert(*selected != ItemID::NONE);
       PLOGE << "Invalid Item!";
@@ -295,19 +300,19 @@ void ItemCmdHud::drawOptions(Font *font, int txt_size) {
   Vector2 position = main_position;
 
   for (int index = 0; index < session->item_limit; index++) {
-    ItemID item = options.at(index);
-    if (item == ItemID::NONE) {
+    ItemID *item = &options.at(index);
+    if (*item == ItemID::NONE) {
       continue;
     }
 
-    if (options.begin() + index == selected) {
+    if (item == selected) {
       float percentage = Clamp(opt_switch_clock + target_mode, 0.0, 1.0);
       position.x -= 8 * percentage;
     }
     position.y += 11;
 
     DrawTextureRec(atlas->sheet, *sprite, position, main_color);
-    drawOptionText(item, position, font, txt_size);
+    drawOptionText(*item, position, font, txt_size);
     position.x = main_position.x;
   }
 }
@@ -328,6 +333,9 @@ void ItemCmdHud::drawOptionText(ItemID item, Vector2 position,
     case ItemID::S_BANDAGE: {
       name = "S.Bandage";
       break;
+    }
+    case ItemID::S_WATER: {
+      name = "S.Water";
     }
     default: {
       assert(item != ItemID::NONE);

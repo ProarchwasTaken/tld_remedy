@@ -15,6 +15,7 @@ public:
   void applyItemEffect();
   void applyMending(float percentage, float speed);
   void applySplint();
+  void applyRefreshed();
 
   void windUp() override;
   void action() override;

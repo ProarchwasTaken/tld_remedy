@@ -99,6 +99,9 @@ string ItemsPanel::getName(ItemID item) {
     case ItemID::S_BANDAGE: {
       return "Sterilized Bandage";
     }
+    case ItemID::S_WATER: {
+      return "Sparkling Water";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "";
@@ -116,6 +119,9 @@ string ItemsPanel::getShortenedName(ItemID item) {
     }
     case ItemID::S_BANDAGE: {
       return "S.Bandage";
+    }
+    case ItemID::S_WATER: {
+      return "S.Water";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -146,6 +152,13 @@ string ItemsPanel::getDescription(ItemID item) {
       "Life.\n"
       "In Combat: Applies \"Mending\"\n"
       "that heals at a faster rate.";
+    }
+    case ItemID::S_WATER: {
+      return 
+      "Grants a 20% boost to a \n"
+      "Combatant's Speed and Recovery.\n"
+      "Morale will also regenerate\n"
+      "while the effect is active.";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -190,6 +203,10 @@ void ItemsPanel::useItem() {
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
       break;
+    }
+    case ItemID::S_WATER: {
+      sfx->play("menu_cancel");
+      return;
     }
     default: {
       assert(item != ItemID::NONE);
@@ -370,13 +387,18 @@ void ItemsPanel::drawOptions() {
 
     DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
-    if (options.begin() + index == selected) {
+    if (item == selected) {
       drawCursor(position);
     }
 
     position = Vector2Add(position, {6, 1});
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
 
+    Color color = WHITE;
+    if (*item == ItemID::S_WATER) {
+      color = Game::palette[2];
+    }
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
     multiplier += 1;
   }
 }
@@ -430,6 +452,10 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
       type = "Curative Item";
       break;
     }
+    case ItemID::S_WATER: {
+      type = "Enhancement Item";
+      break;
+    }
     default: {
       assert(*selected != ItemID::NONE);
     }
@@ -448,6 +474,10 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
     case ItemID::M_SPLINT: 
     case ItemID::S_BANDAGE: {
       usable = "Always";
+      break;
+    }
+    case ItemID::S_WATER: {
+      usable = "In Combat";
       break;
     }
     default: {

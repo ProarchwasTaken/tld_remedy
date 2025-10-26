@@ -10,6 +10,7 @@
 #include "utils/animation.h"
 #include "combat/system/evt_handler.h"
 #include "combat/status_effects/mending.h"
+#include "combat/status_effects/refreshed.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/use_item.h"
@@ -52,6 +53,11 @@ void UseItem::applyItemEffect() {
     case ItemID::S_BANDAGE: {
       PLOGI << "Applying effect of Item: Sterilized Bandage.";
       applyMending(0.50, 0.10);
+      break;
+    }
+    case ItemID::S_WATER: {
+      PLOGI << "Apply effect of Item: Sparkling Water.";
+      applyRefreshed();
       break;
     }
     default: {
@@ -110,6 +116,19 @@ void UseItem::applySplint() {
   if (target->morale < 0) {
     target->morale = 0;
   }
+}
+
+void UseItem::applyRefreshed() {
+  for (auto &effect : target->status) {
+    if (effect->id == StatusID::REFRESHED) {
+      Refreshed *refreshed = static_cast<Refreshed*>(effect.get());
+      refreshed->refresh();
+      return;
+    }
+  }
+
+  unique_ptr<StatusEffect> effect = make_unique<Refreshed>(target);
+  target->afflictStatus(effect);
 }
 
 void UseItem::windUp() {

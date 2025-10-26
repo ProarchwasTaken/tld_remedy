@@ -113,6 +113,7 @@ set(HEADERS
 "include/combat/status_effects/mangled.h"
 "include/combat/status_effects/despondent.h"
 "include/combat/status_effects/mending.h"
+"include/combat/status_effects/refreshed.h"
 "include/scenes/camp_menu.h"
 )
 set(SOURCE
@@ -179,6 +180,7 @@ set(SOURCE
 "src/combat/status_effects/mangled.cpp"
 "src/combat/status_effects/despondent.cpp"
 "src/combat/status_effects/mending.cpp"
+"src/combat/status_effects/refreshed.cpp"
 "src/scenes/camp_menu.cpp"
 )
 
