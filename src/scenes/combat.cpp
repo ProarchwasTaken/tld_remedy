@@ -354,7 +354,7 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
   int limit = data->status_limit;
 
   for (unique_ptr<StatusEffect> &effect : member->status) {
-    if (effect->isPersistant()) {
+    if (effect->isPersistent()) {
       status[index] = effect->id;
       index++;
       data->status_count++;

@@ -10,7 +10,7 @@ BrokenArm::BrokenArm(Combatant *afflicted) :
   StatusEffect(StatusID::BROKEN_ARM, StatusType::NEGATIVE, afflicted)
 {
   name = "Broken Arm";
-  persistant = true;
+  persistent = true;
 
   float offense = afflicted->offense;
   float dec_offense = std::floorf(offense * 0.90);

@@ -11,7 +11,7 @@ Refreshed::Refreshed(PartyMember *afflicted) :
   StatusEffect(StatusID::REFRESHED, StatusType::POSITIVE, afflicted) 
 {
   name = "Refreshed";
-  persistant = false;
+  persistent = false;
   this->afflicted = afflicted;
 
   float speed = afflicted->speed_multiplier;

@@ -20,7 +20,7 @@ public:
   virtual ~StatusEffect();
 
   virtual void init(bool hide_text = false);
-  bool isPersistant() {return persistant;}
+  bool isPersistent() {return persistent;}
 
   virtual void intercept(DamageData &data) {}
   virtual void logic() {}
@@ -31,6 +31,6 @@ public:
 
   bool end = false;
 protected:
-  bool persistant = false;
+  bool persistent = false;
   Combatant *afflicted;
 };

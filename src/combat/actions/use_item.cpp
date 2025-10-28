@@ -97,7 +97,7 @@ void UseItem::applySplint() {
       continue;
     }
 
-    if (!cured && effect->isPersistant()) {
+    if (!cured && effect->isPersistent()) {
       PLOGI << "Cured Statis Ailment: '" << effect->name << "'";
       effect->end = true;
       cured = true;

@@ -9,7 +9,7 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
   StatusEffect(StatusID::CRIPPLED_LEG, StatusType::NEGATIVE, afflicted)
 {
   name = "Crippled Leg";
-  persistant = true;
+  persistent = true;
 
   float speed = afflicted->speed_multiplier;
   float dec_speed = speed * 0.75;

@@ -12,7 +12,7 @@ Despondent::Despondent(PartyMember *afflicted) :
   StatusEffect(StatusID::DESPONDENT, StatusType::NEGATIVE, afflicted)
 {
   name = "Despondent";
-  persistant = false;
+  persistent = false;
   this->afflicted = afflicted;
 
   float intimid = afflicted->intimid;

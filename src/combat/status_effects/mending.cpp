@@ -15,7 +15,7 @@ Mending::Mending(PartyMember *afflicted, float percentage, float speed):
   StatusEffect(StatusID::MENDING, StatusType::POSITIVE, afflicted)
 {
   name = "Mending";
-  persistant = false;
+  persistent = false;
   this->afflicted = afflicted;
 
   to_be_healed = afflicted->max_life * percentage;

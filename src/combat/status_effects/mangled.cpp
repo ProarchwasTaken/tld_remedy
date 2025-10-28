@@ -11,7 +11,7 @@ Mangled::Mangled(PartyMember *afflicted) :
   StatusEffect(StatusID::MANGLED, StatusType::NEGATIVE, afflicted)
 {
   name = "Mangled";
-  persistant = true;
+  persistent = true;
   this->afflicted = afflicted;
 
   float defense = afflicted->defense;
