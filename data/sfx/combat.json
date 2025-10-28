@@ -79,6 +79,22 @@
     {
       "name": "mending_loss",
       "filename": "combat/mending_loss.mp3"
+    },
+    {
+      "name": "refreshed_gain",
+      "filename": "combat/refreshed_gain.mp3"
+    },
+    {
+      "name": "refreshed_lost",
+      "filename": "combat/refreshed_lost.mp3"
+    },
+    {
+      "name": "endurance_gain",
+      "filename": "combat/endurance_gain.mp3"
+    },
+    {
+      "name": "endurance_lost",
+      "filename": "combat/endurance_lost.mp3"
     }
   ]
 }

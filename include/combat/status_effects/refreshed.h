@@ -3,6 +3,9 @@
 #include "base/status_effect.h"
 
 
+/* Boosts a Combatant's speed multiplier and recovery for a certain
+ * amount of time. While the effect is active, the afflicted's Morale
+ * will also regenerate at a rate that's dependent on their recovery.*/
 class Refreshed : public StatusEffect {
 public:
   Refreshed(PartyMember *afflicted);

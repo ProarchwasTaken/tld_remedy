@@ -33,6 +33,7 @@ void Refreshed::init(bool hide_text) {
   << afflicted->recovery << "}";
 
   StatusEffect::init(hide_text);
+  afflicted->sfx.play("refreshed_gain");
 }
 
 Refreshed::~Refreshed() {
@@ -40,6 +41,7 @@ Refreshed::~Refreshed() {
     PLOGI << "Undoing stat bonuses.";
     afflicted->speed_multiplier -= speed_gained;
     afflicted->recovery -= rec_gained;
+    afflicted->sfx.play("refreshed_lost");
   }
 }
 
