@@ -122,6 +122,10 @@ void ItemCmdHud::update() {
   }
 
   Mary *mary = *player;
+
+  bool gamepad = IsGamepadAvailable(0);
+  mary->movementInput(gamepad);
+
   if (mary->state == HIT_STUN || mary->state == DEAD) {
     disable();
     sfx->play("menu_cancel"); 
