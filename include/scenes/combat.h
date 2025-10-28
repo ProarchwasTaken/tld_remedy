@@ -46,6 +46,7 @@ public:
   void draw() override;
 
   #ifndef NDEBUG
+  void debugKeybinds();
   void drawDebugInfo();
   void drawPartyStats(PartyMember *member, Vector2 position, Font *font, 
                       int text_size);

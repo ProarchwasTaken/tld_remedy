@@ -139,14 +139,9 @@ unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
 }
 
 void CombatScene::update() {
-  // Remove this Later!
-  if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
-    dummy->attack();
-  }
-  if (companion != NULL && IsKeyPressed(KEY_F4)) {
-    bool enabled = companion->isEnabled();
-    companion->setEnabled(!enabled);
-  }
+  #ifndef NDEBUG
+  debugKeybinds(); 
+  #endif // !NDEBUG
 
   for (Combatant *combatant : Combatant::existing_combatants) {
     combatant->behavior();
@@ -434,6 +429,29 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
 }
 
 #ifndef NDEBUG
+void CombatScene::debugKeybinds() {
+  if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
+    dummy->attack();
+  }
+  else if (companion != NULL && IsKeyPressed(KEY_F4)) {
+    bool enabled = companion->isEnabled();
+    companion->setEnabled(!enabled);
+  }
+  else if (player != NULL && IsKeyPressed(KEY_F5)) {
+    float threshold = 0.5;
+    float magnitude = player->life * threshold;
+    player->increaseTenacity(magnitude, threshold);
+  }
+  else if (companion != NULL && IsKeyPressed(KEY_F6)) {
+    float threshold = 0.5;
+    float magnitude = companion->life * threshold;
+    companion->increaseTenacity(magnitude, threshold);
+  }
+  else if (IsKeyPressed(KEY_F7)) {
+    endCombatProcedure();
+  }
+}
+
 void CombatScene::drawDebugInfo() {
   Font *font = &Game::sm_font;
   int text_size = font->baseSize;
@@ -452,46 +470,47 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
 
   float spacing = 9;
 
-  string name = "Name: " + member->name;
-  Vector2 n_pos = position;
+  string text = "Name: " + member->name;
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string coord = TextFormat("Position: (%00.01f, %00.01f)", 
-                            member->position.x, member->position.y);
-  Vector2 c_pos = position;
+  text = TextFormat("Position: (%00.01f, %00.01f)", member->position.x, 
+                    member->position.y);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string hp = TextFormat("Life: %02.02f/%02.02f", member->life,
-                         member->max_life);
-  Vector2 hp_pos = position;
+  text = TextFormat("Life: %02.02f/%02.02f", member->life,
+                    member->max_life);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string mp = TextFormat("Morale: %02.02f/%02.02f/%02.02f", 
-                         member->morale, member->init_morale,
-                         member->max_morale);
-  Vector2 mp_pos = position;
+  text = TextFormat("Morale: %02.02f/%02.02f/%02.02f", 
+                    member->morale, member->init_morale,
+                    member->max_morale);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string ex = TextFormat("Exhaustion: %02.02f", member->exhaustion);
-  Vector2 ex_pos = position;
+  text = TextFormat("Tenacity: %01.02f/%01.02f", member->tenacity,
+                    member->tp_threshold);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string spd = TextFormat("Speed Multiplier: %01.02f", 
-                          member->speed_multiplier);
-  Vector2 spd_pos = position;
+  text = TextFormat("Exhaustion: %02.02f", member->exhaustion);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  string rec = TextFormat("Recovery: %01.02f", member->recovery);
-  Vector2 rec_pos = position;
+  text = TextFormat("Speed Multiplier: %01.02f", 
+                    member->speed_multiplier);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  DrawTextEx(*font, name.c_str(), n_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, coord.c_str(), c_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, hp.c_str(), hp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, mp.c_str(), mp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, ex.c_str(), ex_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, spd.c_str(), spd_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, rec.c_str(), rec_pos, text_size, -3, GREEN);
+  text = TextFormat("Recovery: %01.02f", member->recovery);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  position.y += spacing;
+
+  text = TextFormat("Resilience: %01.02f", member->resilience);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  position.y = 228;
 
   if (member->important) {
     return;
@@ -508,13 +527,13 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
     }
   }
 
-  string goal = TextFormat("AI Goal: %i", goal_id);
-  DrawTextEx(*font, goal.c_str(), position, text_size, -3, GREEN);
+  text = TextFormat("AI Goal: %i", goal_id);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
 }
 
 void CombatScene::drawDebugCombo(Font *font, int text_size) {
   string combo = TextFormat("True Combo: %02i", Enemy::comboCount());
-  Vector2 combo_pos = {6, 67};
+  Vector2 combo_pos = {6, 228};
 
   DrawTextEx(*font, combo.c_str(), combo_pos, text_size, -3, GREEN);
 }

@@ -37,6 +37,8 @@ Erwin::Erwin(Companion *data, Mary *player):
   intimid = data->intimid;
   persist = data->persist;
 
+  resilience = 0.60;
+
   afflictPersistent(data->status);
 
   bounding_box.scale = {64, 64};

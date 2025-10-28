@@ -48,6 +48,8 @@ Mary::Mary(Player *plr):
   intimid = plr->intimid;
   persist = plr->persist;
 
+  resilience = 0.80;
+
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
 

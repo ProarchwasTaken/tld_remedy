@@ -92,7 +92,7 @@ void LifeHud::eventHandling(CombatantEvent *event) {
   switch (event->event_type) {
     case CombatantEVT::TOOK_DAMAGE: {
       PLOGD << "Acknowledging TookDamage event sent by: '" << user->name
-        << "' [ID: " << user->entity_id << "'";
+        << "' [ID: " << user->entity_id << "]";
       
       auto *evt_damage = static_cast<TookDamageCBT*>(event);
       damageEventHandling(evt_damage);
@@ -102,7 +102,7 @@ void LifeHud::eventHandling(CombatantEvent *event) {
       auto *effect_gained = static_cast<EffectGainedCBT*>(event);
       if (effect_gained->effect_id == StatusID::MENDING) {
         PLOGD << "Acknowledging EffectGained event sent by: '" << 
-          user->name << "' [ID: " << user->entity_id << "'";
+          user->name << "' [ID: " << user->entity_id << "]";
         has_mending = true;
       }
 
@@ -113,7 +113,7 @@ void LifeHud::eventHandling(CombatantEvent *event) {
       StatusID id = effect_lost->effect_id;
       if (id == StatusID::MENDING) {
         PLOGD << "Acknowledging EffectLost event sent by: '" << 
-          user->name << "' [ID: " << user->entity_id << "'";
+          user->name << "' [ID: " << user->entity_id << "]";
         has_mending = false;
       }
 

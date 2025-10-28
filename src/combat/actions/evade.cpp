@@ -56,7 +56,7 @@ void Evade::intercept(DamageData &data) {
   data.b_def = &user->persist;
   data.def_mod += 0.40;
 
-  float damage = Clamp(user->damageCalulation(data), 0, 9999);
+  float damage = Clamp(user->damageCalculation(data), 0, 9999);
   PLOGD << "Result: " << damage;
 
   float life_time;

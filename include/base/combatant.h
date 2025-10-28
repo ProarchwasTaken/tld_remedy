@@ -61,12 +61,19 @@ public:
    * modify the given damage data, execute special code, or cancel the
    * function all together.*/
   virtual void takeDamage(DamageData &data);
-  float damageCalulation(DamageData &data);
+  float damageCalculation(DamageData &data);
+
+  bool useTenacity(float damage, DamageType type);
+  float tpDamageCalculation(float damage);
+
   virtual void finalIntercept(float &damage, DamageData &data) {};
   void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);
   void increaseLife(float magnitude);
+
+  void damageTenacity(float magnitude);
+  void increaseTenacity(float magnitude, float threshold);
 
   /* This function (Along with increaseMorale) does nothing. This is 
    * because, Combatants at their core do not possess Morale attributes.
@@ -119,6 +126,9 @@ public:
   float life; 
   float max_life;
 
+  float tenacity = 0.0;
+  float tp_threshold = 0.0;
+
   bool intangible = false;
   bool critical_life = false;
 
@@ -128,6 +138,7 @@ public:
   int persist;
 
   float speed_multiplier = 1.0;
+  float resilience;
 
   std::unique_ptr<CombatAction> action;
   Status status;
