@@ -26,20 +26,30 @@ Mangled::Mangled(PartyMember *afflicted) :
 }
 
 Mangled::~Mangled() {
-  if (end) {
-    PLOGI << "Reversing stat penalties.";
-    afflicted->defense += defense_lost;
-    afflicted->recovery += recovery_lost;
+  if (end && !negated) {
+    negateEffect();
   }
 }
 
 void Mangled::init(bool hide_text) {
-  PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
-  afflicted->defense -= defense_lost;
-  afflicted->recovery -= recovery_lost;
+  applyPenalty();
 
   PLOGD << "Result: {DEF: " << afflicted->defense << ", REC: " <<
   afflicted->recovery << "}";
 
   StatusEffect::init(hide_text);
+}
+
+void Mangled::applyPenalty() {
+  PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
+  afflicted->defense -= defense_lost;
+  afflicted->recovery -= recovery_lost;
+  negated = false;
+}
+
+void Mangled::negateEffect() {
+  PLOGI << "Reversing stat penalties.";
+  afflicted->defense += defense_lost;
+  afflicted->recovery += recovery_lost;
+  negated = true;
 }

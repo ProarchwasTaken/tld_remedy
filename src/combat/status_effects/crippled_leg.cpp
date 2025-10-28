@@ -18,17 +18,26 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
 }
 
 CrippledLeg::~CrippledLeg() {
-  if (end) {
-    PLOGI << "Reversing stat penalties.";
-    afflicted->speed_multiplier += speed_lost;
+  if (end && !negated) {
+    negateEffect();
   }
 }
 
 void CrippledLeg::init(bool hide_text) {
-  PLOGI << "Decreasing afflicted's speed multiplier by 25%";
-  afflicted->speed_multiplier -= speed_lost;
-
+  applyPenalty();
   PLOGD << "Result: " << afflicted->speed_multiplier;
 
   StatusEffect::init(hide_text);
+}
+
+void CrippledLeg::applyPenalty() {
+  PLOGI << "Decreasing afflicted's speed multiplier by 25%";
+  afflicted->speed_multiplier -= speed_lost;
+  negated = false;
+}
+
+void CrippledLeg::negateEffect() {
+  PLOGI << "Reversing stat penalties.";
+  afflicted->speed_multiplier += speed_lost;
+  negated = true;
 }

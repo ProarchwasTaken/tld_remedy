@@ -10,7 +10,10 @@ public:
   CrippledLeg(Combatant *afflict);
   ~CrippledLeg();
 
-  void init(bool hide_text = false);
+  void init(bool hide_text = false) override;
+  void applyPenalty();
+  void negateEffect();
 private:
+  bool negated = false;
   float speed_lost = 0;
 };

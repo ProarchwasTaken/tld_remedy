@@ -12,7 +12,10 @@ public:
   ~Mangled();
 
   void init(bool hide_text = false) override;
+  void applyPenalty();
+  void negateEffect();
 private:
+  bool negated = false;
   PartyMember *afflicted;
 
   int defense_lost = 0;
