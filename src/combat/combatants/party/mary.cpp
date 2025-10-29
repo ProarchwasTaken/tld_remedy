@@ -16,7 +16,6 @@
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "combat/system/evt_handler.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -109,8 +108,7 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
 }
 
 void Mary::behavior() {
-  auto *event_pool = CombatantHandler::get();
-  eventHandling(event_pool);
+  Combatant::behavior();
 
   if (!enabled) {
     return;
@@ -125,18 +123,12 @@ void Mary::behavior() {
   }
 }
 
-void Mary::eventHandling(EventPool<CombatantEvent> *event_pool) {
-  PartyMember::eventHandling(event_pool);
+void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  PartyMember::evaluateEvent(event);
 
-  for (auto &event : *event_pool) {
-    if (event == nullptr) {
-      continue;
-    }
-
-    if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
-      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-      damageHandling(dmg_event);
-    }
+  if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
+    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+    damageHandling(dmg_event);
   }
 }
 

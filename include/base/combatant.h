@@ -11,10 +11,13 @@
 
 class CombatAction;
 struct DamageData;
+class CombatantEvent;
 
 class StatusEffect;
 typedef std::vector<std::unique_ptr<StatusEffect>> Status;
 
+template <typename EventType>
+using EventPool = std::vector<std::unique_ptr<EventType>>;
 
 enum CombatantState {
   ACTION,
@@ -53,7 +56,9 @@ public:
 
   float distanceTo(Combatant *combatant);
 
-  virtual void behavior() = 0;
+  virtual void behavior();
+  void eventHandling(EventPool<CombatantEvent> *event_pool);
+  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event) {};
 
   /* The process of taking damage is actually a very thorough procedure. 
    * It is a crucial aspect of any Combatant's functionality afterall.

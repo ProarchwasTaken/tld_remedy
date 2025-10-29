@@ -8,7 +8,6 @@
 #include "data/combatant_event.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -39,7 +38,7 @@ public:
   void useItem(ItemID item, float use_time, PartyMember *target);
 
   void behavior() override;
-  void eventHandling(EventPool<CombatantEvent> *event_pool) override;
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void damageHandling(TookDamageCBT *event);
 
   void movementInput(bool gamepad);

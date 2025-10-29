@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <raylib.h>
+#include <memory>
 #include <set>
 #include "enums.h"
 #include "data/session.h"
@@ -8,7 +9,6 @@
 #include "data/combatant_event.h"
 #include "base/combatant.h"
 #include "system/sprite_atlas.h"
-#include "combat/system/cbt_handler.h"
 
 
 /* The PartyMember subclass is used by Combatants who are on the player's
@@ -23,7 +23,7 @@ public:
   bool isEnabled();
   virtual void setEnabled(bool value);
 
-  virtual void eventHandling(EventPool<CombatantEvent> *event_pool);
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void moraleShare(GainedMoraleCBT *event);
 
   void takeDamage(DamageData &data) override;

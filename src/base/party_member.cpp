@@ -58,16 +58,10 @@ void PartyMember::setEnabled(bool value) {
   }
 }
 
-void PartyMember::eventHandling(EventPool<CombatantEvent> *event_pool) {
-  for (auto &event : *event_pool) {
-    if (event == nullptr) {
-      continue;
-    }
-
-    if (event->event_type == CombatantEVT::MORALE_GAINED) {
-      auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
-      moraleShare(mp_event);
-    }
+void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->event_type == CombatantEVT::MORALE_GAINED) {
+    auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
+    moraleShare(mp_event);
   }
 }
 

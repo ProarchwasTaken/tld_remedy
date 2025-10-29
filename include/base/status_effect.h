@@ -1,7 +1,9 @@
 #pragma once
+#include <memory>
 #include <string>
 #include "enums.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
 
 
@@ -22,6 +24,7 @@ public:
   virtual void init(bool hide_text = false);
   bool isPersistent() {return persistent;}
 
+  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event) {};
   virtual void intercept(DamageData &data) {}
   virtual void logic() {}
 

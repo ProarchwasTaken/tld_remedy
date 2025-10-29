@@ -63,12 +63,11 @@ void Erwin::setEnabled(bool value) {
 }
 
 void Erwin::behavior() {
+  Combatant::behavior();
+
   if (!enabled) {
     return;
   }
-
-  auto *event_pool = CombatantHandler::get();
-  eventHandling(event_pool);
 
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {

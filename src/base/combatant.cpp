@@ -68,6 +68,25 @@ Combatant::~Combatant() {
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
+void Combatant::behavior() {
+  auto *event_pool = CombatantHandler::get();
+  eventHandling(event_pool);
+}
+
+void Combatant::eventHandling(EventPool<CombatantEvent> *event_pool) {
+  for (auto &event : *event_pool) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    evaluateEvent(event);
+
+    for (auto &effect : status) {
+      effect->evaluateEvent(event);
+    }
+  }
+}
+
 float Combatant::distanceTo(Combatant *combatant) {
   assert(combatant != NULL);
   assert(combatant != this);
