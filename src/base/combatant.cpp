@@ -190,10 +190,10 @@ bool Combatant::useTenacity(float damage, DamageType type) {
 
 float Combatant::tpDamageCalculation(float damage) {
   PLOGI << "Performing secondary damage calculation."; 
-  PLOGD << "Damage: " << damage << " vs. Victim DEF and RES: {" << defense
-    << ", " << resilience << "}";
+  PLOGD << "Damage: " << damage << " vs. Victim PER and RES: {" << 
+    persist << ", " << resilience << "}";
 
-  float life_damage = damage - (defense * resilience);
+  float life_damage = damage - (persist * resilience);
   life_damage = Clamp(life_damage, 0, 9999);
 
   bool not_zero = life_damage != 0;
