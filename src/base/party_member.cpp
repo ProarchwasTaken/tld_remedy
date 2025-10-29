@@ -147,15 +147,18 @@ void PartyMember::afflictPersistent() {
   set<StatusID> effect_pool = getEffectPool();
 
   PLOGI << "Possible status effect to inflict: " << effect_pool.size();
-  if (effect_pool.empty()) {
+  bool pool_is_empty = effect_pool.empty();
+  if (pool_is_empty && tenacity == 0) {
     PLOGI << "PartyMember has reached the end of their rope!";
     life = 0;
     death();
     return;
   }
 
-  StatusID id = selectRandomID(effect_pool);
-  afflictPersistent(id);
+  if (!pool_is_empty) {
+    StatusID id = selectRandomID(effect_pool);
+    afflictPersistent(id);
+  }
 }
 
 void PartyMember::afflictPersistent(StatusID id, bool hide_text) {
