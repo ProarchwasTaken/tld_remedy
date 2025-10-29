@@ -102,6 +102,9 @@ string ItemsPanel::getName(ItemID item) {
     case ItemID::S_WATER: {
       return "Sparkling Water";
     }
+    case ItemID::P_KILLERS: {
+      return "Painkillers";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "";
@@ -123,6 +126,9 @@ string ItemsPanel::getShortenedName(ItemID item) {
     case ItemID::S_WATER: {
       return "S.Water";
     }
+    case ItemID::P_KILLERS: {
+      return "P.Killers";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "N / A";
@@ -137,20 +143,20 @@ string ItemsPanel::getDescription(ItemID item) {
       "Restores 35% of a Combatant's\n"
       "Life.\n"
       "In Combat: Instead applies the\n"
-      "\"Mending\" status effect.";
+      "Mending status effect.";
     }
     case ItemID::M_SPLINT: {
       return
-      "Can cure \"Broken Arm\",\n"
-      "\"Crippled Leg\", and \"Mangled\".\n"
+      "Can cure Broken Arm,\n"
+      "Crippled Leg, and Mangled.\n"
       "In Combat: Also cures the\n"
-      "\"Despondent\" status ailment.";
+      "Despondent status ailment.";
     }
     case ItemID::S_BANDAGE: {
       return
       "Restores 50% of a Combatant's\n"
       "Life.\n"
-      "In Combat: Applies \"Mending\"\n"
+      "In Combat: Applies Mending\n"
       "that heals at a faster rate.";
     }
     case ItemID::S_WATER: {
@@ -159,6 +165,13 @@ string ItemsPanel::getDescription(ItemID item) {
       "Combatant's Speed and Recovery.\n"
       "Morale will also regenerate\n"
       "while the effect is active.";
+    }
+    case ItemID::P_KILLERS: {
+      return 
+      "Temporarily negates the negative\n"
+      "effects of Broken Arm,\n"
+      "Crippled Leg, and Mangled.\n"
+      "Also grants Tenacity.";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -204,12 +217,10 @@ void ItemsPanel::useItem() {
       member->life = Clamp(member->life + heal, 0, member->max_life);
       break;
     }
-    case ItemID::S_WATER: {
-      sfx->play("menu_cancel");
-      return;
-    }
     default: {
       assert(item != ItemID::NONE);
+      sfx->play("menu_cancel");
+      return;
     }
   }
 
@@ -394,7 +405,7 @@ void ItemsPanel::drawOptions() {
     position = Vector2Add(position, {6, 1});
 
     Color color = WHITE;
-    if (*item == ItemID::S_WATER) {
+    if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
       color = Game::palette[2];
     }
 
@@ -456,6 +467,10 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
       type = "Enhancement Item";
       break;
     }
+    case ItemID::P_KILLERS: {
+      type = "Analgesic Item";
+      break;
+    }
     default: {
       assert(*selected != ItemID::NONE);
     }
@@ -476,7 +491,8 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
       usable = "Always";
       break;
     }
-    case ItemID::S_WATER: {
+    case ItemID::S_WATER: 
+    case ItemID::P_KILLERS :{
       usable = "In Combat";
       break;
     }

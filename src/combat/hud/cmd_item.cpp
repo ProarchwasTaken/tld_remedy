@@ -251,6 +251,11 @@ void ItemCmdHud::useItem() {
       use_time = 1.5 * multiplier;
       break;
     }
+    case ItemID::P_KILLERS: {
+      PLOGD << "Item Selected: Painkillers.";
+      use_time = 1.0 * multiplier;
+      break;
+    }
     default: {
       assert(*selected != ItemID::NONE);
       PLOGE << "Invalid Item!";
@@ -342,6 +347,11 @@ void ItemCmdHud::drawOptionText(ItemID item, Vector2 position,
     }
     case ItemID::S_WATER: {
       name = "S.Water";
+      break;
+    }
+    case ItemID::P_KILLERS: {
+      name = "P.Killers";
+      break;
     }
     default: {
       assert(item != ItemID::NONE);
