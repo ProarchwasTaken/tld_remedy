@@ -114,6 +114,7 @@ set(HEADERS
 "include/combat/status_effects/despondent.h"
 "include/combat/status_effects/mending.h"
 "include/combat/status_effects/refreshed.h"
+"include/combat/status_effects/endurance.h"
 "include/scenes/camp_menu.h"
 )
 set(SOURCE
@@ -181,6 +182,7 @@ set(SOURCE
 "src/combat/status_effects/despondent.cpp"
 "src/combat/status_effects/mending.cpp"
 "src/combat/status_effects/refreshed.cpp"
+"src/combat/status_effects/endurance.cpp"
 "src/scenes/camp_menu.cpp"
 )
 

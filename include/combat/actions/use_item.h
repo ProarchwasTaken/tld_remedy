@@ -16,6 +16,7 @@ public:
   void applyMending(float percentage, float speed);
   void applySplint();
   void applyRefreshed();
+  void applyEndurance();
 
   void windUp() override;
   void action() override;

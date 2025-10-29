@@ -11,6 +11,7 @@
 #include "combat/system/evt_handler.h"
 #include "combat/status_effects/mending.h"
 #include "combat/status_effects/refreshed.h"
+#include "combat/status_effects/endurance.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/use_item.h"
@@ -41,23 +42,28 @@ void UseItem::applyItemEffect() {
 
   switch (item) {
     case ItemID::I_BANDAGE: {
-      PLOGI << "Applying effect of Item: Improvised Bandage.";
+      PLOGI << "Applying effect of item: Improvised Bandage.";
       applyMending(0.35, 0.05);
       break;
     }
     case ItemID::M_SPLINT: {
-      PLOGI << "Applying effect of Item: Makeshift Splint.";
+      PLOGI << "Applying effect of item: Makeshift Splint.";
       applySplint();
       break;
     }
     case ItemID::S_BANDAGE: {
-      PLOGI << "Applying effect of Item: Sterilized Bandage.";
+      PLOGI << "Applying effect of item: Sterilized Bandage.";
       applyMending(0.50, 0.10);
       break;
     }
     case ItemID::S_WATER: {
-      PLOGI << "Apply effect of Item: Sparkling Water.";
+      PLOGI << "Applying effect of item: Sparkling Water.";
       applyRefreshed();
+      break;
+    }
+    case ItemID::P_KILLERS: {
+      PLOGI << "Applying effect of item: Painkillers.";
+      applyEndurance();
       break;
     }
     default: {
@@ -128,6 +134,19 @@ void UseItem::applyRefreshed() {
   }
 
   unique_ptr<StatusEffect> effect = make_unique<Refreshed>(target);
+  target->afflictStatus(effect);
+}
+
+void UseItem::applyEndurance() {
+  for (auto &effect : target->status) {
+    if (effect->id == StatusID::ENDURANCE) {
+      Endurance *endurance = static_cast<Endurance*>(effect.get());
+      endurance->refresh();
+      return;
+    }
+  }
+
+  unique_ptr<StatusEffect> effect = make_unique<Endurance>(target);
   target->afflictStatus(effect);
 }
 

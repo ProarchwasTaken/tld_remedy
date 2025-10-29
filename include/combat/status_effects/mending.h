@@ -3,7 +3,6 @@
 #include "data/combatant_event.h"
 #include "base/party_member.h"
 #include "base/status_effect.h"
-#include "data/damage.h"
 
 
 /* A positive status effect that gradually restores a percentage of the

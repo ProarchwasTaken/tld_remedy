@@ -1,14 +1,11 @@
 #include <memory>
-#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
-#include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
-#include "data/damage.h"
 #include "data/combatant_event.h"
 #include "combat/status_effects/mending.h"
 #include <plog/Log.h>
