@@ -34,8 +34,10 @@ public:
   Rectangle *getIconSprite(StatusID id);
 
   void drawLife(Vector2 position, Font *font, int txt_size);
-  void drawLifeText(Vector2 position, Font *font, int size);
   void drawLifeSegments(Vector2 position);
+  void drawLifeText(Vector2 position, Font *font, int size);
+  void drawTenacityText(Vector2 position, Font *font, int size);
+
 
   void drawMorale(Vector2 position, Font *font, int txt_size);
   void drawMoraleGauge(Vector2 position);
@@ -53,6 +55,8 @@ private:
   Color life_color = WHITE;
   std::string txt_life;
   bool has_mending = false;
+
+  std::string txt_tenacity;
 
   Color morale_color;
   std::string txt_morale;

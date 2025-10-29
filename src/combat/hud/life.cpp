@@ -270,16 +270,23 @@ void LifeHud::drawLife(Vector2 position, Font *font, int txt_size) {
                  life_color);
   drawLifeSegments(position);
   drawLifeText(position, font, txt_size);
+
+  if (user->tenacity != 0.0) {
+    drawTenacityText(position, font, txt_size);
+  }
 }
 
 void LifeHud::drawLifeSegments(Vector2 position) {
   float life_percentage = user->life / user->max_life;
 
-  float combined = user->life + user->exhaustion;
+  float combined = user->life + user->tenacity + user->exhaustion;
   float with_exhaustion = combined / user->max_life;
+  float with_tenacity = (user->life + user->tenacity) / user->max_life;
 
   int segments = life_percentage * 10;
   int ex_segments = with_exhaustion * 10;
+  int tp_segments = with_tenacity * 10;
+
   float leftover = (life_percentage * 10) - segments;
 
   position = Vector2Add(position, {7, 2});
@@ -295,6 +302,9 @@ void LifeHud::drawLifeSegments(Vector2 position) {
       float interval = (1.0 - leftover) * 0.5;
       sprite = segmentBlink(interval);
       leftover = 0;
+    }
+    else if (segments != tp_segments && x <= tp_segments) {
+      sprite = &atlas.sprites[6];
     }
     else if (segments != ex_segments && x <= ex_segments) {
       sprite = &atlas.sprites[2];
@@ -319,6 +329,16 @@ void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
                                    0);
 
   DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
+}
+
+void LifeHud::drawTenacityText(Vector2 position, Font *font, int size) {
+  txt_tenacity = TextFormat("(+%01.02f)", user->tenacity);
+  position = Vector2Add(position, {78, 11});
+  position = TextUtils::alignRight(txt_tenacity.c_str(), position, *font, 
+                                   -3, 0);
+
+  Color color = Game::palette[22];
+  DrawTextEx(*font, txt_tenacity.c_str(), position, size, -3, color);
 }
 
 void LifeHud::drawMorale(Vector2 position, Font *font, int txt_size) {
@@ -353,6 +373,10 @@ void LifeHud::drawMoraleText(Vector2 position, Font *font, int size) {
 }
 
 Rectangle *LifeHud::segmentBlink(float interval) {
+  if (user->tenacity != 0) {
+    return &atlas.sprites[6];
+  }
+
   blink_clock += Game::deltaTime() / interval;
   if (blink_clock >= 1.0) {
     segment_blink = !segment_blink;

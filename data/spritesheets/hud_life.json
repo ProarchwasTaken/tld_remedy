@@ -23,6 +23,10 @@
     {
       "filename": "morale_empty",
       "frame": {"x": 0, "y": 36, "w": 69, "h": 2}
+    },
+    {
+      "filename": "tenacity_segment",
+      "frame": {"x": 14, "y": 16, "w": 6, "h": 3}
     }
   ],
   "meta": {
