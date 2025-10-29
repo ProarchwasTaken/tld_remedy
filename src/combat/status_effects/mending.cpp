@@ -1,3 +1,7 @@
+#include <memory>
+#include <cstddef>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
@@ -5,10 +9,11 @@
 #include "base/status_effect.h"
 #include "base/party_member.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "combat/status_effects/mending.h"
-#include <cstddef>
 #include <plog/Log.h>
-#include <raymath.h>
+
+using std::unique_ptr;
 
 
 Mending::Mending(PartyMember *afflicted, float percentage, float speed): 
@@ -49,26 +54,21 @@ void Mending::init(bool hide_text) {
   afflicted->sfx.play("mending_gain");
 }
 
-void Mending::intercept(DamageData &data) {
-  if (data.damage_type != DamageType::LIFE) {
+void Mending::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->sender != afflicted) {
     return;
   }
 
-  CombatAction *action = NULL;
-  bool evaded_attack = false;
-  if (afflicted->state == ACTION) {
-    action = afflicted->action.get();
-
-    bool using_evade = action->id == ActionID::EVADE;
-    evaded_attack = using_evade && action->phase == ActionPhase::ACTIVE;
-  }
-
-  if (action != NULL && evaded_attack) {
+  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
     return;
   }
 
-  PLOGI << "Mending status effect has been interrupted.";
-  end = true;
+  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  
+  if (dmg_event->damage_type == DamageType::LIFE) {
+    PLOGI << "Mending status effect has been interrupted.";
+    end = true;
+  }
 }
 
 void Mending::logic() {

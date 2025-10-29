@@ -1,4 +1,6 @@
+#include <memory>
 #include "base/combatant.h"
+#include "data/combatant_event.h"
 #include "base/party_member.h"
 #include "base/status_effect.h"
 #include "data/damage.h"
@@ -16,7 +18,7 @@ public:
   void refresh(float percentage, float speed);
 
   void init(bool hide_text = false) override;
-  void intercept(DamageData &data) override;
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void logic() override;
 private:
   PartyMember *afflicted;
