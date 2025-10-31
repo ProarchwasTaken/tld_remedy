@@ -283,7 +283,15 @@ void LifeHud::drawLifeSegments(Vector2 position) {
   float with_exhaustion = combined / user->max_life;
   float with_tenacity = (user->life + user->tenacity) / user->max_life;
 
-  int segments = life_percentage * 10;
+  int segments;
+  bool close_to_full = 1.0 - life_percentage <= 0.001;
+  if (close_to_full) {
+    segments = 10;
+  }
+  else {
+    segments = life_percentage * 10; 
+  }
+
   int ex_segments = with_exhaustion * 10;
   int tp_segments = with_tenacity * 10;
 
@@ -321,8 +329,7 @@ void LifeHud::drawLifeSegments(Vector2 position) {
 }
 
 void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
-  float life = std::floorf(user->life);
-  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
+  txt_life = TextFormat("%02.00f/%02.00f", user->life, user->max_life);
 
   position = Vector2Add(position, {78, 3});
   position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 

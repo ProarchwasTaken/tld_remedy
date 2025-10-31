@@ -10,7 +10,6 @@
 #include "data/animation.h"
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>

@@ -58,8 +58,6 @@ public:
   float deplete_delay = 0.5;
   float deplete_clock = 0.0;
 
-  float recovery = 1.0;
-
   std::string tech1_name;
   float tech1_cost;
   TechCostType tech1_type;

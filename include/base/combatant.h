@@ -143,6 +143,7 @@ public:
   int persist;
 
   float speed_multiplier = 1.0;
+  float recovery = 1.0;
   float resilience;
 
   std::unique_ptr<CombatAction> action;
