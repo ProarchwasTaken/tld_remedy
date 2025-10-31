@@ -1,6 +1,6 @@
 { "frames": [
    {
-    "filename": "idle_{tagframe)",
+    "filename": "idle_0",
     "frame": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -9,7 +9,7 @@
     "duration": 2000
    },
    {
-    "filename": "idle_{tagframe)",
+    "filename": "idle_1",
     "frame": { "x": 64, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -18,7 +18,7 @@
     "duration": 2000
    },
    {
-    "filename": "crit_{tagframe)",
+    "filename": "crit_0",
     "frame": { "x": 128, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -27,7 +27,7 @@
     "duration": 1000
    },
    {
-    "filename": "crit_{tagframe)",
+    "filename": "crit_1",
     "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -36,7 +36,7 @@
     "duration": 1000
    },
    {
-    "filename": "walk_{tagframe)",
+    "filename": "walk_0",
     "frame": { "x": 256, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -45,7 +45,7 @@
     "duration": 200
    },
    {
-    "filename": "walk_{tagframe)",
+    "filename": "walk_1",
     "frame": { "x": 320, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -54,7 +54,7 @@
     "duration": 200
    },
    {
-    "filename": "walk_{tagframe)",
+    "filename": "walk_2",
     "frame": { "x": 384, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +63,7 @@
     "duration": 200
    },
    {
-    "filename": "stun_{tagframe)",
+    "filename": "stun_0",
     "frame": { "x": 448, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -72,7 +72,7 @@
     "duration": 200
    },
    {
-    "filename": "stun_{tagframe)",
+    "filename": "stun_1",
     "frame": { "x": 512, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -81,7 +81,7 @@
     "duration": 200
    },
    {
-    "filename": "stun_{tagframe)",
+    "filename": "stun_2",
     "frame": { "x": 576, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -90,7 +90,7 @@
     "duration": 200
    },
    {
-    "filename": "stun_{tagframe)",
+    "filename": "stun_3",
     "frame": { "x": 0, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -99,7 +99,7 @@
     "duration": 200
    },
    {
-    "filename": "attack_{tagframe)",
+    "filename": "attack_0",
     "frame": { "x": 64, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -108,7 +108,7 @@
     "duration": 100
    },
    {
-    "filename": "attack_{tagframe)",
+    "filename": "attack_1",
     "frame": { "x": 128, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -117,7 +117,7 @@
     "duration": 100
    },
    {
-    "filename": "attack_{tagframe)",
+    "filename": "attack_2",
     "frame": { "x": 192, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -126,7 +126,7 @@
     "duration": 100
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_0",
     "frame": { "x": 256, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -135,7 +135,7 @@
     "duration": 2000
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_1",
     "frame": { "x": 320, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -144,7 +144,7 @@
     "duration": 2000
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_2",
     "frame": { "x": 384, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -153,7 +153,7 @@
     "duration": 2000
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_3",
     "frame": { "x": 448, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -162,7 +162,7 @@
     "duration": 2000
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_4",
     "frame": { "x": 512, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -171,7 +171,7 @@
     "duration": 2000
    },
    {
-    "filename": "defensive_{tagframe)",
+    "filename": "defensive_5",
     "frame": { "x": 576, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -180,7 +180,7 @@
     "duration": 2000
    },
    {
-    "filename": "cleave_{tagframe)",
+    "filename": "cleave_0",
     "frame": { "x": 0, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -189,7 +189,7 @@
     "duration": 100
    },
    {
-    "filename": "cleave_{tagframe)",
+    "filename": "cleave_1",
     "frame": { "x": 64, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -198,7 +198,7 @@
     "duration": 100
    },
    {
-    "filename": "cleave_{tagframe)",
+    "filename": "cleave_2",
     "frame": { "x": 128, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -207,7 +207,7 @@
     "duration": 100
    },
    {
-    "filename": "cleave_{tagframe)",
+    "filename": "cleave_3",
     "frame": { "x": 192, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -216,7 +216,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_0",
     "frame": { "x": 256, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -225,7 +225,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_1",
     "frame": { "x": 320, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -234,7 +234,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_2",
     "frame": { "x": 384, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -243,7 +243,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_3",
     "frame": { "x": 448, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -252,7 +252,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_4",
     "frame": { "x": 512, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -261,7 +261,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_5",
     "frame": { "x": 576, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -270,7 +270,7 @@
     "duration": 100
    },
    {
-    "filename": "piercer_{tagframe)",
+    "filename": "piercer_6",
     "frame": { "x": 0, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -279,7 +279,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_0",
     "frame": { "x": 64, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -288,7 +288,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_1",
     "frame": { "x": 128, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -297,7 +297,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_2",
     "frame": { "x": 192, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -306,7 +306,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_3",
     "frame": { "x": 256, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -315,7 +315,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_4",
     "frame": { "x": 320, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -324,7 +324,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_5",
     "frame": { "x": 384, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -333,7 +333,7 @@
     "duration": 100
    },
    {
-    "filename": "item_{tagframe)",
+    "filename": "item_6",
     "frame": { "x": 448, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,

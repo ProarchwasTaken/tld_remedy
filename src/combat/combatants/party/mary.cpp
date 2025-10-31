@@ -69,6 +69,7 @@ Mary::Mary(Player *plr):
 
 Mary::~Mary() {
   atlas.release();
+  sub_weapon.reset();
 }
 
 void Mary::setEnabled(bool value) {

@@ -14,7 +14,7 @@
 class SubWeapon {
 public:
   SubWeapon(std::string name, SubWeaponID id, Mary *user);
-  ~SubWeapon() = default;
+  virtual ~SubWeapon() = default;
 
   bool lightTechCondition();
   bool heavyTechCondition();
