@@ -14,7 +14,9 @@ enum class CommandType {
   SET_LIFE,
   ADD_ITEM,
   RM_ITEM,
-  CLR_INV
+  CLR_INV,
+  ADD_EFFECT,
+  RM_EFFECT
 };
 
 
@@ -47,7 +49,9 @@ private:
     {"SET_LIFE", CommandType::SET_LIFE},
     {"ADD_ITEM", CommandType::ADD_ITEM},
     {"RM_ITEM", CommandType::RM_ITEM},
-    {"CLEAR_INV", CommandType::CLR_INV}
+    {"CLEAR_INV", CommandType::CLR_INV},
+    {"ADD_EFFECT", CommandType::ADD_EFFECT},
+    {"RM_EFFECT", CommandType::RM_EFFECT}
   };
 
   inline static std::string buffer;

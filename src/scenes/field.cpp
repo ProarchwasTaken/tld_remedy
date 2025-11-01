@@ -388,6 +388,97 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       clearInventory();
       break;
     }
+    case FieldEVT::PLR_ADD_EFFECT:
+    case FieldEVT::COM_ADD_EFFECT: {
+      PLOGD << "Event detected: AddEffectEvent";
+      auto *event_data = static_cast<AddEffectEvent*>(event.get());
+      addStatusEffect(event_data->event_type, event_data->effect_id);
+      break;
+    }
+    case FieldEVT::PLR_RM_EFFECT:
+    case FieldEVT::COM_RM_EFFECT: {
+      PLOGD << "Event detected: RemoveEffectEvent";
+      auto *event_data = static_cast<RemoveEffectEvent*>(event.get());
+      removeStatusEffect(event_data->event_type, event_data->effect_id);
+      break;
+    }
+  }
+}
+
+void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {
+  Character *target;
+  if (type == FieldEVT::PLR_ADD_EFFECT) {
+    target = &session.player;
+  }
+  else if (type == FieldEVT::COM_ADD_EFFECT) {
+    target = &session.companion;
+  }
+  else {
+    PLOGE << "Invalid Event Type!";
+    return;
+  }
+
+  PLOGD << "Target: '" << target->name << "'";
+  if (target->status_count == target->status_limit) {
+    PLOGI << "Target's status count is at it's limit!";
+    return;
+  }
+
+  StatusID *empty_slot = NULL;
+  for (int x = 0; x < target->status_limit; x++) {
+    StatusID *status_slot = &target->status[x];
+
+    if (*status_slot == effect_id) {
+      PLOGE << "Target already has that status effect!";
+      return;
+    }
+
+    if (empty_slot == NULL && *status_slot == StatusID::NONE) {
+      PLOGD << "Found empty status slot.";
+      empty_slot = status_slot;
+    }
+  }
+
+  assert(empty_slot != NULL);
+  PLOGI << "Afflicting target with status effect of ID: " << 
+    static_cast<int>(effect_id); 
+  *empty_slot = effect_id;
+
+  target->status_count++;
+  assert(target->status_count <= target->status_limit);
+}
+
+void FieldScene::removeStatusEffect(FieldEVT type, StatusID effect_id) {
+  Character *target;
+  if (type == FieldEVT::PLR_RM_EFFECT) {
+    target = &session.player;
+  }
+  else if (type == FieldEVT::COM_RM_EFFECT) {
+    target = &session.companion;
+  }
+  else {
+    PLOGE << "Invalid Event Type!";
+    return;
+  }
+
+  PLOGD << "Target: '" << target->name << "'";
+  if (target->status_count == 0) {
+    PLOGI << "Target doesn't have any status effects!";
+    return;
+  }
+
+  for (int x = 0; x < target->status_limit; x++) {
+    StatusID *status_slot = &target->status[x];
+
+    if (*status_slot == effect_id) {
+      PLOGI << "Cured target of status effect: " << 
+        static_cast<int>(effect_id);
+
+      *status_slot = StatusID::NONE;
+      target->status_count--;
+      assert(target->status_count >= 0);
+      break;
+    }
   }
 }
 

@@ -120,7 +120,11 @@ enum class FieldEVT {
   CHANGE_COM_LIFE,
   ADD_ITEM,
   REMOVE_ITEM,
-  CLEAR_INV
+  CLEAR_INV,
+  PLR_ADD_EFFECT,
+  PLR_RM_EFFECT,
+  COM_ADD_EFFECT,
+  COM_RM_EFFECT
 };
 
 enum class ActorEVT {

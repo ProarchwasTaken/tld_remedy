@@ -34,6 +34,8 @@ public:
   void eventProcessing();
   void eventHandling(std::unique_ptr<FieldEvent> &event);
 
+  void addStatusEffect(FieldEVT type, StatusID effect_id);
+  void removeStatusEffect(FieldEVT type, StatusID effect_id);
   void addItem(ItemID item);
   static void removeItem(Session *session, ItemID item);
   void clearInventory();
