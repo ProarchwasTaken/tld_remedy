@@ -1,11 +1,14 @@
 #pragma once
 #include <string>
 #include <raylib.h>
+#include <memory>
 #include <set>
 #include "enums.h"
 #include "data/session.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
+#include "system/sprite_atlas.h"
 
 
 /* The PartyMember subclass is used by Combatants who are on the player's
@@ -13,11 +16,15 @@
 class PartyMember : public Combatant {
 public:
   static int memberCount() {return member_count;}
-  PartyMember(std::string name, PartyMemberID id, Vector2 position);
+  PartyMember(std::string name, PartyMemberID id, Vector2 position,
+              SpriteAtlas *atlas);
   ~PartyMember();
 
   bool isEnabled();
   virtual void setEnabled(bool value);
+
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
+  void moraleShare(GainedMoraleCBT *event);
 
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
@@ -31,7 +38,7 @@ public:
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
 
   void damageMorale(float magnitude) override;
-  void increaseMorale(float magnitude) override;
+  void increaseMorale(float magnitude, bool mp_share) override;
 
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();
@@ -51,8 +58,6 @@ public:
   float deplete_delay = 0.5;
   float deplete_clock = 0.0;
 
-  float recovery = 1.0;
-
   std::string tech1_name;
   float tech1_cost;
   TechCostType tech1_type;
@@ -65,4 +70,6 @@ protected:
 private:
   static int member_count;
   constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;
+
+  SpriteAtlas *atlas;
 };

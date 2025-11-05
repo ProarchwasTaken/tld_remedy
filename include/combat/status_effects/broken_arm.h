@@ -11,7 +11,12 @@ public:
   ~BrokenArm();
 
   void init(bool hide_text = false) override;
+  void applyPenalty();
+  void negateEffect();
+
+  bool negated = false;
 private:
+
   int offense_lost = 0;
   int intimid_lost = 0;
 };

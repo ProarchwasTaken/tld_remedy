@@ -4,8 +4,11 @@
 #include "enums.h"
 #include "game.h"
 #include "base/combat_action.h"
+#include "data/combat_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/evt_handler.h"
+#include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
 
@@ -45,7 +48,7 @@ void KnifePiercer::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[26];
-    user->sfx.play("knife_piercer");
+    Knife::sfx.play("knife_piercer");
   }
   else {
     user->sprite = &atlas->sprites[*user->animation->current];
@@ -68,10 +71,19 @@ void KnifePiercer::movement(float percentage) {
   }
   else {
     user->position.x += magnitude * direction;
+    distance_traveled += magnitude;
+  }
+
+  if (percentage == 1.0 && distance_traveled >= 6) {
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, atlas, user->sprite,
+      user->bounding_box.position, user->direction
+    );
+
+    distance_traveled = 0.0;
   }
 
   user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
-
 }
 
 void KnifePiercer::hitRegistration() {
@@ -100,7 +112,7 @@ void KnifePiercer::hitRegistration() {
     if (CheckCollisionRecs(hitbox.rect, *hurtbox)) {
       data.hitbox = &hitbox.rect;
       combatant->takeDamage(data);
-      user->sfx.play("knife_piercer_hit");
+      Knife::sfx.play("knife_piercer_hit");
     }
     else {
       continue;
@@ -160,7 +172,7 @@ void KnifePiercer::performSecondHit() {
   state_clock = 0.0;
   end_time = 0.20;
   user->sprite = &atlas->sprites[29];
-  user->sfx.play("knife_piercer_heave");
+  Knife::sfx.play("knife_piercer_heave");
 }
 
 void KnifePiercer::drawDebug() {

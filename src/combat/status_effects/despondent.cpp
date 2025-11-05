@@ -12,7 +12,7 @@ Despondent::Despondent(PartyMember *afflicted) :
   StatusEffect(StatusID::DESPONDENT, StatusType::NEGATIVE, afflicted)
 {
   name = "Despondent";
-  persistant = false;
+  persistent = false;
   this->afflicted = afflicted;
 
   float intimid = afflicted->intimid;
@@ -60,11 +60,19 @@ void Despondent::logic() {
     return;
   }
 
-  float recovery = afflicted->recovery;
-  float magnitude = (afflicted->max_morale * 0.035) * recovery;
-  afflicted->morale += magnitude * Game::deltaTime();
-
   float init_morale = afflicted->init_morale;
+  float recovery = afflicted->recovery;
+
+  float magnitude = (afflicted->max_morale * 0.035) * recovery;
+  magnitude = magnitude * Game::deltaTime();
+
+  float remaining = init_morale - afflicted->morale;
+  if (magnitude > remaining) {
+    magnitude = remaining;
+  }
+
+  afflicted->morale += magnitude;
+
   if (afflicted->morale >= init_morale) {
     end = true;
   }

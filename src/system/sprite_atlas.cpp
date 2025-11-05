@@ -90,7 +90,7 @@ void SpriteAtlas::release() {
 
 Texture SpriteAtlas::getTexturefromSprite(int index) {
   assert(user_count != 0);
-  PLOGI << "Loading sprite of index: " << index << "as a separate"
+  PLOGI << "Loading sprite of index: " << index << " as a separate"
   " texture.";
   Image image = LoadImageFromTexture(sheet);
   ImageCrop(&image, sprites.at(index));

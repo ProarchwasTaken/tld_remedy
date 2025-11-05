@@ -23,7 +23,7 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   CombatAction(ActionID::ATTACK, ActionType::OFFENSE_MP, user, 
                0.10, 0.05, 0.25)
 {
-  name = "Attack";
+  name = "Attack: Default";
   user->rectExCorrection(hitbox);
   this->hitbox = hitbox;
 
@@ -37,6 +37,23 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   data.hit_stop = 0.2;
 
   data.assailant = user;
+
+  this->user_atlas = &user_atlas;
+  this->anim_set = &anim_set;
+  updateAnimFrameDuration();
+}
+
+Attack::Attack(Combatant *user, ActionType type, float wind_up, 
+               float action, float end_lag, RectEx hitbox, 
+               DamageData &data, SpriteAtlas &user_atlas, 
+               AtkAnimSet &anim_set): 
+  CombatAction(ActionID::ATTACK, type, user, wind_up, action, end_lag)
+{
+  name = "Attack: Modified";
+  user->rectExCorrection(hitbox);
+  this->hitbox = hitbox;
+
+  this->data = data;
 
   this->user_atlas = &user_atlas;
   this->anim_set = &anim_set;

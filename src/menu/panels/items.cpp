@@ -96,6 +96,15 @@ string ItemsPanel::getName(ItemID item) {
     case ItemID::M_SPLINT: {
       return "Makeshift Splint";
     }
+    case ItemID::S_BANDAGE: {
+      return "Sterilized Bandage";
+    }
+    case ItemID::S_WATER: {
+      return "Sparkling Water";
+    }
+    case ItemID::P_KILLERS: {
+      return "Painkillers";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "";
@@ -111,6 +120,15 @@ string ItemsPanel::getShortenedName(ItemID item) {
     case ItemID::M_SPLINT: {
       return "M.Splint";
     }
+    case ItemID::S_BANDAGE: {
+      return "S.Bandage";
+    }
+    case ItemID::S_WATER: {
+      return "S.Water";
+    }
+    case ItemID::P_KILLERS: {
+      return "P.Killers";
+    }
     default: {
       assert(item != ItemID::NONE);
       return "N / A";
@@ -125,14 +143,35 @@ string ItemsPanel::getDescription(ItemID item) {
       "Restores 35% of a Combatant's\n"
       "Life.\n"
       "In Combat: Instead applies the\n"
-      "\"Mending\" status effect.";
+      "Mending status effect.";
     }
     case ItemID::M_SPLINT: {
       return
-      "Can cure \"Broken Arm\",\n"
-      "\"Crippled Leg\", and \"Mangled\".\n"
+      "Can cure Broken Arm,\n"
+      "Crippled Leg, and Mangled.\n"
       "In Combat: Also cures the\n"
-      "\"Despondent\" status ailment.";
+      "Despondent status ailment.";
+    }
+    case ItemID::S_BANDAGE: {
+      return
+      "Restores 50% of a Combatant's\n"
+      "Life.\n"
+      "In Combat: Applies Mending\n"
+      "that heals at a faster rate.";
+    }
+    case ItemID::S_WATER: {
+      return 
+      "Grants a 20% boost to a \n"
+      "Combatant's Speed and Recovery.\n"
+      "Morale will also regenerate\n"
+      "while the effect is active.";
+    }
+    case ItemID::P_KILLERS: {
+      return 
+      "Temporarily negates the negative\n"
+      "effects of Broken Arm,\n"
+      "Crippled Leg, and Mangled.\n"
+      "Also grants Tenacity.";
     }
     default: {
       assert(item != ItemID::NONE);
@@ -171,8 +210,17 @@ void ItemsPanel::useItem() {
 
       break;
     }
+    case ItemID::S_BANDAGE: {
+      float heal = std::ceilf(member->max_life * 0.50);
+      PLOGI << "Healing combatant by: " << heal << " Life";
+
+      member->life = Clamp(member->life + heal, 0, member->max_life);
+      break;
+    }
     default: {
       assert(item != ItemID::NONE);
+      sfx->play("menu_cancel");
+      return;
     }
   }
 
@@ -350,13 +398,18 @@ void ItemsPanel::drawOptions() {
 
     DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
-    if (options.begin() + index == selected) {
+    if (item == selected) {
       drawCursor(position);
     }
 
     position = Vector2Add(position, {6, 1});
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
 
+    Color color = WHITE;
+    if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
+      color = Game::palette[2];
+    }
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
     multiplier += 1;
   }
 }
@@ -401,12 +454,21 @@ void ItemsPanel::drawItemName(Font *font, int txt_size) {
 void ItemsPanel::drawItemType(Font *font, int txt_size) {
   string type;
   switch (*selected) {
-    case ItemID::I_BANDAGE: {
+    case ItemID::I_BANDAGE:
+    case ItemID::S_BANDAGE: {
       type = "Restorative Item";
       break;
     }
     case ItemID::M_SPLINT: {
       type = "Curative Item";
+      break;
+    }
+    case ItemID::S_WATER: {
+      type = "Enhancement Item";
+      break;
+    }
+    case ItemID::P_KILLERS: {
+      type = "Analgesic Item";
       break;
     }
     default: {
@@ -424,8 +486,14 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
   string usable;
   switch (*selected) {
     case ItemID::I_BANDAGE:
-    case ItemID::M_SPLINT: {
+    case ItemID::M_SPLINT: 
+    case ItemID::S_BANDAGE: {
       usable = "Always";
+      break;
+    }
+    case ItemID::S_WATER: 
+    case ItemID::P_KILLERS :{
+      usable = "In Combat";
       break;
     }
     default: {
@@ -449,7 +517,7 @@ void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
 void ItemsPanel::drawItemPortrait() {
   assert(*selected != ItemID::NONE);
   int id = static_cast<int>(*selected);
-  Rectangle *sprite = &portraits.sprites[id];
+  Rectangle *sprite = &portraits.sprites.at(id);
   Vector2 position = Vector2Add(frame_position, {5, 5});
 
   DrawTextureRec(portraits.sheet, *sprite, position, WHITE);

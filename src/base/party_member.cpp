@@ -10,14 +10,19 @@
 #include "enums.h"
 #include "data/damage.h"
 #include "data/session.h"
+#include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
+#include "system/sprite_atlas.h"
 #include "combat/status_effects/broken_arm.h"
 #include "combat/status_effects/crippled_leg.h"
 #include "combat/status_effects/mangled.h"
 #include "combat/status_effects/despondent.h"
 #include "combat/system/stage.h"
+#include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
 using std::string, std::set, std::uniform_int_distribution, 
@@ -25,10 +30,12 @@ std::unique_ptr, std::make_unique;
 int PartyMember::member_count = 0;
 
 
-PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position):
+PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position,
+                         SpriteAtlas *atlas):
   Combatant(name, CombatantTeam::PARTY, position, RIGHT)
 {
   this->id = id;
+  this->atlas = atlas;
   member_count++;
 }
 
@@ -51,12 +58,41 @@ void PartyMember::setEnabled(bool value) {
   }
 }
 
+void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->event_type == CombatantEVT::MORALE_GAINED) {
+    auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
+    moraleShare(mp_event);
+  }
+}
+
+void PartyMember::moraleShare(GainedMoraleCBT *event) {
+  assert(event->sender->entity_type == EntityType::COMBATANT);
+  Combatant *sender = static_cast<Combatant*>(event->sender);
+
+  if (this != sender || this->team != sender->team) {
+    PLOGD << this->name <<  ": acknowledging Morale Gain event sent by: " 
+      << sender->name << " [ID: " << sender->entity_id << "]";
+
+    float magnitude = event->morale_gained / 2;
+    increaseMorale(magnitude, false);
+    return;
+  }
+}
+
 void PartyMember::takeDamage(DamageData &data) {
   bool not_demoralized = !demoralized;
   Combatant::takeDamage(data);
 
   deplete_clock = 0.0;
   deplete_delay = DEFAULT_DEPLETE_DELAY;
+
+  if (data.damage_type == DamageType::MORALE && state == HIT_STUN) {
+    Color tint = Game::palette[42];
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, atlas, sprite, bounding_box.position, 
+      direction, 0.25f, tint
+    );
+  }
 
   if (!important) {
     return;
@@ -111,15 +147,18 @@ void PartyMember::afflictPersistent() {
   set<StatusID> effect_pool = getEffectPool();
 
   PLOGI << "Possible status effect to inflict: " << effect_pool.size();
-  if (effect_pool.empty()) {
+  bool pool_is_empty = effect_pool.empty();
+  if (pool_is_empty && tenacity == 0) {
     PLOGI << "PartyMember has reached the end of their rope!";
     life = 0;
     death();
     return;
   }
 
-  StatusID id = selectRandomID(effect_pool);
-  afflictPersistent(id);
+  if (!pool_is_empty) {
+    StatusID id = selectRandomID(effect_pool);
+    afflictPersistent(id);
+  }
 }
 
 void PartyMember::afflictPersistent(StatusID id, bool hide_text) {
@@ -204,11 +243,20 @@ void PartyMember::damageMorale(float magnitude) {
   }
 }
 
-void PartyMember::increaseMorale(float magnitude) {
+void PartyMember::increaseMorale(float magnitude, bool mp_share) {
   float new_morale = morale + magnitude;
   morale = Clamp(new_morale, -max_morale, max_morale);
+
   PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
-    "] Morale has been increased to: " << morale;
+    "] Morale has been increased by: " << magnitude;
+
+  bool eligible = mp_share && !demoralized && memberCount() > 1;
+  if (eligible) {
+    PLOGD << "'" << name << "' is eligible to trigger MP Share";
+    CombatantHandler::queue<GainedMoraleCBT>(this, 
+                                             CombatantEVT::MORALE_GAINED, 
+                                             magnitude);
+  }
 }
 
 void PartyMember::increaseExhaustion(float magnitude) {
@@ -243,6 +291,10 @@ void PartyMember::depleteExhaustion() {
 
   float magnitude = recovery * (max_life * 0.125);
   magnitude *= Game::deltaTime();
+
+  if (magnitude > exhaustion) {
+    magnitude = exhaustion;
+  }
 
   exhaustion = Clamp(exhaustion - magnitude, 0, max_life);
   life = Clamp(life + magnitude, 0, max_life);

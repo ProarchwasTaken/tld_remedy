@@ -21,6 +21,7 @@ enum class MaryAction {
   EVADE,
   LIGHT_TECH,
   HEAVY_TECH,
+  USE_ITEM
 };
 
 
@@ -34,9 +35,10 @@ public:
 
   void setEnabled(bool value) override;
   void assignSubWeapon(SubWeaponID id);
+  void useItem(ItemID item, float use_time, PartyMember *target);
 
   void behavior() override;
-  void eventHandling();
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void damageHandling(TookDamageCBT *event);
 
   void movementInput(bool gamepad);
@@ -73,6 +75,10 @@ private:
   MaryAction buffer = MaryAction::NONE;
   float buffer_lifetime = 0.067;
   float buffer_clock = 0.0;
+
+  ItemID item = ItemID::NONE;
+  float item_use_time = 0.0;
+  PartyMember *item_target = NULL;
 
   std::unique_ptr<SubWeapon> sub_weapon;
 

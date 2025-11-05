@@ -12,6 +12,7 @@
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_cleave.h"
 #include <plog/Log.h>
@@ -79,7 +80,7 @@ void KnifeCleave::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[21];
-    user->sfx.play("knife_cleave");
+    Knife::sfx.play("knife_cleave");
   }
 }
 

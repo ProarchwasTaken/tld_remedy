@@ -27,6 +27,8 @@ is subject to change.
 * **A Key** - Light Technique
 * **S Key** - Heavy Technique
 
+* **Left Shift Key** - Use Item
+
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
@@ -43,6 +45,8 @@ may be different depending on what controller you use.
 * **B Button** - Defensive (Use in combination with directional inputs!)
 * **X Button** - Light Technique
 * **Y Button** - Heavy Technique
+
+* **Select Button** - Use Item
 
 
 # Credits and Contacts

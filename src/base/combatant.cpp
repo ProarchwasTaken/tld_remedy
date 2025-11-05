@@ -68,6 +68,25 @@ Combatant::~Combatant() {
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
+void Combatant::behavior() {
+  auto *event_pool = CombatantHandler::get();
+  eventHandling(event_pool);
+}
+
+void Combatant::eventHandling(EventPool<CombatantEvent> *event_pool) {
+  for (auto &event : *event_pool) {
+    if (event == nullptr) {
+      continue;
+    }
+
+    evaluateEvent(event);
+
+    for (auto &effect : status) {
+      effect->evaluateEvent(event);
+    }
+  }
+}
+
 float Combatant::distanceTo(Combatant *combatant) {
   assert(combatant != NULL);
   assert(combatant != this);
@@ -98,8 +117,14 @@ void Combatant::takeDamage(DamageData &data) {
     return;
   }
 
-  float damage = Clamp(damageCalulation(data), 0, 9999);
-  PLOGD << "Damage Calculation: " << damage << ", Victim Life: " << life;
+  float damage = Clamp(damageCalculation(data), 0, 9999);
+  PLOGD << "Damage Calculation: " << damage;
+
+  if (useTenacity(damage, data.damage_type)) {
+    damage = tpDamageCalculation(damage);
+    PLOGD << "Final Calculation: " << damage << " Life damage.";
+  }
+
   finalIntercept(damage, data);
   applyDamage(damage, data);
 
@@ -117,10 +142,12 @@ void Combatant::takeDamage(DamageData &data) {
                                          damage, data.damage_type, state,
                                          data.stun_time, data.stun_type,
                                          data.assailant);
+
+  PLOGI << "Damage procedure has reached it's conclusion.";
 }
 
-float Combatant::damageCalulation(DamageData &data) {
-  PLOGI << "Now performing damage calulation.";
+float Combatant::damageCalculation(DamageData &data) {
+  PLOGI << "Now performing damage calculation.";
   assert(data.assailant != NULL);
   Combatant *assailant = data.assailant;
 
@@ -150,6 +177,34 @@ float Combatant::damageCalulation(DamageData &data) {
   PLOGD << "Base Damage: " << base_damage;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
   return (base_damage + (a_atk * atk_mod)) - (b_def * def_mod);
+}
+
+bool Combatant::useTenacity(float damage, DamageType type) {
+  if (tenacity > 0 && type == DamageType::LIFE && damage > 0) {
+    return true;
+  } 
+  else {
+    return false;
+  }
+}
+
+float Combatant::tpDamageCalculation(float damage) {
+  PLOGI << "Performing secondary damage calculation."; 
+  PLOGD << "Damage: " << damage << " vs. Victim PER and RES: {" << 
+    persist << ", " << resilience << "}";
+
+  float life_damage = damage - (persist * resilience);
+  life_damage = Clamp(life_damage, 0, 9999);
+
+  bool not_zero = life_damage != 0;
+  float absorbed = 1 - ((life_damage / damage) * not_zero); 
+  float tenacity_damage = damage * absorbed;
+  damageTenacity(tenacity_damage);
+
+  PLOGD << "Damage absorbed by Tenacity: " << tenacity_damage << ", " <<
+  absorbed * 100 << "%";
+
+  return life_damage;
 }
 
 void Combatant::applyDamage(float damage, DamageData &data) {
@@ -189,11 +244,39 @@ void Combatant::damageLife(float magnitude) {
   }
 }
 
+void Combatant::increaseLife(float magnitude) {
+  life = Clamp(life + magnitude, 0, max_life);
+
+  if (critical_life && life >= max_life * LOW_LIFE_THRESHOLD) {
+    PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] is"
+    << " no longer in Critical Life!";
+    critical_life = false;
+  }
+}
+
+void Combatant::damageTenacity(float magnitude) {
+  tenacity = tenacity - magnitude;
+
+  if (tenacity <= 0) {
+    tenacity = 0;
+    tp_threshold = 0.0;
+  }
+}
+
+void Combatant::increaseTenacity(float magnitude, float threshold) {
+  if (threshold > tp_threshold) {
+    PLOGD << "Increasing Tenacity threshold to: " << threshold;
+    tp_threshold = threshold;
+  }
+
+  tenacity = Clamp(tenacity + magnitude, 0, max_life * tp_threshold);
+}
+
 void Combatant::damageMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to damage.";
 }
 
-void Combatant::increaseMorale(float magnitude) {
+void Combatant::increaseMorale(float magnitude, bool mp_share) {
   PLOGD << "Combatant does not possess Morale to increase.";
 }
 

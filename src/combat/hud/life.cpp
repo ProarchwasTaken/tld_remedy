@@ -81,13 +81,46 @@ void LifeHud::behavior() {
     Entity *sender = event->sender;
     CombatantEVT type = event->event_type;
 
-    if (sender == user && type == CombatantEVT::TOOK_DAMAGE) {
-      PLOGD << "Aknowledging TookDamage event sent by: '" << user->name
-        << "' [ID: " << user->entity_id << "'";
+    if (sender == user) {
+      eventHandling(event.get());
+    }
+  }
+}
+
+void LifeHud::eventHandling(CombatantEvent *event) {
+  assert(event->sender == user);
+  switch (event->event_type) {
+    case CombatantEVT::TOOK_DAMAGE: {
+      PLOGD << "Acknowledging TookDamage event sent by: '" << user->name
+        << "' [ID: " << user->entity_id << "]";
       
-      auto *evt_damage = static_cast<TookDamageCBT*>(event.get());
+      auto *evt_damage = static_cast<TookDamageCBT*>(event);
       damageEventHandling(evt_damage);
       break;
+    }
+    case CombatantEVT::EFFECT_GAINED: {
+      auto *effect_gained = static_cast<EffectGainedCBT*>(event);
+      if (effect_gained->effect_id == StatusID::MENDING) {
+        PLOGD << "Acknowledging EffectGained event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "]";
+        has_mending = true;
+      }
+
+      break;
+    }
+    case CombatantEVT::EFFECT_LOST: {
+      auto *effect_lost = static_cast<EffectLostCBT*>(event);
+      StatusID id = effect_lost->effect_id;
+      if (id == StatusID::MENDING) {
+        PLOGD << "Acknowledging EffectLost event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "]";
+        has_mending = false;
+      }
+
+      break;
+    }
+    default: {
+
     }
   }
 }
@@ -122,6 +155,9 @@ void LifeHud::update() {
 void LifeHud::decideLifeColor() {
   if (user->state == CombatantState::DEAD) {
     life_color = Game::palette[32];
+  }
+  else if (has_mending) {
+    life_color = Game::palette[14];
   }
   else if (user->critical_life) {
     life_color = criticalFlash();
@@ -234,16 +270,31 @@ void LifeHud::drawLife(Vector2 position, Font *font, int txt_size) {
                  life_color);
   drawLifeSegments(position);
   drawLifeText(position, font, txt_size);
+
+  if (user->tenacity != 0.0) {
+    drawTenacityText(position, font, txt_size);
+  }
 }
 
 void LifeHud::drawLifeSegments(Vector2 position) {
   float life_percentage = user->life / user->max_life;
 
-  float combined = user->life + user->exhaustion;
+  float combined = user->life + user->tenacity + user->exhaustion;
   float with_exhaustion = combined / user->max_life;
+  float with_tenacity = (user->life + user->tenacity) / user->max_life;
 
-  int segments = life_percentage * 10;
+  int segments;
+  bool close_to_full = 1.0 - life_percentage <= 0.001;
+  if (close_to_full) {
+    segments = 10;
+  }
+  else {
+    segments = life_percentage * 10; 
+  }
+
   int ex_segments = with_exhaustion * 10;
+  int tp_segments = with_tenacity * 10;
+
   float leftover = (life_percentage * 10) - segments;
 
   position = Vector2Add(position, {7, 2});
@@ -260,6 +311,9 @@ void LifeHud::drawLifeSegments(Vector2 position) {
       sprite = segmentBlink(interval);
       leftover = 0;
     }
+    else if (segments != tp_segments && x <= tp_segments) {
+      sprite = &atlas.sprites[6];
+    }
     else if (segments != ex_segments && x <= ex_segments) {
       sprite = &atlas.sprites[2];
       color = Game::palette[29];
@@ -275,14 +329,23 @@ void LifeHud::drawLifeSegments(Vector2 position) {
 }
 
 void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
-  float life = std::floorf(user->life);
-  txt_life = TextFormat("%02.00f/%02.00f", life, user->max_life);
+  txt_life = TextFormat("%02.00f/%02.00f", user->life, user->max_life);
 
   position = Vector2Add(position, {78, 3});
   position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
                                    0);
 
   DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
+}
+
+void LifeHud::drawTenacityText(Vector2 position, Font *font, int size) {
+  txt_tenacity = TextFormat("(+%01.02f)", user->tenacity);
+  position = Vector2Add(position, {78, 11});
+  position = TextUtils::alignRight(txt_tenacity.c_str(), position, *font, 
+                                   -3, 0);
+
+  Color color = Game::palette[22];
+  DrawTextEx(*font, txt_tenacity.c_str(), position, size, -3, color);
 }
 
 void LifeHud::drawMorale(Vector2 position, Font *font, int txt_size) {
@@ -317,6 +380,10 @@ void LifeHud::drawMoraleText(Vector2 position, Font *font, int size) {
 }
 
 Rectangle *LifeHud::segmentBlink(float interval) {
+  if (user->tenacity != 0) {
+    return &atlas.sprites[6];
+  }
+
   blink_clock += Game::deltaTime() / interval;
   if (blink_clock >= 1.0) {
     segment_blink = !segment_blink;

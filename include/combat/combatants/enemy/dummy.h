@@ -11,7 +11,6 @@ public:
   Dummy(Vector2 position, Direction direction);
   ~Dummy();
 
-  void behavior() override {};
   void attack();
 
   void update() override;

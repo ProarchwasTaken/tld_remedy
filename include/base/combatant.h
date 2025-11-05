@@ -11,10 +11,13 @@
 
 class CombatAction;
 struct DamageData;
+class CombatantEvent;
 
 class StatusEffect;
 typedef std::vector<std::unique_ptr<StatusEffect>> Status;
 
+template <typename EventType>
+using EventPool = std::vector<std::unique_ptr<EventType>>;
 
 enum CombatantState {
   ACTION,
@@ -53,7 +56,9 @@ public:
 
   float distanceTo(Combatant *combatant);
 
-  virtual void behavior() = 0;
+  virtual void behavior();
+  void eventHandling(EventPool<CombatantEvent> *event_pool);
+  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event) {};
 
   /* The process of taking damage is actually a very thorough procedure. 
    * It is a crucial aspect of any Combatant's functionality afterall.
@@ -61,18 +66,26 @@ public:
    * modify the given damage data, execute special code, or cancel the
    * function all together.*/
   virtual void takeDamage(DamageData &data);
-  float damageCalulation(DamageData &data);
+  float damageCalculation(DamageData &data);
+
+  bool useTenacity(float damage, DamageType type);
+  float tpDamageCalculation(float damage);
+
   virtual void finalIntercept(float &damage, DamageData &data) {};
   void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);
+  void increaseLife(float magnitude);
+
+  void damageTenacity(float magnitude);
+  void increaseTenacity(float magnitude, float threshold);
 
   /* This function (Along with increaseMorale) does nothing. This is 
    * because, Combatants at their core do not possess Morale attributes.
    * Rather theses functions are meant to be overwritten by Combatants
    * who do have those values. The notable example are PartyMembers.*/
   virtual void damageMorale(float magnitude);
-  virtual void increaseMorale(float magnitude);
+  virtual void increaseMorale(float magnitude, bool mp_share = true);
 
   virtual void enterHitstun(DamageData &data);
   void stunLogic();
@@ -118,6 +131,9 @@ public:
   float life; 
   float max_life;
 
+  float tenacity = 0.0;
+  float tp_threshold = 0.0;
+
   bool intangible = false;
   bool critical_life = false;
 
@@ -127,6 +143,8 @@ public:
   int persist;
 
   float speed_multiplier = 1.0;
+  float recovery = 1.0;
+  float resilience;
 
   std::unique_ptr<CombatAction> action;
   Status status;

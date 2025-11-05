@@ -45,8 +45,8 @@ void SoundAtlas::setup() {
 }
 
 void SoundAtlas::reset() {
-  assert(user_count == 0);
   PLOGI << "Resetting sound atlas: '" << category << "'";
+  assert(user_count == 0);
 
   for (auto &element : sound_table) { 
     UnloadSound(element.second);

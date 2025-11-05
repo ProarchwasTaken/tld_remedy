@@ -1,7 +1,9 @@
 #pragma once
+#include <memory>
 #include <string>
 #include "enums.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "base/combatant.h"
 
 
@@ -20,8 +22,9 @@ public:
   virtual ~StatusEffect();
 
   virtual void init(bool hide_text = false);
-  bool isPersistant() {return persistant;}
+  bool isPersistent() {return persistent;}
 
+  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event) {};
   virtual void intercept(DamageData &data) {}
   virtual void logic() {}
 
@@ -31,6 +34,6 @@ public:
 
   bool end = false;
 protected:
-  bool persistant = false;
+  bool persistent = false;
   Combatant *afflicted;
 };

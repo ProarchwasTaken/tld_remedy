@@ -24,6 +24,8 @@ void setLifeCommand(string target, string value);
 void addItemCommand(string item_id);
 void removeItemCommand(string item_id);
 void clearInventoryCommand();
+void addEffectCommand(string target, string effect_id);
+void removeEffectCommand(string target, string effect_id);
 
 
 CommandSystem::CommandSystem() {
@@ -149,6 +151,20 @@ void CommandSystem::interpretCommand(CommandType type,
     }
     case CommandType::CLR_INV: {
       clearInventoryCommand();
+      break;
+    }
+    case CommandType::ADD_EFFECT: {
+      string target = findNextWord(buffer, iterator, true);
+      string effect_id = findNextWord(buffer, iterator);
+
+      addEffectCommand(target, effect_id);
+      break;
+    }
+    case CommandType::RM_EFFECT: {
+      string target = findNextWord(buffer, iterator, true);
+      string effect_id = findNextWord(buffer, iterator);
+
+      removeEffectCommand(target, effect_id);
       break;
     }
   }
@@ -343,3 +359,65 @@ void clearInventoryCommand() {
   FieldHandler::raise<FieldEvent>(FieldEVT::CLEAR_INV);
 }
 
+void addEffectCommand(string target, string effect_id) {
+  if (target.empty()) {
+    PLOGE << "Target is not specified.";
+    return;
+  }
+
+  if (effect_id.empty()) {
+    PLOGE << "Expected effect id!";
+    return;
+  }
+
+  for (char letter : effect_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid argument! Expected whole number!";
+    }
+  }
+
+  PLOGI << "Now executing command.";
+  StatusID id = static_cast<StatusID>(std::stoi(effect_id));
+
+  if (target == "PLAYER") {
+    FieldHandler::raise<AddEffectEvent>(FieldEVT::PLR_ADD_EFFECT, id);
+  }
+  else if (target == "COMPANION") {
+    FieldHandler::raise<AddEffectEvent>(FieldEVT::COM_ADD_EFFECT, id);
+  }
+  else {
+    PLOGE << "'" << target << "' is not a valid target.";
+  }
+}
+
+void removeEffectCommand(string target, string effect_id) {
+  if (target.empty()) {
+    PLOGE << "Target is not specified.";
+    return;
+  }
+
+  if (effect_id.empty()) {
+    PLOGE << "Expected effect id!";
+    return;
+  }
+
+  for (char letter : effect_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid argument! Expected whole number!";
+    }
+  }
+
+  PLOGI << "Now executing command.";
+  StatusID id = static_cast<StatusID>(std::stoi(effect_id));
+
+  if (target == "PLAYER") {
+    FieldHandler::raise<RemoveEffectEvent>(FieldEVT::PLR_RM_EFFECT, id);
+  }
+  else if (target == "COMPANION") {
+    FieldHandler::raise<RemoveEffectEvent>(FieldEVT::COM_RM_EFFECT, id);
+  }
+  else {
+    PLOGE << "'" << target << "' is not a valid target.";
+  }
+
+}

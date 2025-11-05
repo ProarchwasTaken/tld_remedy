@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.9.0
+VERSION 1.10.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -59,6 +59,7 @@ set(HEADERS
 "include/data/personal.h"
 "include/data/animation.h"
 "include/data/damage.h"
+"include/data/enemy_troops.h"
 "include/utils/input.h"
 "include/utils/collision.h"
 "include/utils/text.h"
@@ -93,8 +94,10 @@ set(HEADERS
 "include/combat/system/cbt_handler.h"
 "include/combat/hud/life.h"
 "include/combat/hud/cmd_plr.h"
+"include/combat/hud/cmd_item.h"
 "include/combat/entities/dmg_number.h"
 "include/combat/entities/status_text.h"
+"include/combat/entities/afterimage.h"
 "include/combat/sub_weapons/knife.h"
 "include/combat/combatants/party/mary.h"
 "include/combat/combatants/party/erwin.h"
@@ -104,10 +107,14 @@ set(HEADERS
 "include/combat/actions/evade.h"
 "include/combat/actions/knife_cleave.h"
 "include/combat/actions/knife_piercer.h"
+"include/combat/actions/use_item.h"
 "include/combat/status_effects/broken_arm.h"
 "include/combat/status_effects/crippled_leg.h"
 "include/combat/status_effects/mangled.h"
 "include/combat/status_effects/despondent.h"
+"include/combat/status_effects/mending.h"
+"include/combat/status_effects/refreshed.h"
+"include/combat/status_effects/endurance.h"
 "include/scenes/camp_menu.h"
 )
 set(SOURCE
@@ -155,8 +162,10 @@ set(SOURCE
 "src/combat/system/cbt_handler.cpp"
 "src/combat/hud/life.cpp"
 "src/combat/hud/cmd_plr.cpp"
+"src/combat/hud/cmd_item.cpp"
 "src/combat/entities/dmg_number.cpp"
 "src/combat/entities/status_text.cpp"
+"src/combat/entities/afterimage.cpp"
 "src/combat/sub_weapons/knife.cpp"
 "src/combat/combatants/party/mary.cpp"
 "src/combat/combatants/party/erwin.cpp"
@@ -166,10 +175,14 @@ set(SOURCE
 "src/combat/actions/evade.cpp"
 "src/combat/actions/knife_cleave.cpp"
 "src/combat/actions/knife_piercer.cpp"
+"src/combat/actions/use_item.cpp"
 "src/combat/status_effects/broken_arm.cpp"
 "src/combat/status_effects/crippled_leg.cpp"
 "src/combat/status_effects/mangled.cpp"
 "src/combat/status_effects/despondent.cpp"
+"src/combat/status_effects/mending.cpp"
+"src/combat/status_effects/refreshed.cpp"
+"src/combat/status_effects/endurance.cpp"
 "src/scenes/camp_menu.cpp"
 )
 

@@ -22,6 +22,7 @@ enum EntityType {
   DMG_NUMBER,
   STATUS_TEXT,
   COMBATANT,
+  AFTERIMAGE
 };
 
 enum class ActorType {
@@ -41,7 +42,10 @@ enum class CompanionID {
 enum class ItemID {
   NONE = -1,
   I_BANDAGE,
-  M_SPLINT
+  M_SPLINT,
+  S_BANDAGE,
+  S_WATER,
+  P_KILLERS,
 };
 
 enum class CombatantTeam {
@@ -63,12 +67,19 @@ enum class EnemyID {
   DUMMY,
 };
 
+enum class TroopID {
+  INVALID = -1,
+  DB_TROOP1,
+  DB_TROOP2
+};
+
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
   EVADE,
   KNIFE_CLEAVE,
-  KNIFE_PIERCER
+  KNIFE_PIERCER,
+  USE_ITEM
 };
 
 enum class StatusID {
@@ -109,7 +120,11 @@ enum class FieldEVT {
   CHANGE_COM_LIFE,
   ADD_ITEM,
   REMOVE_ITEM,
-  CLEAR_INV
+  CLEAR_INV,
+  PLR_ADD_EFFECT,
+  PLR_RM_EFFECT,
+  COM_ADD_EFFECT,
+  COM_RM_EFFECT
 };
 
 enum class ActorEVT {
@@ -121,10 +136,16 @@ enum class ActorEVT {
 enum class CombatEVT {
   CREATE_DMG_NUM,
   CREATE_STAT_TXT,
+  CREATE_AFTERIMAGE,
   DELETE_ENTITY,
+  OPEN_ITEM_HUD,
+  REMOVE_ITEM,
 };
 
 enum class CombatantEVT {
   TOOK_DAMAGE,
+  MORALE_GAINED,
+  EFFECT_GAINED,
+  EFFECT_LOST
 };
 

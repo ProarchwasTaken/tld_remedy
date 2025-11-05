@@ -7,6 +7,7 @@
 #include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/party_member.h"
+#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "data/animation.h"
 #include "data/session.h"
@@ -14,11 +15,12 @@
 #include "utils/input.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
-#include "combat/system/cbt_handler.h"
+#include "combat/system/evt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
+#include "combat/actions/use_item.h"
 #include "combat/combatants/party/mary.h"
 #include <plog/Log.h>
 
@@ -27,7 +29,7 @@ SpriteAtlas Mary::atlas("combatants", "mary_combatant");
 
 
 Mary::Mary(Player *plr): 
-  PartyMember("Mary", PartyMemberID::MARY, {-64, 152})
+  PartyMember("Mary", PartyMemberID::MARY, {-64, 152}, &atlas)
 {
   keybinds = &Game::settings.combat_keybinds;
   important = true;
@@ -44,6 +46,8 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+
+  resilience = 0.80;
 
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
@@ -65,13 +69,16 @@ Mary::Mary(Player *plr):
 
 Mary::~Mary() {
   atlas.release();
+  sub_weapon.reset();
 }
 
 void Mary::setEnabled(bool value) {
   PartyMember::setEnabled(value);
 
-  moving = false;
-  buffer = MaryAction::NONE;
+  if (value == false) {
+    moving = false;
+    buffer = MaryAction::NONE;
+  }
 }
 
 void Mary::assignSubWeapon(SubWeaponID id) {
@@ -93,12 +100,20 @@ void Mary::assignSubWeapon(SubWeaponID id) {
   tech2_type = sub_weapon->tech2_type;
 }
 
+void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
+  PLOGI << "Sending Use Item input to buffer.";
+  buffer = MaryAction::USE_ITEM;
+  this->item = item;
+  item_use_time = use_time;
+  item_target = target;
+}
+
 void Mary::behavior() {
+  Combatant::behavior();
+
   if (!enabled) {
     return;
   }
-
-  eventHandling();
 
   bool gamepad = IsGamepadAvailable(0);
   movementInput(gamepad);
@@ -109,18 +124,12 @@ void Mary::behavior() {
   }
 }
 
-void Mary::eventHandling() {
-  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  PartyMember::evaluateEvent(event);
 
-  for (auto &event : *event_pool) {
-    if (event == nullptr) {
-      continue;
-    }
-
-    if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
-      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-      damageHandling(dmg_event);
-    }
+  if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
+    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+    damageHandling(dmg_event);
   }
 }
 
@@ -183,6 +192,10 @@ void Mary::actionInput(bool gamepad) {
   else if (Input::pressed(keybinds->heavy_tech, gamepad)) {
     PLOGI << "Sending Heavy Tech input to buffer.";
     buffer = MaryAction::HEAVY_TECH;
+  }
+  else if (Input::pressed(keybinds->use_item, gamepad)) {
+    PLOGI << "Sending a event to open the Item Hud";
+    CombatHandler::raise<CombatEvent>(CombatEVT::OPEN_ITEM_HUD);
   }
   else {
     return;
@@ -270,6 +283,18 @@ void Mary::readActionBuffer() {
 
         action = make_unique<Evade>(this, atlas, hitbox, ev_set);
       }
+      break;
+    }
+    case MaryAction::USE_ITEM: {
+      assert(item_target != NULL);
+      assert(item != ItemID::NONE);
+      assert(item_use_time != 0);
+
+      action = make_unique<UseItem>(this, item_target, item, 
+                                    item_use_time);
+      item_target = NULL;
+      item = ItemID::NONE;
+      item_use_time = 0;
       break;
     }
     case MaryAction::LIGHT_TECH: {

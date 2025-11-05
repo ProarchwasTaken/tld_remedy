@@ -10,7 +10,7 @@ BrokenArm::BrokenArm(Combatant *afflicted) :
   StatusEffect(StatusID::BROKEN_ARM, StatusType::NEGATIVE, afflicted)
 {
   name = "Broken Arm";
-  persistant = true;
+  persistent = true;
 
   float offense = afflicted->offense;
   float dec_offense = std::floorf(offense * 0.90);
@@ -24,20 +24,30 @@ BrokenArm::BrokenArm(Combatant *afflicted) :
 }
 
 BrokenArm::~BrokenArm() {
-  if (end) {
-    PLOGI << "Reversing stat penalties.";
-    afflicted->offense += offense_lost;
-    afflicted->intimid += intimid_lost;
+  if (end && !negated) {
+    negateEffect();
   }
 }
 
 void BrokenArm::init(bool hide_text) {
-  PLOGI << "Decreasing afflicted's offense and intimidation by 10%";
-  afflicted->offense -= offense_lost;
-  afflicted->intimid -= intimid_lost;
+  applyPenalty();
 
   PLOGD << "Result: {OFF: " << afflicted->offense << ", INT: " <<
   afflicted->intimid << "}";
 
   StatusEffect::init(hide_text);
+}
+
+void BrokenArm::applyPenalty() {
+  PLOGI << "Decreasing afflicted's offense and intimidation by 10%";
+  afflicted->offense -= offense_lost;
+  afflicted->intimid -= intimid_lost;
+  negated = false;
+}
+
+void BrokenArm::negateEffect() {
+  PLOGI << "Reversing stat penalties.";
+  afflicted->offense += offense_lost;
+  afflicted->intimid += intimid_lost;
+  negated = true;
 }

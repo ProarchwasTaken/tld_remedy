@@ -5,8 +5,10 @@
 #include "base/scene.h"
 #include "base/entity.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/enemy_troops.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
@@ -14,6 +16,7 @@
 #include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_item.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 
@@ -27,6 +30,9 @@ public:
   void initializePlayer();
   void initializeCompanion();
 
+  void initializeTroop(EnemyTroop *troop);
+  std::unique_ptr<Enemy> createEnemy(EnemyData &data);
+
   void update() override;
   void eventProcessing();
   void eventHandling(std::unique_ptr<CombatEvent> &event);
@@ -39,10 +45,13 @@ public:
 
   void draw() override;
 
+  #ifndef NDEBUG
+  void debugKeybinds();
   void drawDebugInfo();
   void drawPartyStats(PartyMember *member, Vector2 position, Font *font, 
                       int text_size);
-  void drawDebugCombo(Font *font, int text_size);
+  void drawDebugCombo(Font *font, int text_size); 
+  #endif // !NDEBUG
 
   static SpriteAtlas cmd_atlas;
 private:
@@ -61,6 +70,8 @@ private:
 
   PartyMember *companion;
   LifeHud com_hud = LifeHud({154, 215});
+
+  ItemCmdHud item_hud = ItemCmdHud({350, 222});
 
   // Remove this later!
   Dummy *dummy = NULL;

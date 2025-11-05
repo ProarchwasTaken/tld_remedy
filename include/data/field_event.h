@@ -40,3 +40,11 @@ struct RemoveItemEvent : FieldEvent {
   ItemID item;
 };
 
+struct AddEffectEvent : FieldEvent {
+  StatusID effect_id;
+};
+
+struct RemoveEffectEvent : FieldEvent {
+  StatusID effect_id;
+};
+

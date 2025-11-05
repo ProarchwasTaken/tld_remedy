@@ -129,8 +129,8 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
 
       companion->offense = 8;
       companion->defense = 6;
-      companion->intimid = 8;
-      companion->persist = 6;
+      companion->intimid = 7;
+      companion->persist = 5;
       break;
     }
   }
@@ -293,19 +293,19 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::OPEN_MENU: {
-      PLOGI << "Event Detected: OpenMenuEvent";
+      PLOGD << "Event Detected: OpenMenuEvent";
       Game::openCampMenu(&session);
       break;
     }
     case FieldEVT::INIT_COMBAT: {
-      PLOGI << "Event Detected: InitCombatEvent";
+      PLOGD << "Event Detected: InitCombatEvent";
 
       Game::initCombat(&session);
       sfx.play("combat_init");
       break;
     }
     case FieldEVT::GOTO_TITLE: {
-      PLOGI << "Event Detected: GotoTitleEvent";
+      PLOGD << "Event Detected: GotoTitleEvent";
       Game::loadTitleScreen();
       break;
     }
@@ -362,7 +362,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::CHANGE_COM_LIFE: {
-      PLOGI << "Event detected: SetComLifeEvent";
+      PLOGD << "Event detected: SetComLifeEvent";
       auto *event_data = static_cast<SetLifeEvent*>(event.get());
 
       float value = event_data->value;
@@ -372,20 +372,111 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       break;
     }
     case FieldEVT::ADD_ITEM: {
-      PLOGI << "Event detected: AddItemEvent";
+      PLOGD << "Event detected: AddItemEvent";
       auto *event_data = static_cast<AddItemEvent*>(event.get());
       addItem(event_data->item);
       break;
     }
     case FieldEVT::REMOVE_ITEM: {
-      PLOGI << "Event detected: RemovedItemEvent";
+      PLOGD << "Event detected: RemoveItemEvent";
       auto *event_data = static_cast<RemoveItemEvent*>(event.get());
-      removeItem(event_data->item);
+      removeItem(&session, event_data->item);
       break;
     }
     case FieldEVT::CLEAR_INV: {
-      PLOGI << "Event detected: ClearInvEvent";
+      PLOGD << "Event detected: ClearInvEvent";
       clearInventory();
+      break;
+    }
+    case FieldEVT::PLR_ADD_EFFECT:
+    case FieldEVT::COM_ADD_EFFECT: {
+      PLOGD << "Event detected: AddEffectEvent";
+      auto *event_data = static_cast<AddEffectEvent*>(event.get());
+      addStatusEffect(event_data->event_type, event_data->effect_id);
+      break;
+    }
+    case FieldEVT::PLR_RM_EFFECT:
+    case FieldEVT::COM_RM_EFFECT: {
+      PLOGD << "Event detected: RemoveEffectEvent";
+      auto *event_data = static_cast<RemoveEffectEvent*>(event.get());
+      removeStatusEffect(event_data->event_type, event_data->effect_id);
+      break;
+    }
+  }
+}
+
+void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {
+  Character *target;
+  if (type == FieldEVT::PLR_ADD_EFFECT) {
+    target = &session.player;
+  }
+  else if (type == FieldEVT::COM_ADD_EFFECT) {
+    target = &session.companion;
+  }
+  else {
+    PLOGE << "Invalid Event Type!";
+    return;
+  }
+
+  PLOGD << "Target: '" << target->name << "'";
+  if (target->status_count == target->status_limit) {
+    PLOGI << "Target's status count is at it's limit!";
+    return;
+  }
+
+  StatusID *empty_slot = NULL;
+  for (int x = 0; x < target->status_limit; x++) {
+    StatusID *status_slot = &target->status[x];
+
+    if (*status_slot == effect_id) {
+      PLOGE << "Target already has that status effect!";
+      return;
+    }
+
+    if (empty_slot == NULL && *status_slot == StatusID::NONE) {
+      PLOGD << "Found empty status slot.";
+      empty_slot = status_slot;
+    }
+  }
+
+  assert(empty_slot != NULL);
+  PLOGI << "Afflicting target with status effect of ID: " << 
+    static_cast<int>(effect_id); 
+  *empty_slot = effect_id;
+
+  target->status_count++;
+  assert(target->status_count <= target->status_limit);
+}
+
+void FieldScene::removeStatusEffect(FieldEVT type, StatusID effect_id) {
+  Character *target;
+  if (type == FieldEVT::PLR_RM_EFFECT) {
+    target = &session.player;
+  }
+  else if (type == FieldEVT::COM_RM_EFFECT) {
+    target = &session.companion;
+  }
+  else {
+    PLOGE << "Invalid Event Type!";
+    return;
+  }
+
+  PLOGD << "Target: '" << target->name << "'";
+  if (target->status_count == 0) {
+    PLOGI << "Target doesn't have any status effects!";
+    return;
+  }
+
+  for (int x = 0; x < target->status_limit; x++) {
+    StatusID *status_slot = &target->status[x];
+
+    if (*status_slot == effect_id) {
+      PLOGI << "Cured target of status effect: " << 
+        static_cast<int>(effect_id);
+
+      *status_slot = StatusID::NONE;
+      target->status_count--;
+      assert(target->status_count >= 0);
       break;
     }
   }
@@ -416,27 +507,27 @@ void FieldScene::addItem(ItemID item) {
   assert(session.item_count <= limit);
 }
 
-void FieldScene::removeItem(ItemID item) {
+void FieldScene::removeItem(Session *session, ItemID item) {
   assert(item != ItemID::NONE);
-  if (session.item_count == 0) {
+  if (session->item_count == 0) {
     PLOGE << "Player's inventory is empty!";
     return;
   }
 
-  int limit = session.item_limit;
+  int limit = session->item_limit;
   for (int index = 0; index < limit; index++) {
-    ItemID *slot = &session.inventory[index];
+    ItemID *slot = &session->inventory[index];
 
     if (*slot == item) {
       PLOGI << "Removed Item: " << static_cast<int>(*slot) <<
         " from player's inventory.";
       *slot = ItemID::NONE;
-      session.item_count--;
+      session->item_count--;
       break;
     }
   }
 
-  assert(session.item_count >= 0);
+  assert(session->item_count >= 0);
 }
 
 void FieldScene::clearInventory() {
@@ -530,6 +621,7 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   }
 }
 
+#ifndef NDEBUG
 void FieldScene::drawSessionInfo() {
   Font *font = &Game::sm_font;
   int text_size = Game::sm_font.baseSize;
@@ -589,3 +681,4 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }
+#endif // !NDEBUG

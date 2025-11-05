@@ -1,0 +1,20 @@
+{
+  "sfx": [
+    {
+      "name": "knife_cleave",
+      "filename": "knife/knife_cleave.mp3"
+    },
+    {
+      "name": "knife_piercer",
+      "filename": "knife/knife_piercer.mp3"
+    },
+    {
+      "name": "knife_piercer_hit",
+      "filename": "knife/knife_piercer_hit.mp3"
+    },
+    {
+      "name": "knife_piercer_heave",
+      "filename": "knife/knife_piercer_heave.mp3"
+    }
+  ]
+}

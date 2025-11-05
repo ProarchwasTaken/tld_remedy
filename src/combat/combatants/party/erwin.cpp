@@ -19,7 +19,7 @@ SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
 
 
 Erwin::Erwin(Companion *data, Mary *player): 
-  PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152})
+  PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152}, &atlas)
 {
   this->player = player;
 
@@ -35,6 +35,8 @@ Erwin::Erwin(Companion *data, Mary *player):
   defense = data->defense;
   intimid = data->intimid;
   persist = data->persist;
+
+  resilience = 0.60;
 
   afflictPersistent(data->status);
 
@@ -60,6 +62,8 @@ void Erwin::setEnabled(bool value) {
 }
 
 void Erwin::behavior() {
+  Combatant::behavior();
+
   if (!enabled) {
     return;
   }
