@@ -5,6 +5,8 @@
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
+#include "combat/actions/attack.h"
+
 
 enum class ErwinGoals {
   IDLE = 0,
@@ -21,6 +23,9 @@ public:
   void setEnabled(bool value) override;
 
   void behavior() override;
+  void attackMP();
+  void attackHP();
+
   void setGoal(ErwinGoals goal);
   void setGoal(ErwinGoals goal, float chance);
 
@@ -55,6 +60,18 @@ private:
   float anim_move_speed = 0.2;
   Animation anim_move = {{4, 5, 6, 5}, anim_move_speed};
   Animation anim_dead = {{7, 9}, 0.25};
+
+  AtkAnimSet atk_mp_set = {
+    {{10, 11}, 0.05},
+    {{11, 10}, 0.05},
+    12
+  };
+
+  AtkAnimSet atk_hp_set = {
+    {{13}, 0.0},
+    {{15, 16}, 0.0},
+    14
+  };
 
   Mary *player;
   float preferred_plr_distance = 128;

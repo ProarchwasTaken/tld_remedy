@@ -1,20 +1,25 @@
 #include <cassert>
+#include <memory>
 #include <random>
 #include <raylib.h>
 #include <raymath.h>
+#include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/session.h"
 #include "data/animation.h"
+#include "data/rect_ex.h"
+#include "data/damage.h"
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
+#include "combat/actions/attack.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
 
-using std::uniform_real_distribution;
+using std::uniform_real_distribution, std::make_unique, std::unique_ptr;
 SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
 
 
@@ -68,6 +73,14 @@ void Erwin::behavior() {
     return;
   }
 
+  // Remove this later!
+  if (state == NEUTRAL && IsKeyPressed(KEY_T)) {
+    attackMP();
+  }
+  else if (state == NEUTRAL && IsKeyPressed(KEY_Y)) {
+    attackHP();
+  }
+
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
     setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
@@ -78,6 +91,36 @@ void Erwin::behavior() {
   if (plr_distance > preferred_plr_distance) {
     setGoal(ErwinGoals::FOLLOW_PLR);
   }
+}
+
+void Erwin::attackMP() {
+  RectEx hitbox;
+  hitbox.scale = {28, 8};
+  hitbox.offset = {-14 + (14.0f * direction), -50};
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, atlas, hitbox, atk_mp_set);
+  performAction(action);
+}
+
+void Erwin::attackHP() {
+  RectEx hitbox;
+  hitbox.scale = {28, 8};
+  hitbox.offset = {-14 + (14.0f * direction), -50};
+
+  DamageData data;
+  data.damage_type = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+  data.knockback = 45.0;
+  data.hit_stop = 0.2;
+  data.assailant = this;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.20, 0.05,
+                               0.25, hitbox, data, atlas, atk_hp_set);
+  performAction(action);
 }
 
 void Erwin::setGoal(ErwinGoals goal) {
