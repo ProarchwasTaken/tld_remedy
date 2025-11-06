@@ -153,6 +153,24 @@ void Erwin::chooseTarget() {
   "]";
 }
 
+void Erwin::decideAttack() {
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  float chance = 0.15;
+  if (morale >= max_morale) {
+    chance += 0.50;
+  }
+
+  if (morale >= 4 && percentage <= chance) {
+    attackHP();
+    morale -= 4;
+  }
+  else {
+    attackMP();
+  }
+}
+
 void Erwin::attackMP() {
   RectEx hitbox;
   hitbox.scale = {28, 8};
@@ -306,8 +324,14 @@ void Erwin::targetingLogic() {
     return;
   }
 
-  attackMP();
-  setGoal(ErwinGoals::RETREATING, 0.50);
+  decideAttack();
+  setGoal(ErwinGoals::RETREATING, 0.5);
+
+  if (ai_goal == ErwinGoals::RETREATING) {
+    PLOGI << "Retreating from target.";
+    uniform_real_distribution<float> range(0.10, 0.75);
+    retreat_time = range(Game::RNG);
+  }
 }
 
 void Erwin::retreatingLogic() {
@@ -329,10 +353,18 @@ void Erwin::retreatingLogic() {
   movement();
 
   retreat_clock += Game::deltaTime() / retreat_time;
-  if (retreat_clock >= 1.0) {
-    ai_goal = ErwinGoals::TARGETING;
-    retreat_clock = 0.0;
+  if (retreat_clock < 1.0) {
+    return;
   }
+
+  setGoal(ErwinGoals::TARGETING, 0.50);
+  if (ai_goal != ErwinGoals::TARGETING) {
+    PLOGI << "Returning to idle.";
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+  }
+
+  retreat_clock = 0.0;
 }
 
 void Erwin::movement() {

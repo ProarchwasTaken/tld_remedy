@@ -28,6 +28,7 @@ public:
   void rootBehavior();
   void chooseTarget();
 
+  void decideAttack();
   void attackMP();
   void attackHP();
 
