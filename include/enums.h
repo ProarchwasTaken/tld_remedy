@@ -70,7 +70,8 @@ enum class EnemyID {
 enum class TroopID {
   INVALID = -1,
   DB_TROOP1,
-  DB_TROOP2
+  DB_TROOP2,
+  DB_TROOP3
 };
 
 enum class ActionID {

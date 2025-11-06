@@ -142,15 +142,16 @@ void Erwin::chooseTarget() {
     }
   }
 
-  assert(!enemies.empty());
-  auto closest = std::min_element(enemies.begin(), enemies.end(),
-                                  Comparison::combatantDistance);
-  target = closest->second;
-  ai_goal = ErwinGoals::TARGETING;
+  if (!enemies.empty()) {
+    auto closest = std::min_element(enemies.begin(), enemies.end(),
+                                    Comparison::combatantDistance);
+    target = closest->second;
+    ai_goal = ErwinGoals::TARGETING;
 
-  PLOGI << "Targeting the closest enemy that the player isn't "
-    " targeting : '" << target->name << "' [ID: " << target->entity_id <<
-  "]";
+    PLOGI << "Targeting the closest enemy that the player isn't "
+      " targeting : '" << target->name << "' [ID: " << target->entity_id 
+      << "]";
+  } 
 }
 
 void Erwin::decideAttack() {
