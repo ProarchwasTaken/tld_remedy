@@ -1,18 +1,24 @@
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <random>
+#include <utility>
+#include <set>
 #include <raylib.h>
 #include <raymath.h>
 #include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "base/combat_action.h"
 #include "data/session.h"
 #include "data/animation.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "utils/animation.h"
+#include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/combatants/party/mary.h"
@@ -73,6 +79,10 @@ void Erwin::behavior() {
     return;
   }
 
+  if (ai_goal == ErwinGoals::IDLE) {
+    rootBehavior();
+  }
+
   // Remove this later!
   if (state == NEUTRAL && IsKeyPressed(KEY_T)) {
     attackMP();
@@ -80,17 +90,67 @@ void Erwin::behavior() {
   else if (state == NEUTRAL && IsKeyPressed(KEY_Y)) {
     attackHP();
   }
+}
+
+void Erwin::rootBehavior() {
+  bool enemies_present = Enemy::memberCount() != 0;
+  if (enemies_present && player->target != NULL) {
+    chooseTarget();
+    return;
+  }
+
+  float plr_distance = distanceTo(player);
+  if (plr_distance > preferred_plr_distance) {
+    ai_goal = ErwinGoals::FOLLOW_PLR;
+    return;
+  }
 
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
     setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
     tick_clock = 0.0;
   }
+}
 
-  float plr_distance = distanceTo(player);
-  if (plr_distance > preferred_plr_distance) {
-    setGoal(ErwinGoals::FOLLOW_PLR);
+void Erwin::chooseTarget() {
+  int count = Enemy::memberCount();
+  assert(count != 0);
+  assert(player->target != NULL);
+
+  if (count == 1) {
+    target = player->target;
+    ai_goal = ErwinGoals::TARGETING;
+    PLOGI << "Targeting the only remaining enemy: '" << target->name << 
+      "' [ID: " << target->entity_id << "]"; 
+    return;
   }
+
+  std::set<std::pair<float, Combatant*>> enemies;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (team == combatant->team) {
+      continue;
+    }
+
+    if (combatant->state == CombatantState::DEAD) {
+      continue;
+    }
+
+    if (player->target != combatant) {
+      float distance = distanceTo(combatant);
+      enemies.emplace(std::make_pair(distance, combatant));
+    }
+  }
+
+  assert(!enemies.empty());
+  auto closest = std::min_element(enemies.begin(), enemies.end(),
+                                  Comparison::combatantDistance);
+  target = closest->second;
+  ai_goal = ErwinGoals::TARGETING;
+
+  PLOGI << "Targeting the closest enemy that the player isn't "
+    " targeting : '" << target->name << "' [ID: " << target->entity_id <<
+  "]";
 }
 
 void Erwin::attackMP() {
@@ -105,8 +165,8 @@ void Erwin::attackMP() {
 
 void Erwin::attackHP() {
   RectEx hitbox;
-  hitbox.scale = {28, 8};
-  hitbox.offset = {-14 + (14.0f * direction), -50};
+  hitbox.scale = {30, 8};
+  hitbox.offset = {-15 + (16.0f * direction), -45};
 
   DamageData data;
   data.damage_type = DamageType::LIFE;
@@ -123,17 +183,7 @@ void Erwin::attackHP() {
   performAction(action);
 }
 
-void Erwin::setGoal(ErwinGoals goal) {
-  if (goal > ai_goal) {
-    ai_goal = goal;
-  }
-}
-
 void Erwin::setGoal(ErwinGoals goal, float chance) {
-  if (goal < ai_goal) {
-    return;
-  }
-
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
@@ -177,13 +227,7 @@ void Erwin::update() {
 
 void Erwin::neutralLogic() {
   float old_x = position.x;
-  goalLogic();
 
-  has_moved = old_x != position.x;
-  animationLogic();
-}
-
-void Erwin::goalLogic() {
   switch (ai_goal) {
     case ErwinGoals::IDLE: {
       moving_x = 0;
@@ -198,7 +242,18 @@ void Erwin::goalLogic() {
       followPlayer();
       break;
     }
+    case ErwinGoals::TARGETING: {
+      targetingLogic();
+      break;
+    }
+    case ErwinGoals::RETREATING: {
+      retreatingLogic();
+      break;
+    }
   }
+
+  has_moved = old_x != position.x;
+  animationLogic();
 }
 
 void Erwin::lookAtPlayer() {
@@ -226,6 +281,57 @@ void Erwin::followPlayer() {
   if (distance <= preferred_plr_distance / 2) {
     ai_goal = ErwinGoals::IDLE;
     moving_x = 0;
+  }
+}
+
+void Erwin::targetingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    moving_x = LEFT;
+  }
+  else {
+    moving_x = RIGHT; 
+  }
+
+  float distance = distanceTo(target);
+  if (distance > preferred_distance) {
+    movement();
+    return;
+  }
+
+  attackMP();
+  setGoal(ErwinGoals::RETREATING, 0.50);
+}
+
+void Erwin::retreatingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    moving_x = RIGHT;
+  }
+  else {
+    moving_x = LEFT; 
+  }
+
+  movement();
+
+  retreat_clock += Game::deltaTime() / retreat_time;
+  if (retreat_clock >= 1.0) {
+    ai_goal = ErwinGoals::TARGETING;
+    retreat_clock = 0.0;
   }
 }
 

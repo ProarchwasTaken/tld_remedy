@@ -11,7 +11,9 @@
 enum class ErwinGoals {
   IDLE = 0,
   LOOK_AT_PLR = 1,
-  FOLLOW_PLR = 2
+  FOLLOW_PLR = 2,
+  TARGETING = 3,
+  RETREATING = 4,
 };
 
 
@@ -23,18 +25,21 @@ public:
   void setEnabled(bool value) override;
 
   void behavior() override;
+  void rootBehavior();
+  void chooseTarget();
+
   void attackMP();
   void attackHP();
 
-  void setGoal(ErwinGoals goal);
   void setGoal(ErwinGoals goal, float chance);
 
   void update() override;
   void neutralLogic();
 
-  void goalLogic();
   void lookAtPlayer();
   void followPlayer();
+  void targetingLogic();
+  void retreatingLogic();
 
   void movement();
   void animationLogic();
@@ -54,6 +59,13 @@ private:
   int moving_x = 0;
   bool has_moved = false;
 
+  Mary *player;
+  float preferred_plr_distance = 128;
+  float preferred_distance = 24;
+
+  float retreat_time = 0.5;
+  float retreat_clock = 0.0;
+
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};
 
@@ -72,7 +84,4 @@ private:
     {{15, 16}, 0.0},
     14
   };
-
-  Mary *player;
-  float preferred_plr_distance = 128;
 };
