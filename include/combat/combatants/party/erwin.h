@@ -9,14 +9,19 @@
 
 
 enum class ErwinGoals {
-  IDLE,
-  LOOK_AT_PLR,
-  FOLLOW_PLR,
-  TARGETING,
-  RETREATING
+  IDLE = 0,
+  LOOK_AT_PLR = 1,
+  FOLLOW_PLR = 2,
+  TARGETING = 3,
+  RETREATING = 4
 };
 
 
+/* Erwin is a Companion Combatant of the "Maverick" archetype. Their
+ * behavior is designed to make sure the player doesn't get overwhelmed.
+ * Mainly by going out of their way to draw enemy aggro if too many are
+ * targeting the player. As such, they tend to be a lot more 
+ * self-sufficent than other companions.*/
 class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);
@@ -25,7 +30,15 @@ public:
   void setEnabled(bool value) override;
 
   void behavior() override;
+
+  /* This is considered the start point of the Erwin's behavior tree.
+   * The function is meant to be ran while the companion is idle.*/
   void rootBehavior();
+
+  /* Meant to be called while Erwin is targeting an enemy. The function
+   * is designed to make the companion seem more "alive", by making it
+   * stop or retreat at random intervals.*/
+  void targetingBehavior();
   void chooseTarget();
 
   void decideAttack();
@@ -66,7 +79,8 @@ private:
 
   Mary *player;
   float preferred_plr_distance = 128;
-  float preferred_distance = 24;
+  float attack_distance = 24;
+  float contest_distance = 96;
 
   float retreat_time = 0.5;
   float retreat_clock = 0.0;

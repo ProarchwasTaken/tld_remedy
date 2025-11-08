@@ -82,13 +82,8 @@ void Erwin::behavior() {
   if (ai_goal == ErwinGoals::IDLE) {
     rootBehavior();
   }
-
-  // Remove this later!
-  if (state == NEUTRAL && IsKeyPressed(KEY_T)) {
-    attackMP();
-  }
-  else if (state == NEUTRAL && IsKeyPressed(KEY_Y)) {
-    attackHP();
+  else if (ai_goal == ErwinGoals::TARGETING){
+    targetingBehavior();
   }
 }
 
@@ -109,6 +104,45 @@ void Erwin::rootBehavior() {
   if (tick_clock >= 1.0) {
     setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
     tick_clock = 0.0;
+  }
+}
+
+void Erwin::targetingBehavior() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  if (waiting) {
+    return;
+  }
+
+  tick_clock += Game::deltaTime();
+  if (tick_clock < 1.0) {
+    return;
+  }
+
+  tick_clock = 0.0;
+
+  float distance = distanceTo(target);
+  if (distance > contest_distance) {
+    return;
+  }
+
+  setGoal(ErwinGoals::RETREATING, 0.40);
+  if (ai_goal == ErwinGoals::RETREATING) {
+    PLOGI << "Deciding to retreat from target.";
+    uniform_real_distribution<float> range(0.10, 0.40);
+    retreat_time = range(Game::RNG);
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+  if (percentage <= 0.40) {
+    wait(0.10, 0.25);
   }
 }
 
@@ -305,12 +339,6 @@ void Erwin::followPlayer() {
 
 void Erwin::targetingLogic() {
   assert(target != NULL);
-  if (target->state == DEAD) {
-    ai_goal = ErwinGoals::IDLE;
-    target = NULL;
-    return;
-  }
-
   float difference = position.x - target->position.x;
   if (difference > 0) {
     direction = LEFT;
@@ -327,13 +355,13 @@ void Erwin::targetingLogic() {
   }
 
   float distance = distanceTo(target);
-  if (distance > preferred_distance) {
+  if (distance > attack_distance) {
     movement();
     return;
   }
 
   decideAttack();
-  setGoal(ErwinGoals::RETREATING, 0.5);
+  setGoal(ErwinGoals::RETREATING, 0.25);
 
   if (ai_goal == ErwinGoals::RETREATING) {
     PLOGI << "Retreating from target.";
