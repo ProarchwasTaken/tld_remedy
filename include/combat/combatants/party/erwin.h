@@ -9,11 +9,11 @@
 
 
 enum class ErwinGoals {
-  IDLE = 0,
-  LOOK_AT_PLR = 1,
-  FOLLOW_PLR = 2,
-  TARGETING = 3,
-  RETREATING = 4,
+  IDLE,
+  LOOK_AT_PLR,
+  FOLLOW_PLR,
+  TARGETING,
+  RETREATING
 };
 
 
@@ -42,6 +42,10 @@ public:
   void targetingLogic();
   void retreatingLogic();
 
+  void wait(float time);
+  void wait(float min, float max);
+  void waitTimer();
+
   void movement();
   void animationLogic();
 
@@ -66,6 +70,10 @@ private:
 
   float retreat_time = 0.5;
   float retreat_clock = 0.0;
+
+  bool waiting = false;
+  float wait_time = 0.20;
+  float wait_clock = 0.0;
 
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};

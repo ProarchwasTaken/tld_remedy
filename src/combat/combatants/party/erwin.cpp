@@ -313,10 +313,17 @@ void Erwin::targetingLogic() {
 
   float difference = position.x - target->position.x;
   if (difference > 0) {
+    direction = LEFT;
     moving_x = LEFT;
   }
   else {
+    direction = RIGHT;
     moving_x = RIGHT; 
+  }
+
+  if (waiting) {
+    waitTimer();
+    return;
   }
 
   float distance = distanceTo(target);
@@ -364,8 +371,37 @@ void Erwin::retreatingLogic() {
     ai_goal = ErwinGoals::IDLE;
     target = NULL;
   }
+  else {
+    wait(0.10, 0.50);
+  }
 
   retreat_clock = 0.0;
+}
+
+void Erwin::wait(float time) {
+  wait_time = time;
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Waiting for: " << wait_time << " seconds.";
+}
+
+void Erwin::wait(float min, float max) {
+  uniform_real_distribution<float> range(min, max);
+
+  wait_time = range(Game::RNG);
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Waiting for: " << wait_time << " seconds.";
+}
+
+void Erwin::waitTimer() {
+  wait_clock += Game::deltaTime() / wait_time;
+
+  if (wait_clock >= 1.0) {
+    PLOGI << "Erwin is done waiting.";
+    wait_clock = 0.0;
+    waiting = false;
+  }
 }
 
 void Erwin::movement() {
