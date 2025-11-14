@@ -26,6 +26,7 @@
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
+#include "combat/combatants/enemy/servant.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -73,7 +74,7 @@ void CombatScene::initializeCombatants() {
 
   item_hud.assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop2();
+  EnemyTroop troop = DBTroop4();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
@@ -131,6 +132,9 @@ unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
   switch (id) {
     case EnemyID::DUMMY: {
       return make_unique<Dummy>(position, direction);
+    }
+    case EnemyID::SERVANT: {
+      return make_unique<Servant>(position, direction);
     }
     default: {
       return nullptr;
