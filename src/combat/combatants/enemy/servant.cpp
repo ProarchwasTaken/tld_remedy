@@ -1,13 +1,17 @@
 #include <cassert>
 #include <cstddef>
+#include <memory>
 #include <raylib.h>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
 #include "base/combat_action.h"
+#include "data/rect_ex.h"
+#include "utils/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/enemy/servant.h"
 
+using std::unique_ptr, std::make_unique;
 SpriteAtlas Servant::atlas("combatants", "servant_combatant");
 
 
@@ -39,6 +43,25 @@ Servant::~Servant() {
   atlas.release();
 }
 
+void Servant::behavior() {
+  Combatant::behavior();
+
+  // Remove this later!
+  if (state == NEUTRAL && IsKeyPressed(KEY_SLASH)) {
+    attackMP();
+  }
+}
+
+void Servant::attackMP() {
+  RectEx hitbox;
+  hitbox.scale = {32, 12};
+  hitbox.offset = {-16 + (16.0f * direction), -52};
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, atlas, hitbox, atk_mp_set);
+  performAction(action);
+}
+
 void Servant::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
@@ -56,6 +79,9 @@ void Servant::update() {
     }
     case CombatantState::DEAD: {
       deathLogic();
+
+      SpriteAnimation::play(animation, &anim_dead, false);
+      sprite = &atlas.sprites[*animation->current];
       break;
     }
   }
