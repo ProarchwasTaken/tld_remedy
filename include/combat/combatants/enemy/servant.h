@@ -14,6 +14,7 @@ public:
 
   void behavior() override;
   void attackMP();
+  void attackHP();
 
   void update() override;
 
@@ -29,5 +30,11 @@ private:
     {{7, 8}, 0.05},
     {{10}, 0.05},
     9
+  };
+
+  AtkAnimSet atk_hp_set = {
+    {{11}, 0.0},
+    {{13, 14}, 0.0},
+    12
   };
 };

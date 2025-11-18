@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
@@ -7,6 +8,7 @@
 #include "base/enemy.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
+#include "data/damage.h"
 #include "utils/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/enemy/servant.h"
@@ -50,6 +52,9 @@ void Servant::behavior() {
   if (state == NEUTRAL && IsKeyPressed(KEY_SLASH)) {
     attackMP();
   }
+  if (state == NEUTRAL && IsKeyPressed(KEY_PERIOD)) {
+    attackHP();
+  }
 }
 
 void Servant::attackMP() {
@@ -59,6 +64,26 @@ void Servant::attackMP() {
 
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, atlas, hitbox, atk_mp_set);
+  performAction(action);
+}
+
+void Servant::attackHP() {
+  RectEx hitbox;
+  hitbox.scale = {38, 24};
+  hitbox.offset = {-19 + (19.0f * direction), -52};
+
+  DamageData data;
+  data.damage_type = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+  data.knockback = 20.0;
+  data.hit_stop = 0.2;
+  data.assailant = this;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.30, 0.05,
+                               0.25, hitbox, data, atlas, atk_hp_set);
   performAction(action);
 }
 
