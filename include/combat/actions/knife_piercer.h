@@ -14,6 +14,8 @@ public:
   KnifePiercer(Mary *user);
   ~KnifePiercer();
 
+  void sendWarning();
+
   void windUp() override;
   void action() override;
 

@@ -149,6 +149,7 @@ enum class CombatantEVT {
   TOOK_DAMAGE,
   MORALE_GAINED,
   EFFECT_GAINED,
-  EFFECT_LOST
+  EFFECT_LOST,
+  WARNING
 };
 

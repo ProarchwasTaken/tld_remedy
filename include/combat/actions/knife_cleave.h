@@ -16,6 +16,7 @@ public:
   ~KnifeCleave();
 
   bool cancelCheck();
+  void sendWarning();
   void updateAnimFrameDuration();
 
   void windUp() override;
