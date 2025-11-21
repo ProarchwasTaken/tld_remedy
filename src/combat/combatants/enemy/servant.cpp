@@ -1,19 +1,26 @@
 #include <algorithm>
+#include <random>
 #include <cassert>
 #include <cstddef>
 #include <memory>
+#include <set>
+#include <utility>
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
+#include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "utils/animation.h"
+#include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/enemy/servant.h"
+#include <plog/Log.h>
 
-using std::unique_ptr, std::make_unique;
+using std::unique_ptr, std::make_unique, std::uniform_real_distribution;
 SpriteAtlas Servant::atlas("combatants", "servant_combatant");
 
 
@@ -48,12 +55,98 @@ Servant::~Servant() {
 void Servant::behavior() {
   Combatant::behavior();
 
+  if (ai_goal == ServantGoals::IDLE) {
+    rootBehavior();
+  }
+
   // Remove this later!
   if (state == NEUTRAL && IsKeyPressed(KEY_SLASH)) {
     attackMP();
   }
   if (state == NEUTRAL && IsKeyPressed(KEY_PERIOD)) {
     attackHP();
+  }
+}
+
+void Servant::rootBehavior() {
+  bool party_alive = PartyMember::memberCount() != 0;
+  if (party_alive) {
+    chooseTarget();
+    return;
+  }
+}
+
+void Servant::chooseTarget() {
+  int count = PartyMember::memberCount();
+  assert(count != 0);
+
+  std::set<std::pair<float, Combatant*>> party_members;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team != CombatantTeam::PARTY) {
+      continue;
+    }
+
+    if (combatant->state != CombatantState::DEAD) {
+      float distance = distanceTo(combatant);
+      party_members.emplace(std::make_pair(distance, combatant));
+    }
+  }
+
+  if (party_members.empty()) {
+    return;
+  }
+
+  if (party_members.size() == 1) {
+    target = party_members.begin()->second;
+    ai_goal = ServantGoals::TARGETING;
+
+    PLOGI << "Servant [ID: " << entity_id << "] targeting the only "
+      "PartyMember remaining.";
+  }
+  else {
+    auto closest = std::min_element(party_members.begin(), 
+                                    party_members.end(),
+                                    Comparison::combatantDistance);
+
+    target = closest->second;
+    ai_goal = ServantGoals::TARGETING;
+
+    PLOGI << "Servant [ID: " << entity_id << "] is now targeting: '" <<
+    target->name << "' [ID: " << target->entity_id << "]";
+  }
+}
+
+void Servant::setGoal(ServantGoals goal, float chance) {
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  if (percentage <= chance) {
+    ai_goal = goal;
+  }
+}
+
+void Servant::decideAttack() {
+  assert(target->team == CombatantTeam::PARTY);
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  PartyMember *party_member = static_cast<PartyMember*>(target);
+  float chance = 0.10;
+
+  if (party_member->critical_life) {
+    chance += 0.20;
+  }
+
+  if (party_member->demoralized) {
+    chance += 0.40;
+  }
+
+  if (percentage <= chance) {
+    attackHP();
+  }
+  else {
+    attackMP();
   }
 }
 
@@ -90,7 +183,7 @@ void Servant::attackHP() {
 void Servant::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
-      sprite = &atlas.sprites[0];
+      neutralLogic();
       break;
     }
     case CombatantState::ACTION: {
@@ -114,6 +207,106 @@ void Servant::update() {
   statusLogic();
 }
 
+void Servant::neutralLogic() {
+  float old_x = position.x;
+
+  switch (ai_goal) {
+    case ServantGoals::IDLE: {
+      moving_x = 0;
+      break;
+    }
+    case ServantGoals::TARGETING: {
+      targetingLogic();
+      break;
+    }
+  }
+
+  has_moved = old_x != position.x;
+  if (has_moved) {
+    useMovingAnimation();
+    rectExCorrection(bounding_box, hurtbox);
+  }
+  else {
+    sprite = &atlas.sprites[0]; 
+  }
+}
+
+void Servant::targetingLogic() {
+  assert(target != NULL);
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    direction = LEFT;
+    moving_x = LEFT;
+  }
+  else {
+    direction = RIGHT;
+    moving_x = RIGHT; 
+  }
+
+  if (waiting) {
+    waitTimer();
+    return;
+  }
+
+  float distance = distanceTo(target);
+  if (distance > attack_distance) {
+    movement();
+    return;
+  }
+
+  decideAttack();
+}
+
+void Servant::wait(float time) {
+  wait_time = time;
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << wait_time 
+    << " seconds.";
+}
+
+void Servant::wait(float min, float max) {
+  uniform_real_distribution<float> range(min, max);
+
+  wait_time = range(Game::RNG);
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << wait_time 
+    << " seconds.";
+}
+
+void Servant::waitTimer() {
+  wait_clock += Game::deltaTime() / wait_time;
+
+  if (wait_clock >= 1.0) {
+    PLOGI << "Servant [ID: " << entity_id << "] is done waiting.";
+    wait_clock = 0.0;
+    waiting = false;
+  }
+}
+
+void Servant::movement() {
+  if (moving_x == 0) {
+    return;
+  }
+
+  direction = static_cast<Direction>(moving_x);
+  float speed = default_speed * speed_multiplier;
+  float magnitude = speed * direction;
+
+  position.x += magnitude * Game::deltaTime();
+}
+
+void Servant::useMovingAnimation() {
+  float difference = 1.0 - speed_multiplier;
+  float percentage = 1.0 + difference;
+
+  anim_move.frame_duration = anim_move_speed * percentage;
+  SpriteAnimation::play(animation, &anim_move, true);
+  sprite = &atlas.sprites[*animation->current];
+}
+
 Rectangle *Servant::getStunSprite() {
   if (damage_type == DamageType::LIFE) {
     return &atlas.sprites[5];
@@ -134,6 +327,11 @@ void Servant::draw() {
 
 void Servant::drawDebug() {
   Combatant::drawDebug();
+
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
+  const char *txt_goal = TextFormat("%i", static_cast<int>(ai_goal));
+  DrawTextEx(*font, txt_goal, position, size, -3, RED);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();
