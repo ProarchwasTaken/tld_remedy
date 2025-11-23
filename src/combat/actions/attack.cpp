@@ -71,15 +71,14 @@ void Attack::sendWarning(bool punishable) {
   }
 
   bool dead = user->target->state == CombatantState::DEAD;
-  Rectangle *target_hurtbox = &user->target->hurtbox.rect;
-  if (dead || CheckCollisionRecs(hitbox.rect, *target_hurtbox)) {
+  if (!dead) {
     Combatant *target = user->target;
 
     PLOGD << "Sending warning event for: '" << target->name << "' [ID: "
       << target->entity_id << "]";
     CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
-                                        user->target, type, wind_time,
-                                        act_time, punishable);
+                                        user->target, type, hitbox.rect, 
+                                        wind_time, act_time, punishable);
   }
 }
 

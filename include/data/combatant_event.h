@@ -1,4 +1,5 @@
 #pragma once
+#include <raylib.h>
 #include "enums.h"
 #include "base/entity.h"
 #include "base/combatant.h"
@@ -36,6 +37,7 @@ struct EffectLostCBT : CombatantEvent {
 struct WarningCBT : CombatantEvent {
   Combatant *target;
   ActionType action_type;
+  Rectangle hitbox;
 
   float time_until = 0.0;
   float active_time = 0.0;
