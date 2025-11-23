@@ -54,7 +54,7 @@ public:
   ~Combatant();
   Color spriteTint() {return tint;}
 
-  float distanceTo(Combatant *combatant);
+  float distanceTo(Entity *entity);
 
   virtual void behavior();
   void eventHandling(EventPool<CombatantEvent> *event_pool);

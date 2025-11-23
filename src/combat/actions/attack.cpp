@@ -78,7 +78,8 @@ void Attack::sendWarning(bool punishable) {
       << target->entity_id << "]";
     CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
                                         user->target, type, hitbox.rect, 
-                                        wind_time, act_time, punishable);
+                                        wind_time, act_time, user, 
+                                        punishable);
   }
 }
 

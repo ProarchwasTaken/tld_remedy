@@ -81,7 +81,7 @@ void KnifeCleave::sendWarning() {
       << target->entity_id << "]";
     CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
                                         user->target, type, hitbox.rect,
-                                        wind_time, act_time);
+                                        wind_time, act_time, user);
   }
 }
 

@@ -1,10 +1,13 @@
 #pragma once
+#include <memory>
 #include <raylib.h>
 #include "enums.h"
 #include "base/enemy.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 
 
 enum class ServantGoals {
@@ -20,6 +23,9 @@ public:
   ~Servant();
 
   void behavior() override;
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
+  void warningHandling(WarningCBT *event);
+
   void rootBehavior();
   void targetingBehavior();
   void chooseTarget();
@@ -81,4 +87,6 @@ private:
     {{13, 14}, 0.0},
     12
   };
+
+  GSSpriteSet gs_set = {15, 17, 16};
 };

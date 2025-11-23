@@ -42,5 +42,6 @@ struct WarningCBT : CombatantEvent {
   float time_until = 0.0;
   float active_time = 0.0;
 
+  Combatant *assailant = NULL;
   bool punishable = false;
 };

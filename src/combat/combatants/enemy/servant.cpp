@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <random>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <memory>
 #include <set>
@@ -13,6 +14,7 @@
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
+#include "data/combatant_event.h"
 #include "data/damage.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
@@ -69,6 +71,18 @@ void Servant::behavior() {
   if (state == NEUTRAL && IsKeyPressed(KEY_PERIOD)) {
     attackHP();
   }
+}
+
+void Servant::evaluateEvent(std::unique_ptr<CombatantEvent> &event) {
+  Enemy::evaluateEvent(event);
+
+  if (event->event_type == CombatantEVT::WARNING) {
+    WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
+    warningHandling(warn_event);
+  }
+}
+
+void Servant::warningHandling(WarningCBT *event) {
 }
 
 void Servant::rootBehavior() {
