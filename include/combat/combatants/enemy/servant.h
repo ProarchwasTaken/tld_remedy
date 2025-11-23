@@ -10,6 +10,7 @@
 enum class ServantGoals {
   IDLE = 0,
   TARGETING = 1,
+  RETREATING = 2
 };
 
 
@@ -20,6 +21,7 @@ public:
 
   void behavior() override;
   void rootBehavior();
+  void targetingBehavior();
   void chooseTarget();
 
   void setGoal(ServantGoals, float chance);
@@ -31,6 +33,7 @@ public:
   void update() override;
   void neutralLogic();
   void targetingLogic();
+  void retreatingLogic();
 
   void wait(float time);
   void wait(float min, float max);
@@ -46,12 +49,17 @@ public:
   static SpriteAtlas atlas;
 
   ServantGoals ai_goal = ServantGoals::IDLE;
+  float tick_clock = 0.0;
 private:
   const float default_speed = 64;
   int moving_x = 0;
   bool has_moved = false;
 
-  float attack_distance = 32;
+  float attack_distance = 24;
+  float contest_distance = 128;
+
+  float retreat_time = 0.5;
+  float retreat_clock = 0.0;
 
   bool waiting = false;
   float wait_time = 0.20;

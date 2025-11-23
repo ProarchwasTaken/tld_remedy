@@ -58,6 +58,9 @@ void Servant::behavior() {
   if (ai_goal == ServantGoals::IDLE) {
     rootBehavior();
   }
+  else if (ai_goal == ServantGoals::TARGETING) {
+    targetingBehavior();
+  }
 
   // Remove this later!
   if (state == NEUTRAL && IsKeyPressed(KEY_SLASH)) {
@@ -72,7 +75,45 @@ void Servant::rootBehavior() {
   bool party_alive = PartyMember::memberCount() != 0;
   if (party_alive) {
     chooseTarget();
+  }
+}
+
+void Servant::targetingBehavior() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = ServantGoals::IDLE;
+    target = NULL;
     return;
+  }
+
+  if (waiting) {
+    return;
+  }
+
+  tick_clock += Game::deltaTime();
+  if (tick_clock < 1.0) {
+    return;
+  }
+
+  tick_clock = 0.0;
+
+  float distance = distanceTo(target);
+  if (distance > contest_distance) {
+    return;
+  }
+
+  setGoal(ServantGoals::RETREATING, 0.40);
+  if (ai_goal == ServantGoals::RETREATING) {
+    PLOGI << "Deciding to retreat from target.";
+    uniform_real_distribution<float> range(0.10, 0.40);
+    retreat_time = range(Game::RNG);
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+  if (percentage <= 0.40) {
+    wait(0.10, 0.25);
   }
 }
 
@@ -219,6 +260,10 @@ void Servant::neutralLogic() {
       targetingLogic();
       break;
     }
+    case ServantGoals::RETREATING: {
+      retreatingLogic();
+      break;
+    }
   }
 
   has_moved = old_x != position.x;
@@ -256,6 +301,49 @@ void Servant::targetingLogic() {
   }
 
   decideAttack();
+  setGoal(ServantGoals::RETREATING, 0.45);
+
+  if (ai_goal == ServantGoals::RETREATING) {
+    PLOGI << "Retreating from target.";
+    uniform_real_distribution<float> range(0.10, 0.75);
+    retreat_time = range(Game::RNG);
+  }
+}
+
+void Servant::retreatingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = ServantGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    moving_x = RIGHT;
+  }
+  else {
+    moving_x = LEFT; 
+  }
+
+  movement();
+
+  retreat_clock += Game::deltaTime() / retreat_time;
+  if (retreat_clock < 1.0) {
+    return;
+  }
+
+  setGoal(ServantGoals::TARGETING, 0.75);
+  if (ai_goal != ServantGoals::TARGETING) {
+    PLOGI << "Returning to idle.";
+    ai_goal = ServantGoals::IDLE;
+    target = NULL;
+  }
+  else {
+    wait(0.10, 0.50);  
+  }
+
+  retreat_clock = 0.0;
 }
 
 void Servant::wait(float time) {
