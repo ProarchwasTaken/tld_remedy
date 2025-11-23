@@ -19,6 +19,8 @@
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
+#include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 #include "combat/combatants/enemy/servant.h"
 #include <plog/Log.h>
 
@@ -63,32 +65,91 @@ void Servant::behavior() {
   else if (ai_goal == ServantGoals::TARGETING) {
     targetingBehavior();
   }
-
-  // Remove this later!
-  if (state == NEUTRAL && IsKeyPressed(KEY_SLASH)) {
-    attackMP();
-  }
-  if (state == NEUTRAL && IsKeyPressed(KEY_PERIOD)) {
-    attackHP();
-  }
 }
 
 void Servant::evaluateEvent(std::unique_ptr<CombatantEvent> &event) {
   Enemy::evaluateEvent(event);
 
-  if (event->event_type == CombatantEVT::WARNING) {
+  bool from_itself = event->sender == this;
+
+  if (!from_itself && event->event_type == CombatantEVT::WARNING) {
     WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
     warningHandling(warn_event);
   }
 }
 
 void Servant::warningHandling(WarningCBT *event) {
+  assert(event->sender != this);
+  if (ai_goal == ServantGoals::DODGING) {
+    return;
+  }
+  
+  bool from_target = false;
+  if (target != NULL) {
+    float distance = distanceTo(target);
+    bool contested = distance <= contest_distance;
+
+    from_target = contested && target == event->assailant;
+  }
+
+  bool in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
+
+  if (!from_target && !in_range) {
+    return;
+  }
+
+  PLOGI << "Servant [ID: " << entity_id << "] Acknowledging Warning sent"
+    << " by Entity [ID: " << event->sender->entity_id << "]";
+
+
+  float dodge_chance = chanceCalculation(event, from_target, in_range);
+  PLOGI << "Chance to dodge attack: " << dodge_chance;
+
+  setGoal(ServantGoals::DODGING, dodge_chance);
+  if (ai_goal != ServantGoals::DODGING) {
+    return;
+  }
+
+  PLOGI << "Servant [ID: " << entity_id << "] has decided to dodge the" 
+    << " attack";
+  dodge_time = event->time_until * 0.90;
+  dodge_clock = 0.0;
+
+  if (target == NULL) {
+    chooseTarget();
+  }
+}
+
+float Servant::chanceCalculation(WarningCBT *event, bool from_target,
+                                 bool in_range)
+{
+  float range = event->hitbox.width;
+  float distance = distanceTo(event->sender);
+
+  assert(range != 0);
+  float range_bonus = std::sinf(distance / range) * 0.5;
+  PLOGD << "Range Bonus: " << range_bonus;
+
+  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
+  float time_bonus = event->time_until * life_attack;
+  PLOGD << "Time Bonus: " << time_bonus;
+
+  float multiplier = 1.0 - (0.5 * from_target);
+  PLOGD << "Multiplier: " << multiplier;
+
+  return (time_bonus + range_bonus) * multiplier;
 }
 
 void Servant::rootBehavior() {
   bool party_alive = PartyMember::memberCount() != 0;
   if (party_alive) {
     chooseTarget();
+  }
+
+  if (target != NULL) {
+    PLOGI << "Servant [ID: " << entity_id << "] is now targeting: '" <<
+    target->name << "' [ID: " << target->entity_id << "]";
+    ai_goal = ServantGoals::TARGETING;
   }
 }
 
@@ -154,10 +215,6 @@ void Servant::chooseTarget() {
 
   if (party_members.size() == 1) {
     target = party_members.begin()->second;
-    ai_goal = ServantGoals::TARGETING;
-
-    PLOGI << "Servant [ID: " << entity_id << "] targeting the only "
-      "PartyMember remaining.";
   }
   else {
     auto closest = std::min_element(party_members.begin(), 
@@ -165,10 +222,6 @@ void Servant::chooseTarget() {
                                     Comparison::combatantDistance);
 
     target = closest->second;
-    ai_goal = ServantGoals::TARGETING;
-
-    PLOGI << "Servant [ID: " << entity_id << "] is now targeting: '" <<
-    target->name << "' [ID: " << target->entity_id << "]";
   }
 }
 
@@ -235,6 +288,24 @@ void Servant::attackHP() {
   performAction(action);
 }
 
+void Servant::ghoststep() {
+  assert(target != NULL);
+
+  int direction_x;
+
+  float difference = position.x - target->position.x;
+  if (difference < 0) {
+    direction_x = LEFT;
+  }
+  else {
+    direction_x = RIGHT;
+  }
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
+  performAction(action);
+}
+
 void Servant::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
@@ -276,6 +347,10 @@ void Servant::neutralLogic() {
     }
     case ServantGoals::RETREATING: {
       retreatingLogic();
+      break;
+    }
+    case ServantGoals::DODGING: {
+      dodgingLogic();
       break;
     }
   }
@@ -358,6 +433,49 @@ void Servant::retreatingLogic() {
   }
 
   retreat_clock = 0.0;
+}
+
+void Servant::dodgingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    PLOGI << "Aborting dodging goal.";
+    ai_goal = ServantGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+
+  dodge_clock += Game::deltaTime() / dodge_time;
+
+  if (dodge_clock < 0.75) {
+    return;
+  }
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    direction = LEFT;
+  }
+  else {
+    direction = RIGHT;
+  }
+
+  if (dodge_clock < 1.0) {
+    return;
+  }
+
+  ghoststep();
+
+  setGoal(ServantGoals::TARGETING, 0.80);
+  if (ai_goal != ServantGoals::TARGETING) {
+    PLOGI << "Returning to idle.";
+    ai_goal = ServantGoals::IDLE;
+    target = NULL;
+  }
+  else {
+    wait(0.25, 0.50);
+  }
+
+  dodge_clock = 0.0;
 }
 
 void Servant::wait(float time) {

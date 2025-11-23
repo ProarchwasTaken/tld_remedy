@@ -31,7 +31,11 @@ LifeHud::LifeHud(Vector2 position) {
 
 LifeHud::~LifeHud() {
   atlas.release();
-  bust_atlas.release();
+
+  if (bust_atlas.users() != 0) {
+    bust_atlas.release();
+  }
+
   status_atlas.release();
 }
 

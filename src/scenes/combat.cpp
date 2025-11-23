@@ -70,7 +70,10 @@ CombatScene::~CombatScene() {
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
   initializePlayer();
-  initializeCompanion();
+
+  if (session->companion.life != 0) {
+    initializeCompanion();
+  }
 
   item_hud.assign(player, companion, session);
 

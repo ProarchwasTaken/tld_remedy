@@ -13,7 +13,8 @@
 enum class ServantGoals {
   IDLE = 0,
   TARGETING = 1,
-  RETREATING = 2
+  RETREATING = 2,
+  DODGING = 3
 };
 
 
@@ -25,6 +26,8 @@ public:
   void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void warningHandling(WarningCBT *event);
+  float chanceCalculation(WarningCBT *event, bool from_target, 
+                          bool in_range);
 
   void rootBehavior();
   void targetingBehavior();
@@ -35,11 +38,13 @@ public:
   void decideAttack();
   void attackMP();
   void attackHP();
+  void ghoststep();
 
   void update() override;
   void neutralLogic();
   void targetingLogic();
   void retreatingLogic();
+  void dodgingLogic();
 
   void wait(float time);
   void wait(float min, float max);
@@ -66,6 +71,9 @@ private:
 
   float retreat_time = 0.5;
   float retreat_clock = 0.0;
+
+  float dodge_time = 0.0;
+  float dodge_clock = 0.0;
 
   bool waiting = false;
   float wait_time = 0.20;
