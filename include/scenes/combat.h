@@ -64,11 +64,11 @@ private:
 
   bool game_over = false;
 
-  Mary *player;
+  Mary *player = NULL;
   LifeHud plr_hud = LifeHud({34, 215});
   PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
 
-  PartyMember *companion;
+  PartyMember *companion = NULL;
   LifeHud com_hud = LifeHud({154, 215});
 
   ItemCmdHud item_hud = ItemCmdHud({350, 222});

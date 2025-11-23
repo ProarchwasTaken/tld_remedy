@@ -464,7 +464,10 @@ void CombatScene::drawDebugInfo() {
   int text_size = font->baseSize;
   
   drawPartyStats(player, {6, 4}, font, text_size);
-  drawPartyStats(companion, {128, 4}, font, text_size);
+  if (companion != NULL) {
+    drawPartyStats(companion, {128, 4}, font, text_size);
+  }
+
   drawDebugCombo(font, text_size);
 }
 
