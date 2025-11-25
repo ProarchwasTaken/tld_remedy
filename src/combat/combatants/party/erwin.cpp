@@ -107,6 +107,14 @@ void Erwin::warningHandling(WarningCBT *event) {
     return;
   }
 
+  if (team == event->assailant->team) {
+    return;
+  }
+
+  if (critical_life) {
+    return;
+  }
+
   bool from_target = false;
   if (target != NULL) {
     float distance = distanceTo(target);
@@ -308,6 +316,8 @@ void Erwin::attackHP() {
 }
 
 void Erwin::ghoststep(int direction_x) {
+  increaseExhaustion(5.5);
+
   unique_ptr<CombatAction> action;
   action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
   performAction(action);

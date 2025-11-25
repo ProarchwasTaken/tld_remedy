@@ -48,7 +48,7 @@ struct DBTroop4 : EnemyTroop {
   DBTroop4() {
     id = TroopID::DB_TROOP4;
     enemies = {
-      {EnemyID::SERVANT, {32, 152}, LEFT}
+      {EnemyID::SERVANT, {32, 152}, LEFT},
     };
   }
 };

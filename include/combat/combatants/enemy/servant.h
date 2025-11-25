@@ -4,6 +4,7 @@
 #include "enums.h"
 #include "base/enemy.h"
 #include "data/animation.h"
+#include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -15,6 +16,34 @@ enum class ServantGoals {
   TARGETING = 1,
   RETREATING = 2,
   DODGING = 3
+};
+
+
+struct ServantAI : AIBehavior {
+  ServantAI() {
+    ct_retreat_chance = 0.40;
+    ct_min_retreat = 0.10;
+    ct_max_retreat = 0.40;
+
+    ct_wait_chance = 0.40;
+    ct_min_wait = 0.10;
+    ct_max_wait = 0.25;
+
+    tg_retreat_chance = 0.45;
+    tg_min_retreat = 0.10;
+    tg_max_retreat = 0.75;
+
+    rt_target_chance = 0.75;
+    rt_min_wait = 0.10;
+    rt_max_wait = 0.50;
+
+    d_target_chance = 0.80;
+    d_min_wait = 0.25;
+    d_max_wait = 0.50;
+
+    d_penality = 0.5;
+    d_range_multiplier = 0.5;
+  }
 };
 
 
@@ -57,10 +86,11 @@ public:
   void draw() override;
   void drawDebug() override;
 
-  static SpriteAtlas atlas;
-
   ServantGoals ai_goal = ServantGoals::IDLE;
+  AIBehavior ai_behavior = ServantAI(); 
   float tick_clock = 0.0;
+
+  static SpriteAtlas atlas;
 private:
   const float default_speed = 64;
   int moving_x = 0;

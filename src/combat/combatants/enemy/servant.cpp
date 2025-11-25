@@ -83,6 +83,10 @@ void Servant::warningHandling(WarningCBT *event) {
   if (ai_goal == ServantGoals::DODGING) {
     return;
   }
+
+  if (team == event->assailant->team) {
+    return;
+  }
   
   bool from_target = false;
   if (target != NULL) {
@@ -127,14 +131,16 @@ float Servant::chanceCalculation(WarningCBT *event, bool from_target,
   float distance = distanceTo(event->sender);
 
   assert(range != 0);
-  float range_bonus = std::sinf(distance / range) * 0.5;
+  float range_multiplier = ai_behavior.d_range_multiplier;
+  float range_bonus = std::sinf(distance / range) * range_multiplier;
   PLOGD << "Range Bonus: " << range_bonus;
 
   bool life_attack = event->action_type == ActionType::OFFENSE_HP;
   float time_bonus = event->time_until * life_attack;
   PLOGD << "Time Bonus: " << time_bonus;
 
-  float multiplier = 1.0 - (0.5 * from_target);
+  float penalty = ai_behavior.d_penality;
+  float multiplier = 1.0 - (penalty * from_target);
   PLOGD << "Multiplier: " << multiplier;
 
   return (time_bonus + range_bonus) * multiplier;
@@ -177,18 +183,27 @@ void Servant::targetingBehavior() {
     return;
   }
 
-  setGoal(ServantGoals::RETREATING, 0.40);
+  float retreat_chance = ai_behavior.ct_retreat_chance;
+  setGoal(ServantGoals::RETREATING, retreat_chance);
+
   if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Deciding to retreat from target.";
-    uniform_real_distribution<float> range(0.10, 0.40);
+    float min_retreat = ai_behavior.ct_min_retreat;
+    float max_retreat = ai_behavior.ct_max_retreat;
+
+    uniform_real_distribution<float> range(min_retreat, max_retreat);
     retreat_time = range(Game::RNG);
     return;
   }
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
-  if (percentage <= 0.40) {
-    wait(0.10, 0.25);
+  float wait_chance = ai_behavior.ct_wait_chance;
+
+  if (percentage <= wait_chance) {
+    float min_wait = ai_behavior.ct_min_wait;
+    float max_wait = ai_behavior.ct_max_wait;
+    wait(min_wait, max_wait);
   }
 }
 
@@ -390,11 +405,16 @@ void Servant::targetingLogic() {
   }
 
   decideAttack();
-  setGoal(ServantGoals::RETREATING, 0.45);
+
+  float retreat_chance = ai_behavior.tg_retreat_chance;
+  setGoal(ServantGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Retreating from target.";
-    uniform_real_distribution<float> range(0.10, 0.75);
+    float min_retreat = ai_behavior.tg_min_retreat;
+    float max_retreat = ai_behavior.tg_max_retreat;
+
+    uniform_real_distribution<float> range(min_retreat, max_retreat);
     retreat_time = range(Game::RNG);
   }
 }
@@ -422,14 +442,18 @@ void Servant::retreatingLogic() {
     return;
   }
 
-  setGoal(ServantGoals::TARGETING, 0.75);
+  float target_chance = ai_behavior.rt_target_chance;
+  setGoal(ServantGoals::TARGETING, target_chance);
+
   if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
     ai_goal = ServantGoals::IDLE;
     target = NULL;
   }
   else {
-    wait(0.10, 0.50);  
+    float min_wait = ai_behavior.rt_min_wait;
+    float max_wait = ai_behavior.rt_max_wait;
+    wait(min_wait, max_wait);  
   }
 
   retreat_clock = 0.0;
@@ -464,14 +488,18 @@ void Servant::dodgingLogic() {
 
   ghoststep();
 
-  setGoal(ServantGoals::TARGETING, 0.80);
+  float target_chance = ai_behavior.d_target_chance;
+  setGoal(ServantGoals::TARGETING, target_chance);
+
   if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
     ai_goal = ServantGoals::IDLE;
     target = NULL;
   }
   else {
-    wait(0.25, 0.50);
+    float min_wait = ai_behavior.d_min_wait;
+    float max_wait = ai_behavior.d_max_wait;
+    wait(min_wait, max_wait);
   }
 
   dodge_clock = 0.0;

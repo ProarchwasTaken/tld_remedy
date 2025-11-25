@@ -60,6 +60,7 @@ set(HEADERS
 "include/data/animation.h"
 "include/data/damage.h"
 "include/data/enemy_troops.h"
+"include/data/ai_behavior.h"
 "include/utils/input.h"
 "include/utils/collision.h"
 "include/utils/text.h"
