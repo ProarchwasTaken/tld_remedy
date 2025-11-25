@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <random>
+#include <cmath>
 #include <utility>
 #include <set>
 #include <raylib.h>
@@ -17,10 +18,12 @@
 #include "data/animation.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
+#include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
@@ -87,10 +90,87 @@ void Erwin::behavior() {
   }
 }
 
+void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  PartyMember::evaluateEvent(event);
+  
+  bool from_itself = event->sender == this;
+
+  if (!from_itself && event->event_type == CombatantEVT::WARNING) {
+    WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
+    warningHandling(warn_event);
+  }
+}
+
+void Erwin::warningHandling(WarningCBT *event) {
+  assert(event->sender != this);
+  if (ai_goal == ErwinGoals::DODGING) {
+    return;
+  }
+
+  bool from_target = false;
+  if (target != NULL) {
+    float distance = distanceTo(target);
+    bool contested = distance <= contest_distance;
+
+    from_target = contested && target == event->assailant;
+  }
+
+  bool in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
+
+  if (!from_target && !in_range) {
+    return;
+  }
+  
+  PLOGI << "Acknowledging Warning sent by Entity [ID: " 
+    << event->sender->entity_id << "]";
+
+  float dodge_chance = chanceCalculation(event, from_target, in_range);
+  PLOGI << "Chance to dodge attack: " << dodge_chance;
+
+  setGoal(ErwinGoals::DODGING, dodge_chance);
+  if (ai_goal != ErwinGoals::DODGING) {
+    return;
+  }
+
+  PLOGI << "Decided to dodge the attack.";
+  dodge_time = event->time_until * 0.90;
+  dodge_clock = 0.0;
+
+  if (target == NULL) {
+    chooseTarget();
+  }
+}
+
+float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
+                               bool in_range)
+{
+  float range = event->hitbox.width;
+  float distance = distanceTo(event->sender);
+
+  assert(range != 0);
+  float range_bonus = std::sinf(distance / range) * 0.5;
+  PLOGD << "Range Bonus: " << range_bonus;
+
+  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
+  float time_bonus = event->time_until * life_attack;
+  PLOGD << "Time Bonus: " << time_bonus;
+
+  float multiplier = 1.0 - (0.5 * from_target);
+  PLOGD << "Multiplier: " << multiplier;
+
+  return (time_bonus + range_bonus) * multiplier;
+}
+
 void Erwin::rootBehavior() {
   bool enemies_present = Enemy::memberCount() != 0;
   if (enemies_present && player->target != NULL) {
     chooseTarget();
+  }
+
+  if (target != NULL) {
+    PLOGI << "Now targeting: '" << target->name << "' [ID: " 
+      << target->entity_id << "]";
+    ai_goal = ErwinGoals::TARGETING;
     return;
   }
 
@@ -149,13 +229,9 @@ void Erwin::targetingBehavior() {
 void Erwin::chooseTarget() {
   int count = Enemy::memberCount();
   assert(count != 0);
-  assert(player->target != NULL);
 
-  if (count == 1) {
+  if (count == 1 && player->target != NULL) {
     target = player->target;
-    ai_goal = ErwinGoals::TARGETING;
-    PLOGI << "Targeting the only remaining enemy: '" << target->name << 
-      "' [ID: " << target->entity_id << "]"; 
     return;
   }
 
@@ -180,11 +256,6 @@ void Erwin::chooseTarget() {
     auto closest = std::min_element(enemies.begin(), enemies.end(),
                                     Comparison::combatantDistance);
     target = closest->second;
-    ai_goal = ErwinGoals::TARGETING;
-
-    PLOGI << "Targeting the closest enemy that the player isn't "
-      " targeting : '" << target->name << "' [ID: " << target->entity_id 
-      << "]";
   } 
 }
 
@@ -233,6 +304,12 @@ void Erwin::attackHP() {
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.20, 0.05,
                                0.25, hitbox, data, atlas, atk_hp_set);
+  performAction(action);
+}
+
+void Erwin::ghoststep(int direction_x) {
+  unique_ptr<CombatAction> action;
+  action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
   performAction(action);
 }
 
@@ -301,6 +378,10 @@ void Erwin::neutralLogic() {
     }
     case ErwinGoals::RETREATING: {
       retreatingLogic();
+      break;
+    }
+    case ErwinGoals::DODGING: {
+      dodgingLogic();
       break;
     }
   }
@@ -404,6 +485,51 @@ void Erwin::retreatingLogic() {
   }
 
   retreat_clock = 0.0;
+}
+
+void Erwin::dodgingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    PLOGI << "Aborting dodging goal.";
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  dodge_clock += Game::deltaTime() / dodge_time;
+
+  if (dodge_clock < 0.75) {
+    return;
+  }
+
+  int x_direction;
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    direction = LEFT;
+    x_direction = RIGHT;
+  }
+  else {
+    direction = RIGHT;
+    x_direction = LEFT;
+  }
+
+  if (dodge_clock < 1.0) {
+    return;
+  }
+
+  ghoststep(x_direction);
+
+  setGoal(ErwinGoals::TARGETING, 0.80);
+  if (ai_goal != ErwinGoals::TARGETING) {
+    PLOGI << "Returning to idle.";
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+  }
+  else {
+    wait(0.25, 0.50);
+  }
+
+  dodge_clock = 0.0;
 }
 
 void Erwin::wait(float time) {

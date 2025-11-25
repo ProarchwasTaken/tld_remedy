@@ -1,8 +1,11 @@
 #pragma once
+#include <memory>
 #include <raylib.h>
 #include "base/party_member.h"
+#include "combat/actions/ghost_step.h"
 #include "data/session.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/attack.h"
@@ -13,7 +16,8 @@ enum class ErwinGoals {
   LOOK_AT_PLR = 1,
   FOLLOW_PLR = 2,
   TARGETING = 3,
-  RETREATING = 4
+  RETREATING = 4,
+  DODGING = 5
 };
 
 
@@ -30,6 +34,10 @@ public:
   void setEnabled(bool value) override;
 
   void behavior() override;
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
+  void warningHandling(WarningCBT *event);
+  float chanceCalculation(WarningCBT *event, bool from_target,
+                          bool in_range);
 
   /* This is considered the start point of the Erwin's behavior tree.
    * The function is meant to be ran while the companion is idle.*/
@@ -44,6 +52,7 @@ public:
   void decideAttack();
   void attackMP();
   void attackHP();
+  void ghoststep(int direction_x);
 
   void setGoal(ErwinGoals goal, float chance);
 
@@ -54,6 +63,7 @@ public:
   void followPlayer();
   void targetingLogic();
   void retreatingLogic();
+  void dodgingLogic();
 
   void wait(float time);
   void wait(float min, float max);
@@ -85,6 +95,9 @@ private:
   float retreat_time = 0.5;
   float retreat_clock = 0.0;
 
+  float dodge_time = 0.0;
+  float dodge_clock = 0.0;
+
   bool waiting = false;
   float wait_time = 0.20;
   float wait_clock = 0.0;
@@ -107,4 +120,6 @@ private:
     {{15, 16}, 0.0},
     14
   };
+
+  GSSpriteSet gs_set = {17, 18, 8};
 };

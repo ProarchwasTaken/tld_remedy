@@ -67,7 +67,7 @@ void Servant::behavior() {
   }
 }
 
-void Servant::evaluateEvent(std::unique_ptr<CombatantEvent> &event) {
+void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Enemy::evaluateEvent(event);
 
   bool from_itself = event->sender == this;
@@ -443,7 +443,6 @@ void Servant::dodgingLogic() {
     target = NULL;
     return;
   }
-
 
   dodge_clock += Game::deltaTime() / dodge_time;
 
