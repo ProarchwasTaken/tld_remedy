@@ -18,11 +18,13 @@ struct AIBehavior {
   float rt_min_wait;
   float rt_max_wait;
 
-  float d_target_chance;
-  float d_min_wait;
-  float d_max_wait;
+  float dg_target_chance;
+  float dg_min_wait;
+  float dg_max_wait;
 
-  float d_range_multiplier;
-  float d_penalty;
+  float dg_range_multiplier;
+  float dg_time_multiplier;
+  float dg_penalty;
+  float dg_retailiation_chance;
 };
 

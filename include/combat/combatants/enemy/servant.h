@@ -2,6 +2,7 @@
 #include <memory>
 #include <raylib.h>
 #include "enums.h"
+#include "base/combatant.h"
 #include "base/enemy.h"
 #include "data/animation.h"
 #include "data/ai_behavior.h"
@@ -37,12 +38,14 @@ struct ServantAI : AIBehavior {
     rt_min_wait = 0.10;
     rt_max_wait = 0.50;
 
-    d_target_chance = 0.80;
-    d_min_wait = 0.25;
-    d_max_wait = 0.50;
+    dg_target_chance = 0.80;
+    dg_min_wait = 0.25;
+    dg_max_wait = 0.50;
 
-    d_penalty = 0.5;
-    d_range_multiplier = 0.5;
+    dg_range_multiplier = 0.5;
+    dg_time_multiplier = 1.0;
+    dg_penalty = 0.5;
+    dg_retailiation_chance = 0.80;
   }
 };
 
@@ -55,6 +58,7 @@ public:
   void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void warningHandling(WarningCBT *event);
+  void retaliation(Combatant *assailant, float chance);
   float chanceCalculation(WarningCBT *event, bool from_target, 
                           bool in_range);
 

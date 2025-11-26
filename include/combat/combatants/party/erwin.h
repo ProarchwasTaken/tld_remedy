@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 #include <raylib.h>
+#include "base/combatant.h"
 #include "base/party_member.h"
-#include "combat/actions/ghost_step.h"
 #include "data/session.h"
 #include "data/animation.h"
 #include "data/ai_behavior.h"
@@ -10,6 +10,7 @@
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/attack.h"
+#include "combat/actions/ghost_step.h"
 
 
 enum class ErwinGoals {
@@ -42,12 +43,14 @@ struct ErwinAI : AIBehavior {
     rt_min_wait = 0.10;
     rt_max_wait = 0.50;
 
-    d_target_chance = 0.80;
-    d_min_wait = 0.25;
-    d_max_wait = 0.50;
+    dg_target_chance = 0.80;
+    dg_min_wait = 0.25;
+    dg_max_wait = 0.50;
 
-    d_range_multiplier = 0.5;
-    d_penalty = 0.5;
+    dg_range_multiplier = 0.5;
+    dg_time_multiplier = 1.0;
+    dg_penalty = 0.5;
+    dg_retailiation_chance = 0.80;
   }
 };
 
@@ -67,6 +70,7 @@ public:
   void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void warningHandling(WarningCBT *event);
+  void retaliation(Combatant *assailant, float chance);
   float chanceCalculation(WarningCBT *event, bool from_target,
                           bool in_range);
 

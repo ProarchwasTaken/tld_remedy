@@ -119,9 +119,40 @@ void Servant::warningHandling(WarningCBT *event) {
   dodge_time = event->time_until * 0.90;
   dodge_clock = 0.0;
 
+  float retaliation_chance = ai_behavior.dg_retailiation_chance;
+  retaliation(event->assailant, retaliation_chance);
+
   if (target == NULL) {
     chooseTarget();
   }
+}
+
+void Servant::retaliation(Combatant *assailant, float chance) {
+  if (assailant == NULL || assailant == target) {
+    return;
+  }
+
+  if (team == assailant->team) {
+
+  }
+
+  float distance = distanceTo(assailant);
+  if (distance > contest_distance) {
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  if (percentage > chance) {
+    return;
+  }
+
+  target = assailant;
+
+  PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
+  << "retaliate against: '" << target->name << "' [ID: " << 
+    target->entity_id << "]";
 }
 
 float Servant::chanceCalculation(WarningCBT *event, bool from_target,
@@ -131,15 +162,16 @@ float Servant::chanceCalculation(WarningCBT *event, bool from_target,
   float distance = distanceTo(event->sender);
 
   assert(range != 0);
-  float range_multiplier = ai_behavior.d_range_multiplier;
+  float range_multiplier = ai_behavior.dg_range_multiplier;
   float range_bonus = std::sinf(distance / range) * range_multiplier;
   PLOGD << "Range Bonus: " << range_bonus;
 
   bool life_attack = event->action_type == ActionType::OFFENSE_HP;
-  float time_bonus = event->time_until * life_attack;
+  float time_multiplier = ai_behavior.dg_time_multiplier;
+  float time_bonus = (event->time_until * time_multiplier) * life_attack;
   PLOGD << "Time Bonus: " << time_bonus;
 
-  float penalty = ai_behavior.d_penalty;
+  float penalty = ai_behavior.dg_penalty;
   float multiplier = 1.0 - (penalty * from_target);
   PLOGD << "Multiplier: " << multiplier;
 
@@ -488,7 +520,7 @@ void Servant::dodgingLogic() {
 
   ghoststep();
 
-  float target_chance = ai_behavior.d_target_chance;
+  float target_chance = ai_behavior.dg_target_chance;
   setGoal(ServantGoals::TARGETING, target_chance);
 
   if (ai_goal != ServantGoals::TARGETING) {
@@ -497,8 +529,8 @@ void Servant::dodgingLogic() {
     target = NULL;
   }
   else {
-    float min_wait = ai_behavior.d_min_wait;
-    float max_wait = ai_behavior.d_max_wait;
+    float min_wait = ai_behavior.dg_min_wait;
+    float max_wait = ai_behavior.dg_max_wait;
     wait(min_wait, max_wait);
   }
 
