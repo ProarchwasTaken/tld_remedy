@@ -125,7 +125,7 @@ private:
 
   Mary *player;
   float preferred_plr_distance = 128;
-  float attack_distance = 24;
+  float attack_distance = 28;
   float contest_distance = 96;
 
   float retreat_time = 0.5;

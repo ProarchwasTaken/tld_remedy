@@ -42,7 +42,7 @@ struct ServantAI : AIBehavior {
     dg_min_wait = 0.25;
     dg_max_wait = 0.50;
 
-    dg_range_multiplier = 0.5;
+    dg_range_multiplier = 0.15;
     dg_time_multiplier = 1.0;
     dg_penalty = 0.5;
     dg_retailiation_chance = 0.80;
@@ -100,7 +100,7 @@ private:
   int moving_x = 0;
   bool has_moved = false;
 
-  float attack_distance = 24;
+  float attack_distance = 28;
   float contest_distance = 128;
 
   float retreat_time = 0.5;

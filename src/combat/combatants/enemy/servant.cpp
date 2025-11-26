@@ -159,7 +159,10 @@ float Servant::chanceCalculation(WarningCBT *event, bool from_target,
                                  bool in_range)
 {
   float range = event->hitbox.width;
+  PLOGD << "Range: " << range; 
+
   float distance = distanceTo(event->sender);
+  PLOGD << "Distance from sender: " << distance;
 
   assert(range != 0);
   float range_multiplier = ai_behavior.dg_range_multiplier;
@@ -287,7 +290,7 @@ void Servant::decideAttack() {
   float percentage = range(Game::RNG);
 
   PartyMember *party_member = static_cast<PartyMember*>(target);
-  float chance = 0.10;
+  float chance = 0.20;
 
   if (party_member->critical_life) {
     chance += 0.20;
@@ -330,7 +333,7 @@ void Servant::attackHP() {
   data.assailant = this;
 
   unique_ptr<CombatAction> action;
-  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.30, 0.05,
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.35, 0.05,
                                0.25, hitbox, data, atlas, atk_hp_set);
   performAction(action);
 }

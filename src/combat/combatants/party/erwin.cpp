@@ -314,7 +314,7 @@ void Erwin::decideAttack() {
   float percentage = range(Game::RNG);
 
   float chance = 0.15;
-  if (morale >= max_morale) {
+  if (morale >= max_morale * 0.75) {
     chance += 0.50;
   }
 
