@@ -139,7 +139,7 @@ float Servant::chanceCalculation(WarningCBT *event, bool from_target,
   float time_bonus = event->time_until * life_attack;
   PLOGD << "Time Bonus: " << time_bonus;
 
-  float penalty = ai_behavior.d_penality;
+  float penalty = ai_behavior.d_penalty;
   float multiplier = 1.0 - (penalty * from_target);
   PLOGD << "Multiplier: " << multiplier;
 

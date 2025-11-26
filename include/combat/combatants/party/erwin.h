@@ -5,6 +5,7 @@
 #include "combat/actions/ghost_step.h"
 #include "data/session.h"
 #include "data/animation.h"
+#include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
@@ -18,6 +19,36 @@ enum class ErwinGoals {
   TARGETING = 3,
   RETREATING = 4,
   DODGING = 5
+};
+
+
+/* The parameters that govern how Erwin will behave. Depending on the
+ * gamestate, these variables may change.*/
+struct ErwinAI : AIBehavior {
+  ErwinAI() {
+    ct_retreat_chance = 0.40;
+    ct_min_retreat = 0.10;
+    ct_max_retreat = 0.40;
+
+    ct_wait_chance = 0.40;
+    ct_min_wait = 0.10;
+    ct_max_wait = 0.25;
+
+    tg_retreat_chance = 0.25;
+    tg_min_retreat = 0.10;
+    tg_max_retreat = 0.75;
+
+    rt_target_chance = 0.50;
+    rt_min_wait = 0.10;
+    rt_max_wait = 0.50;
+
+    d_target_chance = 0.80;
+    d_min_wait = 0.25;
+    d_max_wait = 0.50;
+
+    d_range_multiplier = 0.5;
+    d_penalty = 0.5;
+  }
 };
 
 
@@ -81,6 +112,7 @@ public:
   static SpriteAtlas atlas;
 
   ErwinGoals ai_goal = ErwinGoals::IDLE;
+  AIBehavior ai_behavior = ErwinAI();
   float tick_clock = 0.0;
 private:
   const float default_speed = 68;

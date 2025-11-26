@@ -23,6 +23,6 @@ struct AIBehavior {
   float d_max_wait;
 
   float d_range_multiplier;
-  float d_penality;
+  float d_penalty;
 };
 

@@ -41,7 +41,7 @@ struct ServantAI : AIBehavior {
     d_min_wait = 0.25;
     d_max_wait = 0.50;
 
-    d_penality = 0.5;
+    d_penalty = 0.5;
     d_range_multiplier = 0.5;
   }
 };
