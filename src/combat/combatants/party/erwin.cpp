@@ -24,6 +24,7 @@
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
@@ -362,6 +363,16 @@ void Erwin::ghoststep(int direction_x) {
 
   unique_ptr<CombatAction> action;
   action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
+  performAction(action);
+}
+
+void Erwin::evade() {
+  RectEx hitbox;
+  hitbox.scale = {8, 46};
+  hitbox.offset = {-4 + (8.0f * direction), -48};
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Evade>(this, atlas, hitbox, ev_set);
   performAction(action);
 }
 

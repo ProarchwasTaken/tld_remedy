@@ -11,6 +11,7 @@
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
+#include "combat/actions/evade.h"
 
 
 enum class ErwinGoals {
@@ -88,6 +89,7 @@ public:
   void attackMP();
   void attackHP();
   void ghoststep(int direction_x);
+  void evade();
 
   void setGoal(ErwinGoals goal, float chance);
 
@@ -158,4 +160,5 @@ private:
   };
 
   GSSpriteSet gs_set = {17, 18, 8};
+  EvadeSpriteSet ev_set = {19, 20, 19, 21, 0};
 };
