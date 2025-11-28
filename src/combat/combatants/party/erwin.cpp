@@ -99,6 +99,13 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   if (!from_itself && event->event_type == CombatantEVT::WARNING) {
     WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
     warningHandling(warn_event);
+    return;
+  }
+
+  if (from_itself && event->event_type == CombatantEVT::TOOK_DAMAGE) {
+    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+    damageHandling(dmg_event);
+    return;
   }
 }
 
@@ -145,12 +152,25 @@ void Erwin::warningHandling(WarningCBT *event) {
   dodge_time = event->time_until * 0.90;
   dodge_clock = 0.0;
 
-  float retaliation_chance = ai_behavior.dg_retailiation_chance;
+  float retaliation_chance = ai_behavior.dg_retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
 
   if (target == NULL) {
     chooseTarget();
   }
+}
+
+void Erwin::damageHandling(TookDamageCBT *event) {
+  if (event->resulting_state != HIT_STUN) {
+    return;
+  }
+
+  if (event->assailant == target) {
+    return;
+  }
+
+  float retaliation_chance = ai_behavior.dmg_retaliation_chance;
+  retaliation(event->assailant, retaliation_chance);
 }
 
 void Erwin::retaliation(Combatant *assailant, float chance) {
@@ -159,7 +179,7 @@ void Erwin::retaliation(Combatant *assailant, float chance) {
   }
 
   if (team == assailant->team) {
-
+    return;
   }
 
   float distance = distanceTo(assailant);

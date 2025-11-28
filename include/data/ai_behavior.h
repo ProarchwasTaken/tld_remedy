@@ -25,6 +25,8 @@ struct AIBehavior {
   float dg_range_multiplier;
   float dg_time_multiplier;
   float dg_penalty;
-  float dg_retailiation_chance;
+  float dg_retaliation_chance;
+
+  float dmg_retaliation_chance;
 };
 

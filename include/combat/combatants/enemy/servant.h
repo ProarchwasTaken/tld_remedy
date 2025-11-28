@@ -45,7 +45,9 @@ struct ServantAI : AIBehavior {
     dg_range_multiplier = 0.15;
     dg_time_multiplier = 1.0;
     dg_penalty = 0.5;
-    dg_retailiation_chance = 0.80;
+    dg_retaliation_chance = 0.80;
+
+    dmg_retaliation_chance = 0.75;
   }
 };
 
@@ -58,6 +60,7 @@ public:
   void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void warningHandling(WarningCBT *event);
+  void damageHandling(TookDamageCBT *event);
   void retaliation(Combatant *assailant, float chance);
   float chanceCalculation(WarningCBT *event, bool from_target, 
                           bool in_range);
