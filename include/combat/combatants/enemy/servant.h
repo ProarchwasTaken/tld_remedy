@@ -25,9 +25,9 @@ struct ServantAI : AIBehavior {
     contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
     targeting = {0.45, 0.10, 0.75};
     retreating = {0.75, 0.10, 0.50};
-    dodging = {0.80, 0.25, 0.50, 0.15, 1.0, 0.50};
+    dodging = {0.80, 0.25, 0.50, 0.15, 1.0, 0.50, 0.80};
 
-    retaliation_chance = 0.80;
+    retaliation_chance = 0.75;
   }
 };
 
@@ -74,7 +74,7 @@ public:
   void drawDebug() override;
 
   ServantGoals ai_goal = ServantGoals::IDLE;
-  AIBehavior ai_behavior = ServantAI(); 
+  std::unique_ptr<AIBehavior> ai_behavior; 
   float tick_clock = 0.0;
 
   static SpriteAtlas atlas;

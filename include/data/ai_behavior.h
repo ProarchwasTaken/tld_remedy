@@ -31,11 +31,14 @@ struct Dodging {
   float range_multiplier;
   float time_multiplier;
   float penalty;
+  float retaliation_chance;
 };
 
 
-/* DO NOT add any more variables to this struct. For some reason it 
- * causes weird things to happen when you do, and I have no idea why.*/
+/* The parameters that govern the behavior of every non-playable 
+ * Combatant; Enemy or otherwise. There are 4 core traits that every
+ * Combatant AI shares: Contesting, Targeting, Retreating, and Dodging.
+ * The parameters that relate to any of these can be freely changed.*/
 struct AIBehavior {
   Contesting contesting;
   Targeting targeting;

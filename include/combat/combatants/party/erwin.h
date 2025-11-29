@@ -31,9 +31,9 @@ struct ErwinAI : AIBehavior {
     contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
     targeting = {0.25, 0.10, 0.75};
     retreating = {0.50, 0.10, 0.50};
-    dodging = {0.80, 0.25, 0.50, 0.50, 1.0, 0.50};
+    dodging = {0.80, 0.25, 0.50, 0.50, 1.0, 0.50, 0.80};
 
-    retaliation_chance = 0.80;
+    retaliation_chance = 0.75;
   }
 };
 
@@ -101,7 +101,8 @@ public:
   static SpriteAtlas atlas;
 
   ErwinGoals ai_goal = ErwinGoals::IDLE;
-  AIBehavior ai_behavior = ErwinAI();
+  std::unique_ptr<AIBehavior> ai_behavior;
+  
   float tick_clock = 0.0;
 private:
   const float default_speed = 68;
