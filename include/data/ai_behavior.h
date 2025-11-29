@@ -1,6 +1,8 @@
 #pragma once
 
 
+/* DO NOT add any more variables to this struct. For some reason it 
+ * causes weird things to happen when you do, and I have no idea why.*/
 struct AIBehavior {
   float ct_retreat_chance;
   float ct_min_retreat;
@@ -25,8 +27,7 @@ struct AIBehavior {
   float dg_range_multiplier;
   float dg_time_multiplier;
   float dg_penalty;
-  float dg_retaliation_chance;
 
-  float dmg_retaliation_chance;
+  float retaliation_chance;
 };
 

@@ -45,9 +45,7 @@ struct ServantAI : AIBehavior {
     dg_range_multiplier = 0.15;
     dg_time_multiplier = 1.0;
     dg_penalty = 0.5;
-    dg_retaliation_chance = 0.80;
-
-    dmg_retaliation_chance = 0.75;
+    retaliation_chance = 0.80;
   }
 };
 

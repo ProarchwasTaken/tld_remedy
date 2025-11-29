@@ -152,7 +152,7 @@ void Erwin::warningHandling(WarningCBT *event) {
   dodge_time = event->time_until * 0.90;
   dodge_clock = 0.0;
 
-  float retaliation_chance = ai_behavior.dg_retaliation_chance;
+  float retaliation_chance = ai_behavior.retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
 
   if (target == NULL) {
@@ -169,7 +169,7 @@ void Erwin::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  float retaliation_chance = ai_behavior.dmg_retaliation_chance;
+  float retaliation_chance = ai_behavior.retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
 }
 
