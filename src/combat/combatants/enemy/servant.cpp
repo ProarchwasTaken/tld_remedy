@@ -522,6 +522,10 @@ void Servant::dodgingLogic() {
     return;
   }
 
+  if (dodge_clock < 0.50) {
+    targetingLogic();
+  }
+
   dodge_clock += Game::deltaTime() / dodge_time;
 
   if (dodge_clock < 0.75) {
