@@ -208,16 +208,16 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   float distance = distanceTo(event->sender);
 
   assert(range != 0);
-  float range_multiplier = ai_behavior.dg_range_multiplier;
+  float range_multiplier = ai_behavior.dodging.range_multiplier;
   float range_bonus = std::sinf(distance / range) * range_multiplier;
   PLOGD << "Range Bonus: " << range_bonus;
 
   bool life_attack = event->action_type == ActionType::OFFENSE_HP;
-  float time_multiplier = ai_behavior.dg_time_multiplier;
+  float time_multiplier = ai_behavior.dodging.time_multiplier;
   float time_bonus = (event->time_until * time_multiplier) * life_attack;
   PLOGD << "Time Bonus: " << time_bonus;
 
-  float penalty = ai_behavior.dg_penalty;
+  float penalty = ai_behavior.dodging.penalty;
   float multiplier = 1.0 - (penalty * from_target);
   PLOGD << "Multiplier: " << multiplier;
 
@@ -274,12 +274,12 @@ void Erwin::targetingBehavior() {
     return;
   }
 
-  float retreat_chance = ai_behavior.ct_retreat_chance;
+  float retreat_chance = ai_behavior.contesting.retreat_chance;
   setGoal(ErwinGoals::RETREATING, retreat_chance);
   if (ai_goal == ErwinGoals::RETREATING) {
     PLOGI << "Deciding to retreat from target.";
-    float min_retreat = ai_behavior.ct_min_retreat;
-    float max_retreat = ai_behavior.ct_max_retreat;
+    float min_retreat = ai_behavior.contesting.min_retreat;
+    float max_retreat = ai_behavior.contesting.max_retreat;
 
     uniform_real_distribution<float> range(min_retreat, max_retreat);
     retreat_time = range(Game::RNG);
@@ -288,11 +288,11 @@ void Erwin::targetingBehavior() {
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
-  float wait_chance = ai_behavior.ct_wait_chance;
+  float wait_chance = ai_behavior.contesting.wait_chance;
 
   if (percentage <= wait_chance) {
-    float min_wait = ai_behavior.ct_min_wait;
-    float max_wait = ai_behavior.ct_max_wait;
+    float min_wait = ai_behavior.contesting.min_wait;
+    float max_wait = ai_behavior.contesting.max_wait;
     wait(min_wait, max_wait);
   }
 }
@@ -526,13 +526,13 @@ void Erwin::targetingLogic() {
 
   decideAttack();
 
-  float retreat_chance = ai_behavior.tg_retreat_chance;
+  float retreat_chance = ai_behavior.targeting.retreat_chance;
   setGoal(ErwinGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ErwinGoals::RETREATING) {
     PLOGI << "Retreating from target.";
-    float min_retreat = ai_behavior.tg_min_retreat;
-    float max_retreat = ai_behavior.tg_max_retreat;
+    float min_retreat = ai_behavior.targeting.min_retreat;
+    float max_retreat = ai_behavior.targeting.max_retreat;
 
     uniform_real_distribution<float> range(min_retreat, max_retreat);
     retreat_time = range(Game::RNG);
@@ -562,7 +562,7 @@ void Erwin::retreatingLogic() {
     return;
   }
 
-  float target_chance = ai_behavior.rt_target_chance;
+  float target_chance = ai_behavior.retreating.target_chance;
   setGoal(ErwinGoals::TARGETING, target_chance);
 
   if (ai_goal != ErwinGoals::TARGETING) {
@@ -571,8 +571,8 @@ void Erwin::retreatingLogic() {
     target = NULL;
   }
   else {
-    float min_wait = ai_behavior.rt_min_wait;
-    float max_wait = ai_behavior.rt_max_wait;
+    float min_wait = ai_behavior.retreating.min_wait;
+    float max_wait = ai_behavior.retreating.max_wait;
     wait(min_wait, max_wait);
   }
 
@@ -615,7 +615,7 @@ void Erwin::dodgingLogic() {
 
   ghoststep(x_direction);
 
-  float target_chance = ai_behavior.dg_target_chance;
+  float target_chance = ai_behavior.dodging.target_chance;
   setGoal(ErwinGoals::TARGETING, target_chance);
 
   if (ai_goal != ErwinGoals::TARGETING) {
@@ -624,8 +624,8 @@ void Erwin::dodgingLogic() {
     target = NULL;
   }
   else {
-    float min_wait = ai_behavior.dg_min_wait;
-    float max_wait = ai_behavior.dg_max_wait;
+    float min_wait = ai_behavior.dodging.min_wait;
+    float max_wait = ai_behavior.dodging.max_wait;
     wait(min_wait, max_wait);
   }
 

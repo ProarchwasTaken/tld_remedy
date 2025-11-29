@@ -28,29 +28,11 @@ enum class ErwinGoals {
  * gamestate, these variables may change.*/
 struct ErwinAI : AIBehavior {
   ErwinAI() {
-    ct_retreat_chance = 0.40;
-    ct_min_retreat = 0.10;
-    ct_max_retreat = 0.40;
+    contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
+    targeting = {0.25, 0.10, 0.75};
+    retreating = {0.50, 0.10, 0.50};
+    dodging = {0.80, 0.25, 0.50, 0.50, 1.0, 0.50};
 
-    ct_wait_chance = 0.40;
-    ct_min_wait = 0.10;
-    ct_max_wait = 0.25;
-
-    tg_retreat_chance = 0.25;
-    tg_min_retreat = 0.10;
-    tg_max_retreat = 0.75;
-
-    rt_target_chance = 0.50;
-    rt_min_wait = 0.10;
-    rt_max_wait = 0.50;
-
-    dg_target_chance = 0.80;
-    dg_min_wait = 0.25;
-    dg_max_wait = 0.50;
-
-    dg_range_multiplier = 0.5;
-    dg_time_multiplier = 1.0;
-    dg_penalty = 0.5;
     retaliation_chance = 0.80;
   }
 };
