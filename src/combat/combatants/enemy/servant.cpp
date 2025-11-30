@@ -32,7 +32,7 @@ SpriteAtlas Servant::atlas("combatants", "servant_combatant");
 Servant::Servant(Vector2 position, Direction direction) : 
   Enemy("Servant", EnemyID::SERVANT, position)
 {
-  max_life = 15;
+  max_life = 10;
   life = max_life;
 
   offense = 8;

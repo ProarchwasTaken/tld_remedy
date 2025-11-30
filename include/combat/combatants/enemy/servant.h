@@ -32,6 +32,9 @@ struct ServantAI : AIBehavior {
 };
 
 
+/* The Servant Enemy is designed to apply continous pressure to it's
+ * target. It's the first enemy of the game, and it's meant act as a
+ * baseline going forward. While a single*/
 class Servant : public Enemy {
 public:
   Servant(Vector2 position, Direction direction);

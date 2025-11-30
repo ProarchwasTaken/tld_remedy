@@ -77,7 +77,7 @@ void CombatScene::initializeCombatants() {
 
   item_hud.assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop4();
+  EnemyTroop troop = DBTroop1();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
