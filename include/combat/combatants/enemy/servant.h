@@ -22,7 +22,7 @@ enum class ServantGoals {
 
 struct ServantAI : AIBehavior {
   ServantAI() {
-    contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
+    contesting = {0.20, 0.10, 0.50, 0.40, 0.10, 0.25};
     targeting = {0.45, 0.10, 0.75};
     retreating = {0.75, 0.10, 0.50};
     dodging = {0.80, 0.25, 0.50, 0.15, 1.0, 0.50, 0.80};
@@ -79,7 +79,7 @@ public:
 
   static SpriteAtlas atlas;
 private:
-  const float default_speed = 64;
+  const float default_speed = 60;
   int moving_x = 0;
   bool has_moved = false;
 
@@ -96,7 +96,7 @@ private:
   float wait_time = 0.20;
   float wait_clock = 0.0;
 
-  float anim_move_speed = 0.2125;
+  float anim_move_speed = 0.226;
   Animation anim_move = {{1, 2, 3, 2}, anim_move_speed};
 
   Animation anim_dead = {{5, 6}, 0.5};

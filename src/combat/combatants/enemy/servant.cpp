@@ -37,7 +37,7 @@ Servant::Servant(Vector2 position, Direction direction) :
 
   offense = 8;
   defense = 6;
-  intimid = 10;
+  intimid = 6;
   persist = 6;
 
   resilience = 1.0;

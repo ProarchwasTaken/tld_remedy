@@ -76,6 +76,7 @@ void Erwin::setEnabled(bool value) {
   PartyMember::setEnabled(value);
 
   ai_goal = ErwinGoals::IDLE;
+  target = NULL;
   tick_clock = 0;
 }
 
@@ -97,6 +98,10 @@ void Erwin::behavior() {
 void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
   
+  if (!enabled) {
+    return;
+  }
+
   bool from_itself = event->sender == this;
 
   if (!from_itself && event->event_type == CombatantEVT::WARNING) {
@@ -337,12 +342,14 @@ void Erwin::decideAttack() {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
-  float chance = 0.15;
-  if (morale >= max_morale * 0.75) {
+  float chance = 0.25;
+  if (morale >= max_morale * 0.50) {
     chance += 0.50;
   }
 
-  if (morale >= 4 && percentage <= chance) {
+  bool sufficent = !demoralized && morale >= 4;
+
+  if (sufficent && percentage <= chance) {
     attackHP();
     morale -= 4;
   }
