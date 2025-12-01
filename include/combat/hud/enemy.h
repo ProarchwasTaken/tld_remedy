@@ -17,6 +17,9 @@ public:
   void drawTargetHud(Combatant *target, Vector2 position);
   void drawGauge(Combatant *target, Vector2 position, float width, 
                  float max_width, bool overflow);
+  void drawName(Combatant *target, Vector2 position);
+
+  void drawSegments(Combatant *target, Vector2 position);
 
   static SpriteAtlas atlas;
 private:
