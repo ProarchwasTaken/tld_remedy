@@ -75,6 +75,7 @@ void CombatScene::initializeCombatants() {
     initializeCompanion();
   }
 
+  enemy_hud.assign(player, companion);
   item_hud.assign(player, companion, session);
 
   EnemyTroop troop = DBTroop1();
@@ -170,6 +171,7 @@ void CombatScene::update() {
     plr_hud.update();
     plr_cmd_hud.update();
     com_hud.update();
+    enemy_hud.update();
     item_hud.update();
 
     eventProcessing();
@@ -397,6 +399,7 @@ void CombatScene::draw() {
   plr_hud.draw();
   plr_cmd_hud.draw();
   com_hud.draw();
+  enemy_hud.draw();
   item_hud.draw();
 
   #ifndef NDEBUG
