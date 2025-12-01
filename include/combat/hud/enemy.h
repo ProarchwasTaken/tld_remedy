@@ -14,7 +14,9 @@ public:
 
   void update();
   void draw();
-  void drawLifeGauge(Combatant *target);
+  void drawTargetHud(Combatant *target, Vector2 position);
+  void drawGauge(Combatant *target, Vector2 position, float width, 
+                 float max_width, bool overflow);
 
   static SpriteAtlas atlas;
 private:
@@ -24,4 +26,6 @@ private:
   Vector2 main_position;
   Texture life_bar;
   Texture life_empty;
+
+  static constexpr float LIFE_PER_SEGMENT = 20;
 };

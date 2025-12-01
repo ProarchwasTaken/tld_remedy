@@ -1,6 +1,9 @@
+#include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
+#include "game.h"
 #include "base/party_member.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
@@ -40,32 +43,74 @@ void EnemyHud::draw() {
 
   Mary *mary = *player;
   if (mary->target != NULL) {
-    drawLifeGauge(mary->target);
+    drawTargetHud(mary->target, main_position);
   }
 }
 
-void EnemyHud::drawLifeGauge(Combatant *target) {
+void EnemyHud::drawTargetHud(Combatant *target, Vector2 position) {
+  float width_percentage = target->max_life / LIFE_PER_SEGMENT;
+
   float max_gauge_width = 136;
-
-  float width_percentage = target->max_life / 20;
   float gauge_width = max_gauge_width * width_percentage;
-  float frame_width = gauge_width + 4;
 
-  Rectangle frame = {main_position.x, main_position.y, frame_width, 7};
+  float frame_width;
+  bool overflow = gauge_width > max_gauge_width;
+  if (!overflow) {
+    frame_width = gauge_width + 4;
+  }
+  else {
+    frame_width = max_gauge_width + 4;
+  }
+
+  Rectangle frame = {position.x, position.y, frame_width, 7};
   DrawRectanglePro(frame, {frame_width, 0}, 0, BLACK);
 
-  Rectangle source = {0, 0, -gauge_width, 3};
+  drawGauge(target, position, gauge_width, max_gauge_width, overflow);
+}
+
+void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
+                         float max_width, bool overflow)
+{
+  Rectangle source = {0, 0, -width, 3};
   Rectangle dest = source;
-  dest.x = main_position.x - 2;
-  dest.y = main_position.y + 2;
-  dest.width = gauge_width;
+  dest.x = position.x - 2;
+  dest.y = position.y + 2;
 
-  DrawTexturePro(life_empty, source, dest, {gauge_width, 0}, 0, WHITE);
+  if (!overflow) {
+    dest.width = width;
+    DrawTexturePro(life_empty, source, dest, {width, 0}, 0, WHITE);
 
-  float life_percentage = target->life / target->max_life;
+    float percentage = target->life / target->max_life;
 
-  gauge_width = gauge_width * life_percentage;
-  source.width = -gauge_width;
-  dest.width = gauge_width;
-  DrawTexturePro(life_bar, source, dest, {gauge_width, 0}, 0, WHITE);
+    width = width * percentage;
+    source.width = -width;
+    dest.width = width;
+    DrawTexturePro(life_bar, source, dest, {width, 0}, 0, WHITE);
+    return;
+  }
+
+  int segments = std::floorf(target->life / LIFE_PER_SEGMENT);
+
+  Texture *empty;
+  Color color;
+  if (segments == 0) {
+    empty = &life_empty;
+    color = WHITE;
+  }
+  else {
+    empty = &life_bar;
+    color = Game::palette[2];
+  }
+
+  dest.width = max_width;
+  source.width = -max_width;
+  DrawTexturePro(*empty, source, dest, {max_width, 0}, 0, color); 
+
+  float leftover = target->life - (LIFE_PER_SEGMENT * segments);
+  float percentage = leftover / LIFE_PER_SEGMENT;
+
+  width = max_width * percentage;
+  source.width = -width;
+  dest.width = width;
+  DrawTexturePro(life_bar, source, dest, {width, 0}, 0, WHITE);
 }
