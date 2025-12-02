@@ -134,10 +134,6 @@ void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 }
 
 void Mary::damageHandling(TookDamageCBT *event) {
-  if (target != NULL) {
-    return;
-  }
-
   Combatant *potential_target = NULL;
   if (event->sender == this) {
     assert(event->assailant != NULL);

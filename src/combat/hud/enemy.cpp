@@ -37,7 +37,65 @@ void EnemyHud::assign(Mary *&player, PartyMember *&companion) {
 }
 
 void EnemyHud::update() {
+  targetCheck(*player);
+  targetCheck(*companion);
+  targetTimer();
+}
 
+void EnemyHud::targetCheck(PartyMember *member) {
+  if (member == NULL) {
+    return;
+  }
+
+  Combatant *target = member->target;
+  if (target == NULL || target->state == DEAD) {
+    return;
+  }
+
+  TargetData *unused = NULL;
+  for (auto &data : targets) {
+    if (data.target == NULL) {
+      unused = &data;
+      continue;
+    }
+
+    if (target == data.target) {
+      unused = NULL;
+      break;
+    }
+  }
+
+  if (unused != NULL) {
+    unused->target = target;
+    unused->clock = 0.0;
+  }
+}
+
+void EnemyHud::targetTimer() {
+  PartyMember *mary = *player;
+  PartyMember *companion = *this->companion;
+
+  for (TargetData &data : targets) {
+    Combatant *target = data.target;
+
+    if (target == NULL) {
+      continue;
+    }
+
+    bool targeted_by_plr = mary != NULL && target == mary->target;
+    bool targeted_by_com = companion != NULL && 
+      target == companion->target;
+
+    if (targeted_by_plr || targeted_by_com) {
+      data.clock = 0.0;
+      continue;
+    }
+
+    data.clock += Game::deltaTime();
+    if (data.clock >= 0.5) {
+      data.target = NULL;
+    }
+  }
 }
 
 void EnemyHud::draw() {
@@ -45,9 +103,12 @@ void EnemyHud::draw() {
     return;
   }
 
-  Mary *mary = *player;
-  if (mary->target != NULL) {
-    drawTargetHud(mary->target, main_position);
+  Vector2 position = main_position;
+  for (TargetData &data : targets) {
+    if (data.target != NULL) {
+      drawTargetHud(data.target, position);
+      position.y += 18;
+    }
   }
 }
 
@@ -75,6 +136,8 @@ void EnemyHud::drawTargetHud(Combatant *target, Vector2 position) {
   if (overflow) {
     drawSegments(target, position);
   }
+
+  drawTargetReticle(target, position, frame_width);
 }
 
 void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
@@ -85,11 +148,14 @@ void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
   dest.x = position.x - 2;
   dest.y = position.y + 2;
 
+  float max_life = target->max_life;
+  float life = Clamp(target->life, 0.0, max_life);
+
   if (!overflow) {
     dest.width = width;
     DrawTexturePro(life_empty, source, dest, {width, 0}, 0, WHITE);
 
-    float percentage = target->life / target->max_life;
+    float percentage = life / max_life;
 
     width = width * percentage;
     source.width = -width;
@@ -98,7 +164,7 @@ void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
     return;
   }
 
-  int segments = std::floorf(target->life / LIFE_PER_SEGMENT);
+  int segments = std::floorf(life / LIFE_PER_SEGMENT);
 
   Texture *empty;
   Color color;
@@ -115,7 +181,7 @@ void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
   source.width = -max_width;
   DrawTexturePro(*empty, source, dest, {max_width, 0}, 0, color); 
 
-  float leftover = target->life - (LIFE_PER_SEGMENT * segments);
+  float leftover = life - (LIFE_PER_SEGMENT * segments);
   float percentage = leftover / LIFE_PER_SEGMENT;
 
   width = max_width * percentage;
@@ -126,8 +192,10 @@ void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
 
 void EnemyHud::drawSegments(Combatant *target, Vector2 position) {
   assert(target->max_life / LIFE_PER_SEGMENT > 1.0);
-  int max_segments = std::floorf(target->max_life / LIFE_PER_SEGMENT);
-  int segments = std::floorf(target->life / LIFE_PER_SEGMENT);
+  float max_life = target->max_life;
+  float life = Clamp(target->life, 0.0, max_life);
+  int max_segments = std::floorf(max_life / LIFE_PER_SEGMENT);
+  int segments = std::floorf(life / LIFE_PER_SEGMENT);
 
   position.y += 5;
   float frame_width = 2 + (6 * max_segments);
@@ -147,6 +215,28 @@ void EnemyHud::drawSegments(Combatant *target, Vector2 position) {
     }
 
     DrawTextureRec(atlas.sheet, *sprite, position, WHITE);
+  }
+}
+
+void EnemyHud::drawTargetReticle(Combatant *target, Vector2 position, 
+                                 float frame_width) 
+{ 
+  PartyMember *mary = *player;
+  PartyMember *companion = *this->companion;
+
+  Rectangle *sprite = &atlas.sprites[4];
+  position = Vector2Subtract(position, {frame_width + 10, 1});
+  Color color;
+
+  if (mary != NULL && target == mary->target) {
+    color = Game::palette[42];
+    DrawTextureRec(atlas.sheet, *sprite, position, color);
+    position.x -= 10;
+  }
+
+  if (companion != NULL && target == companion->target) {
+    color = Game::palette[51];
+    DrawTextureRec(atlas.sheet, *sprite, position, color);
   }
 }
 
