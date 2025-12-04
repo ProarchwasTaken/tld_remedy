@@ -21,12 +21,20 @@
       "filename": "combat/attack.mp3"
     },
     {
+      "name": "enemy_warning1",
+      "filename": "combat/enemy_warning1.mp3"
+    },
+    {
       "name": "ghost_step",
       "filename": "combat/ghost_step.mp3"
     },
     {
       "name": "evade",
       "filename": "combat/evade.mp3"
+    },
+    {
+      "name": "evade_ready",
+      "filename": "combat/evade_ready.mp3"
     },
     {
       "name": "evade_perfect",

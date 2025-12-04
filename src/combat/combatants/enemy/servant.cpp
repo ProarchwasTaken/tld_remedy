@@ -155,7 +155,7 @@ void Servant::retaliation(Combatant *assailant, float chance) {
   }
 
   if (team == assailant->team) {
-
+    return;
   }
 
   float distance = distanceTo(assailant);
@@ -357,7 +357,9 @@ void Servant::attackHP() {
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.35, 0.05,
                                0.25, hitbox, data, atlas, atk_hp_set);
+
   performAction(action);
+  sfx.play("enemy_warning1");
 }
 
 void Servant::ghoststep() {
