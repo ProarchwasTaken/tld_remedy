@@ -39,7 +39,7 @@ void EnemyHud::assign(Mary *&player, PartyMember *&companion) {
 void EnemyHud::update() {
   targetCheck(*player);
   targetCheck(*companion);
-  targetTimer();
+  targetLogic();
 }
 
 void EnemyHud::targetCheck(PartyMember *member) {
@@ -67,11 +67,12 @@ void EnemyHud::targetCheck(PartyMember *member) {
 
   if (unused != NULL) {
     unused->target = target;
+    unused->prev_life = Clamp(target->life, 0.0, target->max_life);
     unused->clock = 0.0;
   }
 }
 
-void EnemyHud::targetTimer() {
+void EnemyHud::targetLogic() {
   PartyMember *mary = *player;
   PartyMember *companion = *this->companion;
 
@@ -106,13 +107,16 @@ void EnemyHud::draw() {
   Vector2 position = main_position;
   for (TargetData &data : targets) {
     if (data.target != NULL) {
-      drawTargetHud(data.target, position);
+      drawTargetHud(data, position);
       position.y += 18;
     }
   }
 }
 
-void EnemyHud::drawTargetHud(Combatant *target, Vector2 position) {
+void EnemyHud::drawTargetHud(TargetData &data, Vector2 position) {
+  assert(data.target != NULL);
+  Combatant *target = data.target;
+
   float width_percentage = target->max_life / LIFE_PER_SEGMENT;
 
   float max_gauge_width = 136;
@@ -131,7 +135,7 @@ void EnemyHud::drawTargetHud(Combatant *target, Vector2 position) {
   DrawRectanglePro(frame, {frame_width, 0}, 0, BLACK);
 
   drawName(target, position);
-  drawGauge(target, position, gauge_width, max_gauge_width, overflow);
+  drawLifeGauge(data, position, gauge_width, max_gauge_width, overflow);
 
   if (overflow) {
     drawSegments(target, position);
@@ -140,29 +144,51 @@ void EnemyHud::drawTargetHud(Combatant *target, Vector2 position) {
   drawTargetReticle(target, position, frame_width);
 }
 
-void EnemyHud::drawGauge(Combatant *target, Vector2 position, float width,
+void EnemyHud::drawLifeGauge(TargetData &data, Vector2 position, float width,
                          float max_width, bool overflow)
+{
+  if (!overflow) {
+    drawGaugeNormal(data, position, width);
+  }
+  else {
+    drawGaugeOverflow(data, position, width, max_width);
+  }
+}
+
+void EnemyHud::drawGaugeNormal(TargetData &data, Vector2 position,
+                               float width) 
 {
   Rectangle source = {0, 0, -width, 3};
   Rectangle dest = source;
   dest.x = position.x - 2;
   dest.y = position.y + 2;
 
+  Combatant *target = data.target;
   float max_life = target->max_life;
   float life = Clamp(target->life, 0.0, max_life);
 
-  if (!overflow) {
-    dest.width = width;
-    DrawTexturePro(life_empty, source, dest, {width, 0}, 0, WHITE);
+  dest.width = width;
+  DrawTexturePro(life_empty, source, dest, {width, 0}, 0, WHITE);
 
-    float percentage = life / max_life;
+  float percentage = life / max_life;
 
-    width = width * percentage;
-    source.width = -width;
-    dest.width = width;
-    DrawTexturePro(life_bar, source, dest, {width, 0}, 0, WHITE);
-    return;
-  }
+  width = width * percentage;
+  source.width = -width;
+  dest.width = width;
+  DrawTexturePro(life_bar, source, dest, {width, 0}, 0, WHITE);
+}
+
+void EnemyHud::drawGaugeOverflow(TargetData &data, Vector2 position,
+                                 float width, float max_width) 
+{
+  Rectangle source = {0, 0, -width, 3};
+  Rectangle dest = source;
+  dest.x = position.x - 2;
+  dest.y = position.y + 2;
+
+  Combatant *target = data.target;
+  float max_life = target->max_life;
+  float life = Clamp(target->life, 0.0, max_life);
 
   int segments = std::floorf(life / LIFE_PER_SEGMENT);
 

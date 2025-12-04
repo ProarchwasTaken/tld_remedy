@@ -10,6 +10,7 @@
 
 struct TargetData {
   Combatant *target = NULL;
+  float prev_life = 0.0;
   float clock = 0.0;
 };
 
@@ -22,12 +23,17 @@ public:
 
   void update();
   void targetCheck(PartyMember *member);
-  void targetTimer();
+  void targetLogic();
 
   void draw();
-  void drawTargetHud(Combatant *target, Vector2 position);
-  void drawGauge(Combatant *target, Vector2 position, float width, 
-                 float max_width, bool overflow);
+  void drawTargetHud(TargetData &data, Vector2 position);
+
+  void drawLifeGauge(TargetData &data, Vector2 position, float width, 
+                     float max_width, bool overflow);
+  void drawGaugeNormal(TargetData &data, Vector2 position, float width);
+  void drawGaugeOverflow(TargetData &data, Vector2 position, float width,
+                         float max_width);
+
   void drawName(Combatant *target, Vector2 position);
 
   void drawSegments(Combatant *target, Vector2 position);
