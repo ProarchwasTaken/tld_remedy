@@ -11,7 +11,8 @@
 struct TargetData {
   Combatant *target = NULL;
   float prev_life = 0.0;
-  float clock = 0.0;
+  float red_clock = 0.0;
+  float end_clock = 0.0;
 };
 
 
@@ -20,10 +21,13 @@ public:
   EnemyHud(Vector2 position);
   ~EnemyHud();
   void assign(Mary *&player, PartyMember *&companion);
+  void behavior();
+  void damageHandling(Combatant *sender);
 
   void update();
   void targetCheck(PartyMember *member);
   void targetLogic();
+  void redGuageTimer(TargetData &data);
 
   void draw();
   void drawTargetHud(TargetData &data, Vector2 position);
@@ -36,7 +40,7 @@ public:
 
   void drawName(Combatant *target, Vector2 position);
 
-  void drawSegments(Combatant *target, Vector2 position);
+  void drawSegments(TargetData &data, Vector2 position);
   void drawTargetReticle(Combatant *target, Vector2 position, 
                          float frame_width);
 
@@ -51,4 +55,6 @@ private:
   Texture life_empty;
 
   static constexpr float LIFE_PER_SEGMENT = 20;
+  static constexpr float RED_GAUGE_TIME = 0.10;
+  static constexpr float END_TIME = 0.5;
 };

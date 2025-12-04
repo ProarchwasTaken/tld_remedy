@@ -157,6 +157,7 @@ void CombatScene::update() {
 
   plr_hud.behavior();
   com_hud.behavior();
+  enemy_hud.behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
