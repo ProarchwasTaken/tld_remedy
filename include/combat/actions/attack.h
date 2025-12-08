@@ -26,7 +26,10 @@ public:
          RectEx hitbox, AtkAnimSet &anim_set);
   Attack(Combatant *user, ActionType type, float wind_up, float action,
          float end_lag, RectEx hitbox, DamageData &data, 
-         SpriteAtlas &user_atlas, AtkAnimSet &anim_set);
+         SpriteAtlas &user_atlas, AtkAnimSet &anim_set, 
+         bool punishable = false);
+
+  void sendWarning(bool punishable);
   void updateAnimFrameDuration();
 
   void windUp() override;

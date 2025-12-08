@@ -54,7 +54,7 @@ public:
   ~Combatant();
   Color spriteTint() {return tint;}
 
-  float distanceTo(Combatant *combatant);
+  float distanceTo(Entity *entity);
 
   virtual void behavior();
   void eventHandling(EventPool<CombatantEvent> *event_pool);
@@ -149,9 +149,9 @@ public:
   std::unique_ptr<CombatAction> action;
   Status status;
 
+  Color tint = WHITE;
   static constexpr float LOW_LIFE_THRESHOLD = 0.30;
 protected:
-  Color tint = WHITE;
   DamageType damage_type;
   StunType stun_type;
 

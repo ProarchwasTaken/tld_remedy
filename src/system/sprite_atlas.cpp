@@ -63,8 +63,8 @@ void SpriteAtlas::setup() {
 }
 
 void SpriteAtlas::reset() {
+  PLOGD << "Resetting sprite atlas: '" << sprite_group << "'";
   assert(user_count == 0);
-  PLOGI << "Resetting sprite atlas: '" << sprite_group << "'";
 
   UnloadTexture(sheet);
   sprites.clear();
@@ -79,6 +79,7 @@ void SpriteAtlas::use() {
 }
 
 void SpriteAtlas::release() {
+  PLOGD << "Attempting to release: '" << sprite_group << "'";
   assert(user_count != 0);
 
   user_count--;

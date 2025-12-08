@@ -15,12 +15,12 @@ SpriteAtlas Dummy::atlas("combatants", "dummy");
 Dummy::Dummy(Vector2 position, Direction direction) :  
   Enemy("Dummy", EnemyID::DUMMY, position)
 {
-  max_life = 10;
+  max_life = 50;
   life = max_life;
 
   offense = 8;
   defense = 6;
-  intimid = 10;
+  intimid = 6;
   persist = 6;
 
   resilience = 1.0;

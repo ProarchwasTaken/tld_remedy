@@ -87,11 +87,11 @@ void Combatant::eventHandling(EventPool<CombatantEvent> *event_pool) {
   }
 }
 
-float Combatant::distanceTo(Combatant *combatant) {
-  assert(combatant != NULL);
-  assert(combatant != this);
+float Combatant::distanceTo(Entity *entity) {
+  assert(entity != NULL);
+  assert(entity != this);
 
-  Vector2 difference = Vector2Subtract(position, combatant->position);
+  Vector2 difference = Vector2Subtract(position, entity->position);
   float distance = Vector2Length(difference);
   return distance;
 }

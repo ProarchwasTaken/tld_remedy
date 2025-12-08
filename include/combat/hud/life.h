@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <raylib.h>
 #include <string>
 #include "enums.h"
@@ -48,7 +49,7 @@ public:
   static SpriteAtlas atlas;
   static SpriteAtlas status_atlas;
 private:
-  PartyMember *user;
+  PartyMember *user = NULL;
 
   Vector2 main_position;
 

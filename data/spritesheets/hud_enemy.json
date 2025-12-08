@@ -1,0 +1,27 @@
+{
+  "frames": [
+    {
+      "filename": "life_bar",
+      "frame" : {"x": 0, "y": 0, "w": 4, "h": 3}
+    },
+    {
+      "filename": "life_empty",
+      "frame": {"x": 6, "y": 0, "w": 4, "h": 3}
+    },
+    {
+      "filename": "life_chunk",
+      "frame": {"x": 0, "y": 4, "w": 5, "h": 2}
+    },
+    {
+      "filename": "empty_chunk",
+      "frame": {"x": 6, "y": 4, "w": 5, "h": 2}
+    },
+    {
+      "filename": "reticle",
+      "frame": {"x": 0, "y": 7, "w": 9, "h": 9}
+    }
+  ],
+  "meta": {
+    "size": {"w": 16, "h": 16}
+  }
+}

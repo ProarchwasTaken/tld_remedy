@@ -159,6 +159,12 @@ void UseItem::windUp() {
     interval_clock = 0.0;
   }
 
+  if (target->state == DEAD) {
+    phase = ActionPhase::END_LAG;
+    proceed();
+    return;
+  }
+
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[33];
@@ -172,6 +178,12 @@ void UseItem::windUp() {
 void UseItem::action() {
   SpriteAnimation::play(user->animation, &anim_use, false);
   user->sprite = &atlas->sprites[*user->animation->current];
+
+  if (target->state == DEAD) {
+    phase = ActionPhase::END_LAG;
+    proceed();
+    return;
+  }
 
   bool end_phase = state_clock == 1.0;
   if (end_phase) {

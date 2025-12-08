@@ -1,113 +1,83 @@
 #include <algorithm>
+#include <random>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <memory>
-#include <random>
-#include <cmath>
-#include <utility>
 #include <set>
+#include <utility>
 #include <raylib.h>
-#include <raymath.h>
-#include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
-#include "base/party_member.h"
+#include "base/combatant.h"
 #include "base/enemy.h"
+#include "base/party_member.h"
 #include "base/combat_action.h"
-#include "data/session.h"
-#include "data/animation.h"
 #include "data/rect_ex.h"
-#include "data/damage.h"
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
+#include "data/damage.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
-#include "combat/actions/evade.h"
-#include "combat/combatants/party/mary.h"
-#include "combat/combatants/party/erwin.h"
+#include "combat/combatants/enemy/servant.h"
 #include <plog/Log.h>
 
-using std::uniform_real_distribution, std::make_unique, std::unique_ptr;
-SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
+using std::unique_ptr, std::make_unique, std::uniform_real_distribution;
+SpriteAtlas Servant::atlas("combatants", "servant_combatant");
 
 
-Erwin::Erwin(Companion *data, Mary *player): 
-  PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152}, &atlas)
+Servant::Servant(Vector2 position, Direction direction) : 
+  Enemy("Servant", EnemyID::SERVANT, position)
 {
-  this->player = player;
+  max_life = 10;
+  life = max_life;
 
-  life = data->life;
-  max_life = data->max_life;
-  critical_life = life < max_life * LOW_LIFE_THRESHOLD;
+  offense = 8;
+  defense = 6;
+  intimid = 6;
+  persist = 6;
 
-  init_morale = data->init_morale;
-  morale = init_morale;
-  max_morale = data->max_morale;
+  resilience = 1.0;
+  ai_behavior = make_unique<ServantAI>();
 
-  offense = data->offense;
-  defense = data->defense;
-  intimid = data->intimid;
-  persist = data->persist;
+  bounding_box.scale = {80, 80};
+  bounding_box.offset = {-40, -80};
+  hurtbox.scale = {20, 64};
+  hurtbox.offset = {-10,-66};
 
-  resilience = 0.60;
-  ai_behavior = make_unique<ErwinAI>();
-
-  afflictPersistent(data->status);
-
-  bounding_box.scale = {64, 64};
-  bounding_box.offset = {-32, -64};
-  hurtbox.scale = {12, 56};
-  hurtbox.offset = {-6, -58};
   rectExCorrection(bounding_box, hurtbox);
-
   atlas.use();
+
   sprite = &atlas.sprites[0];
 }
 
-Erwin::~Erwin() {
+Servant::~Servant() {
   ai_behavior.reset();
   atlas.release();
 }
 
-void Erwin::setEnabled(bool value) {
-  PartyMember::setEnabled(value);
-
-  ai_goal = ErwinGoals::IDLE;
-  target = NULL;
-  tick_clock = 0;
-}
-
-void Erwin::behavior() {
+void Servant::behavior() {
   Combatant::behavior();
 
-  if (!enabled) {
-    return;
-  }
-
-  if (ai_goal == ErwinGoals::IDLE) {
+  if (ai_goal == ServantGoals::IDLE) {
     rootBehavior();
   }
-  else if (ai_goal == ErwinGoals::TARGETING){
+  else if (ai_goal == ServantGoals::TARGETING) {
     targetingBehavior();
   }
 }
 
-void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
-  PartyMember::evaluateEvent(event);
-  
-  if (!enabled) {
-    return;
-  }
+void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  Enemy::evaluateEvent(event);
 
   bool from_itself = event->sender == this;
 
   if (!from_itself && event->event_type == CombatantEVT::WARNING) {
     WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
     warningHandling(warn_event);
-    return;
   }
 
   if (from_itself && event->event_type == CombatantEVT::TOOK_DAMAGE) {
@@ -117,20 +87,16 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 }
 
-void Erwin::warningHandling(WarningCBT *event) {
+void Servant::warningHandling(WarningCBT *event) {
   assert(event->sender != this);
-  if (ai_goal == ErwinGoals::DODGING) {
+  if (ai_goal == ServantGoals::DODGING) {
     return;
   }
 
   if (team == event->assailant->team) {
     return;
   }
-
-  if (critical_life) {
-    return;
-  }
-
+  
   bool from_target = false;
   if (target != NULL) {
     float distance = distanceTo(target);
@@ -144,19 +110,21 @@ void Erwin::warningHandling(WarningCBT *event) {
   if (!from_target && !in_range) {
     return;
   }
-  
-  PLOGI << "Acknowledging Warning sent by Entity [ID: " 
-    << event->sender->entity_id << "]";
+
+  PLOGI << "Servant [ID: " << entity_id << "] Acknowledging Warning sent"
+    << " by Entity [ID: " << event->sender->entity_id << "]";
+
 
   float dodge_chance = chanceCalculation(event, from_target, in_range);
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
-  setGoal(ErwinGoals::DODGING, dodge_chance);
-  if (ai_goal != ErwinGoals::DODGING) {
+  setGoal(ServantGoals::DODGING, dodge_chance);
+  if (ai_goal != ServantGoals::DODGING) {
     return;
   }
 
-  PLOGI << "Decided to dodge the attack.";
+  PLOGI << "Servant [ID: " << entity_id << "] has decided to dodge the" 
+    << " attack";
   dodge_time = event->time_until * 0.90;
   dodge_clock = 0.0;
 
@@ -168,7 +136,7 @@ void Erwin::warningHandling(WarningCBT *event) {
   }
 }
 
-void Erwin::damageHandling(TookDamageCBT *event) {
+void Servant::damageHandling(TookDamageCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }
@@ -181,7 +149,7 @@ void Erwin::damageHandling(TookDamageCBT *event) {
   retaliation(event->assailant, retaliation_chance);
 }
 
-void Erwin::retaliation(Combatant *assailant, float chance) {
+void Servant::retaliation(Combatant *assailant, float chance) {
   if (assailant == NULL || assailant == target) {
     return;
   }
@@ -209,11 +177,14 @@ void Erwin::retaliation(Combatant *assailant, float chance) {
     target->entity_id << "]";
 }
 
-float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
-                               bool in_range)
+float Servant::chanceCalculation(WarningCBT *event, bool from_target,
+                                 bool in_range)
 {
   float range = event->hitbox.width;
+  PLOGD << "Range: " << range; 
+
   float distance = distanceTo(event->sender);
+  PLOGD << "Distance from sender: " << distance;
 
   assert(range != 0);
   float range_multiplier = ai_behavior->dodging.range_multiplier;
@@ -232,36 +203,23 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   return (time_bonus + range_bonus) * multiplier;
 }
 
-void Erwin::rootBehavior() {
-  bool enemies_present = Enemy::memberCount() != 0;
-  if (enemies_present && player->target != NULL) {
+void Servant::rootBehavior() {
+  bool party_alive = PartyMember::memberCount() != 0;
+  if (party_alive) {
     chooseTarget();
   }
 
   if (target != NULL) {
-    PLOGI << "Now targeting: '" << target->name << "' [ID: " 
-      << target->entity_id << "]";
-    ai_goal = ErwinGoals::TARGETING;
-    return;
-  }
-
-  float plr_distance = distanceTo(player);
-  if (plr_distance > preferred_plr_distance) {
-    ai_goal = ErwinGoals::FOLLOW_PLR;
-    return;
-  }
-
-  tick_clock += Game::deltaTime();
-  if (tick_clock >= 1.0) {
-    setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
-    tick_clock = 0.0;
+    PLOGI << "Servant [ID: " << entity_id << "] is now targeting: '" <<
+    target->name << "' [ID: " << target->entity_id << "]";
+    ai_goal = ServantGoals::TARGETING;
   }
 }
 
-void Erwin::targetingBehavior() {
+void Servant::targetingBehavior() {
   assert(target != NULL);
   if (target->state == DEAD) {
-    ai_goal = ErwinGoals::IDLE;
+    ai_goal = ServantGoals::IDLE;
     target = NULL;
     return;
   }
@@ -283,8 +241,9 @@ void Erwin::targetingBehavior() {
   }
 
   float retreat_chance = ai_behavior->contesting.retreat_chance;
-  setGoal(ErwinGoals::RETREATING, retreat_chance);
-  if (ai_goal == ErwinGoals::RETREATING) {
+  setGoal(ServantGoals::RETREATING, retreat_chance);
+
+  if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Deciding to retreat from target.";
     float min_retreat = ai_behavior->contesting.min_retreat;
     float max_retreat = ai_behavior->contesting.max_retreat;
@@ -305,108 +264,40 @@ void Erwin::targetingBehavior() {
   }
 }
 
-void Erwin::chooseTarget() {
-  int count = Enemy::memberCount();
+void Servant::chooseTarget() {
+  int count = PartyMember::memberCount();
   assert(count != 0);
 
-  if (count == 1 && player->target != NULL) {
-    target = player->target;
+  std::set<std::pair<float, Combatant*>> party_members;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team != CombatantTeam::PARTY) {
+      continue;
+    }
+
+    if (combatant->state != CombatantState::DEAD) {
+      float distance = distanceTo(combatant);
+      party_members.emplace(std::make_pair(distance, combatant));
+    }
+  }
+
+  if (party_members.empty()) {
     return;
   }
 
-  std::set<std::pair<float, Combatant*>> enemies;
-
-  for (Combatant *combatant : existing_combatants) {
-    if (team == combatant->team) {
-      continue;
-    }
-
-    if (combatant->state == CombatantState::DEAD) {
-      continue;
-    }
-
-    if (player->target != combatant) {
-      float distance = distanceTo(combatant);
-      enemies.emplace(std::make_pair(distance, combatant));
-    }
-  }
-
-  if (!enemies.empty()) {
-    auto closest = std::min_element(enemies.begin(), enemies.end(),
-                                    Comparison::combatantDistance);
-    target = closest->second;
-  } 
-}
-
-void Erwin::decideAttack() {
-  uniform_real_distribution<float> range(0.0, 1.0);
-  float percentage = range(Game::RNG);
-
-  float chance = 0.25;
-  if (morale >= max_morale * 0.50) {
-    chance += 0.50;
-  }
-
-  bool sufficent = !demoralized && morale >= 4;
-
-  if (sufficent && percentage <= chance) {
-    attackHP();
-    morale -= 4;
+  if (party_members.size() == 1) {
+    target = party_members.begin()->second;
   }
   else {
-    attackMP();
+    auto closest = std::min_element(party_members.begin(), 
+                                    party_members.end(),
+                                    Comparison::combatantDistance);
+
+    target = closest->second;
   }
 }
 
-void Erwin::attackMP() {
-  RectEx hitbox;
-  hitbox.scale = {28, 8};
-  hitbox.offset = {-14 + (14.0f * direction), -50};
-
-  unique_ptr<CombatAction> action;
-  action = make_unique<Attack>(this, atlas, hitbox, atk_mp_set);
-  performAction(action);
-}
-
-void Erwin::attackHP() {
-  RectEx hitbox;
-  hitbox.scale = {30, 8};
-  hitbox.offset = {-15 + (16.0f * direction), -45};
-
-  DamageData data;
-  data.damage_type = DamageType::LIFE;
-  data.calculation = DamageType::LIFE;
-  data.stun_time = 0.5;
-  data.stun_type = StunType::NORMAL;
-  data.knockback = 45.0;
-  data.hit_stop = 0.2;
-  data.assailant = this;
-
-  unique_ptr<CombatAction> action;
-  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.20, 0.05,
-                               0.25, hitbox, data, atlas, atk_hp_set);
-  performAction(action);
-}
-
-void Erwin::ghoststep(int direction_x) {
-  increaseExhaustion(5.5);
-
-  unique_ptr<CombatAction> action;
-  action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
-  performAction(action);
-}
-
-void Erwin::evade() {
-  RectEx hitbox;
-  hitbox.scale = {8, 46};
-  hitbox.offset = {-4 + (8.0f * direction), -48};
-
-  unique_ptr<CombatAction> action;
-  action = make_unique<Evade>(this, atlas, hitbox, ev_set);
-  performAction(action);
-}
-
-void Erwin::setGoal(ErwinGoals goal, float chance) {
+void Servant::setGoal(ServantGoals goal, float chance) {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
@@ -415,15 +306,83 @@ void Erwin::setGoal(ErwinGoals goal, float chance) {
   }
 }
 
-void Erwin::update() {
-  tintFlash();
+void Servant::decideAttack() {
+  assert(target->team == CombatantTeam::PARTY);
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
 
+  PartyMember *party_member = static_cast<PartyMember*>(target);
+  float chance = 0.20;
+
+  if (party_member->critical_life) {
+    chance += 0.20;
+  }
+
+  if (party_member->demoralized) {
+    chance += 0.40;
+  }
+
+  if (percentage <= chance) {
+    attackHP();
+  }
+  else {
+    attackMP();
+  }
+}
+
+void Servant::attackMP() {
+  RectEx hitbox;
+  hitbox.scale = {32, 12};
+  hitbox.offset = {-16 + (16.0f * direction), -52};
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, atlas, hitbox, atk_mp_set);
+  performAction(action);
+}
+
+void Servant::attackHP() {
+  RectEx hitbox;
+  hitbox.scale = {38, 24};
+  hitbox.offset = {-19 + (19.0f * direction), -52};
+
+  DamageData data;
+  data.damage_type = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+  data.knockback = 20.0;
+  data.hit_stop = 0.2;
+  data.assailant = this;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.35, 0.05,
+                               0.25, hitbox, data, atlas, atk_hp_set);
+
+  performAction(action);
+  sfx.play("enemy_warning1");
+}
+
+void Servant::ghoststep() {
+  assert(target != NULL);
+
+  int direction_x;
+
+  float difference = position.x - target->position.x;
+  if (difference < 0) {
+    direction_x = LEFT;
+  }
+  else {
+    direction_x = RIGHT;
+  }
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
+  performAction(action);
+}
+
+void Servant::update() {
   switch (state) {
     case CombatantState::NEUTRAL: {
-      if (exhaustion != 0) {
-        depleteExhaustion();
-      }
-
       neutralLogic();
       break;
     }
@@ -448,71 +407,41 @@ void Erwin::update() {
   statusLogic();
 }
 
-void Erwin::neutralLogic() {
+void Servant::neutralLogic() {
   float old_x = position.x;
 
   switch (ai_goal) {
-    case ErwinGoals::IDLE: {
+    case ServantGoals::IDLE: {
       moving_x = 0;
       break;
     }
-    case ErwinGoals::LOOK_AT_PLR: {
-      lookAtPlayer();
-      ai_goal = ErwinGoals::IDLE;
-      break;
-    }
-    case ErwinGoals::FOLLOW_PLR: {
-      followPlayer();
-      break;
-    }
-    case ErwinGoals::TARGETING: {
+    case ServantGoals::TARGETING: {
       targetingLogic();
       break;
     }
-    case ErwinGoals::RETREATING: {
+    case ServantGoals::RETREATING: {
       retreatingLogic();
       break;
     }
-    case ErwinGoals::DODGING: {
+    case ServantGoals::DODGING: {
       dodgingLogic();
       break;
     }
   }
 
   has_moved = old_x != position.x;
-  animationLogic();
-}
-
-void Erwin::lookAtPlayer() {
-  float difference = position.x - player->position.x;
-  if (difference > 0) {
-    direction = LEFT;
+  if (has_moved) {
+    useMovingAnimation();
+    rectExCorrection(bounding_box, hurtbox);
   }
   else {
-    direction = RIGHT; 
+    sprite = &atlas.sprites[0]; 
   }
 }
 
-void Erwin::followPlayer() {
-  float difference = position.x - player->position.x;
-  if (difference > 0) {
-    moving_x = LEFT;
-  }
-  else {
-    moving_x = RIGHT;
-  }
-
-  movement();
-
-  float distance = distanceTo(player);
-  if (distance <= preferred_plr_distance / 2) {
-    ai_goal = ErwinGoals::IDLE;
-    moving_x = 0;
-  }
-}
-
-void Erwin::targetingLogic() {
+void Servant::targetingLogic() {
   assert(target != NULL);
+
   float difference = position.x - target->position.x;
   if (difference > 0) {
     direction = LEFT;
@@ -537,9 +466,9 @@ void Erwin::targetingLogic() {
   decideAttack();
 
   float retreat_chance = ai_behavior->targeting.retreat_chance;
-  setGoal(ErwinGoals::RETREATING, retreat_chance);
+  setGoal(ServantGoals::RETREATING, retreat_chance);
 
-  if (ai_goal == ErwinGoals::RETREATING) {
+  if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Retreating from target.";
     float min_retreat = ai_behavior->targeting.min_retreat;
     float max_retreat = ai_behavior->targeting.max_retreat;
@@ -549,10 +478,10 @@ void Erwin::targetingLogic() {
   }
 }
 
-void Erwin::retreatingLogic() {
+void Servant::retreatingLogic() {
   assert(target != NULL);
   if (target->state == DEAD) {
-    ai_goal = ErwinGoals::IDLE;
+    ai_goal = ServantGoals::IDLE;
     target = NULL;
     return;
   }
@@ -573,27 +502,27 @@ void Erwin::retreatingLogic() {
   }
 
   float target_chance = ai_behavior->retreating.target_chance;
-  setGoal(ErwinGoals::TARGETING, target_chance);
+  setGoal(ServantGoals::TARGETING, target_chance);
 
-  if (ai_goal != ErwinGoals::TARGETING) {
+  if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
-    ai_goal = ErwinGoals::IDLE;
+    ai_goal = ServantGoals::IDLE;
     target = NULL;
   }
   else {
     float min_wait = ai_behavior->retreating.min_wait;
     float max_wait = ai_behavior->retreating.max_wait;
-    wait(min_wait, max_wait);
+    wait(min_wait, max_wait);  
   }
 
   retreat_clock = 0.0;
 }
 
-void Erwin::dodgingLogic() {
+void Servant::dodgingLogic() {
   assert(target != NULL);
   if (target->state == DEAD) {
     PLOGI << "Aborting dodging goal.";
-    ai_goal = ErwinGoals::IDLE;
+    ai_goal = ServantGoals::IDLE;
     target = NULL;
     return;
   }
@@ -608,29 +537,26 @@ void Erwin::dodgingLogic() {
     return;
   }
 
-  int x_direction;
   float difference = position.x - target->position.x;
   if (difference > 0) {
     direction = LEFT;
-    x_direction = RIGHT;
   }
   else {
     direction = RIGHT;
-    x_direction = LEFT;
   }
 
   if (dodge_clock < 1.0) {
     return;
   }
 
-  ghoststep(x_direction);
+  ghoststep();
 
   float target_chance = ai_behavior->dodging.target_chance;
-  setGoal(ErwinGoals::TARGETING, target_chance);
+  setGoal(ServantGoals::TARGETING, target_chance);
 
-  if (ai_goal != ErwinGoals::TARGETING) {
+  if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
-    ai_goal = ErwinGoals::IDLE;
+    ai_goal = ServantGoals::IDLE;
     target = NULL;
   }
   else {
@@ -642,85 +568,66 @@ void Erwin::dodgingLogic() {
   dodge_clock = 0.0;
 }
 
-void Erwin::wait(float time) {
+void Servant::wait(float time) {
   wait_time = time;
   wait_clock = 0.0;
   waiting = true;
-  PLOGI << "Waiting for: " << wait_time << " seconds.";
+  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << wait_time 
+    << " seconds.";
 }
 
-void Erwin::wait(float min, float max) {
+void Servant::wait(float min, float max) {
   uniform_real_distribution<float> range(min, max);
 
   wait_time = range(Game::RNG);
   wait_clock = 0.0;
   waiting = true;
-  PLOGI << "Waiting for: " << wait_time << " seconds.";
+  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << wait_time 
+    << " seconds.";
 }
 
-void Erwin::waitTimer() {
+void Servant::waitTimer() {
   wait_clock += Game::deltaTime() / wait_time;
 
   if (wait_clock >= 1.0) {
-    PLOGI << "Erwin is done waiting.";
+    PLOGI << "Servant [ID: " << entity_id << "] is done waiting.";
     wait_clock = 0.0;
     waiting = false;
   }
 }
 
-void Erwin::movement() {
+void Servant::movement() {
   if (moving_x == 0) {
     return;
   }
 
   direction = static_cast<Direction>(moving_x);
-
   float speed = default_speed * speed_multiplier;
   float magnitude = speed * direction;
 
   position.x += magnitude * Game::deltaTime();
 }
 
-void Erwin::animationLogic() {
-  Animation *next_anim;
-  if (has_moved) {
-    
-    float difference = 1.0 - speed_multiplier;
-    float percentage = 1.0 + difference;
+void Servant::useMovingAnimation() {
+  float difference = 1.0 - speed_multiplier;
+  float percentage = 1.0 + difference;
 
-    next_anim =  &anim_move;
-    next_anim->frame_duration = anim_move_speed * percentage;
-    rectExCorrection(bounding_box, hurtbox);
-  }
-  else {
-    next_anim = getIdleAnim();
-  }
-
-  SpriteAnimation::play(animation, next_anim, true);
+  anim_move.frame_duration = anim_move_speed * percentage;
+  SpriteAnimation::play(animation, &anim_move, true);
   sprite = &atlas.sprites[*animation->current];
 }
 
-Animation *Erwin::getIdleAnim() {
-  if (!critical_life) {
-    return &anim_idle;
-  }
-  else {
-    return &anim_crit;
-  }
-}
-
-Rectangle *Erwin::getStunSprite() {
+Rectangle *Servant::getStunSprite() {
   if (damage_type == DamageType::LIFE) {
-    return &atlas.sprites[7];
+    return &atlas.sprites[5];
   }
   else {
-    return &atlas.sprites[8];
+    return &atlas.sprites[4];
   }
 }
 
-void Erwin::draw() {
+void Servant::draw() {
   assert(sprite != NULL);
-
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
@@ -728,8 +635,13 @@ void Erwin::draw() {
   DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
 }
 
-void Erwin::drawDebug() {
+void Servant::drawDebug() {
   Combatant::drawDebug();
+
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
+  const char *txt_goal = TextFormat("%i", static_cast<int>(ai_goal));
+  DrawTextEx(*font, txt_goal, position, size, -3, RED);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();

@@ -5,12 +5,15 @@
 #include "game.h"
 #include "base/combat_action.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
+#include <plog/Log.h>
 
 
 KnifePiercer::KnifePiercer(Mary *user): 
@@ -36,10 +39,28 @@ KnifePiercer::KnifePiercer(Mary *user):
 
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(24);
+  sendWarning();
 }
 
 KnifePiercer::~KnifePiercer() {
   user->animation = NULL;
+}
+
+void KnifePiercer::sendWarning() {
+  if (user->target == NULL) {
+    return;
+  }
+
+  bool dead = user->target->state == CombatantState::DEAD;
+  if (!dead) {
+    Combatant *target = user->target;
+
+    PLOGD << "Sending warning event for: '" << target->name << "' [ID: "
+      << target->entity_id << "]";
+    CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
+                                        user->target, type, hitbox.rect, 
+                                        wind_time, act_time, user, true);
+  }
 }
 
 void KnifePiercer::windUp() {

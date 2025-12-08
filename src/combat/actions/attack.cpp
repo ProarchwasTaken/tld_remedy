@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <utility>
 #include <raylib.h>
 #include <raymath.h>
@@ -7,11 +8,13 @@
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
+#include "data/combatant_event.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/actions/attack.h"
 #include <plog/Log.h>
 
@@ -41,12 +44,13 @@ Attack::Attack(Combatant *user, SpriteAtlas &user_atlas,
   this->user_atlas = &user_atlas;
   this->anim_set = &anim_set;
   updateAnimFrameDuration();
+  sendWarning(false);
 }
 
 Attack::Attack(Combatant *user, ActionType type, float wind_up, 
                float action, float end_lag, RectEx hitbox, 
                DamageData &data, SpriteAtlas &user_atlas, 
-               AtkAnimSet &anim_set): 
+               AtkAnimSet &anim_set, bool punishable): 
   CombatAction(ActionID::ATTACK, type, user, wind_up, action, end_lag)
 {
   name = "Attack: Modified";
@@ -58,6 +62,25 @@ Attack::Attack(Combatant *user, ActionType type, float wind_up,
   this->user_atlas = &user_atlas;
   this->anim_set = &anim_set;
   updateAnimFrameDuration();
+  sendWarning(punishable);
+}
+
+void Attack::sendWarning(bool punishable) {
+  if (user->target == NULL) {
+    return;
+  }
+
+  bool dead = user->target->state == CombatantState::DEAD;
+  if (!dead) {
+    Combatant *target = user->target;
+
+    PLOGD << "Sending warning event for: '" << target->name << "' [ID: "
+      << target->entity_id << "]";
+    CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
+                                        user->target, type, hitbox.rect, 
+                                        wind_time, act_time, user, 
+                                        punishable);
+  }
 }
 
 void Attack::updateAnimFrameDuration() {

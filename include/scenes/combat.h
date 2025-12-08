@@ -15,6 +15,7 @@
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
+#include "combat/hud/enemy.h"
 #include "combat/hud/cmd_plr.h"
 #include "combat/hud/cmd_item.h"
 #include "combat/combatants/party/mary.h"
@@ -64,13 +65,14 @@ private:
 
   bool game_over = false;
 
-  Mary *player;
+  Mary *player = NULL;
   LifeHud plr_hud = LifeHud({34, 215});
   PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
 
-  PartyMember *companion;
+  PartyMember *companion = NULL;
   LifeHud com_hud = LifeHud({154, 215});
 
+  EnemyHud enemy_hud = EnemyHud({409, 16});
   ItemCmdHud item_hud = ItemCmdHud({350, 222});
 
   // Remove this later!

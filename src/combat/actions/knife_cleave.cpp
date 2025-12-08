@@ -9,11 +9,13 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
-#include "system/sprite_atlas.h"
+#include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "system/sprite_atlas.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/actions/knife_cleave.h"
 #include <plog/Log.h>
 
@@ -49,6 +51,8 @@ KnifeCleave::KnifeCleave(Mary *user):
   if (canceled_into) {
     wind_time = wind_time * 0.5;
   }
+
+  sendWarning();
 }
 
 KnifeCleave::~KnifeCleave() {
@@ -61,6 +65,23 @@ bool KnifeCleave::cancelCheck() {
   }
   else {
     return false;
+  }
+}
+
+void KnifeCleave::sendWarning() {
+  if (user->target == NULL) {
+    return;
+  }
+
+  bool dead = user->target->state == CombatantState::DEAD;
+  if (!dead) {
+    Combatant *target = user->target;
+
+    PLOGD << "Sending warning event for: '" << target->name << "' [ID: "
+      << target->entity_id << "]";
+    CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
+                                        user->target, type, hitbox.rect,
+                                        wind_time, act_time, user);
   }
 }
 

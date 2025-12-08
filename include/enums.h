@@ -64,13 +64,15 @@ enum class TechCostType {
 };
 
 enum class EnemyID {
-  DUMMY,
+  DUMMY = -1,
+  SERVANT
 };
 
 enum class TroopID {
   INVALID = -1,
   DB_TROOP1,
-  DB_TROOP2
+  DB_TROOP2,
+  DB_TROOP3,
 };
 
 enum class ActionID {
@@ -146,6 +148,7 @@ enum class CombatantEVT {
   TOOK_DAMAGE,
   MORALE_GAINED,
   EFFECT_GAINED,
-  EFFECT_LOST
+  EFFECT_LOST,
+  WARNING
 };
 

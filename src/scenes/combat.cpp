@@ -26,6 +26,7 @@
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
+#include "combat/combatants/enemy/servant.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -69,11 +70,15 @@ CombatScene::~CombatScene() {
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
   initializePlayer();
-  initializeCompanion();
 
+  if (session->companion.life != 0) {
+    initializeCompanion();
+  }
+
+  enemy_hud.assign(player, companion);
   item_hud.assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop2();
+  EnemyTroop troop = DBTroop3();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
@@ -132,6 +137,9 @@ unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
     case EnemyID::DUMMY: {
       return make_unique<Dummy>(position, direction);
     }
+    case EnemyID::SERVANT: {
+      return make_unique<Servant>(position, direction);
+    }
     default: {
       return nullptr;
     }
@@ -149,6 +157,7 @@ void CombatScene::update() {
 
   plr_hud.behavior();
   com_hud.behavior();
+  enemy_hud.behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
@@ -163,6 +172,7 @@ void CombatScene::update() {
     plr_hud.update();
     plr_cmd_hud.update();
     com_hud.update();
+    enemy_hud.update();
     item_hud.update();
 
     eventProcessing();
@@ -390,6 +400,7 @@ void CombatScene::draw() {
   plr_hud.draw();
   plr_cmd_hud.draw();
   com_hud.draw();
+  enemy_hud.draw();
   item_hud.draw();
 
   #ifndef NDEBUG
@@ -457,7 +468,10 @@ void CombatScene::drawDebugInfo() {
   int text_size = font->baseSize;
   
   drawPartyStats(player, {6, 4}, font, text_size);
-  drawPartyStats(companion, {128, 4}, font, text_size);
+  if (companion != NULL) {
+    drawPartyStats(companion, {128, 4}, font, text_size);
+  }
+
   drawDebugCombo(font, text_size);
 }
 

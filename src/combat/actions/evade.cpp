@@ -17,7 +17,7 @@
 Evade::Evade(PartyMember *user, SpriteAtlas &user_atlas, RectEx hitbox,
              EvadeSpriteSet &sprite_set): 
   CombatAction(ActionID::EVADE, ActionType::DEFENSE, user, 
-               0.20, 0.40, 0.25) 
+               0.15, 0.40, 0.25) 
 {
   name = "Evade";
   this->user = user;
@@ -54,13 +54,15 @@ void Evade::intercept(DamageData &data) {
   PLOGI << "Conditions have been met to intercept damage function";
   PLOGD << "Timing: " << act_time * state_clock;
   data.b_def = &user->persist;
-  data.def_mod += 0.40;
+  data.def_mod += 0.75;
 
   float damage = Clamp(user->damageCalculation(data), 0, 9999);
   PLOGD << "Result: " << damage;
 
   float life_time;
   Color tint;
+
+  float sleep_time;
 
   if (user->important && state_clock <= 0.25) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
@@ -71,13 +73,17 @@ void Evade::intercept(DamageData &data) {
     tint = Game::palette[51];
 
     Combatant::sfx.play("evade_perfect");
-    Game::sleep(0.25);
+    sleep_time = 0.25;
   }
   else {
     PLOGD << "Redirection damage towards the combatant's exhaustion.";
     user->increaseExhaustion(damage); 
     tint = Game::palette[29];
-    Game::sleep(0.05);
+    sleep_time = 0.25;
+  }
+
+  if (user->important) {
+    Game::sleep(sleep_time);
   }
  
   state_clock = 0.999999;
@@ -96,11 +102,20 @@ void Evade::windUp() {
   bool end_phase = state_clock >= 1.0;
   if (end_phase) {
     user->sprite = &user_atlas->sprites[sprite_set->id_active];
+    user->sfx.play("evade_ready");
   }
 }
 
 void Evade::action() {
   bool end_phase = state_clock >= 1.0;
+
+  Color start_tint = Game::palette[14];
+  unsigned char r = Lerp(start_tint.r, 255, state_clock);
+  unsigned char g = Lerp(start_tint.g, 255, state_clock);
+  unsigned char b = Lerp(start_tint.b, 255, state_clock);
+
+  user->tint = {r, g, b, 255}; 
+
   if (!end_phase) {
     return;
   }
