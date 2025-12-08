@@ -264,7 +264,7 @@ void Mary::readActionBuffer() {
       break;
     }
     case MaryAction::GHOST_STEP: {
-      if (!critical_life) {
+      if (life > 1) {
         increaseExhaustion(gs_cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
       }
@@ -272,7 +272,7 @@ void Mary::readActionBuffer() {
       break;
     }
     case MaryAction::EVADE: {
-      if (!critical_life) {
+      if (life > 1) {
         RectEx hitbox;
         hitbox.scale = {8, 46};
         hitbox.offset = {-4 + (8.0f * direction), -48};

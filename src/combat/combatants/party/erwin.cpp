@@ -127,7 +127,7 @@ void Erwin::warningHandling(WarningCBT *event) {
     return;
   }
 
-  if (critical_life) {
+  if (life <= 1) {
     return;
   }
 

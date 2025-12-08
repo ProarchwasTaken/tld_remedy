@@ -76,7 +76,7 @@ Color PlayerCmdHud::determineAttackColor() {
 }
 
 void PlayerCmdHud::updateDefendText() {
-  if (player->critical_life) {
+  if (player->life <= 1) {
     defend_color = Game::palette[32];
     return;
   }
@@ -123,8 +123,7 @@ Color PlayerCmdHud::determineGSColor() {
   }
 
   float gs_cost = player->gs_cost;
-  float threshold = player->max_life * player->LOW_LIFE_THRESHOLD;
-  if (player->life - gs_cost <= threshold) {
+  if (player->life - gs_cost <= 1.0) {
     return Game::palette[26];
   }
   else {
@@ -159,7 +158,7 @@ void PlayerCmdHud::draw() {
   drawCmdText("Attack", 0, font, txt_size, attack_color);
 
   drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color,
-              player->critical_life);
+              player->life <= 1);
 
   drawCmdText(player->tech1_name.c_str(), 2, font, txt_size, tech1_color,
               player->demoralized);

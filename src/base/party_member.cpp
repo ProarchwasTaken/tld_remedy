@@ -274,10 +274,13 @@ void PartyMember::increaseExhaustion(float magnitude) {
     PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
       "] is now Winded!";
     critical_life = true;
-    deplete_delay = 2.0;
+  }
+
+  if (life <= 1) {
+    deplete_delay = 3.0;
   }
   else {
-    deplete_delay = DEFAULT_DEPLETE_DELAY;
+    deplete_delay = DEFAULT_DEPLETE_DELAY; 
   }
 
   deplete_clock = 0.0;
