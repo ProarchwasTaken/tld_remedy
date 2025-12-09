@@ -81,7 +81,8 @@ enum class ActionID {
   EVADE,
   KNIFE_CLEAVE,
   KNIFE_PIERCER,
-  USE_ITEM
+  USE_ITEM,
+  ERWIN_PROVOKE
 };
 
 enum class StatusID {

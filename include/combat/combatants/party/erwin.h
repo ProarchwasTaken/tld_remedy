@@ -98,18 +98,17 @@ public:
   Animation *getIdleAnim();
   Rectangle *getStunSprite();
 
-  static SpriteAtlas atlas;
-
   ErwinGoals ai_goal = ErwinGoals::IDLE;
-  std::unique_ptr<AIBehavior> ai_behavior;
-  
+  std::unique_ptr<AIBehavior> ai_behavior; 
   float tick_clock = 0.0;
+
+  Mary *player;
+  static SpriteAtlas atlas;
 private:
   const float default_speed = 68;
   int moving_x = 0;
   bool has_moved = false;
 
-  Mary *player;
   float preferred_plr_distance = 128;
   float attack_distance = 30;
   float contest_distance = 96;
