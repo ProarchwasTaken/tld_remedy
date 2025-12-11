@@ -4,6 +4,7 @@
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "data/session.h"
+#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
@@ -20,7 +21,8 @@ enum class ErwinGoals {
   FOLLOW_PLR = 2,
   TARGETING = 3,
   RETREATING = 4,
-  DODGING = 5
+  DODGING = 5,
+  PROVOKE = 6
 };
 
 
@@ -58,6 +60,9 @@ public:
   float chanceCalculation(WarningCBT *event, bool from_target,
                           bool in_range);
 
+  void assistInput();
+  bool lightAssistCondition();
+
   /* This is considered the start point of the Erwin's behavior tree.
    * The function is meant to be ran while the companion is idle.*/
   void rootBehavior();
@@ -73,6 +78,7 @@ public:
   void attackHP();
   void ghoststep(int direction_x);
   void evade();
+  void provoke();
 
   void setGoal(ErwinGoals goal, float chance);
 
@@ -105,6 +111,8 @@ public:
   Mary *player;
   static SpriteAtlas atlas;
 private:
+  CombatKeybinds *keybinds;
+
   const float default_speed = 68;
   int moving_x = 0;
   bool has_moved = false;

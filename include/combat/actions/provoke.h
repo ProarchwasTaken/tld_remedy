@@ -20,5 +20,4 @@ private:
 
   SpriteAtlas *atlas;
   Animation anim_provoke = {{23, 24}, 0.15};
-  Animation anim_end = {{23, 22}, 0.10};
 };

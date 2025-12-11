@@ -12,7 +12,7 @@
 
 Provoke::Provoke(Erwin *user): 
   CombatAction(ActionID::ERWIN_PROVOKE, ActionType::DEFENSE, user, 
-               0.20, 0.30, 0.20)
+               0.10, 1.00, 0.50)
 {
   name = "Provoke";
   this->user = user;
@@ -76,14 +76,13 @@ void Provoke::windUp() {
 void Provoke::action() {
   SpriteAnimation::play(user->animation, &anim_provoke, true);
   user->sprite = &atlas->sprites[*user->animation->current];
-}
 
-void Provoke::endLag() {
-  SpriteAnimation::play(user->animation, &anim_end, true);
-  user->sprite = &atlas->sprites[*user->animation->current];
-
-  bool end_state = state_clock = 1.0;
+  bool end_state = state_clock == 1.0;
   if (end_state) {
     user->intangible = false;
   }
+}
+
+void Provoke::endLag() {
+  user->sprite = &atlas->sprites[22];
 }

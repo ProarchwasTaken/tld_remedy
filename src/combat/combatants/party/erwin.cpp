@@ -14,7 +14,7 @@
 #include "base/party_member.h"
 #include "base/enemy.h"
 #include "base/combat_action.h"
-#include "data/session.h"
+#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
@@ -22,10 +22,12 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "utils/input.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
+#include "combat/actions/provoke.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
@@ -55,6 +57,10 @@ Erwin::Erwin(Companion *data, Mary *player):
   resilience = 0.60;
   ai_behavior = make_unique<ErwinAI>();
 
+  tech1_name = "Provoke";
+  tech1_type = TechCostType::MORALE;
+  tech1_cost = 8;
+
   afflictPersistent(data->status);
 
   bounding_box.scale = {64, 64};
@@ -65,6 +71,8 @@ Erwin::Erwin(Companion *data, Mary *player):
 
   atlas.use();
   sprite = &atlas.sprites[0];
+
+  keybinds = &Game::settings.combat_keybinds;
 }
 
 Erwin::~Erwin() {
@@ -86,6 +94,8 @@ void Erwin::behavior() {
   if (!enabled) {
     return;
   }
+
+  assistInput();
 
   if (ai_goal == ErwinGoals::IDLE) {
     rootBehavior();
@@ -230,6 +240,18 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   PLOGD << "Multiplier: " << multiplier;
 
   return (time_bonus + range_bonus) * multiplier;
+}
+
+void Erwin::assistInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  bool light_input = Input::pressed(keybinds->light_assist, gamepad);
+  if (light_input && lightAssistCondition()) {
+    ai_goal = ErwinGoals::PROVOKE;
+  }
+}
+
+bool Erwin::lightAssistCondition() {
+  return !demoralized && morale >= tech1_cost;
 }
 
 void Erwin::rootBehavior() {
@@ -406,6 +428,18 @@ void Erwin::evade() {
   performAction(action);
 }
 
+void Erwin::provoke() {
+  if (morale < tech1_cost) {
+    return;
+  }
+
+  morale -= tech1_cost;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Provoke>(this);
+  performAction(action);
+}
+
 void Erwin::setGoal(ErwinGoals goal, float chance) {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
@@ -476,6 +510,10 @@ void Erwin::neutralLogic() {
     case ErwinGoals::DODGING: {
       dodgingLogic();
       break;
+    }
+    case ErwinGoals::PROVOKE: {
+      provoke();
+      ai_goal = ErwinGoals::IDLE;
     }
   }
 
