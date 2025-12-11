@@ -1,5 +1,6 @@
 #pragma once
 #include "base/combat_action.h"
+#include "data/animation.h"
 #include "combat/combatants/party/erwin.h"
 #include "system/sprite_atlas.h"
 
@@ -16,5 +17,8 @@ public:
   void endLag() override;
 private:
   Erwin *user;
+
   SpriteAtlas *atlas;
+  Animation anim_provoke = {{23, 24}, 0.15};
+  Animation anim_end = {{23, 22}, 0.10};
 };
