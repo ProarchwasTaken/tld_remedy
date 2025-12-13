@@ -57,9 +57,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   resilience = 0.60;
   ai_behavior = make_unique<ErwinAI>();
 
-  tech1_name = "Provoke";
-  tech1_type = TechCostType::MORALE;
-  tech1_cost = 8;
+  tech1 = {"Provoke", TechCostType::MORALE, 8};
 
   afflictPersistent(data->status);
 
@@ -252,7 +250,7 @@ void Erwin::assistInput() {
 }
 
 bool Erwin::lightAssistCondition() {
-  return !demoralized && morale >= tech1_cost;
+  return !demoralized && morale >= tech1.cost;
 }
 
 void Erwin::rootBehavior() {
@@ -430,11 +428,11 @@ void Erwin::evade() {
 }
 
 void Erwin::provoke() {
-  if (morale < tech1_cost) {
+  if (morale < tech1.cost) {
     return;
   }
 
-  morale -= tech1_cost;
+  morale -= tech1.cost;
 
   unique_ptr<CombatAction> action;
   action = make_unique<Provoke>(this);

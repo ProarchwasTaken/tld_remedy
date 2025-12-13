@@ -55,8 +55,8 @@ void PlayerCmdHud::update() {
   if (player->state == NEUTRAL || player->canCancel(true)) {
     attack_color = determineAttackColor();
     updateDefendText();
-    tech1_color = determineTechColor(player->tech1_cost);
-    tech2_color = determineTechColor(player->tech2_cost); 
+    tech1_color = determineTechColor(player->tech1.cost);
+    tech2_color = determineTechColor(player->tech2.cost); 
   }
   else {
     attack_color = Game::palette[2];
@@ -160,10 +160,10 @@ void PlayerCmdHud::draw() {
   drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color,
               player->life <= 1);
 
-  drawCmdText(player->tech1_name.c_str(), 2, font, txt_size, tech1_color,
+  drawCmdText(player->tech1.name.c_str(), 2, font, txt_size, tech1_color,
               player->demoralized);
 
-  drawCmdText(player->tech2_name.c_str(), 3, font, txt_size, tech2_color,
+  drawCmdText(player->tech2.name.c_str(), 3, font, txt_size, tech2_color,
               player->demoralized);
 }
 
