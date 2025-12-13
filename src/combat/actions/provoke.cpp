@@ -12,7 +12,7 @@
 
 Provoke::Provoke(Erwin *user): 
   CombatAction(ActionID::ERWIN_PROVOKE, ActionType::DEFENSE, user, 
-               0.10, 1.00, 0.50)
+               0.10, 1.00, 0.25)
 {
   name = "Provoke";
   this->user = user;
@@ -70,6 +70,7 @@ void Provoke::windUp() {
   bool end_state = state_clock == 1.0;
   if (end_state) {
     drawEnemyAggro();
+    user->sfx.play("provoke");
   }
 }
 

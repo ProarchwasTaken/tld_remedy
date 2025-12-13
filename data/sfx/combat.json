@@ -87,6 +87,14 @@
     {
       "name": "endurance_lost",
       "filename": "combat/endurance_lost.mp3"
+    },
+    {
+      "name": "assist_call",
+      "filename": "combat/assist_call.mp3"
+    },
+    {
+      "name": "provoke",
+      "filename": "combat/provoke.mp3"
     }
   ]
 }

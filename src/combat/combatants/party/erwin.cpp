@@ -247,6 +247,7 @@ void Erwin::assistInput() {
   bool light_input = Input::pressed(keybinds->light_assist, gamepad);
   if (light_input && lightAssistCondition()) {
     ai_goal = ErwinGoals::PROVOKE;
+    sfx.play("assist_call");
   }
 }
 
