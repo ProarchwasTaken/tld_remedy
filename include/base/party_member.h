@@ -45,6 +45,8 @@ public:
   void depleteExhaustion();
   void depleteInstant();
 
+  void techniqueCooldown();
+
   void tintFlash();
 
   PartyMemberID id;

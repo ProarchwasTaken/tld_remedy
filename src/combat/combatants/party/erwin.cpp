@@ -58,6 +58,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   ai_behavior = make_unique<ErwinAI>();
 
   tech1 = {"Provoke", TechCostType::MORALE, 8};
+  tech1.cooldown = 8.0;
 
   afflictPersistent(data->status);
 
@@ -245,12 +246,20 @@ void Erwin::assistInput() {
   bool light_input = Input::pressed(keybinds->light_assist, gamepad);
   if (light_input && lightAssistCondition()) {
     ai_goal = ErwinGoals::PROVOKE;
+    tech1.clock = 0.0;
     sfx.play("assist_call");
   }
 }
 
 bool Erwin::lightAssistCondition() {
-  return !demoralized && morale >= tech1.cost;
+  bool off_cooldown = tech1.clock >= 1.0;
+  if (off_cooldown && !demoralized && morale >= tech1.cost) {
+    return true;
+  }
+  else {
+    sfx.play("action_denied");
+    return false;
+  }
 }
 
 void Erwin::rootBehavior() {
@@ -479,6 +488,7 @@ void Erwin::update() {
   }
 
   statusLogic();
+  techniqueCooldown();
 }
 
 void Erwin::neutralLogic() {

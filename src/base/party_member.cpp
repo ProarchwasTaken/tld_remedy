@@ -6,8 +6,8 @@
 #include <string>
 #include <memory>
 #include <set>
-#include "game.h"
 #include "enums.h"
+#include "game.h"
 #include "data/damage.h"
 #include "data/session.h"
 #include "data/combat_event.h"
@@ -317,6 +317,16 @@ void PartyMember::depleteInstant() {
     PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
       "] is no longer Winded.";
     critical_life = false;
+  }
+}
+
+void PartyMember::techniqueCooldown() {
+  if (tech1.clock < 1.0) {
+    tech1.clock += Game::deltaTime() / tech1.cooldown;
+  }
+
+  if (tech2.clock < 1.0) {
+    tech2.clock += Game::deltaTime() / tech2.cooldown;
   }
 }
 
