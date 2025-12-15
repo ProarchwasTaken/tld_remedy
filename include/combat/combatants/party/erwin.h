@@ -22,7 +22,8 @@ enum class ErwinGoals {
   TARGETING = 3,
   RETREATING = 4,
   DODGING = 5,
-  PROVOKE = 6
+  PROVOKE = 6,
+  THIRD_PARTY = 7
 };
 
 
@@ -42,9 +43,8 @@ struct ErwinAI : AIBehavior {
 
 /* Erwin is a Companion Combatant of the "Maverick" archetype. Their
  * behavior is designed to make sure the player doesn't get overwhelmed.
- * Mainly by going out of their way to draw enemy aggro if too many are
- * targeting the player. As such, they tend to be a lot more 
- * self-sufficent than other companions.*/
+ * As such, they tend to be a lot more self-sufficent than other 
+ * companions.*/
 class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);
@@ -62,6 +62,7 @@ public:
 
   void assistInput();
   bool lightAssistCondition();
+  bool heavyAssistCondition();
 
   /* This is considered the start point of the Erwin's behavior tree.
    * The function is meant to be ran while the companion is idle.*/
@@ -91,6 +92,7 @@ public:
   void targetingLogic();
   void retreatingLogic();
   void dodgingLogic();
+  void thirdPartyLogic();
 
   void wait(float time);
   void wait(float min, float max);
