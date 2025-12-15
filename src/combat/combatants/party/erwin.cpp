@@ -28,6 +28,7 @@
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
 #include "combat/actions/provoke.h"
+#include "combat/actions/3rd_party.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
@@ -59,6 +60,9 @@ Erwin::Erwin(Companion *data, Mary *player):
 
   tech1 = {"Provoke", TechCostType::MORALE, 8};
   tech1.cooldown = 8.0;
+
+  tech2 = {"Third Party", TechCostType::MORALE, 10};
+  tech2.cooldown = 10.0;
 
   afflictPersistent(data->status);
 
@@ -248,6 +252,11 @@ void Erwin::assistInput() {
     ai_goal = ErwinGoals::PROVOKE;
     tech1.clock = 0.0;
     sfx.play("assist_call");
+  }
+
+  // Change this later!
+  if (IsKeyPressed(KEY_C) && state == NEUTRAL) {
+    thirdparty();
   }
 }
 
@@ -448,6 +457,18 @@ void Erwin::provoke() {
   performAction(action);
 }
 
+void Erwin::thirdparty() {
+  if (morale < tech2.cost) {
+    return;
+  }
+
+  // morale -= tech2.cost;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<ThirdParty>(this);
+  performAction(action);
+}
+
 void Erwin::setGoal(ErwinGoals goal, float chance) {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
@@ -549,7 +570,7 @@ void Erwin::followPlayer() {
     moving_x = RIGHT;
   }
 
-  movement();
+  movement(speed_multiplier);
 
   float distance = distanceTo(player);
   if (distance <= preferred_plr_distance / 2) {
@@ -577,7 +598,7 @@ void Erwin::targetingLogic() {
 
   float distance = distanceTo(target);
   if (distance > attack_distance) {
-    movement();
+    movement(speed_multiplier);
     return;
   }
 
@@ -612,7 +633,7 @@ void Erwin::retreatingLogic() {
     moving_x = LEFT; 
   }
 
-  movement();
+  movement(speed_multiplier);
 
   retreat_clock += Game::deltaTime() / retreat_time;
   if (retreat_clock < 1.0) {
@@ -715,14 +736,14 @@ void Erwin::waitTimer() {
   }
 }
 
-void Erwin::movement() {
+void Erwin::movement(float multiplier) {
   if (moving_x == 0) {
     return;
   }
 
   direction = static_cast<Direction>(moving_x);
 
-  float speed = default_speed * speed_multiplier;
+  float speed = default_speed * multiplier;
   float magnitude = speed * direction;
 
   position.x += magnitude * Game::deltaTime();

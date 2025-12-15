@@ -79,6 +79,7 @@ public:
   void ghoststep(int direction_x);
   void evade();
   void provoke();
+  void thirdparty();
 
   void setGoal(ErwinGoals goal, float chance);
 
@@ -95,7 +96,7 @@ public:
   void wait(float min, float max);
   void waitTimer();
 
-  void movement();
+  void movement(float multiplier);
   void animationLogic();
 
   void draw() override;

@@ -82,7 +82,8 @@ enum class ActionID {
   KNIFE_CLEAVE,
   KNIFE_PIERCER,
   USE_ITEM,
-  ERWIN_PROVOKE
+  ERWIN_PROVOKE,
+  ERWIN_3RD_PARTY
 };
 
 enum class StatusID {

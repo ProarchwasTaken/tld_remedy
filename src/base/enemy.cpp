@@ -46,7 +46,7 @@ void Enemy::takeDamage(DamageData &data) {
   }
 
   PartyMember *combatant = static_cast<PartyMember*>(data.assailant);
-  if (!combatant->important) {
+  if (!combatant->important && !data.force_hitstop) {
     return;
   }
 
