@@ -45,6 +45,8 @@ may be different depending on what controller you use.
 * **B Button** - Defensive (Use in combination with directional inputs!)
 * **X Button** - Light Technique
 * **Y Button** - Heavy Technique
+* **L Button** - Light Assist
+* **R Button** - Heavy Assist
 
 * **Select Button** - Use Item
 
