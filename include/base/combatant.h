@@ -134,6 +134,7 @@ public:
   float tenacity = 0.0;
   float tp_threshold = 0.0;
 
+  bool targetable = true;
   bool intangible = false;
   bool critical_life = false;
 

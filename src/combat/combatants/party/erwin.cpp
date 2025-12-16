@@ -59,10 +59,10 @@ Erwin::Erwin(Companion *data, Mary *player):
   ai_behavior = make_unique<ErwinAI>();
 
   tech1 = {"Provoke", TechCostType::MORALE, 8};
-  tech1.cooldown = 8.0;
+  tech1.cooldown = 5.0;
 
   tech2 = {"Third Party", TechCostType::MORALE, 10};
-  tech2.cooldown = 10.0;
+  tech2.cooldown = 8.0;
 
   afflictPersistent(data->status);
 
@@ -199,7 +199,7 @@ void Erwin::retaliation(Combatant *assailant, float chance) {
     return;
   }
 
-  if (team == assailant->team) {
+  if (!assailant->targetable || team == assailant->team) {
     return;
   }
 
@@ -282,7 +282,9 @@ bool Erwin::lightAssistCondition() {
 bool Erwin::heavyAssistCondition() {
   bool off_cooldown = tech2.clock >= 1.0;
   bool sufficent_morale = !demoralized && morale >= tech2.cost;
-  if (off_cooldown && sufficent_morale && player->target != NULL) {
+  bool valid = player->target != NULL && player->target->targetable;
+
+  if (off_cooldown && sufficent_morale && valid) {
     return true;
   }
   else {
@@ -319,7 +321,7 @@ void Erwin::rootBehavior() {
 
 void Erwin::targetingBehavior() {
   assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target->state == DEAD || !target->targetable) {
     ai_goal = ErwinGoals::IDLE;
     target = NULL;
     return;
@@ -376,11 +378,11 @@ void Erwin::chooseTarget() {
   std::set<std::pair<float, Combatant*>> enemies;
 
   for (Combatant *combatant : existing_combatants) {
-    if (team == combatant->team) {
+    if (combatant->state == CombatantState::DEAD) {
       continue;
     }
 
-    if (combatant->state == CombatantState::DEAD) {
+    if (!combatant->targetable || team == combatant->team) {
       continue;
     }
 
@@ -401,9 +403,9 @@ void Erwin::decideAttack() {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
-  float chance = 0.25;
-  if (morale >= max_morale * 0.50) {
-    chance += 0.50;
+  float chance = 0.15;
+  if (morale >= max_morale * 0.75) {
+    chance += 0.45;
   }
 
   bool sufficent = !demoralized && morale >= 4;
@@ -737,7 +739,7 @@ void Erwin::dodgingLogic() {
 
 void Erwin::thirdPartyLogic() {
   assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target->state == DEAD || !target->targetable) {
     PLOGI << "Aborting Third Party goal.";
     ai_goal = ErwinGoals::IDLE;
     target = NULL;

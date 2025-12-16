@@ -154,7 +154,7 @@ void Servant::retaliation(Combatant *assailant, float chance) {
     return;
   }
 
-  if (team == assailant->team) {
+  if (!assailant->targetable || team == assailant->team) {
     return;
   }
 
@@ -218,7 +218,7 @@ void Servant::rootBehavior() {
 
 void Servant::targetingBehavior() {
   assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target->state == DEAD || !target->targetable) {
     ai_goal = ServantGoals::IDLE;
     target = NULL;
     return;
@@ -275,7 +275,7 @@ void Servant::chooseTarget() {
       continue;
     }
 
-    if (combatant->state != CombatantState::DEAD) {
+    if (combatant->targetable && combatant->state != DEAD) {
       float distance = distanceTo(combatant);
       party_members.emplace(std::make_pair(distance, combatant));
     }
