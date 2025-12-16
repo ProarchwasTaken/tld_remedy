@@ -66,14 +66,14 @@ private:
   bool game_over = false;
 
   Mary *player = NULL;
-  LifeHud plr_hud = LifeHud({34, 215});
-  PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
+  std::unique_ptr<LifeHud> plr_hud;
+  std::unique_ptr<PlayerCmdHud> plr_cmd_hud;
 
   PartyMember *companion = NULL;
-  LifeHud com_hud = LifeHud({154, 215});
+  std::unique_ptr<LifeHud> com_hud;
 
-  EnemyHud enemy_hud = EnemyHud({409, 16});
-  ItemCmdHud item_hud = ItemCmdHud({350, 222});
+  std::unique_ptr<EnemyHud> enemy_hud;
+  std::unique_ptr<ItemCmdHud> item_hud;
 
   // Remove this later!
   Dummy *dummy = NULL;

@@ -20,6 +20,10 @@
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "combat/system/evt_handler.h"
+#include "combat/hud/life.h"
+#include "combat/hud/cmd_plr.h"
+#include "combat/hud/enemy.h"
+#include "combat/hud/cmd_item.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
 #include "combat/entities/afterimage.h"
@@ -60,6 +64,14 @@ CombatScene::CombatScene(Session *session) {
 }
 
 CombatScene::~CombatScene() {
+  plr_hud.reset();
+  plr_cmd_hud.reset();
+
+  com_hud.reset();
+
+  enemy_hud.reset();
+  item_hud.reset();
+
   Entity::clear(entities);
 
   UnloadTexture(debug_overlay);
@@ -75,8 +87,11 @@ void CombatScene::initializeCombatants() {
     initializeCompanion();
   }
 
-  enemy_hud.assign(player, companion);
-  item_hud.assign(player, companion, session);
+  enemy_hud = make_unique<EnemyHud>((Vector2){409, 16});
+  enemy_hud->assign(player, companion);
+
+  item_hud = make_unique<ItemCmdHud>((Vector2){350, 222});
+  item_hud->assign(player, companion, session);
 
   EnemyTroop troop = DBTroop1();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
@@ -88,8 +103,11 @@ void CombatScene::initializePlayer() {
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
 
-  plr_hud.assign(this->player);
-  plr_cmd_hud.assign(this->player);
+  plr_hud = make_unique<LifeHud>((Vector2){34, 215});
+  plr_hud->assign(this->player);
+
+  plr_cmd_hud = make_unique<PlayerCmdHud>((Vector2){350, 178});
+  plr_cmd_hud->assign(this->player);
   entities.push_back(std::move(player));
 }
 
@@ -106,7 +124,9 @@ void CombatScene::initializeCompanion() {
 
   assert(companion != nullptr);
   this->companion = companion.get();
-  com_hud.assign(this->companion);
+
+  com_hud = make_unique<LifeHud>((Vector2){154, 215});
+  com_hud->assign(this->companion);
   entities.push_back(std::move(companion));
 }
 
@@ -155,9 +175,10 @@ void CombatScene::update() {
     combatant->behavior();
   }
 
-  plr_hud.behavior();
-  com_hud.behavior();
-  enemy_hud.behavior();
+  plr_hud->behavior();
+  com_hud->behavior();
+
+  enemy_hud->behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
@@ -169,11 +190,12 @@ void CombatScene::update() {
 
     camera.update(player);
 
-    plr_hud.update();
-    plr_cmd_hud.update();
-    com_hud.update();
-    enemy_hud.update();
-    item_hud.update();
+    plr_hud->update();
+    plr_cmd_hud->update();
+
+    com_hud->update();
+    enemy_hud->update();
+    item_hud->update();
 
     eventProcessing();
   }
@@ -245,7 +267,7 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
     }
     case CombatEVT::OPEN_ITEM_HUD: {
       PLOGD << "Event detected: OpenItemHud";
-      item_hud.enable();
+      item_hud->enable();
       break;
     }
     case CombatEVT::REMOVE_ITEM: {
@@ -308,12 +330,12 @@ void CombatScene::deleteEntity(int entity_id) {
 
     if (player == entity.get()) {
       player = NULL;
-      plr_hud.assign(player);
-      plr_cmd_hud.assign(player);
+      plr_hud->assign(player);
+      plr_cmd_hud->assign(player);
     }
     else if (companion == entity.get()) {
       companion = NULL;
-      com_hud.assign(companion);
+      com_hud->assign(companion);
     }
 
     entity.reset();
@@ -397,11 +419,12 @@ void CombatScene::draw() {
   }
   EndMode2D();
 
-  plr_hud.draw();
-  plr_cmd_hud.draw();
-  com_hud.draw();
-  enemy_hud.draw();
-  item_hud.draw();
+  plr_hud->draw();
+  plr_cmd_hud->draw();
+  com_hud->draw();
+
+  enemy_hud->draw();
+  item_hud->draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
