@@ -16,6 +16,7 @@
 #include "data/field_event.h"
 #include "data/session.h"
 #include "system/sound_atlas.h"
+#include "field/system/field_map.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
 #include "system/sprite_atlas.h"
@@ -39,7 +40,8 @@ SpriteAtlas FieldScene::emotes("entities", "emote_balloons");
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new session.";
-  session.version = Game::session_version;
+  session = make_unique<Session>();
+  session->version = Game::session_version;
 
   initPlayerData(sub_weapon);
   initCompanionData(companion);
@@ -51,18 +53,21 @@ FieldScene::FieldScene(Session *session_data) {
   assert(session_data != NULL);
 
   PLOGI << "Loading existing session data.";
-  session = *session_data;
+  session = make_unique<Session>();
+  *session = *session_data;
   setup();
 }
 
 FieldScene::~FieldScene() {
   Entity::clear(entities);
-  sfx.release();
-
-  UnloadTexture(vignette);
-
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
+
+  UnloadTexture(vignette);
+  field.reset();
+  session.reset();
+
+  sfx.release();
   PLOGI << "Unloaded the Field scene.";
 }
 
@@ -70,7 +75,8 @@ void FieldScene::setup() {
   PLOGI << "Setting up the field scene...";
   scene_id = SceneID::FIELD;
 
-  mapLoadProcedure(session.location);
+  field = make_unique<FieldMap>();
+  mapLoadProcedure(session->location);
 
   #ifndef NDEBUG
   static CommandSystem command_system;
@@ -84,7 +90,7 @@ void FieldScene::setup() {
 
 void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   PLOGI << "initializing Player data...";
-  Player *player = &session.player;
+  Player *player = &session->player;
 
   std::strcpy(player->name, "Mary");
   player->member_id = PartyMemberID::MARY;
@@ -113,7 +119,7 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
 
 void FieldScene::initCompanionData(CompanionID companion_id) {
   PLOGI << "Initializing Companion data...";
-  Companion *companion = &session.companion;
+  Companion *companion = &session->companion;
 
   switch (companion_id) {
     case CompanionID::ERWIN: {
@@ -147,13 +153,13 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
     Entity::clear(entities);
   }
 
-  field.loadMap(session, map_name, spawn_name);
+  field->loadMap(*session, map_name, spawn_name);
   setupEntities();
 
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
 
-  std::strcpy(session.location, map_name.c_str());
+  std::strcpy(session->location, map_name.c_str());
   map_ready = true;
 
   PLOGI << "Procedure complete.";
@@ -172,7 +178,7 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      CompanionID id = session.companion.companion_id;
+      CompanionID id = session->companion.companion_id;
       entity = make_unique<CompanionActor>(id, position, direction);
       break;
     }
@@ -194,9 +200,9 @@ void FieldScene::setupActor(ActorData *data) {
 
 void FieldScene::setupEntities() {
   PLOGI << "Setting up field entities...";
-  PLOGD << "Entities to be created: " << field.entity_queue.size();
+  PLOGD << "Entities to be created: " << field->entity_queue.size();
 
-  for (auto &data : field.entity_queue) {
+  for (auto &data : field->entity_queue) {
     unique_ptr<Entity> entity;
 
     switch (data->type) {
@@ -226,7 +232,7 @@ void FieldScene::setupEntities() {
     data.reset();
   }
 
-  field.entity_queue.clear();
+  field->entity_queue.clear();
 }
 
 void FieldScene::update() { 
@@ -289,18 +295,18 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGD << "Event Detected: SaveSessionEvent";
 
       PLOGI << "Saving the session.";
-      Game::saveSession(&session);
+      Game::saveSession(session.get());
       break;
     }
     case FieldEVT::OPEN_MENU: {
       PLOGD << "Event Detected: OpenMenuEvent";
-      Game::openCampMenu(&session);
+      Game::openCampMenu(session.get());
       break;
     }
     case FieldEVT::INIT_COMBAT: {
       PLOGD << "Event Detected: InitCombatEvent";
 
-      Game::initCombat(&session);
+      Game::initCombat(session.get());
       sfx.play("combat_init");
       break;
     }
@@ -338,7 +344,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       int value = event_data->value;
 
       PLOGI << "Changing value of 'supplies' to: " << value;
-      session.supplies = value;
+      session->supplies = value;
       break;
     }
     case FieldEVT::ADD_SUPPLIES: {
@@ -348,7 +354,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       int magnitude = event_data->magnitude;
 
       PLOGI << "Incrementing value of 'supplies' by: " << magnitude;
-      session.supplies += magnitude;
+      session->supplies += magnitude;
       break;
     }
     case FieldEVT::CHANGE_PLR_LIFE: {
@@ -358,7 +364,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       float value = event_data->value;
 
       PLOGI << "Changing the player's life expectancy to: " << value;
-      session.player.life = value;
+      session->player.life = value;
       break;
     }
     case FieldEVT::CHANGE_COM_LIFE: {
@@ -368,7 +374,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       float value = event_data->value;
 
       PLOGI << "Changing the Companion's life Expectancy to: " << value;
-      session.companion.life = value;
+      session->companion.life = value;
       break;
     }
     case FieldEVT::ADD_ITEM: {
@@ -380,7 +386,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::REMOVE_ITEM: {
       PLOGD << "Event detected: RemoveItemEvent";
       auto *event_data = static_cast<RemoveItemEvent*>(event.get());
-      removeItem(&session, event_data->item);
+      removeItem(session.get(), event_data->item);
       break;
     }
     case FieldEVT::CLEAR_INV: {
@@ -408,10 +414,10 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
 void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {
   Character *target;
   if (type == FieldEVT::PLR_ADD_EFFECT) {
-    target = &session.player;
+    target = &session->player;
   }
   else if (type == FieldEVT::COM_ADD_EFFECT) {
-    target = &session.companion;
+    target = &session->companion;
   }
   else {
     PLOGE << "Invalid Event Type!";
@@ -451,10 +457,10 @@ void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {
 void FieldScene::removeStatusEffect(FieldEVT type, StatusID effect_id) {
   Character *target;
   if (type == FieldEVT::PLR_RM_EFFECT) {
-    target = &session.player;
+    target = &session->player;
   }
   else if (type == FieldEVT::COM_RM_EFFECT) {
-    target = &session.companion;
+    target = &session->companion;
   }
   else {
     PLOGE << "Invalid Event Type!";
@@ -484,27 +490,27 @@ void FieldScene::removeStatusEffect(FieldEVT type, StatusID effect_id) {
 
 void FieldScene::addItem(ItemID item) {
   assert(item != ItemID::NONE);
-  int limit = session.item_limit;
+  int limit = session->item_limit;
 
-  if (session.item_count == limit) {
+  if (session->item_count == limit) {
     PLOGE << "Player's inventory is full!";
     return;
   }
 
   for (int index = 0; index < limit; index++) {
-    ItemID *slot = &session.inventory[index];
+    ItemID *slot = &session->inventory[index];
 
     bool empty_slot = *slot == ItemID::NONE;
     if (empty_slot) {
       *slot = item;
-      session.item_count++;
+      session->item_count++;
       PLOGI << "Added Item: " << static_cast<int>(*slot) <<
         " to player's inventory.";
       break;
     }
   }
 
-  assert(session.item_count <= limit);
+  assert(session->item_count <= limit);
 }
 
 void FieldScene::removeItem(Session *session, ItemID item) {
@@ -531,24 +537,24 @@ void FieldScene::removeItem(Session *session, ItemID item) {
 }
 
 void FieldScene::clearInventory() {
-  int limit = session.item_limit;
+  int limit = session->item_limit;
   for (int index = 0; index < limit; index++) {
-    ItemID *slot = &session.inventory[index];
+    ItemID *slot = &session->inventory[index];
     *slot = ItemID::NONE;
   }
 
-  session.item_count = 0;
+  session->item_count = 0;
   PLOGI << "Cleared the player's inventory.";
 }
 
 void FieldScene::updateCommonData(int object_id, bool active) {
-  int common_count = session.common_count;
+  int common_count = session->common_count;
   for (int x = 0; x < common_count; x++) {
-    CommonData *data = &session.common[x];
+    CommonData *data = &session->common[x];
 
     string map_name = data->map_name;
 
-    if (map_name != session.location) {
+    if (map_name != session->location) {
       continue;
     }
 
@@ -586,7 +592,7 @@ void FieldScene::draw() {
 
   BeginMode2D(camera); 
   {
-    field.draw();
+    field->draw();
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
@@ -598,7 +604,7 @@ void FieldScene::draw() {
         entity->drawDebug();
       }
 
-      field.drawCollLines();
+      field->drawCollLines();
     } 
     #endif // !NDEBUG
   }
@@ -629,17 +635,17 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string location = TextFormat("Location: %s", session.location);
+  string location = TextFormat("Location: %s", session->location);
   Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
                                           *font, -3, 0);
   y += spacing;
 
-  string supplies = TextFormat("Supplies: %03i", session.supplies);
+  string supplies = TextFormat("Supplies: %03i", session->supplies);
   Vector2 sup_pos = TextUtils::alignRight(supplies.c_str(), {base_x, y}, 
                                           *font, -3, 0);
   y += spacing;
 
-  Player *player = &session.player;
+  Player *player = &session->player;
   string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
                              player->life, player->max_life);
   Vector2 php_pos = TextUtils::alignRight(plr_hp.c_str(), {base_x, y}, 
@@ -648,7 +654,7 @@ void FieldScene::drawSessionInfo() {
 
 
 
-  Companion *companion = &session.companion;
+  Companion *companion = &session->companion;
   string com_hp = TextFormat("%s Life: %02.00f / %02.00f", 
                              companion->name, companion->life,
                              companion->max_life);
@@ -662,7 +668,7 @@ void FieldScene::drawSessionInfo() {
   y += spacing;
 
   string common = TextFormat("Common Count: %i / %i", 
-                             session.common_count, session.common_limit);
+                             session->common_count, session->common_limit);
   Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
                                              *font, -3, 0);
   y += spacing;
