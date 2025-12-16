@@ -37,10 +37,6 @@ ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
   sfx = &Game::menu_sfx;
   sfx->use();
 
-  on_linux = PLATFORM == PLATFORM_LINUX;
-  if (on_linux) {
-    disallowed.emplace(ConfigOption::FULLSCREEN);
-  }
   PLOGI << "Configuration Panel: Initialized.";
 }
 
@@ -215,9 +211,7 @@ void ConfigPanel::applySettings() {
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
 
-  if (!on_linux) {
-    Game::fullscreenCheck();
-  } 
+  Game::fullscreenCheck();
 
   unapplied = settings != Game::settings;
 }
@@ -255,11 +249,6 @@ void ConfigPanel::drawOptions() {
 
   for (int x = 0; x < options.size(); x++) {
     ConfigOption id = options.at(x);
-
-    bool dont_draw = on_linux && id == ConfigOption::FULLSCREEN;
-    if (dont_draw) {
-      continue;
-    } 
 
     string name = getOptionName(id);
     float y = y_values.at(x);

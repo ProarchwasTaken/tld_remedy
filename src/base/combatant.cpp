@@ -97,7 +97,10 @@ float Combatant::distanceTo(Entity *entity) {
 }
 
 void Combatant::takeDamage(DamageData &data) {
-  assert(state != CombatantState::DEAD);
+  if (state == CombatantState::DEAD) {
+    return;
+  }
+
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";

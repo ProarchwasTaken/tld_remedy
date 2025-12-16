@@ -83,6 +83,5 @@ private:
   std::unique_ptr<ConfirmPanel> panel;
   bool panel_mode = false;
 
-  bool on_linux;
   std::unordered_set<ConfigOption> disallowed;
 };
