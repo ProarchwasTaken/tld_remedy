@@ -7,6 +7,7 @@
 #include "data/rect_ex.h"
 #include "combat/combatants/party/erwin.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 
 
 class ThirdParty : public CombatAction {
@@ -32,6 +33,8 @@ private:
   bool attack_connected = false;;
 
   SpriteAtlas *atlas;
+  SoundAtlas *sfx;
+
   Animation anim_windup = {{25, 26}, 0.15};
   Animation anim_end = {{28, 29}, 0.40};
 };

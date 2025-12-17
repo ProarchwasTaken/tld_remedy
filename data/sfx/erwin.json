@@ -1,0 +1,24 @@
+{
+  "sfx": [
+    {
+      "name": "provoke",
+      "filename": "erwin/provoke.mp3"
+    },
+    {
+      "name": "3rdparty_jump",
+      "filename": "erwin/3rdparty_jump.mp3"
+    },
+    {
+      "name": "3rdparty_dropkick",
+      "filename": "erwin/3rdparty_dropkick.mp3"
+    },
+    {
+      "name": "3rdparty_hit",
+      "filename": "erwin/3rdparty_hit.mp3"
+    },
+    {
+      "name": "3rdparty_end",
+      "filename": "erwin/3rdparty_end.mp3"
+    }
+  ]
+}

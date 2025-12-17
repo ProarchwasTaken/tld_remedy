@@ -9,6 +9,7 @@
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -113,6 +114,7 @@ public:
 
   Mary *player;
   static SpriteAtlas atlas;
+  static SoundAtlas psfx;
 private:
   CombatKeybinds *keybinds;
 

@@ -44,6 +44,9 @@ ThirdParty::ThirdParty(Erwin *user):
   data.assailant = user;
 
   sendWarning();
+
+  sfx = &user->psfx;
+  sfx->play("3rdparty_jump");
 }
 
 ThirdParty::~ThirdParty() {
@@ -77,6 +80,7 @@ void ThirdParty::windUp() {
   bool end_state = state_clock == 1.0;
   if (end_state) {
     user->sprite = &atlas->sprites[27];
+    sfx->play("3rdparty_dropkick");
   }
 }
 
@@ -90,6 +94,11 @@ void ThirdParty::action() {
 
   if (!hits.empty()) {
     inflictDamage(hits);
+  }
+
+  bool end_state = state_clock == 1.0;
+  if (end_state) {
+    sfx->play("3rdparty_end");
   }
 }
 
@@ -135,7 +144,7 @@ void ThirdParty::inflictDamage(set<pair<float, Combatant*>> &hits) {
   victim->takeDamage(data);
 
   attack_connected = true;
-
+  sfx->play("3rdparty_hit");
 }
 
 void ThirdParty::endLag() {

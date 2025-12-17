@@ -70,7 +70,7 @@ void Provoke::windUp() {
   bool end_state = state_clock == 1.0;
   if (end_state) {
     drawEnemyAggro();
-    user->sfx.play("provoke");
+    user->psfx.play("provoke");
   }
 }
 

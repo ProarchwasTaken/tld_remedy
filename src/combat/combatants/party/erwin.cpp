@@ -24,6 +24,7 @@
 #include "utils/comparisons.h"
 #include "utils/input.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -35,6 +36,7 @@
 
 using std::uniform_real_distribution, std::make_unique, std::unique_ptr;
 SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
+SoundAtlas Erwin::psfx("erwin");
 
 
 Erwin::Erwin(Companion *data, Mary *player): 
@@ -73,14 +75,16 @@ Erwin::Erwin(Companion *data, Mary *player):
   rectExCorrection(bounding_box, hurtbox);
 
   atlas.use();
-  sprite = &atlas.sprites[0];
+  psfx.use();
 
+  sprite = &atlas.sprites[0];
   keybinds = &Game::settings.combat_keybinds;
 }
 
 Erwin::~Erwin() {
   ai_behavior.reset();
   atlas.release();
+  psfx.release();
 }
 
 void Erwin::setEnabled(bool value) {

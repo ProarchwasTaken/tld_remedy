@@ -91,10 +91,6 @@
     {
       "name": "assist_call",
       "filename": "combat/assist_call.mp3"
-    },
-    {
-      "name": "provoke",
-      "filename": "combat/provoke.mp3"
     }
   ]
 }
