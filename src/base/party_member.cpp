@@ -323,10 +323,12 @@ void PartyMember::depleteInstant() {
 void PartyMember::techniqueCooldown() {
   if (tech1.clock < 1.0) {
     tech1.clock += Game::deltaTime() / tech1.cooldown;
+    tech1.clock = Clamp(tech1.clock, 0.0, 1.0);
   }
 
   if (tech2.clock < 1.0) {
     tech2.clock += Game::deltaTime() / tech2.cooldown;
+    tech2.clock = Clamp(tech2.clock, 0.0, 1.0);
   }
 }
 

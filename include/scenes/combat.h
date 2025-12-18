@@ -17,6 +17,7 @@
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_assist.h"
 #include "combat/hud/cmd_item.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
@@ -71,6 +72,7 @@ private:
 
   PartyMember *companion = NULL;
   std::unique_ptr<LifeHud> com_hud;
+  std::unique_ptr<AssistCmdHud> assist_hud;
 
   std::unique_ptr<EnemyHud> enemy_hud;
   std::unique_ptr<ItemCmdHud> item_hud;

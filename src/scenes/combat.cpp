@@ -22,6 +22,7 @@
 #include "combat/system/evt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_assist.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/cmd_item.h"
 #include "combat/entities/dmg_number.h"
@@ -82,10 +83,7 @@ CombatScene::~CombatScene() {
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
   initializePlayer();
-
-  if (session->companion.life != 0) {
-    initializeCompanion();
-  }
+  initializeCompanion();
 
   enemy_hud = make_unique<EnemyHud>((Vector2){409, 16});
   enemy_hud->assign(player, companion);
@@ -127,6 +125,10 @@ void CombatScene::initializeCompanion() {
 
   com_hud = make_unique<LifeHud>((Vector2){154, 215});
   com_hud->assign(this->companion);
+
+  assist_hud = make_unique<AssistCmdHud>((Vector2){274, 200});
+  assist_hud->assign(this->companion);
+
   entities.push_back(std::move(companion));
 }
 
@@ -194,6 +196,8 @@ void CombatScene::update() {
     plr_cmd_hud->update();
 
     com_hud->update();
+    assist_hud->update();
+
     enemy_hud->update();
     item_hud->update();
 
@@ -336,6 +340,7 @@ void CombatScene::deleteEntity(int entity_id) {
     else if (companion == entity.get()) {
       companion = NULL;
       com_hud->assign(companion);
+      assist_hud->assign(companion);
     }
 
     entity.reset();
@@ -421,7 +426,9 @@ void CombatScene::draw() {
 
   plr_hud->draw();
   plr_cmd_hud->draw();
+
   com_hud->draw();
+  assist_hud->draw();
 
   enemy_hud->draw();
   item_hud->draw();

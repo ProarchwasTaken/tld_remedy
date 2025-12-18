@@ -63,7 +63,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   tech1 = {"Provoke", TechCostType::MORALE, 8};
   tech1.cooldown = 5.0;
 
-  tech2 = {"Third Party", TechCostType::MORALE, 10};
+  tech2 = {"3rd Party", TechCostType::MORALE, 10};
   tech2.cooldown = 8.0;
 
   afflictPersistent(data->status);

@@ -16,7 +16,7 @@
 
 PlayerCmdHud::PlayerCmdHud(Vector2 position) {
   main_position = position;
-  name_position = Vector2Add(main_position, {66, 1}); 
+  name_position = Vector2Add(main_position, {67, 1}); 
   main_color = Game::palette[42];
 
   keybinds = &Game::settings.combat_keybinds;
