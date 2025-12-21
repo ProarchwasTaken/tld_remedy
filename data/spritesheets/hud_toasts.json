@@ -1,0 +1,35 @@
+{
+  "frames": [
+    {
+      "filename": "counter",
+      "frame": {"x": 0, "y": 0, "w": 87, "h": 10}
+    },
+    {
+      "filename": "reversal",
+      "frame": {"x": 0, "y": 16, "w": 98, "h": 10}
+    },
+    {
+      "filename": "good",
+      "frame": {"x": 0, "y": 32, "w": 54, "h": 10}
+    },
+    {
+      "filename": "great",
+      "frame": {"x": 0, "y": 48, "w": 72, "h": 10}
+    },
+    {
+      "filename": "fantastic",
+      "frame": {"x": 0, "y": 64, "w": 121, "h": 10}
+    },
+    {
+      "filename": "critical",
+      "frame": {"x": 0, "y": 80, "w": 94, "h": 10}
+    },
+    {
+      "filename": "demoralized",
+      "frame": {"x": 0, "y": 96, "w": 129, "h": 10}
+    }
+  ],
+  "meta": {
+    "size": {"w": 144, "h": 112}
+  }
+}

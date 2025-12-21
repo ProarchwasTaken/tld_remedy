@@ -9,7 +9,7 @@
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/cbt_handler.h"
-#include "combat/hud/hud_combo.h"
+#include "combat/hud/combo.h"
 
 SpriteAtlas ComboHud::atlas("hud", "hud_combo");
 
