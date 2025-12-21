@@ -1,0 +1,15 @@
+{
+  "frames": [
+    {
+      "filename": "frame",
+      "frame": {"x": 0, "y": 0, "w": 72, "h": 12}
+    },
+    {
+      "filename": "stun_bar",
+      "frame": {"x": 1, "y": 14, "w": 69, "h": 1}
+    }
+  ],
+  "meta": {
+    "size": {"w": 72, "h": 16}
+  }
+}

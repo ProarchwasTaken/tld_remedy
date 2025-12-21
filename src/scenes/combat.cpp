@@ -25,6 +25,7 @@
 #include "combat/hud/cmd_assist.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/cmd_item.h"
+#include "combat/hud/hud_combo.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
 #include "combat/entities/afterimage.h"
@@ -50,6 +51,8 @@ CombatScene::CombatScene(Session *session) {
   stage.loadStage("debug");
   initializeCombatants();
 
+  combo_hud = make_unique<ComboHud>((Vector2){24, 27});
+
   PLOGD << "Sorting Combat entities in their intended order.";
   std::sort(entities.begin(), entities.end(), combatAlgorithm);
 
@@ -72,6 +75,7 @@ CombatScene::~CombatScene() {
 
   enemy_hud.reset();
   item_hud.reset();
+  combo_hud.reset();
 
   Entity::clear(entities);
 
@@ -181,6 +185,7 @@ void CombatScene::update() {
   com_hud->behavior();
 
   enemy_hud->behavior();
+  combo_hud->behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
@@ -200,6 +205,7 @@ void CombatScene::update() {
 
     enemy_hud->update();
     item_hud->update();
+    combo_hud->update();
 
     eventProcessing();
   }
@@ -432,6 +438,7 @@ void CombatScene::draw() {
 
   enemy_hud->draw();
   item_hud->draw();
+  combo_hud->draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
