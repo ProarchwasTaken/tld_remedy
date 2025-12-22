@@ -81,6 +81,7 @@ void PartyMember::moraleShare(GainedMoraleCBT *event) {
 
 void PartyMember::takeDamage(DamageData &data) {
   bool not_demoralized = !demoralized;
+  bool in_critical = critical_life;
   Combatant::takeDamage(data);
 
   deplete_clock = 0.0;
@@ -109,6 +110,12 @@ void PartyMember::takeDamage(DamageData &data) {
     data.hit_stop *= 2;
     apply_hitstop = true;
     CombatStage::tintStage(Game::palette[40]);
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
+  }
+
+  bool entered_critical = in_critical != critical_life;
+  if (entered_critical && state != CombatantState::DEAD) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
   }
 
   if (apply_hitstop) {

@@ -5,9 +5,11 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
+#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
+#include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
 #include "combat/hud/combo.h"
 
@@ -51,14 +53,35 @@ void ComboHud::behavior() {
 
 void ComboHud::update() {
   if (stun_clock != 1.0) {
-    stun_clock += Game::deltaTime() / stun_time;
-    stun_clock = Clamp(stun_clock, 0.0, 1.0);
+    stunTimer();
   }
   else if (end_clock != 1.0) {
     end_clock += Game::deltaTime() / end_time;
     end_clock = Clamp(end_clock, 0.0, 1.0);
   }
+}
 
+void ComboHud::stunTimer() {
+  stun_clock += Game::deltaTime() / stun_time;
+  stun_clock = Clamp(stun_clock, 0.0, 1.0);
+
+  if (stun_clock == 1.0) {
+    startComboToast();
+  }
+}
+
+void ComboHud::startComboToast() {
+  int combo = Enemy::comboCount();
+
+  if (combo >= 8) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 4);
+  }
+  else if (combo >= 5) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 3); 
+  }
+  else if (combo >= 3) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 2); 
+  }
 }
 
 void ComboHud::draw() {

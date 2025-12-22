@@ -53,7 +53,7 @@ CombatScene::CombatScene(Session *session) {
   initializeCombatants();
 
   combo_hud = make_unique<ComboHud>((Vector2){24, 27});
-  toasts = make_unique<CombatToasts>((Vector2){24, 16});
+  toasts = make_unique<CombatToasts>((Vector2){24, 21});
 
   PLOGD << "Sorting Combat entities in their intended order.";
   std::sort(entities.begin(), entities.end(), combatAlgorithm);

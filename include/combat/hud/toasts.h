@@ -12,12 +12,13 @@ public:
   void startToast(int toast_id);
 
   void draw();
+  void drawToast();
 
   static SpriteAtlas atlas;
 private:
   Vector2 main_position;
   Rectangle *sprite = NULL;
 
-  float toast_time = 1.0;
+  float toast_time = 0.80;
   float toast_clock = 0.0;
 };

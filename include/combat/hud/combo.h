@@ -11,6 +11,9 @@ public:
   void behavior();
   void update();
 
+  void stunTimer();
+  void startComboToast();
+
   void draw();
   void drawComboCount(int value);
 

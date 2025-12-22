@@ -95,6 +95,7 @@ void Evade::intercept(DamageData &data) {
   CombatHandler::raise<CreateAfterImgCB>(
     CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
     user->bounding_box.position, user->direction, 0.25f, tint);
+  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
   PLOGI << "Interception complete.";
 }
 
