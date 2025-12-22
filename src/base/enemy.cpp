@@ -82,7 +82,6 @@ void Enemy::enterHitstun(DamageData &data) {
   if (state == ACTION && counterToastCondition(data)) {
     PLOGD << "Starting combat toast: Counter";
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 0);
-    sfx.play("counter");
   }
 
   Combatant::enterHitstun(data);
