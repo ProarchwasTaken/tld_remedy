@@ -18,6 +18,6 @@ private:
   Vector2 main_position;
   Rectangle *sprite = NULL;
 
-  float toast_time = 1.5;
+  float toast_time = 1.0;
   float toast_clock = 0.0;
 };

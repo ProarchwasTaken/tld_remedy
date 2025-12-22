@@ -13,6 +13,10 @@ CombatToasts::CombatToasts(Vector2 position) {
   atlas.use();
 }
 
+CombatToasts::~CombatToasts() {
+  atlas.release();
+}
+
 void CombatToasts::startToast(int toast_id) {
   sprite = &atlas.sprites.at(toast_id);
   toast_clock = 0.0;
@@ -25,6 +29,8 @@ void CombatToasts::draw() {
 
   toast_clock += Game::deltaTime() / toast_time;
   toast_clock = Clamp(toast_clock, 0.0, 1.0);
+
+  DrawTextureRec(atlas.sheet, *sprite, main_position, WHITE);
 
   if (toast_clock == 1.0) {
     sprite = NULL;
