@@ -19,10 +19,14 @@ SpriteAtlas ComboHud::atlas("hud", "hud_combo");
 ComboHud::ComboHud(Vector2 position) {
   main_position = position;
   atlas.use();
+
+  sfx = &Combatant::sfx;
+  sfx->use();
 }
 
 ComboHud::~ComboHud() {
   atlas.release();
+  sfx->release();
 }
 
 void ComboHud::behavior() {
@@ -75,12 +79,15 @@ void ComboHud::startComboToast() {
 
   if (combo >= 8) {
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 4);
+    sfx->play("combo_fantastic");
   }
   else if (combo >= 5) {
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 3); 
+    sfx->play("combo_great");
   }
   else if (combo >= 3) {
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 2); 
+    sfx->play("combo_good");
   }
 }
 

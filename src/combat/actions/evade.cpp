@@ -74,12 +74,15 @@ void Evade::intercept(DamageData &data) {
 
     Combatant::sfx.play("evade_perfect");
     sleep_time = 0.25;
+
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+    Combatant::sfx.play("technical");
   }
   else {
     PLOGD << "Redirection damage towards the combatant's exhaustion.";
     user->increaseExhaustion(damage); 
     tint = Game::palette[29];
-    sleep_time = 0.25;
+    sleep_time = 0.15;
   }
 
   if (user->important) {
@@ -95,7 +98,6 @@ void Evade::intercept(DamageData &data) {
   CombatHandler::raise<CreateAfterImgCB>(
     CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
     user->bounding_box.position, user->direction, 0.25f, tint);
-  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
   PLOGI << "Interception complete.";
 }
 

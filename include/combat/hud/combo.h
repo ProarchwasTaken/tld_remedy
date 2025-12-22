@@ -1,6 +1,7 @@
 #pragma once
 #include <raylib.h>
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 
 
 class ComboHud {
@@ -19,6 +20,8 @@ public:
 
   static SpriteAtlas atlas;
 private:
+  SoundAtlas *sfx;
+
   Vector2 main_position;
   Color tint = WHITE;
 

@@ -1,4 +1,3 @@
-#include <cmath>
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>

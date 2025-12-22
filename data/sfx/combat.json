@@ -91,6 +91,26 @@
     {
       "name": "assist_call",
       "filename": "combat/assist_call.mp3"
+    },
+    {
+      "name": "counter",
+      "filename": "combat/counter.mp3"
+    },
+    {
+      "name": "technical",
+      "filename": "combat/technical.mp3"
+    },
+    {
+      "name": "combo_good",
+      "filename": "combat/combo_good.mp3"
+    },
+    {
+      "name": "combo_great",
+      "filename": "combat/combo_great.mp3"
+    },
+    {
+      "name": "combo_fantastic",
+      "filename": "combat/combo_fantastic.mp3"
     }
   ]
 }

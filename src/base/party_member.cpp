@@ -105,7 +105,7 @@ void PartyMember::takeDamage(DamageData &data) {
     apply_hitstop = true;
   }
 
-  bool became_demoralized = not_demoralized == demoralized;
+  bool became_demoralized = not_demoralized && demoralized;
   if (became_demoralized) {
     data.hit_stop *= 2;
     apply_hitstop = true;
@@ -113,7 +113,7 @@ void PartyMember::takeDamage(DamageData &data) {
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
   }
 
-  bool entered_critical = in_critical != critical_life;
+  bool entered_critical = !in_critical && critical_life;
   if (entered_critical && state != CombatantState::DEAD) {
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
   }
