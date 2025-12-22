@@ -39,3 +39,6 @@ struct RemoveItemCB : CombatEvent {
   ItemID item;
 };
 
+struct StartToastCB : CombatEvent {
+  int toast_id;
+};

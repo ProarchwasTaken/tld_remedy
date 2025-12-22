@@ -23,6 +23,7 @@
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/combo.h"
+#include "combat/hud/toasts.h"
 #include "combat/hud/cmd_plr.h"
 #include "combat/hud/cmd_assist.h"
 #include "combat/hud/cmd_item.h"
@@ -52,6 +53,7 @@ CombatScene::CombatScene(Session *session) {
   initializeCombatants();
 
   combo_hud = make_unique<ComboHud>((Vector2){24, 27});
+  toasts = make_unique<CombatToasts>((Vector2){24, 16});
 
   PLOGD << "Sorting Combat entities in their intended order.";
   std::sort(entities.begin(), entities.end(), combatAlgorithm);
@@ -76,6 +78,7 @@ CombatScene::~CombatScene() {
   enemy_hud.reset();
   item_hud.reset();
   combo_hud.reset();
+  toasts.reset();
 
   Entity::clear(entities);
 
@@ -286,6 +289,12 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       FieldScene::removeItem(session, event_data->item);
       break;
     }
+    case CombatEVT::START_TOAST: {
+      PLOGD << "Event detected: StartToastCB";
+      auto *event_data = static_cast<StartToastCB*>(event.get());
+      toasts->startToast(event_data->toast_id);
+      break;
+    }
   }
 
   int new_count = entities.size();
@@ -439,6 +448,7 @@ void CombatScene::draw() {
   enemy_hud->draw();
   item_hud->draw();
   combo_hud->draw();
+  toasts->draw();
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();

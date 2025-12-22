@@ -17,6 +17,7 @@
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/combo.h"
+#include "combat/hud/toasts.h"
 #include "combat/hud/cmd_plr.h"
 #include "combat/hud/cmd_assist.h"
 #include "combat/hud/cmd_item.h"
@@ -78,6 +79,7 @@ private:
   std::unique_ptr<EnemyHud> enemy_hud;
   std::unique_ptr<ItemCmdHud> item_hud;
   std::unique_ptr<ComboHud> combo_hud;
+  std::unique_ptr<CombatToasts> toasts;
 
   // Remove this later!
   Dummy *dummy = NULL;
