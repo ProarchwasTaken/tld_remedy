@@ -13,7 +13,6 @@
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/text.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/hud/enemy.h"
 #include <plog/Log.h>

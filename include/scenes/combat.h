@@ -69,9 +69,9 @@ private:
   Texture debug_overlay;
 
   CombatCamera camera;
+  BlackBars black_bars;
   CombatHandler evt_handler;
   CombatantHandler cbt_handler;
-  BlackBars black_bars;
 
   bool game_over = false;
 

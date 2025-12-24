@@ -10,7 +10,6 @@
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/evt_handler.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/hud/combo.h"
 
 using std::unique_ptr;

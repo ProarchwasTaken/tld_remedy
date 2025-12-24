@@ -224,6 +224,7 @@ void CombatScene::eventEvaluation(unique_ptr<CombatantEvent> &event) {
   com_hud->evaluateEvent(event);
   enemy_hud->evaluateEvent(event);
   combo_hud->evaluateEvent(event);
+  black_bars.evaluateEvent(event);
 }
 
 void CombatScene::updateHud() {

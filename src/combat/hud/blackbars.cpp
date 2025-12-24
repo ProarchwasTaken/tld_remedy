@@ -1,11 +1,18 @@
 #include <cassert>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
+#include "enums.h"
 #include "game.h"
+#include "base/combatant.h"
+#include "base/party_member.h"
+#include "data/combatant_event.h"
 #include "utils/math.h"
 #include "combat/system/camera.h"
 #include "combat/hud/blackbars.h"
 #include <plog/Log.h>
+
+using std::unique_ptr;
 
 
 BlackBars::BlackBars() {
@@ -17,24 +24,74 @@ BlackBars::~BlackBars() {
   UnloadTexture(texture);
 }
 
+void BlackBars::setValues(float speed, float zoom) {
+  if (speed != 0) {
+    set_speed = speed;
+    this->speed = set_speed;
+    decel_clock = 0.0;
+  }
+
+  if (zoom != 0) {
+    set_zoom = zoom;
+    this->zoom = zoom;
+    zoom_clock = 0.0;
+  }
+}
+
+void BlackBars::setTargetValues(float speed, float zoom, float duration) {
+  target_speed = speed;
+  target_zoom = zoom;
+
+  target_clock = 0.0;
+  target_time = duration;
+
+  PLOGD << "Target speed and zoom has been changed to: " << target_speed
+  << ", " << target_zoom;
+  PLOGD << "Duration: " << target_time;
+}
+
+void BlackBars::resetTargetValues() {
+  target_speed = DEFAULT_SPEED;
+  target_zoom = DEFAULT_ZOOM;
+  PLOGD << "Target speed and zoom has been reset to their default values";
+}
+
+void BlackBars::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+    return;
+  }
+
+  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  if (dmg_event->damage_type != DamageType::LIFE) {
+    return;
+  }
+
+  assert(dmg_event->sender->entity_type == COMBATANT);
+  Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
+
+  bool from_enemy = victim->team == CombatantTeam::ENEMY;
+  if (from_enemy) {
+    setValues(90, 8);
+    return;
+  }
+
+  PartyMember *member = static_cast<PartyMember*>(victim);
+  if (member->important) {
+    setValues(0, -8);
+  }
+}
+
 void BlackBars::update(CombatCamera *camera) {
   top_dest.x = camera->target.x;
   bottom_dest.x = camera->target.x;
-}
 
-void BlackBars::draw() {
   if (speed != target_speed) {
     speedLerp();
   }
 
-  source.x += speed * Game::deltaTime();
-
-  if (source.x > 16) {
-    source.x = source.x - 16;
+  if (zoom != target_zoom) {
+    zoomLerp();
   }
-
-  DrawTexturePro(texture, source, top_dest, {215, 0}, 178, tint);
-  DrawTexturePro(texture, source, bottom_dest, {215, 0}, -2, tint);
 }
 
 void BlackBars::speedLerp() {
@@ -48,3 +105,27 @@ void BlackBars::speedLerp() {
     decel_clock = 0.0;
   }
 }
+
+void BlackBars::zoomLerp() {
+  assert(zoom != target_zoom);
+  zoom_clock += Game::deltaTime() / zoom_time;
+  zoom_clock = Clamp(zoom_clock, 0.0, 1.0);
+
+  zoom = Math::smoothstep(set_zoom, target_zoom, zoom_clock);
+
+  if (zoom_clock == 1.0) {
+    zoom_clock = 0.0;
+  }
+}
+
+void BlackBars::draw() {
+  source.x += speed * Game::deltaTime();
+
+  if (source.x > 16) {
+    source.x = source.x - 16;
+  }
+
+  DrawTexturePro(texture, source, top_dest, {215, zoom}, 178, tint);
+  DrawTexturePro(texture, source, bottom_dest, {215, zoom}, -2, tint);
+}
+
