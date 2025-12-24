@@ -14,6 +14,7 @@
 #include "combat/system/camera.h"
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
+#include "combat/hud/blackbars.h"
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
 #include "combat/hud/combo.h"
@@ -65,6 +66,7 @@ private:
   CombatCamera camera;
   CombatHandler evt_handler;
   CombatantHandler cbt_handler;
+  BlackBars black_bars;
 
   bool game_over = false;
 

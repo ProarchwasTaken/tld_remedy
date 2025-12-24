@@ -189,6 +189,7 @@ void CombatScene::update() {
 
   enemy_hud->behavior();
   combo_hud->behavior();
+  black_bars.behavior();
   cbt_handler.clearEvents();
 
   if (Game::state() == GameState::READY) {
@@ -199,6 +200,7 @@ void CombatScene::update() {
     }
 
     camera.update(player);
+    black_bars.update(&camera);
 
     plr_hud->update();
     plr_cmd_hud->update();
@@ -418,6 +420,7 @@ void CombatScene::draw() {
   BeginMode2D(camera);
   {
     stage.drawBackground();
+    black_bars.draw();
 
     #ifndef NDEBUG
     if (debug_info) DrawTextureV(debug_overlay, {-512, 0}, WHITE);
