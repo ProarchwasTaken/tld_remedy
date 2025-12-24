@@ -144,7 +144,10 @@ enum class CombatEVT {
   DELETE_ENTITY,
   OPEN_ITEM_HUD,
   REMOVE_ITEM,
-  START_TOAST
+  START_TOAST,
+  BAR_SET,
+  BAR_SET_TARGET,
+  BAR_RESET
 };
 
 enum class CombatantEVT {

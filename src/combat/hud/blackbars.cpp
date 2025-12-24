@@ -25,16 +25,16 @@ BlackBars::~BlackBars() {
 }
 
 void BlackBars::setValues(float speed, float zoom) {
-  if (speed != 0) {
-    set_speed = speed;
-    this->speed = set_speed;
-    decel_clock = 0.0;
-  }
+  set_speed = speed;
+  this->speed = set_speed;
+  decel_clock = 0.0;
+  PLOGD << "Speed has been changed to: " << speed;
 
   if (zoom != 0) {
     set_zoom = zoom;
     this->zoom = zoom;
     zoom_clock = 0.0;
+    PLOGD << "Zoom has been changed to: " << zoom;
   }
 }
 
@@ -69,15 +69,20 @@ void BlackBars::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   assert(dmg_event->sender->entity_type == COMBATANT);
   Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
 
+  float multiplier = 1;
+  if (dmg_event->stun_type == StunType::STAGGER) {
+    multiplier = 3;
+  }
+
   bool from_enemy = victim->team == CombatantTeam::ENEMY;
   if (from_enemy) {
-    setValues(90, 8);
+    setValues(90, 8 * multiplier);
     return;
   }
 
   PartyMember *member = static_cast<PartyMember*>(victim);
   if (member->important) {
-    setValues(0, -8);
+    setValues(0, -8 * multiplier);
   }
 }
 
@@ -91,6 +96,10 @@ void BlackBars::update(CombatCamera *camera) {
 
   if (zoom != target_zoom) {
     zoomLerp();
+  }
+
+  if (target_speed != DEFAULT_SPEED || target_zoom != DEFAULT_ZOOM) {
+    targetTimer();
   }
 }
 
@@ -115,6 +124,17 @@ void BlackBars::zoomLerp() {
 
   if (zoom_clock == 1.0) {
     zoom_clock = 0.0;
+  }
+}
+
+void BlackBars::targetTimer() {
+  if (target_time < 0) {
+    return;
+  }
+
+  target_clock += Game::deltaTime() / target_time;
+  if (target_clock >= 1.0) {
+    resetTargetValues();
   }
 }
 

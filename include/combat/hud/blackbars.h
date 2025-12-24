@@ -19,6 +19,7 @@ public:
 
   void speedLerp();
   void zoomLerp();
+  void targetTimer();
 
   void draw();
 private:

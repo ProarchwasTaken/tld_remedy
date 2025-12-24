@@ -76,6 +76,7 @@ void Evade::intercept(DamageData &data) {
     sleep_time = 0.25;
 
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+    CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 48.0f);
     Combatant::sfx.play("technical");
   }
   else {

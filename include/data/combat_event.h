@@ -42,3 +42,15 @@ struct RemoveItemCB : CombatEvent {
 struct StartToastCB : CombatEvent {
   int toast_id;
 };
+
+struct SetBarCB : CombatEvent {
+  float speed = 0;
+  float zoom = 0;
+};
+
+struct SetBarTargetCB : CombatEvent {
+  float speed = 0;
+  float zoom = 0;
+};
+
+

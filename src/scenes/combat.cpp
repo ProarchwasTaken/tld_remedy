@@ -320,6 +320,23 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       toasts->startToast(event_data->toast_id);
       break;
     }
+    case CombatEVT::BAR_SET: {
+      PLOGD << "Event detected: SetBarCB";
+      auto *event_data = static_cast<SetBarCB*>(event.get());
+      black_bars.setValues(event_data->speed, event_data->zoom);
+      break;
+    }
+    case CombatEVT::BAR_SET_TARGET: {
+      PLOGD << "Event detected: SetBarTargetCB";
+      auto *event_data = static_cast<SetBarTargetCB*>(event.get());
+      black_bars.setTargetValues(event_data->speed, event_data->zoom);
+      break;
+    }
+    case CombatEVT::BAR_RESET: {
+      PLOGI << "Event detected: BarResetCB";
+      black_bars.resetTargetValues();
+      break;
+    }
   }
 
   int new_count = entities.size();
