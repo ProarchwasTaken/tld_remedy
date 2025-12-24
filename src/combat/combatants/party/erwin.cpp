@@ -96,8 +96,6 @@ void Erwin::setEnabled(bool value) {
 }
 
 void Erwin::behavior() {
-  Combatant::behavior();
-
   if (!enabled) {
     return;
   }

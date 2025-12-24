@@ -1,5 +1,7 @@
 #pragma once
 #include <raylib.h>
+#include <memory>
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
@@ -9,7 +11,8 @@ public:
   ComboHud(Vector2 position);
   ~ComboHud();
 
-  void behavior();
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
+
   void update();
 
   void stunTimer();

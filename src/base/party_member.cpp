@@ -59,6 +59,8 @@ void PartyMember::setEnabled(bool value) {
 }
 
 void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  Combatant::evaluateEvent(event);
+
   if (event->event_type == CombatantEVT::MORALE_GAINED) {
     auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
     moraleShare(mp_event);

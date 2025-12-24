@@ -60,8 +60,6 @@ Servant::~Servant() {
 }
 
 void Servant::behavior() {
-  Combatant::behavior();
-
   if (ai_goal == ServantGoals::IDLE) {
     rootBehavior();
   }

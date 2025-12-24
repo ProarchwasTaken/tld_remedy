@@ -17,6 +17,7 @@
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "combat/system/evt_handler.h"
@@ -180,17 +181,7 @@ void CombatScene::update() {
   debugKeybinds(); 
   #endif // !NDEBUG
 
-  for (Combatant *combatant : Combatant::existing_combatants) {
-    combatant->behavior();
-  }
-
-  plr_hud->behavior();
-  com_hud->behavior();
-
-  enemy_hud->behavior();
-  combo_hud->behavior();
-  black_bars.behavior();
-  cbt_handler.clearEvents();
+  combatantBehavior();
 
   if (Game::state() == GameState::READY) {
     stage.update();
@@ -202,18 +193,49 @@ void CombatScene::update() {
     camera.update(player);
     black_bars.update(&camera);
 
-    plr_hud->update();
-    plr_cmd_hud->update();
-
-    com_hud->update();
-    assist_hud->update();
-
-    enemy_hud->update();
-    item_hud->update();
-    combo_hud->update();
-
+    updateHud();
     eventProcessing();
   }
+}
+
+void CombatScene::combatantBehavior() {
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->behavior();
+  }
+
+  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+  for (auto &event : *event_pool) {
+    eventEvaluation(event);
+  }
+
+  cbt_handler.clearEvents();
+}
+
+void CombatScene::eventEvaluation(unique_ptr<CombatantEvent> &event) {
+  if (event == nullptr) {
+    return;
+  }
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->evaluateEvent(event);
+  }
+
+  plr_hud->evaluateEvent(event);
+  com_hud->evaluateEvent(event);
+  enemy_hud->evaluateEvent(event);
+  combo_hud->evaluateEvent(event);
+}
+
+void CombatScene::updateHud() {
+  plr_hud->update();
+  plr_cmd_hud->update();
+
+  com_hud->update();
+  assist_hud->update();
+
+  enemy_hud->update();
+  item_hud->update();
+  combo_hud->update();
 }
 
 void CombatScene::eventProcessing() {
@@ -442,6 +464,14 @@ void CombatScene::draw() {
   }
   EndMode2D();
 
+  drawHud();
+
+  #ifndef NDEBUG
+  if (debug_info) drawDebugInfo();
+  #endif // !NDEBUG
+}
+
+void CombatScene::drawHud() {
   plr_hud->draw();
   plr_cmd_hud->draw();
 
@@ -452,10 +482,6 @@ void CombatScene::draw() {
   item_hud->draw();
   combo_hud->draw();
   toasts->draw();
-
-  #ifndef NDEBUG
-  if (debug_info) drawDebugInfo();
-  #endif // !NDEBUG
 }
 
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {

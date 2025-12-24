@@ -8,6 +8,7 @@
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "data/enemy_troops.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
@@ -39,7 +40,10 @@ public:
   std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
   void update() override;
+  void combatantBehavior();
+  void eventEvaluation(std::unique_ptr<CombatantEvent> &event);
   void eventProcessing();
+  void updateHud();
   void eventHandling(std::unique_ptr<CombatEvent> &event);
 
   void dmgNumberHandling(Combatant *target, DamageType damage_type,
@@ -49,6 +53,7 @@ public:
   void updatePartyAttr(PartyMember *member, Character *data);
 
   void draw() override;
+  void drawHud();
 
   #ifndef NDEBUG
   void debugKeybinds();

@@ -1,6 +1,6 @@
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
-#include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
@@ -13,6 +13,7 @@
 #include "combat/system/cbt_handler.h"
 #include "combat/hud/combo.h"
 
+using std::unique_ptr;
 SpriteAtlas ComboHud::atlas("hud", "hud_combo");
 
 
@@ -29,31 +30,27 @@ ComboHud::~ComboHud() {
   sfx->release();
 }
 
-void ComboHud::behavior() {
-  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
-
-  for (auto &event : *event_pool) {
-    if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
-      continue;
-    }
-
-    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-    Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
-
-    bool from_enemy = victim->team == CombatantTeam::ENEMY;
-    if (!from_enemy) {
-      return;
-    }
-
-    hit_clock = 0.0;
-
-    if (dmg_event->stun_time > 0) {
-      stun_time = dmg_event->stun_time;
-      stun_clock = 0.0;
-      end_clock = 0.0;
-    }
+void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+    return;
   }
-} 
+
+  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
+
+  bool from_enemy = victim->team == CombatantTeam::ENEMY;
+  if (!from_enemy) {
+    return;
+  }
+
+  hit_clock = 0.0;
+
+  if (dmg_event->stun_time > 0) {
+    stun_time = dmg_event->stun_time;
+    stun_clock = 0.0;
+    end_clock = 0.0;
+  }
+}
 
 void ComboHud::update() {
   if (stun_clock != 1.0) {

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include "enums.h"
@@ -18,8 +19,7 @@ public:
 
   void assign(PartyMember *combatant);
 
-  void behavior();
-  void eventHandling(CombatantEvent *event);
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
   void damageEventHandling(TookDamageCBT *event);
 
   void update();

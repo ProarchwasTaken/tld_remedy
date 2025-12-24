@@ -56,9 +56,8 @@ public:
 
   float distanceTo(Entity *entity);
 
-  virtual void behavior();
-  void eventHandling(EventPool<CombatantEvent> *event_pool);
-  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event) {};
+  virtual void behavior() {};
+  virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
 
   /* The process of taking damage is actually a very thorough procedure. 
    * It is a crucial aspect of any Combatant's functionality afterall.

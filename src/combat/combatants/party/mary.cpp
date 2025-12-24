@@ -101,8 +101,6 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
 }
 
 void Mary::behavior() {
-  Combatant::behavior();
-
   if (!enabled) {
     return;
   }

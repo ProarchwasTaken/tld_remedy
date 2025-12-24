@@ -13,7 +13,6 @@
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/text.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
@@ -67,43 +66,27 @@ void LifeHud::assign(PartyMember *combatant) {
     << user->name << "'";
 }
 
-void LifeHud::behavior() {
+void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   if (user == NULL) {
     return;
   }
 
-  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
-  int count = event_pool->size();
-
-  for (int x = 0; x < count; x++) {
-    unique_ptr<CombatantEvent> &event = event_pool->at(x);
-
-    if (event == nullptr) {
-      continue;
-    }
-
-    Entity *sender = event->sender;
-    CombatantEVT type = event->event_type;
-
-    if (sender == user) {
-      eventHandling(event.get());
-    }
+  Entity *sender = event->sender;
+  if (sender != user) {
+    return;
   }
-}
 
-void LifeHud::eventHandling(CombatantEvent *event) {
-  assert(event->sender == user);
   switch (event->event_type) {
     case CombatantEVT::TOOK_DAMAGE: {
       PLOGD << "Acknowledging TookDamage event sent by: '" << user->name
         << "' [ID: " << user->entity_id << "]";
       
-      auto *evt_damage = static_cast<TookDamageCBT*>(event);
+      auto *evt_damage = static_cast<TookDamageCBT*>(event.get());
       damageEventHandling(evt_damage);
       break;
     }
     case CombatantEVT::EFFECT_GAINED: {
-      auto *effect_gained = static_cast<EffectGainedCBT*>(event);
+      auto *effect_gained = static_cast<EffectGainedCBT*>(event.get());
       if (effect_gained->effect_id == StatusID::MENDING) {
         PLOGD << "Acknowledging EffectGained event sent by: '" << 
           user->name << "' [ID: " << user->entity_id << "]";
@@ -113,7 +96,7 @@ void LifeHud::eventHandling(CombatantEvent *event) {
       break;
     }
     case CombatantEVT::EFFECT_LOST: {
-      auto *effect_lost = static_cast<EffectLostCBT*>(event);
+      auto *effect_lost = static_cast<EffectLostCBT*>(event.get());
       StatusID id = effect_lost->effect_id;
       if (id == StatusID::MENDING) {
         PLOGD << "Acknowledging EffectLost event sent by: '" << 
