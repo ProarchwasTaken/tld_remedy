@@ -111,11 +111,14 @@ void PartyMember::takeDamage(DamageData &data) {
     apply_hitstop = true;
     CombatStage::tintStage(Game::palette[40]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
+    sfx.play("demoralized");
   }
 
   bool entered_critical = !in_critical && critical_life;
   if (entered_critical && state != CombatantState::DEAD) {
+    CombatStage::tintStage(Game::palette[32]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
+    sfx.play("critical_life");
   }
 
   if (apply_hitstop) {

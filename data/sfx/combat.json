@@ -107,6 +107,14 @@
     {
       "name": "combo_fantastic",
       "filename": "combat/combo_fantastic.mp3"
+    },
+    {
+      "name": "critical_life",
+      "filename": "combat/critical_life.mp3"
+    },
+    {
+      "name": "demoralized",
+      "filename": "combat/demoralized.mp3"
     }
   ]
 }
