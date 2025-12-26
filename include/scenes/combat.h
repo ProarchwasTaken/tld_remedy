@@ -6,10 +6,12 @@
 #include "base/entity.h"
 #include "base/party_member.h"
 #include "base/enemy.h"
+#include "data/keybinds.h"
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "data/enemy_troops.h"
+#include "system/sound_atlas.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
@@ -39,13 +41,19 @@ public:
   void initializeTroop(EnemyTroop *troop);
   std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
+  void pause();
+  void resume();
+  bool shouldPause();
+  bool canPause();
+
   void update() override;
+  void pauseLogic();
   void combatantBehavior();
   void eventEvaluation(std::unique_ptr<CombatantEvent> &event);
   void eventProcessing();
   void updateHud();
-  void eventHandling(std::unique_ptr<CombatEvent> &event);
 
+  void eventHandling(std::unique_ptr<CombatEvent> &event);
   void dmgNumberHandling(Combatant *target, DamageType damage_type,
                          float damage_taken);
   void deleteEntity(int entity_id);
@@ -54,6 +62,7 @@ public:
 
   void draw() override;
   void drawHud();
+  void drawPauseMenu();
 
   #ifndef NDEBUG
   void debugKeybinds();
@@ -73,6 +82,11 @@ private:
   CombatHandler evt_handler;
   CombatantHandler cbt_handler;
 
+  Session *session;
+  CombatKeybinds *keybinds;
+  SoundAtlas *menu_sfx;
+
+  bool paused = false;
   bool game_over = false;
 
   Mary *player = NULL;
@@ -92,5 +106,4 @@ private:
   Dummy *dummy = NULL;
 
   std::vector<std::unique_ptr<Entity>> entities;
-  Session *session;
 };

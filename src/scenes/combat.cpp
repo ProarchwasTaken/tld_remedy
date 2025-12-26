@@ -18,6 +18,8 @@
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "data/combatant_event.h"
+#include "utils/input.h"
+#include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "combat/system/evt_handler.h"
@@ -49,6 +51,10 @@ CombatScene::CombatScene(Session *session) {
 
   scene_id = SceneID::COMBAT;
   this->session = session;
+  keybinds = &Game::settings.combat_keybinds;
+
+  menu_sfx = &Game::menu_sfx;
+  menu_sfx->use();
 
   stage.loadStage("debug");
   initializeCombatants();
@@ -82,6 +88,7 @@ CombatScene::~CombatScene() {
   toasts.reset();
 
   Entity::clear(entities);
+  menu_sfx->release();
 
   UnloadTexture(debug_overlay);
   assert(Combatant::existing_combatants.empty());
@@ -176,11 +183,47 @@ unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
   }
 }
 
+void CombatScene::pause() {
+  Color tint = Game::palette[2];
+  stage.tintStage(tint);
+
+  black_bars.setTargetValues(5, 48);
+  paused = true;
+  menu_sfx->play("menu_select");
+  PLOGI << "Pausing the game.";
+}
+
+void CombatScene::resume() {
+  black_bars.resetTargetValues();
+  paused = false;
+  menu_sfx->play("menu_cancel");
+  PLOGI << "Resuming the game.";
+}
+
+bool CombatScene::shouldPause() {
+  bool gamepad = IsGamepadAvailable(0);
+  return Input::pressed(keybinds->pause, gamepad) || !IsWindowFocused();
+}
+
+bool CombatScene::canPause() {
+  return player->state == NEUTRAL && Enemy::memberCount() > 0;
+}
+
 void CombatScene::update() {
   #ifndef NDEBUG
   debugKeybinds(); 
   #endif // !NDEBUG
 
+  if (paused) {
+    pauseLogic();
+    return;
+  } 
+
+  if (shouldPause() && canPause()) {
+    pause();
+    return;
+  }
+  
   combatantBehavior();
 
   if (Game::state() == GameState::READY) {
@@ -195,6 +238,15 @@ void CombatScene::update() {
 
     updateHud();
     eventProcessing();
+  }
+}
+
+void CombatScene::pauseLogic() {
+  black_bars.update(&camera);
+
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->pause, gamepad) && IsWindowFocused()) {
+    resume();
   }
 }
 
@@ -484,6 +536,10 @@ void CombatScene::draw() {
 
   drawHud();
 
+  if (paused) {
+    drawPauseMenu();
+  }
+
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
   #endif // !NDEBUG
@@ -500,6 +556,21 @@ void CombatScene::drawHud() {
   item_hud->draw();
   combo_hud->draw();
   toasts->draw();
+}
+
+void CombatScene::drawPauseMenu() {
+  Color color = BLACK;
+  color.a = 200;
+  DrawRectangle(0, 0, 426, 240, color);
+
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  const char *text = "- PAUSED -";
+  Vector2 position = TextUtils::alignCenter(text, {213, 48}, *font, -2, 
+                                            0);
+
+  DrawTextEx(*font, text, position, txt_size, -2, WHITE);
 }
 
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {

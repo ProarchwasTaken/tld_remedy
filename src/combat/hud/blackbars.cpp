@@ -45,6 +45,12 @@ void BlackBars::setTargetValues(float speed, float zoom, float duration) {
   target_clock = 0.0;
   target_time = duration;
 
+  set_speed = this->speed;
+  set_zoom = this->zoom;
+
+  decel_clock = 0.0;
+  zoom_clock = 0.0;
+
   PLOGD << "Target speed and zoom has been changed to: " << target_speed
   << ", " << target_zoom;
   PLOGD << "Duration: " << target_time;
@@ -53,6 +59,12 @@ void BlackBars::setTargetValues(float speed, float zoom, float duration) {
 void BlackBars::resetTargetValues() {
   target_speed = DEFAULT_SPEED;
   target_zoom = DEFAULT_ZOOM;
+
+  set_speed = speed;
+  set_zoom = zoom;
+
+  decel_clock = 0.0;
+  zoom_clock = 0.0;
   PLOGD << "Target speed and zoom has been reset to their default values";
 }
 

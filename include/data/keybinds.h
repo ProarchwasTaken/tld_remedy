@@ -39,5 +39,6 @@ struct CombatKeybinds {
   KeyBind light_assist = {KEY_D, GAMEPAD_BUTTON_RIGHT_TRIGGER_1};
   KeyBind heavy_assist = {KEY_C, GAMEPAD_BUTTON_RIGHT_TRIGGER_2};
 
+  KeyBind pause = {KEY_TAB, GAMEPAD_BUTTON_MIDDLE_RIGHT};
   KeyBind use_item = {KEY_LEFT_SHIFT, GAMEPAD_BUTTON_MIDDLE_LEFT};
 };
