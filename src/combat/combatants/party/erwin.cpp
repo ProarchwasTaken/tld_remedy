@@ -192,7 +192,7 @@ void Erwin::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  float retaliation_chance = ai_behavior->retaliation_chance;
+  float retaliation_chance = ai_behavior->damaged.retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
 }
 
