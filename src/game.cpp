@@ -64,7 +64,7 @@ void Game::init() {
   HideCursor();
   setupCanvas();
 
-  if (settings.fullscreen && PLATFORM == PLATFORM_WINDOWS) {
+  if (settings.fullscreen) {
     toggleFullscreen();
   }
 
@@ -193,7 +193,7 @@ void Game::topLevelInput() {
   if (IsKeyPressed(KEY_F2)) {
     takeScreenshot();
   }
-  if (IsKeyPressed(KEY_F11) && PLATFORM == PLATFORM_WINDOWS) {
+  if (IsKeyPressed(KEY_F11)) {
     toggleFullscreen();
   }
 }
@@ -219,10 +219,17 @@ void Game::takeScreenshot() {
 void Game::toggleFullscreen() {
   PLOGI << "Toggling fullscreen.";
   ToggleBorderlessWindowed();
-  window_res.x = GetScreenWidth();
-  window_res.y = GetScreenHeight();
-
   settings.fullscreen = IsWindowState(FLAG_WINDOW_UNDECORATED);
+
+  if (settings.fullscreen) {
+    int monitor = GetCurrentMonitor();
+    window_res.x = GetMonitorWidth(monitor);
+    window_res.y = GetMonitorHeight(monitor);
+  }
+  else {
+    window_res = {1278, 720};
+  }
+ 
   setupCanvas();
 }
 

@@ -14,7 +14,7 @@
 #include "base/party_member.h"
 #include "base/enemy.h"
 #include "base/combat_action.h"
-#include "data/session.h"
+#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
@@ -22,16 +22,21 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "utils/input.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
+#include "combat/actions/provoke.h"
+#include "combat/actions/3rd_party.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
 #include <plog/Log.h>
 
 using std::uniform_real_distribution, std::make_unique, std::unique_ptr;
 SpriteAtlas Erwin::atlas("combatants", "erwin_combatant");
+SoundAtlas Erwin::psfx("erwin");
 
 
 Erwin::Erwin(Companion *data, Mary *player): 
@@ -55,6 +60,12 @@ Erwin::Erwin(Companion *data, Mary *player):
   resilience = 0.60;
   ai_behavior = make_unique<ErwinAI>();
 
+  tech1 = {"Provoke", TechCostType::MORALE, 8};
+  tech1.cooldown = 5.0;
+
+  tech2 = {"3rd Party", TechCostType::MORALE, 10};
+  tech2.cooldown = 8.0;
+
   afflictPersistent(data->status);
 
   bounding_box.scale = {64, 64};
@@ -64,12 +75,16 @@ Erwin::Erwin(Companion *data, Mary *player):
   rectExCorrection(bounding_box, hurtbox);
 
   atlas.use();
+  psfx.use();
+
   sprite = &atlas.sprites[0];
+  keybinds = &Game::settings.combat_keybinds;
 }
 
 Erwin::~Erwin() {
   ai_behavior.reset();
   atlas.release();
+  psfx.release();
 }
 
 void Erwin::setEnabled(bool value) {
@@ -81,11 +96,11 @@ void Erwin::setEnabled(bool value) {
 }
 
 void Erwin::behavior() {
-  Combatant::behavior();
-
   if (!enabled) {
     return;
   }
+
+  assistInput();
 
   if (ai_goal == ErwinGoals::IDLE) {
     rootBehavior();
@@ -127,7 +142,7 @@ void Erwin::warningHandling(WarningCBT *event) {
     return;
   }
 
-  if (critical_life) {
+  if (life <= 1) {
     return;
   }
 
@@ -177,7 +192,7 @@ void Erwin::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  float retaliation_chance = ai_behavior->retaliation_chance;
+  float retaliation_chance = ai_behavior->damaged.retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
 }
 
@@ -186,7 +201,7 @@ void Erwin::retaliation(Combatant *assailant, float chance) {
     return;
   }
 
-  if (team == assailant->team) {
+  if (!assailant->targetable || team == assailant->team) {
     return;
   }
 
@@ -232,6 +247,54 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   return (time_bonus + range_bonus) * multiplier;
 }
 
+void Erwin::assistInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  bool light_input = Input::pressed(keybinds->light_assist, gamepad);
+  if (light_input && lightAssistCondition()) {
+    ai_goal = ErwinGoals::PROVOKE;
+    tech1.clock = 0.0;
+    sfx.play("assist_call");
+  }
+
+  bool heavy_input = Input::pressed(keybinds->heavy_assist, gamepad);
+  if (heavy_input && heavyAssistCondition()) {
+    ai_goal = ErwinGoals::THIRD_PARTY;
+
+    target = player->target;
+    assert(target != NULL);
+    PLOGI << "Now targeting: '" << target->name << "' [ID: " 
+      << target->entity_id << "]";
+
+    tech2.clock = 0.0;
+    sfx.play("assist_call");
+  }
+}
+
+bool Erwin::lightAssistCondition() {
+  bool off_cooldown = tech1.clock >= 1.0;
+  if (off_cooldown && !demoralized && morale >= tech1.cost) {
+    return true;
+  }
+  else {
+    sfx.play("action_denied");
+    return false;
+  }
+}
+
+bool Erwin::heavyAssistCondition() {
+  bool off_cooldown = tech2.clock >= 1.0;
+  bool sufficent_morale = !demoralized && morale >= tech2.cost;
+  bool valid = player->target != NULL && player->target->targetable;
+
+  if (off_cooldown && sufficent_morale && valid) {
+    return true;
+  }
+  else {
+    sfx.play("action_denied");
+    return false;
+  }
+}
+
 void Erwin::rootBehavior() {
   bool enemies_present = Enemy::memberCount() != 0;
   if (enemies_present && player->target != NULL) {
@@ -260,7 +323,7 @@ void Erwin::rootBehavior() {
 
 void Erwin::targetingBehavior() {
   assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target->state == DEAD || !target->targetable) {
     ai_goal = ErwinGoals::IDLE;
     target = NULL;
     return;
@@ -317,11 +380,11 @@ void Erwin::chooseTarget() {
   std::set<std::pair<float, Combatant*>> enemies;
 
   for (Combatant *combatant : existing_combatants) {
-    if (team == combatant->team) {
+    if (combatant->state == CombatantState::DEAD) {
       continue;
     }
 
-    if (combatant->state == CombatantState::DEAD) {
+    if (!combatant->targetable || team == combatant->team) {
       continue;
     }
 
@@ -342,9 +405,9 @@ void Erwin::decideAttack() {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
-  float chance = 0.25;
-  if (morale >= max_morale * 0.50) {
-    chance += 0.50;
+  float chance = 0.15;
+  if (morale >= max_morale * 0.75) {
+    chance += 0.45;
   }
 
   bool sufficent = !demoralized && morale >= 4;
@@ -406,6 +469,30 @@ void Erwin::evade() {
   performAction(action);
 }
 
+void Erwin::provoke() {
+  if (morale < tech1.cost) {
+    return;
+  }
+
+  morale -= tech1.cost;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Provoke>(this);
+  performAction(action);
+}
+
+void Erwin::thirdparty() {
+  if (morale < tech2.cost) {
+    return;
+  }
+
+  morale -= tech2.cost;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<ThirdParty>(this);
+  performAction(action);
+}
+
 void Erwin::setGoal(ErwinGoals goal, float chance) {
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
@@ -446,6 +533,7 @@ void Erwin::update() {
   }
 
   statusLogic();
+  techniqueCooldown();
 }
 
 void Erwin::neutralLogic() {
@@ -477,6 +565,15 @@ void Erwin::neutralLogic() {
       dodgingLogic();
       break;
     }
+    case ErwinGoals::PROVOKE: {
+      provoke();
+      ai_goal = ErwinGoals::IDLE;
+      break;
+    }
+    case ErwinGoals::THIRD_PARTY: {
+      thirdPartyLogic();
+      break;
+    }
   }
 
   has_moved = old_x != position.x;
@@ -502,7 +599,7 @@ void Erwin::followPlayer() {
     moving_x = RIGHT;
   }
 
-  movement();
+  movement(speed_multiplier);
 
   float distance = distanceTo(player);
   if (distance <= preferred_plr_distance / 2) {
@@ -530,7 +627,7 @@ void Erwin::targetingLogic() {
 
   float distance = distanceTo(target);
   if (distance > attack_distance) {
-    movement();
+    movement(speed_multiplier);
     return;
   }
 
@@ -565,7 +662,7 @@ void Erwin::retreatingLogic() {
     moving_x = LEFT; 
   }
 
-  movement();
+  movement(speed_multiplier);
 
   retreat_clock += Game::deltaTime() / retreat_time;
   if (retreat_clock < 1.0) {
@@ -642,6 +739,35 @@ void Erwin::dodgingLogic() {
   dodge_clock = 0.0;
 }
 
+void Erwin::thirdPartyLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD || !target->targetable) {
+    PLOGI << "Aborting Third Party goal.";
+    ai_goal = ErwinGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  float difference = position.x - target->position.x;
+  if (difference > 0) {
+    direction = LEFT;
+    moving_x = LEFT;
+  }
+  else {
+    direction = RIGHT;
+    moving_x = RIGHT; 
+  }
+
+  float distance = distanceTo(target);
+  if (distance > 96) {
+    movement(speed_multiplier * 3);
+    return;
+  }
+
+  thirdparty();
+  ai_goal = ErwinGoals::IDLE;
+}
+
 void Erwin::wait(float time) {
   wait_time = time;
   wait_clock = 0.0;
@@ -668,14 +794,14 @@ void Erwin::waitTimer() {
   }
 }
 
-void Erwin::movement() {
+void Erwin::movement(float multiplier) {
   if (moving_x == 0) {
     return;
   }
 
   direction = static_cast<Direction>(moving_x);
 
-  float speed = default_speed * speed_multiplier;
+  float speed = default_speed * multiplier;
   float magnitude = speed * direction;
 
   position.x += magnitude * Game::deltaTime();
@@ -683,10 +809,12 @@ void Erwin::movement() {
 
 void Erwin::animationLogic() {
   Animation *next_anim;
-  if (has_moved) {
-    
-    float difference = 1.0 - speed_multiplier;
-    float percentage = 1.0 + difference;
+  if (has_moved) {  
+    bool using_tech2 = ai_goal == ErwinGoals::THIRD_PARTY;
+    float multiplier = 1.0 + (2 * using_tech2);
+
+    float difference = 1.0 - (speed_multiplier * multiplier);
+    float percentage = Clamp(1.0 + difference, 0.50, 10.0);
 
     next_anim =  &anim_move;
     next_anim->frame_duration = anim_move_speed * percentage;

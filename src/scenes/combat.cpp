@@ -17,9 +17,19 @@
 #include "base/enemy.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
+#include "utils/input.h"
+#include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "combat/system/evt_handler.h"
+#include "combat/hud/life.h"
+#include "combat/hud/enemy.h"
+#include "combat/hud/combo.h"
+#include "combat/hud/toasts.h"
+#include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_assist.h"
+#include "combat/hud/cmd_item.h"
 #include "combat/entities/dmg_number.h"
 #include "combat/entities/status_text.h"
 #include "combat/entities/afterimage.h"
@@ -41,9 +51,16 @@ CombatScene::CombatScene(Session *session) {
 
   scene_id = SceneID::COMBAT;
   this->session = session;
+  keybinds = &Game::settings.combat_keybinds;
+
+  menu_sfx = &Game::menu_sfx;
+  menu_sfx->use();
 
   stage.loadStage("debug");
   initializeCombatants();
+
+  combo_hud = make_unique<ComboHud>((Vector2){24, 27});
+  toasts = make_unique<CombatToasts>((Vector2){24, 21});
 
   PLOGD << "Sorting Combat entities in their intended order.";
   std::sort(entities.begin(), entities.end(), combatAlgorithm);
@@ -60,7 +77,18 @@ CombatScene::CombatScene(Session *session) {
 }
 
 CombatScene::~CombatScene() {
+  plr_hud.reset();
+  plr_cmd_hud.reset();
+
+  com_hud.reset();
+
+  enemy_hud.reset();
+  item_hud.reset();
+  combo_hud.reset();
+  toasts.reset();
+
   Entity::clear(entities);
+  menu_sfx->release();
 
   UnloadTexture(debug_overlay);
   assert(Combatant::existing_combatants.empty());
@@ -70,13 +98,13 @@ CombatScene::~CombatScene() {
 void CombatScene::initializeCombatants() {
   PLOGI << "Initializing combatants.";
   initializePlayer();
+  initializeCompanion();
 
-  if (session->companion.life != 0) {
-    initializeCompanion();
-  }
+  enemy_hud = make_unique<EnemyHud>((Vector2){409, 16});
+  enemy_hud->assign(player, companion);
 
-  enemy_hud.assign(player, companion);
-  item_hud.assign(player, companion, session);
+  item_hud = make_unique<ItemCmdHud>((Vector2){350, 222});
+  item_hud->assign(player, companion, session);
 
   EnemyTroop troop = DBTroop3();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
@@ -88,8 +116,11 @@ void CombatScene::initializePlayer() {
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
 
-  plr_hud.assign(this->player);
-  plr_cmd_hud.assign(this->player);
+  plr_hud = make_unique<LifeHud>((Vector2){34, 215});
+  plr_hud->assign(this->player);
+
+  plr_cmd_hud = make_unique<PlayerCmdHud>((Vector2){350, 178});
+  plr_cmd_hud->assign(this->player);
   entities.push_back(std::move(player));
 }
 
@@ -106,7 +137,13 @@ void CombatScene::initializeCompanion() {
 
   assert(companion != nullptr);
   this->companion = companion.get();
-  com_hud.assign(this->companion);
+
+  com_hud = make_unique<LifeHud>((Vector2){154, 215});
+  com_hud->assign(this->companion);
+
+  assist_hud = make_unique<AssistCmdHud>((Vector2){274, 200});
+  assist_hud->assign(this->companion);
+
   entities.push_back(std::move(companion));
 }
 
@@ -146,19 +183,48 @@ unique_ptr<Enemy> CombatScene::createEnemy(EnemyData &data) {
   }
 }
 
+void CombatScene::pause() {
+  Color tint = Game::palette[2];
+  stage.tintStage(tint);
+
+  black_bars.setTargetValues(5, 48);
+  paused = true;
+  menu_sfx->play("menu_select");
+  PLOGI << "Pausing the game.";
+}
+
+void CombatScene::resume() {
+  black_bars.resetTargetValues();
+  paused = false;
+  menu_sfx->play("menu_cancel");
+  PLOGI << "Resuming the game.";
+}
+
+bool CombatScene::shouldPause() {
+  bool gamepad = IsGamepadAvailable(0);
+  return Input::pressed(keybinds->pause, gamepad) || !IsWindowFocused();
+}
+
+bool CombatScene::canPause() {
+  return player->state == NEUTRAL && Enemy::memberCount() > 0;
+}
+
 void CombatScene::update() {
   #ifndef NDEBUG
   debugKeybinds(); 
   #endif // !NDEBUG
 
-  for (Combatant *combatant : Combatant::existing_combatants) {
-    combatant->behavior();
-  }
+  if (paused) {
+    pauseLogic();
+    return;
+  } 
 
-  plr_hud.behavior();
-  com_hud.behavior();
-  enemy_hud.behavior();
-  cbt_handler.clearEvents();
+  if (shouldPause() && canPause()) {
+    pause();
+    return;
+  }
+  
+  combatantBehavior();
 
   if (Game::state() == GameState::READY) {
     stage.update();
@@ -168,15 +234,61 @@ void CombatScene::update() {
     }
 
     camera.update(player);
+    black_bars.update(&camera);
 
-    plr_hud.update();
-    plr_cmd_hud.update();
-    com_hud.update();
-    enemy_hud.update();
-    item_hud.update();
-
+    updateHud();
     eventProcessing();
   }
+}
+
+void CombatScene::pauseLogic() {
+  black_bars.update(&camera);
+
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->pause, gamepad) && IsWindowFocused()) {
+    resume();
+  }
+}
+
+void CombatScene::combatantBehavior() {
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->behavior();
+  }
+
+  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+  for (auto &event : *event_pool) {
+    eventEvaluation(event);
+  }
+
+  cbt_handler.clearEvents();
+}
+
+void CombatScene::eventEvaluation(unique_ptr<CombatantEvent> &event) {
+  if (event == nullptr) {
+    return;
+  }
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->evaluateEvent(event);
+  }
+
+  plr_hud->evaluateEvent(event);
+  com_hud->evaluateEvent(event);
+  enemy_hud->evaluateEvent(event);
+  combo_hud->evaluateEvent(event);
+  black_bars.evaluateEvent(event);
+}
+
+void CombatScene::updateHud() {
+  plr_hud->update();
+  plr_cmd_hud->update();
+
+  com_hud->update();
+  assist_hud->update();
+
+  enemy_hud->update();
+  item_hud->update();
+  combo_hud->update();
 }
 
 void CombatScene::eventProcessing() {
@@ -245,13 +357,36 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
     }
     case CombatEVT::OPEN_ITEM_HUD: {
       PLOGD << "Event detected: OpenItemHud";
-      item_hud.enable();
+      item_hud->enable();
       break;
     }
     case CombatEVT::REMOVE_ITEM: {
       PLOGD << "Event detected: RemoveItemCB";
       auto *event_data = static_cast<RemoveItemCB*>(event.get());
       FieldScene::removeItem(session, event_data->item);
+      break;
+    }
+    case CombatEVT::START_TOAST: {
+      PLOGD << "Event detected: StartToastCB";
+      auto *event_data = static_cast<StartToastCB*>(event.get());
+      toasts->startToast(event_data->toast_id);
+      break;
+    }
+    case CombatEVT::BAR_SET: {
+      PLOGD << "Event detected: SetBarCB";
+      auto *event_data = static_cast<SetBarCB*>(event.get());
+      black_bars.setValues(event_data->speed, event_data->zoom);
+      break;
+    }
+    case CombatEVT::BAR_SET_TARGET: {
+      PLOGD << "Event detected: SetBarTargetCB";
+      auto *event_data = static_cast<SetBarTargetCB*>(event.get());
+      black_bars.setTargetValues(event_data->speed, event_data->zoom);
+      break;
+    }
+    case CombatEVT::BAR_RESET: {
+      PLOGI << "Event detected: BarResetCB";
+      black_bars.resetTargetValues();
       break;
     }
   }
@@ -308,12 +443,13 @@ void CombatScene::deleteEntity(int entity_id) {
 
     if (player == entity.get()) {
       player = NULL;
-      plr_hud.assign(player);
-      plr_cmd_hud.assign(player);
+      plr_hud->assign(player);
+      plr_cmd_hud->assign(player);
     }
     else if (companion == entity.get()) {
       companion = NULL;
-      com_hud.assign(companion);
+      com_hud->assign(companion);
+      assist_hud->assign(companion);
     }
 
     entity.reset();
@@ -376,6 +512,7 @@ void CombatScene::draw() {
   BeginMode2D(camera);
   {
     stage.drawBackground();
+    black_bars.draw();
 
     #ifndef NDEBUG
     if (debug_info) DrawTextureV(debug_overlay, {-512, 0}, WHITE);
@@ -397,15 +534,43 @@ void CombatScene::draw() {
   }
   EndMode2D();
 
-  plr_hud.draw();
-  plr_cmd_hud.draw();
-  com_hud.draw();
-  enemy_hud.draw();
-  item_hud.draw();
+  drawHud();
+
+  if (paused) {
+    drawPauseMenu();
+  }
 
   #ifndef NDEBUG
   if (debug_info) drawDebugInfo();
   #endif // !NDEBUG
+}
+
+void CombatScene::drawHud() {
+  plr_hud->draw();
+  plr_cmd_hud->draw();
+
+  com_hud->draw();
+  assist_hud->draw();
+
+  enemy_hud->draw();
+  item_hud->draw();
+  combo_hud->draw();
+  toasts->draw();
+}
+
+void CombatScene::drawPauseMenu() {
+  Color color = BLACK;
+  color.a = 200;
+  DrawRectangle(0, 0, 426, 240, color);
+
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  const char *text = "- PAUSED -";
+  Vector2 position = TextUtils::alignCenter(text, {213, 48}, *font, -2, 
+                                            0);
+
+  DrawTextEx(*font, text, position, txt_size, -2, WHITE);
 }
 
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {

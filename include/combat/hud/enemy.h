@@ -1,9 +1,11 @@
 #pragma once
 #include <cstddef>
 #include <array>
+#include <memory>
 #include <raylib.h>
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 
@@ -21,7 +23,7 @@ public:
   EnemyHud(Vector2 position);
   ~EnemyHud();
   void assign(Mary *&player, PartyMember *&companion);
-  void behavior();
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
   void damageHandling(Combatant *sender);
 
   void update();

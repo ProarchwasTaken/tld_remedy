@@ -39,7 +39,7 @@ struct DBTroop3 : EnemyTroop {
     enemies = {
       {EnemyID::SERVANT, {32, 152}, LEFT},
       {EnemyID::SERVANT, {160, 152}, LEFT},
-      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+      // {EnemyID::SERVANT, {-180, 152}, RIGHT},
       // {EnemyID::SERVANT, {-270, 152}, RIGHT},
     };
   }

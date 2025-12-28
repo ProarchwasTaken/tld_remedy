@@ -60,8 +60,6 @@ Servant::~Servant() {
 }
 
 void Servant::behavior() {
-  Combatant::behavior();
-
   if (ai_goal == ServantGoals::IDLE) {
     rootBehavior();
   }
@@ -141,12 +139,27 @@ void Servant::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  if (event->assailant == target) {
+  if (event->assailant != target) {
+    float retaliation_chance = ai_behavior->damaged.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance);
+  }
+
+  if (event->damage_type != DamageType::LIFE) {
     return;
   }
 
-  float retaliation_chance = ai_behavior->retaliation_chance;
-  retaliation(event->assailant, retaliation_chance);
+  float retreat_chance = ai_behavior->damaged.retreat_chance;
+  setGoal(ServantGoals::RETREATING, retreat_chance);
+
+  if (ai_goal == ServantGoals::RETREATING) {
+    PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
+    << "retreat after taking life damage.";
+    float min_retreat = ai_behavior->damaged.min_retreat;
+    float max_retreat = ai_behavior->damaged.max_retreat;
+
+    uniform_real_distribution<float> range(min_retreat, max_retreat);
+    retreat_time = range(Game::RNG);
+  }
 }
 
 void Servant::retaliation(Combatant *assailant, float chance) {
@@ -154,7 +167,7 @@ void Servant::retaliation(Combatant *assailant, float chance) {
     return;
   }
 
-  if (team == assailant->team) {
+  if (!assailant->targetable || team == assailant->team) {
     return;
   }
 
@@ -218,7 +231,7 @@ void Servant::rootBehavior() {
 
 void Servant::targetingBehavior() {
   assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target->state == DEAD || !target->targetable) {
     ai_goal = ServantGoals::IDLE;
     target = NULL;
     return;
@@ -275,7 +288,7 @@ void Servant::chooseTarget() {
       continue;
     }
 
-    if (combatant->state != CombatantState::DEAD) {
+    if (combatant->targetable && combatant->state != DEAD) {
       float distance = distanceTo(combatant);
       party_members.emplace(std::make_pair(distance, combatant));
     }

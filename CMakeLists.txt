@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.10.0
+VERSION 1.12.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -60,6 +60,7 @@ set(HEADERS
 "include/data/animation.h"
 "include/data/damage.h"
 "include/data/enemy_troops.h"
+"include/data/technique.h"
 "include/data/ai_behavior.h"
 "include/utils/input.h"
 "include/utils/collision.h"
@@ -95,7 +96,11 @@ set(HEADERS
 "include/combat/system/cbt_handler.h"
 "include/combat/hud/life.h"
 "include/combat/hud/enemy.h"
+"include/combat/hud/combo.h"
+"include/combat/hud/toasts.h"
+"include/combat/hud/blackbars.h"
 "include/combat/hud/cmd_plr.h"
+"include/combat/hud/cmd_assist.h"
 "include/combat/hud/cmd_item.h"
 "include/combat/entities/dmg_number.h"
 "include/combat/entities/status_text.h"
@@ -111,6 +116,8 @@ set(HEADERS
 "include/combat/actions/knife_cleave.h"
 "include/combat/actions/knife_piercer.h"
 "include/combat/actions/use_item.h"
+"include/combat/actions/provoke.h"
+"include/combat/actions/3rd_party.h"
 "include/combat/status_effects/broken_arm.h"
 "include/combat/status_effects/crippled_leg.h"
 "include/combat/status_effects/mangled.h"
@@ -165,7 +172,11 @@ set(SOURCE
 "src/combat/system/cbt_handler.cpp"
 "src/combat/hud/life.cpp"
 "src/combat/hud/enemy.cpp"
+"src/combat/hud/combo.cpp"
+"src/combat/hud/toasts.cpp"
+"src/combat/hud/blackbars.cpp"
 "src/combat/hud/cmd_plr.cpp"
+"src/combat/hud/cmd_assist.cpp"
 "src/combat/hud/cmd_item.cpp"
 "src/combat/entities/dmg_number.cpp"
 "src/combat/entities/status_text.cpp"
@@ -181,6 +192,8 @@ set(SOURCE
 "src/combat/actions/knife_cleave.cpp"
 "src/combat/actions/knife_piercer.cpp"
 "src/combat/actions/use_item.cpp"
+"src/combat/actions/provoke.cpp"
+"src/combat/actions/3rd_party.cpp"
 "src/combat/status_effects/broken_arm.cpp"
 "src/combat/status_effects/crippled_leg.cpp"
 "src/combat/status_effects/mangled.cpp"

@@ -4,10 +4,12 @@
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "data/session.h"
+#include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -20,7 +22,9 @@ enum class ErwinGoals {
   FOLLOW_PLR = 2,
   TARGETING = 3,
   RETREATING = 4,
-  DODGING = 5
+  DODGING = 5,
+  PROVOKE = 6,
+  THIRD_PARTY = 7
 };
 
 
@@ -31,18 +35,16 @@ struct ErwinAI : AIBehavior {
     contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
     targeting = {0.25, 0.10, 0.75};
     retreating = {0.50, 0.10, 0.50};
-    dodging = {0.80, 0.25, 0.50, 0.50, 1.0, 0.50, 0.80};
-
-    retaliation_chance = 0.75;
+    dodging = {0.80, 0.25, 0.50, 0.50, 1.0, 0.25, 0.80};
+    damaged.retaliation_chance = 0.75;
   }
 };
 
 
 /* Erwin is a Companion Combatant of the "Maverick" archetype. Their
  * behavior is designed to make sure the player doesn't get overwhelmed.
- * Mainly by going out of their way to draw enemy aggro if too many are
- * targeting the player. As such, they tend to be a lot more 
- * self-sufficent than other companions.*/
+ * As such, they tend to be a lot more self-sufficent than other 
+ * companions.*/
 class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);
@@ -57,6 +59,10 @@ public:
   void retaliation(Combatant *assailant, float chance);
   float chanceCalculation(WarningCBT *event, bool from_target,
                           bool in_range);
+
+  void assistInput();
+  bool lightAssistCondition();
+  bool heavyAssistCondition();
 
   /* This is considered the start point of the Erwin's behavior tree.
    * The function is meant to be ran while the companion is idle.*/
@@ -73,6 +79,8 @@ public:
   void attackHP();
   void ghoststep(int direction_x);
   void evade();
+  void provoke();
+  void thirdparty();
 
   void setGoal(ErwinGoals goal, float chance);
 
@@ -84,12 +92,13 @@ public:
   void targetingLogic();
   void retreatingLogic();
   void dodgingLogic();
+  void thirdPartyLogic();
 
   void wait(float time);
   void wait(float min, float max);
   void waitTimer();
 
-  void movement();
+  void movement(float multiplier);
   void animationLogic();
 
   void draw() override;
@@ -98,18 +107,20 @@ public:
   Animation *getIdleAnim();
   Rectangle *getStunSprite();
 
-  static SpriteAtlas atlas;
-
   ErwinGoals ai_goal = ErwinGoals::IDLE;
-  std::unique_ptr<AIBehavior> ai_behavior;
-  
+  std::unique_ptr<AIBehavior> ai_behavior; 
   float tick_clock = 0.0;
+
+  Mary *player;
+  static SpriteAtlas atlas;
+  static SoundAtlas psfx;
 private:
+  CombatKeybinds *keybinds;
+
   const float default_speed = 68;
   int moving_x = 0;
   bool has_moved = false;
 
-  Mary *player;
   float preferred_plr_distance = 128;
   float attack_distance = 30;
   float contest_distance = 96;

@@ -26,8 +26,7 @@ struct ServantAI : AIBehavior {
     targeting = {0.45, 0.10, 0.75};
     retreating = {0.75, 0.10, 0.50};
     dodging = {0.80, 0.25, 0.50, 0.15, 1.0, 0.50, 0.80};
-
-    retaliation_chance = 0.75;
+    damaged = {0.60, 1.0, 3.0, 0.75};
   }
 };
 

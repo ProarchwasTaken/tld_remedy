@@ -6,17 +6,24 @@
 #include "base/entity.h"
 #include "base/party_member.h"
 #include "base/enemy.h"
+#include "data/keybinds.h"
 #include "data/session.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "data/enemy_troops.h"
+#include "system/sound_atlas.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/camera.h"
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
+#include "combat/hud/blackbars.h"
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
+#include "combat/hud/combo.h"
+#include "combat/hud/toasts.h"
 #include "combat/hud/cmd_plr.h"
+#include "combat/hud/cmd_assist.h"
 #include "combat/hud/cmd_item.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
@@ -34,10 +41,19 @@ public:
   void initializeTroop(EnemyTroop *troop);
   std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
-  void update() override;
-  void eventProcessing();
-  void eventHandling(std::unique_ptr<CombatEvent> &event);
+  void pause();
+  void resume();
+  bool shouldPause();
+  bool canPause();
 
+  void update() override;
+  void pauseLogic();
+  void combatantBehavior();
+  void eventEvaluation(std::unique_ptr<CombatantEvent> &event);
+  void eventProcessing();
+  void updateHud();
+
+  void eventHandling(std::unique_ptr<CombatEvent> &event);
   void dmgNumberHandling(Combatant *target, DamageType damage_type,
                          float damage_taken);
   void deleteEntity(int entity_id);
@@ -45,6 +61,8 @@ public:
   void updatePartyAttr(PartyMember *member, Character *data);
 
   void draw() override;
+  void drawHud();
+  void drawPauseMenu();
 
   #ifndef NDEBUG
   void debugKeybinds();
@@ -60,24 +78,32 @@ private:
   Texture debug_overlay;
 
   CombatCamera camera;
+  BlackBars black_bars;
   CombatHandler evt_handler;
   CombatantHandler cbt_handler;
 
+  Session *session;
+  CombatKeybinds *keybinds;
+  SoundAtlas *menu_sfx;
+
+  bool paused = false;
   bool game_over = false;
 
   Mary *player = NULL;
-  LifeHud plr_hud = LifeHud({34, 215});
-  PlayerCmdHud plr_cmd_hud = PlayerCmdHud({350, 178});
+  std::unique_ptr<LifeHud> plr_hud;
+  std::unique_ptr<PlayerCmdHud> plr_cmd_hud;
 
   PartyMember *companion = NULL;
-  LifeHud com_hud = LifeHud({154, 215});
+  std::unique_ptr<LifeHud> com_hud;
+  std::unique_ptr<AssistCmdHud> assist_hud;
 
-  EnemyHud enemy_hud = EnemyHud({409, 16});
-  ItemCmdHud item_hud = ItemCmdHud({350, 222});
+  std::unique_ptr<EnemyHud> enemy_hud;
+  std::unique_ptr<ItemCmdHud> item_hud;
+  std::unique_ptr<ComboHud> combo_hud;
+  std::unique_ptr<CombatToasts> toasts;
 
   // Remove this later!
   Dummy *dummy = NULL;
 
   std::vector<std::unique_ptr<Entity>> entities;
-  Session *session;
 };

@@ -1,8 +1,10 @@
 #pragma once
+#include <cstddef>
 #include <string>
 #include <memory>
 #include "enums.h"
 #include "base/combat_action.h"
+#include "data/technique.h"
 #include "combat/combatants/party/mary.h"
 
 
@@ -25,13 +27,8 @@ public:
   std::string name;
   SubWeaponID id;
 
-  std::string tech1_name;
-  float tech1_cost;
-  TechCostType tech1_type;
-
-  std::string tech2_name;
-  float tech2_cost;
-  TechCostType tech2_type;
+  Technique *tech1 = NULL;
+  Technique *tech2 = NULL;
 protected:
   Mary *user;
 };

@@ -81,7 +81,9 @@ enum class ActionID {
   EVADE,
   KNIFE_CLEAVE,
   KNIFE_PIERCER,
-  USE_ITEM
+  USE_ITEM,
+  ERWIN_PROVOKE,
+  ERWIN_3RD_PARTY
 };
 
 enum class StatusID {
@@ -142,6 +144,10 @@ enum class CombatEVT {
   DELETE_ENTITY,
   OPEN_ITEM_HUD,
   REMOVE_ITEM,
+  START_TOAST,
+  BAR_SET,
+  BAR_SET_TARGET,
+  BAR_RESET
 };
 
 enum class CombatantEVT {

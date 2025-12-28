@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "data/session.h"
 #include "data/damage.h"
+#include "data/technique.h"
 #include "data/combatant_event.h"
 #include "base/combatant.h"
 #include "system/sprite_atlas.h"
@@ -44,6 +45,8 @@ public:
   void depleteExhaustion();
   void depleteInstant();
 
+  void techniqueCooldown();
+
   void tintFlash();
 
   PartyMemberID id;
@@ -58,13 +61,8 @@ public:
   float deplete_delay = 0.5;
   float deplete_clock = 0.0;
 
-  std::string tech1_name;
-  float tech1_cost;
-  TechCostType tech1_type;
-
-  std::string tech2_name;
-  float tech2_cost;
-  TechCostType tech2_type;
+  Technique tech1;
+  Technique tech2;
 protected:
   bool enabled = true;
 private:

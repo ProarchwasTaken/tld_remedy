@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstddef>
 #include <string>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include "game.h"
@@ -12,12 +13,11 @@
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/text.h"
-#include "combat/system/cbt_handler.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/hud/enemy.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::unique_ptr;
 SpriteAtlas EnemyHud::atlas("hud", "hud_enemy");
 
 
@@ -41,25 +41,17 @@ void EnemyHud::assign(Mary *&player, PartyMember *&companion) {
   PLOGI << "Assigned enemy hud to player and companion.";
 }
 
-void EnemyHud::behavior() {
-  EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
+void EnemyHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+    return;
+  }
 
-  for (auto &event : *event_pool) {
-    if (event == nullptr) {
-      continue;
-    }
-
-    if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
-      continue;
-    }
-
-    assert(event->sender->entity_type == COMBATANT);
-    Combatant *sender = static_cast<Combatant*>(event->sender);
-    if (sender->team == CombatantTeam::ENEMY) {
-      PLOGI << "Acknowledging TookDamage event sent by '" << sender->name
-        << "' [ID: " << sender->entity_id << "]";
-      damageHandling(sender);
-    }
+  assert(event->sender->entity_type == COMBATANT);
+  Combatant *sender = static_cast<Combatant*>(event->sender);
+  if (sender->team == CombatantTeam::ENEMY) {
+    PLOGI << "Acknowledging TookDamage event sent by '" << sender->name
+      << "' [ID: " << sender->entity_id << "]";
+    damageHandling(sender);
   }
 }
 

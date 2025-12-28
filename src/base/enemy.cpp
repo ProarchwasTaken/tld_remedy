@@ -1,12 +1,15 @@
 #include <cassert>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
 #include "enums.h"
+#include "game.h"
 #include "data/damage.h"
+#include "data/combat_event.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
-#include "game.h"
+#include "combat/system/evt_handler.h"
 #include "base/enemy.h"
 #include <plog/Log.h>
 
@@ -46,7 +49,7 @@ void Enemy::takeDamage(DamageData &data) {
   }
 
   PartyMember *combatant = static_cast<PartyMember*>(data.assailant);
-  if (!combatant->important) {
+  if (!combatant->important && !data.force_hitstop) {
     return;
   }
 
@@ -76,7 +79,21 @@ void Enemy::enterHitstun(DamageData &data) {
     PLOGI << "Combo: " << combo;
   }
 
+  if (state == ACTION && counterToastCondition(data)) {
+    PLOGD << "Starting combat toast: Counter";
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 0);
+  }
+
   Combatant::enterHitstun(data);
+}
+
+bool Enemy::counterToastCondition(DamageData &data) {
+  if (data.assailant == NULL && data.assailant->team == team) {
+    return false;
+  }
+
+  PartyMember *assailant = static_cast<PartyMember*>(data.assailant);
+  return assailant->important || data.force_hitstop;
 }
 
 void Enemy::exitHitstun() {

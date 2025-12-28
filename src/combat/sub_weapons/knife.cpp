@@ -14,13 +14,8 @@ SoundAtlas Knife::sfx("knife");
 
 
 Knife::Knife(Mary *user) : SubWeapon("Knife", SubWeaponID::KNIFE, user) {
-  tech1_name = "Cleave";
-  tech1_cost = 8;
-  tech1_type = TechCostType::MORALE;
-
-  tech2_name = "Piercer";
-  tech2_cost = 12;
-  tech2_type = TechCostType::MORALE;
+  *tech1 = {"Cleave", TechCostType::MORALE, 8};
+  *tech2 = {"Piercer", TechCostType::MORALE, 12};
 
   sfx.use();
   PLOGI << "Knife Sub-Weapon: Initialized.";
@@ -32,13 +27,13 @@ Knife::~Knife() {
 }
 
 unique_ptr<CombatAction> Knife::lightTechnique() {
-  user->morale -= tech1_cost;
+  user->morale -= tech1->cost;
   PLOGI << "Decreased Morale to: " << user->morale;
   return make_unique<KnifeCleave>(user);
 }
 
 unique_ptr<CombatAction> Knife::heavyTechnique() {
-  user->morale -= tech2_cost;
+  user->morale -= tech2->cost;
   PLOGI << "Decreased Morale to: " << user->morale;
   return make_unique<KnifePiercer>(user);
 }

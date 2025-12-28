@@ -68,22 +68,9 @@ Combatant::~Combatant() {
   PLOGI << "Removed combatant: '" << name << "'";
 }
 
-void Combatant::behavior() {
-  auto *event_pool = CombatantHandler::get();
-  eventHandling(event_pool);
-}
-
-void Combatant::eventHandling(EventPool<CombatantEvent> *event_pool) {
-  for (auto &event : *event_pool) {
-    if (event == nullptr) {
-      continue;
-    }
-
-    evaluateEvent(event);
-
-    for (auto &effect : status) {
-      effect->evaluateEvent(event);
-    }
+void Combatant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  for (auto &effect : status) {
+    effect->evaluateEvent(event);
   }
 }
 
@@ -97,7 +84,10 @@ float Combatant::distanceTo(Entity *entity) {
 }
 
 void Combatant::takeDamage(DamageData &data) {
-  assert(state != CombatantState::DEAD);
+  if (state == CombatantState::DEAD) {
+    return;
+  }
+
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";

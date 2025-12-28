@@ -20,6 +20,7 @@ public:
   void finalIntercept(float &damage, DamageData &data) override;
 
   void enterHitstun(DamageData &data) override;
+  bool counterToastCondition(DamageData &data);
   void exitHitstun() override;
 
   void death() override;

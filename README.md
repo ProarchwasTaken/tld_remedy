@@ -26,7 +26,10 @@ is subject to change.
 * **X Key** - Defensive (Use in combination with directional inputs!)
 * **A Key** - Light Technique
 * **S Key** - Heavy Technique
+* **D Key** - Light Assist
+* **C Key** - Heavy Assist
 
+* **Tab Key** - Pause
 * **Left Shift Key** - Use Item
 
 
@@ -45,7 +48,10 @@ may be different depending on what controller you use.
 * **B Button** - Defensive (Use in combination with directional inputs!)
 * **X Button** - Light Technique
 * **Y Button** - Heavy Technique
+* **L Button** - Light Assist
+* **R Button** - Heavy Assist
 
+* **Start Button** - Pause
 * **Select Button** - Use Item
 
 

@@ -6,8 +6,8 @@
 #include <string>
 #include <memory>
 #include <set>
-#include "game.h"
 #include "enums.h"
+#include "game.h"
 #include "data/damage.h"
 #include "data/session.h"
 #include "data/combat_event.h"
@@ -59,6 +59,8 @@ void PartyMember::setEnabled(bool value) {
 }
 
 void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  Combatant::evaluateEvent(event);
+
   if (event->event_type == CombatantEVT::MORALE_GAINED) {
     auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
     moraleShare(mp_event);
@@ -81,6 +83,7 @@ void PartyMember::moraleShare(GainedMoraleCBT *event) {
 
 void PartyMember::takeDamage(DamageData &data) {
   bool not_demoralized = !demoralized;
+  bool in_critical = critical_life;
   Combatant::takeDamage(data);
 
   deplete_clock = 0.0;
@@ -104,11 +107,20 @@ void PartyMember::takeDamage(DamageData &data) {
     apply_hitstop = true;
   }
 
-  bool became_demoralized = not_demoralized == demoralized;
+  bool became_demoralized = not_demoralized && demoralized;
   if (became_demoralized) {
     data.hit_stop *= 2;
     apply_hitstop = true;
     CombatStage::tintStage(Game::palette[40]);
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
+    sfx.play("demoralized");
+  }
+
+  bool entered_critical = !in_critical && critical_life;
+  if (entered_critical && state != CombatantState::DEAD) {
+    CombatStage::tintStage(Game::palette[32]);
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
+    sfx.play("critical_life");
   }
 
   if (apply_hitstop) {
@@ -274,10 +286,13 @@ void PartyMember::increaseExhaustion(float magnitude) {
     PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
       "] is now Winded!";
     critical_life = true;
-    deplete_delay = 2.0;
+  }
+
+  if (life <= 1) {
+    deplete_delay = 3.0;
   }
   else {
-    deplete_delay = DEFAULT_DEPLETE_DELAY;
+    deplete_delay = DEFAULT_DEPLETE_DELAY; 
   }
 
   deplete_clock = 0.0;
@@ -314,6 +329,18 @@ void PartyMember::depleteInstant() {
     PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
       "] is no longer Winded.";
     critical_life = false;
+  }
+}
+
+void PartyMember::techniqueCooldown() {
+  if (tech1.clock < 1.0) {
+    tech1.clock += Game::deltaTime() / tech1.cooldown;
+    tech1.clock = Clamp(tech1.clock, 0.0, 1.0);
+  }
+
+  if (tech2.clock < 1.0) {
+    tech2.clock += Game::deltaTime() / tech2.cooldown;
+    tech2.clock = Clamp(tech2.clock, 0.0, 1.0);
   }
 }
 

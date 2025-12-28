@@ -51,12 +51,12 @@ public:
   static SoundAtlas sfx;
   static SpriteAtlas emotes;
 private:
-  FieldMap field;
+  std::unique_ptr<FieldMap> field;
   Texture vignette;
 
   FieldHandler evt_handler;
   ActorHandler actor_handler;
-  Session session;
+  std::unique_ptr<Session> session;
 
   FieldCamera camera;
   Entity *camera_target;

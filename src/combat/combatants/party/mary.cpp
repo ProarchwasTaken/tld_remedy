@@ -90,14 +90,6 @@ void Mary::assignSubWeapon(SubWeaponID id) {
       break;
     }
   }
-
-  tech1_name = sub_weapon->tech1_name;
-  tech1_cost = sub_weapon->tech1_cost;
-  tech1_type = sub_weapon->tech1_type;
-
-  tech2_name = sub_weapon->tech2_name;
-  tech2_cost = sub_weapon->tech2_cost;
-  tech2_type = sub_weapon->tech2_type;
 }
 
 void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
@@ -109,8 +101,6 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
 }
 
 void Mary::behavior() {
-  Combatant::behavior();
-
   if (!enabled) {
     return;
   }
@@ -264,7 +254,7 @@ void Mary::readActionBuffer() {
       break;
     }
     case MaryAction::GHOST_STEP: {
-      if (!critical_life) {
+      if (life > 1) {
         increaseExhaustion(gs_cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
       }
@@ -272,7 +262,7 @@ void Mary::readActionBuffer() {
       break;
     }
     case MaryAction::EVADE: {
-      if (!critical_life) {
+      if (life > 1) {
         RectEx hitbox;
         hitbox.scale = {8, 46};
         hitbox.offset = {-4 + (8.0f * direction), -48};
