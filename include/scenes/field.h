@@ -32,6 +32,10 @@ public:
   void setupActor(ActorData *data);
 
   void update() override;
+
+  void panelLogic();
+  void panelTermination();
+
   void actorBehavior();
   void eventEvaluation(std::unique_ptr<ActorEvent> &event);
   void eventProcessing();

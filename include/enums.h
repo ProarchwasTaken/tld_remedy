@@ -12,7 +12,8 @@ enum class PanelID {
   CONFIG,
   CONFIRM,
   STATUS,
-  ITEMS
+  ITEMS,
+  DIALOG
 };
 
 enum EntityType {

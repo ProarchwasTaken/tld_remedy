@@ -28,6 +28,7 @@ public:
   CommandSystem();
   ~CommandSystem();
   static void assignScene(FieldScene *scene);
+  static bool isActive() {return command_mode;}
 
   static void process();
 

@@ -17,11 +17,12 @@
 #include "data/actor_event.h"
 #include "data/session.h"
 #include "system/sound_atlas.h"
+#include "system/sprite_atlas.h"
+#include "utils/text.h"
+#include "menu/panels/dialog.h"
 #include "field/system/field_map.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
-#include "system/sprite_atlas.h"
-#include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
 #include "field/actors/enemy.h"
@@ -69,6 +70,10 @@ FieldScene::~FieldScene() {
   session.reset();
 
   sfx.release();
+
+  if (panel != nullptr) {
+    panel.reset();
+  }
   PLOGI << "Unloaded the Field scene.";
 }
 
@@ -243,6 +248,25 @@ void FieldScene::update() {
     return;
   }
 
+  // Remove this later!
+  if (!panel_mode && IsKeyPressed(KEY_T) && !CommandSystem::isActive()) {
+    vector<string> dialog = {
+      "Hello!",
+      "This is test dialogue!",
+      "It even works with multiple lines too\n"
+      "as demonstrated in this very text box.\n"
+      "See what I mean?"
+    };
+
+    panel = make_unique<DialogPanel>((Vector2){97, 183}, dialog);
+    panel_mode = true;
+  }
+
+  if (panel_mode) {
+    panelLogic();
+    return;
+  }
+
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
@@ -257,6 +281,21 @@ void FieldScene::update() {
     camera.follow(camera_target);
     eventProcessing();
   }
+}
+
+void FieldScene::panelLogic() {
+  assert(panel != nullptr);
+  panel->update();
+
+  if (panel->terminate) {
+    panelTermination();
+  }
+}
+
+void FieldScene::panelTermination() {
+  assert(panel != nullptr);
+  panel.reset();
+  panel_mode = false;
 }
 
 void FieldScene::actorBehavior() {
@@ -631,6 +670,10 @@ void FieldScene::draw() {
   EndMode2D();
 
   DrawTextureV(vignette, {0, 0}, WHITE);
+
+  if (panel_mode) {
+    panel->draw();
+  }
 
   #ifndef NDEBUG
   CommandSystem::drawBuffer();
