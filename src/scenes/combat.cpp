@@ -251,13 +251,13 @@ void CombatScene::pauseLogic() {
 }
 
 void CombatScene::combatantBehavior() {
-  for (Combatant *combatant : Combatant::existing_combatants) {
-    combatant->behavior();
-  }
-
   EventPool<CombatantEvent> *event_pool = CombatantHandler::get();
   for (auto &event : *event_pool) {
     eventEvaluation(event);
+  }
+
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    combatant->behavior();
   }
 
   cbt_handler.clearEvents();

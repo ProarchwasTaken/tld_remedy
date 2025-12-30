@@ -532,8 +532,7 @@ void Servant::retreatingLogic() {
 }
 
 void Servant::dodgingLogic() {
-  assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target == NULL || target->state == DEAD) {
     PLOGI << "Aborting dodging goal.";
     ai_goal = ServantGoals::IDLE;
     target = NULL;

@@ -14,6 +14,7 @@
 #include "data/actor.h"
 #include "data/entity.h"
 #include "data/field_event.h"
+#include "data/actor_event.h"
 #include "data/session.h"
 #include "system/sound_atlas.h"
 #include "field/system/field_map.h"
@@ -245,11 +246,8 @@ void FieldScene::update() {
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
-  
-  for (Actor *actor : Actor::existing_actors) {
-    actor->behavior();
-  }
-  actor_handler.clearEvents();
+
+  actorBehavior();
 
   if (Game::state() == GameState::READY) {
     for (unique_ptr<Entity> &entity : entities) {
@@ -258,6 +256,28 @@ void FieldScene::update() {
 
     camera.follow(camera_target);
     eventProcessing();
+  }
+}
+
+void FieldScene::actorBehavior() {
+  for (auto &event : *actor_handler.get()) {
+    eventEvaluation(event);
+  }
+
+  for (Actor *actor : Actor::existing_actors) {
+    actor->behavior();
+  }
+
+  actor_handler.clearEvents();
+}
+
+void FieldScene::eventEvaluation(unique_ptr<ActorEvent> &event) {
+  for (Actor *actor : Actor::existing_actors) {
+    if (event == nullptr) {
+      break;
+    }
+
+    actor->evaluateEvent(event);
   }
 }
 

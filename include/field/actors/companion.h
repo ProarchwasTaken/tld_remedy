@@ -1,10 +1,12 @@
 #pragma once
-#include <raylib.h>
 #include <list>
 #include <utility>
+#include <memory>
+#include <raylib.h>
 #include "enums.h"
 #include "base/actor.h"
 #include "data/animation.h"
+#include "data/actor_event.h"
 #include "system/sprite_atlas.h"
 #include "field/actors/player.h"
 
@@ -16,8 +18,7 @@ public:
   ~CompanionActor();
   void setupAtlas(CompanionID id);
 
-  void behavior() override;
-  void processEvents();
+  void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
 
   void update() override;
   void pathfind();

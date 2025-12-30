@@ -11,7 +11,6 @@
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
-#include "field/system/actor_handler.h"
 #include "field/actors/companion.h"
 
 using std::unique_ptr, std::string;
@@ -53,30 +52,17 @@ void CompanionActor::setupAtlas(CompanionID id) {
   atlas = SpriteAtlas("actors", sprite_group);
 }
 
-void CompanionActor::behavior() {
-  processEvents();
-}
+void CompanionActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
+  ActorEVT type = event->event_type;
+  if (type == ActorEVT::PLR_MOVING) {
+    PlayerActor *sender = static_cast<PlayerActor*>(event->sender);
+    Vector2 position = sender->position;
+    Direction direction = sender->direction;
 
-void CompanionActor::processEvents() {
-  EventPool<ActorEvent> *event_pool = ActorHandler::get();
-  int count = event_pool->size();
-
-  for (int x = 0; x < count; x++) {
-    unique_ptr<ActorEvent> &event = event_pool->at(x);
-
-    if (event == nullptr) {
-      continue;
-    }
-
-    ActorEVT type = event->event_type;
-    if (type == ActorEVT::PLR_MOVING) {
-      PlayerActor *sender = static_cast<PlayerActor*>(event->sender);
-      Vector2 position = sender->position;
-      Direction direction = sender->direction;
-
-      move_points.push_back({position, direction});
-      if (plr == NULL) plr = sender;
-    }
+    move_points.push_back({position, direction});
+    if (plr == NULL) {
+      plr = sender;
+    } 
   }
 }
 

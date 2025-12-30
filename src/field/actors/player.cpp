@@ -4,7 +4,6 @@
 #include <cmath>
 #include <plog/Log.h>
 #include "enums.h"
-#include "field/system/field_handler.h"
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
@@ -14,6 +13,7 @@
 #include "utils/collision.h"
 #include "utils/animation.h"
 #include "field/system/actor_handler.h"
+#include "field/system/field_handler.h"
 #include "field/entities/pickup.h"
 #include "field/actors/player.h"
 
@@ -48,8 +48,6 @@ PlayerActor::~PlayerActor() {
 }
 
 void PlayerActor::behavior() {
-  processEvents();
-
   if (controllable) {
     bool gamepad = IsGamepadAvailable(0);
 
@@ -64,28 +62,17 @@ void PlayerActor::behavior() {
   }
 }
 
-void PlayerActor::processEvents() {
-  EventPool<ActorEvent> *event_pool = ActorHandler::get();
-  int count = event_pool->size();
+void PlayerActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
+  bool holding_event = pickup_event != nullptr;
+  ActorEVT type = event->event_type;
+  if (!holding_event && type == ActorEVT::PICKUP_IN) {
+    int id = event->sender->entity_id;
 
-  for (int x = 0; x < count; x++) {
-    unique_ptr<ActorEvent> &event = event_pool->at(x);
-
-    if (event == nullptr) {
-      continue;
-    }
-
-    bool holding_event = pickup_event != nullptr;
-    ActorEVT type = event->event_type;
-    if (!holding_event && type == ActorEVT::PICKUP_IN) {
-      int id = event->sender->entity_id;
-
-      PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
-      pickup_event.swap(event);
-    } 
-    else if (holding_event && type == ActorEVT::PICKUP_OUT) {
-      dropPickupEvent(event);
-    }
+    PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
+    pickup_event.swap(event);
+  } 
+  else if (holding_event && type == ActorEVT::PICKUP_OUT) {
+    dropPickupEvent(event);
   }
 }
 

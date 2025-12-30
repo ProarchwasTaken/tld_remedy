@@ -7,6 +7,7 @@
 #include "base/entity.h"
 #include "data/actor.h"
 #include "data/field_event.h"
+#include "data/actor_event.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
@@ -31,6 +32,8 @@ public:
   void setupActor(ActorData *data);
 
   void update() override;
+  void actorBehavior();
+  void eventEvaluation(std::unique_ptr<ActorEvent> &event);
   void eventProcessing();
   void eventHandling(std::unique_ptr<FieldEvent> &event);
 

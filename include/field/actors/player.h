@@ -15,7 +15,7 @@ public:
   ~PlayerActor();
 
   void behavior() override;
-  void processEvents();
+  void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
   void dropPickupEvent(std::unique_ptr<ActorEvent> &out_range);
   void movementInput(bool gamepad);
   bool isMoving();
