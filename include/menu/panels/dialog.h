@@ -21,6 +21,7 @@ public:
   void update() override;
   void heightLerp();
   void textScrolling();
+  float getSpeedMultiplier();
   void confirm();
 
   void draw() override;
@@ -39,6 +40,6 @@ private:
   std::string::iterator current_char;
   std::string buffer;
 
-  float text_speed = 0.10;
+  float text_speed = 0.025;
   float text_clock = 0.0;
 };

@@ -1,3 +1,4 @@
+#include <cassert>
 #include <string>
 #include <vector>
 #include <raylib.h>
@@ -69,7 +70,9 @@ void DialogPanel::heightLerp() {
 
 void DialogPanel::textScrolling() {
   if (text_clock < 1.0) {
-    text_clock += Game::deltaTime() / text_clock;
+    assert(current_char != current_line->end());
+    float multiplier = getSpeedMultiplier();
+    text_clock += Game::deltaTime() / (text_speed * multiplier);
     return;
   }
 
@@ -77,6 +80,28 @@ void DialogPanel::textScrolling() {
   current_char++;
 
   text_clock = 0.0;
+}
+
+float DialogPanel::getSpeedMultiplier() {
+  if (current_char == current_line->begin()) {
+    return 1.0;
+  }
+
+  string::iterator prev_char = current_char - 1;
+  switch (*prev_char) {
+    case ',':
+    case ';': {
+      return 8.0;
+    }
+    case '.':
+    case '?':
+    case '!': {
+      return 16.0;
+    }
+    default: {
+      return 1.0;
+    }
+  }
 }
 
 void DialogPanel::confirm() {
