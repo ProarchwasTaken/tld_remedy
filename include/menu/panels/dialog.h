@@ -4,6 +4,7 @@
 #include <raylib.h>
 #include "data/keybinds.h"
 #include "base/panel.h"
+#include "system/sound_atlas.h"
 
 
 enum class DialogState {
@@ -15,7 +16,8 @@ enum class DialogState {
 
 class DialogPanel : public Panel {
 public:
-  DialogPanel(Vector2 position, std::vector<std::string> dialog);
+  DialogPanel(Vector2 position, std::vector<std::string> dialog,
+              std::string scrool_sound = "txt_scroll");
   ~DialogPanel();
 
   void update() override;
@@ -34,6 +36,9 @@ private:
 
   Texture texture;
   float frame_height;
+
+  SoundAtlas *sfx;
+  std::string scroll_sound;
 
   std::vector<std::string> dialog;
   std::vector<std::string>::iterator current_line;

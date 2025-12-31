@@ -253,9 +253,10 @@ void FieldScene::update() {
     vector<string> dialog = {
       "Hello!",
       "This right here, is test dialogue!",
-      "It even works with multiple lines too\n"
+      "It even works with multiple lines too,\n"
       "as demonstrated in this very text box.\n"
-      "See what I mean?"
+      "See what I mean?",
+      "So... isn't this pretty cool?"
     };
 
     panel = make_unique<DialogPanel>((Vector2){97, 183}, dialog);

@@ -13,13 +13,18 @@
 using std::string, std::vector;
 
 
-DialogPanel::DialogPanel(Vector2 position, vector<string> dialog) {
+DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
+                         string scroll_sound) {
   id = PanelID::DIALOG;
   main_position = position;
   text_position = Vector2Add(position, {2, 1});
 
   texture = LoadTexture("graphics/menu/dialog_frame1.png");
   frame_height = texture.height;
+
+  sfx = &Game::menu_sfx;
+  sfx->use();
+  this->scroll_sound = scroll_sound;
 
   this->dialog = dialog;
   current_line = this->dialog.begin();
@@ -29,6 +34,7 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog) {
 }
 
 DialogPanel::~DialogPanel() {
+  sfx->release();
   UnloadTexture(texture);
 }
 
@@ -79,6 +85,7 @@ void DialogPanel::textScrolling() {
   buffer.push_back(*current_char);
   current_char++;
 
+  sfx->play(scroll_sound, 1.30, true);
   text_clock = 0.0;
 }
 
@@ -91,12 +98,12 @@ float DialogPanel::getSpeedMultiplier() {
   switch (*prev_char) {
     case ',':
     case ';': {
-      return 8.0;
+      return 3.0;
     }
     case '.':
     case '?':
     case '!': {
-      return 16.0;
+      return 8.0;
     }
     default: {
       return 1.0;
