@@ -27,10 +27,6 @@
     {
       "name": "menu_camp_reverse",
       "filename": "menu/menu_camp_reverse.mp3"
-    },
-    {
-      "name": "txt_scroll",
-      "filename": "menu/txt_scroll.mp3"
     }
   ]
 }

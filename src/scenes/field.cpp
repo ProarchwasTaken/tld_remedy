@@ -259,7 +259,7 @@ void FieldScene::update() {
       "So... isn't this pretty cool?"
     };
 
-    panel = make_unique<DialogPanel>((Vector2){97, 183}, dialog);
+    panel = make_unique<DialogPanel>((Vector2){97, 183}, dialog, true);
     panel_mode = true;
   }
 
