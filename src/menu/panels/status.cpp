@@ -34,7 +34,7 @@ StatusPanel::StatusPanel(Session *session, string *description)
   this->description = description;
   updateDescription();
 
-  menu_atlas = &CampMenuScene::menu_atlas;
+  menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 
   camp_atlas = &CampMenuScene::atlas;

@@ -38,7 +38,7 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   this->sfx = &Game::menu_sfx;
   this->camp_atlas = &CampMenuScene::atlas;
-  this->menu_atlas = &CampMenuScene::menu_atlas;
+  this->menu_atlas = &Game::menu_atlas;
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();

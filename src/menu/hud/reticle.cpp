@@ -1,12 +1,12 @@
 #include <cmath>
 #include <raylib.h>
+#include "game.h"
 #include "system/sprite_atlas.h"
-#include "scenes/camp_menu.h"
 #include "menu/hud/reticle.h"
 
 
 TargetReticle::TargetReticle() {
-  menu_atlas = &CampMenuScene::menu_atlas;
+  menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 }
 

@@ -32,7 +32,7 @@ public:
 private:
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
-  SpriteAtlas menu_atlas = SpriteAtlas("menu", "menu_elements");
+  SpriteAtlas *menu_atlas;
 
   std::array<TitleOption, 3> options = {
     TitleOption::NEW_GAME,

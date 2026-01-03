@@ -22,7 +22,9 @@ TitleScene::TitleScene() {
 
   sfx = &Game::menu_sfx;
   sfx->use();
-  menu_atlas.use();
+
+  menu_atlas = &Game::menu_atlas;
+  menu_atlas->use();
 
   valid_session = Game::existingSession();
   if (!valid_session) {
@@ -32,7 +34,7 @@ TitleScene::TitleScene() {
 
 TitleScene::~TitleScene() {
   sfx->release();
-  menu_atlas.release();
+  menu_atlas->release();
 
   if (panel != nullptr) {
     panel.reset();
@@ -71,7 +73,7 @@ void TitleScene::optionNavigation() {
     sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
-    panel = make_unique<ConfirmPanel>(&menu_atlas, keybinds, 
+    panel = make_unique<ConfirmPanel>(menu_atlas, keybinds, 
                                      "Close the game?");
     sfx->play("menu_cancel");
     panel_mode = true;
@@ -90,7 +92,7 @@ void TitleScene::selectOption() {
       break;
     }
     case TitleOption::CONFIG: {
-      panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
+      panel = make_unique<ConfigPanel>(menu_atlas, keybinds);
       panel_mode = true;
       break;
     }
@@ -159,7 +161,7 @@ void TitleScene::drawCursor(Vector2 position, Color color) {
   }
 
   position = Vector2Add(position, {-11, 2});
-  DrawTextureRec(menu_atlas.sheet, menu_atlas.sprites[0], position, 
+  DrawTextureRec(menu_atlas->sheet, menu_atlas->sprites[0], position, 
                  color);
 }
 

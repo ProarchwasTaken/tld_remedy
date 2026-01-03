@@ -60,11 +60,11 @@ public:
   std::string getOptionName(CampMenuOption option);
 
   static SpriteAtlas atlas;
-  static SpriteAtlas menu_atlas;
 private:
   Session *session;
   MenuKeybinds *keybinds;
   SoundAtlas *sfx;
+  SpriteAtlas *menu_atlas;
 
   Texture background;
   Texture gradient1;

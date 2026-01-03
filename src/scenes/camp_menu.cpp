@@ -22,7 +22,6 @@
 
 using std::string, std::make_unique;
 SpriteAtlas CampMenuScene::atlas("menu", "camp_menu");
-SpriteAtlas CampMenuScene::menu_atlas("menu", "menu_elements");
 
 
 CampMenuScene::CampMenuScene(Session *session) {
@@ -41,6 +40,7 @@ CampMenuScene::CampMenuScene(Session *session) {
   gradient1 = LoadTexture("graphics/overlays/camp_gradient.png");
   gradient2 = atlas.getTexturefromSprite(8);
 
+  menu_atlas = &Game::menu_atlas;
   sfx = &Game::menu_sfx;
   sfx->use();
 }
@@ -186,14 +186,14 @@ void CampMenuScene::selectOption() {
       break;
     }
     case CampMenuOption::CONFIG: {
-      panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
+      panel = make_unique<ConfigPanel>(menu_atlas, keybinds);
       break;
     }
     case CampMenuOption::END_GAME: {
       string message = "Return to the Title Screen?\n"
       "(Unsaved progress will be lost.)";
 
-      panel = make_unique<ConfirmPanel>(&menu_atlas, keybinds, message);
+      panel = make_unique<ConfirmPanel>(menu_atlas, keybinds, message);
     }
     default: {
 

@@ -17,7 +17,7 @@ enum class DialogState {
 class DialogPanel : public Panel {
 public:
   DialogPanel(Vector2 position, std::vector<std::string> dialog,
-              std::string scrool_sound = "txt_scroll");
+              std::string scroll_sound = "txt_scroll");
   ~DialogPanel();
 
   void update() override;
