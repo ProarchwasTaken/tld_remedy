@@ -129,7 +129,8 @@ enum class FieldEVT {
   PLR_ADD_EFFECT,
   PLR_RM_EFFECT,
   COM_ADD_EFFECT,
-  COM_RM_EFFECT
+  COM_RM_EFFECT,
+  OPEN_DIALOG,
 };
 
 enum class ActorEVT {

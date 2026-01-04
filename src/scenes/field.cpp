@@ -248,21 +248,6 @@ void FieldScene::update() {
     return;
   }
 
-  // Remove this later!
-  if (!panel_mode && IsKeyPressed(KEY_T) && !CommandSystem::isActive()) {
-    vector<string> dialog = {
-      "Hello!",
-      "This right here, is test dialogue!",
-      "It even works with multiple lines too,\n"
-      "as demonstrated in this very text box.\n"
-      "See what I mean?",
-      "So... isn't this pretty cool?"
-    };
-
-    panel = make_unique<DialogPanel>((Vector2){97, 183}, dialog, true);
-    panel_mode = true;
-  }
-
   if (panel_mode) {
     panelLogic();
     return;
@@ -467,6 +452,15 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       auto *event_data = static_cast<RemoveEffectEvent*>(event.get());
       removeStatusEffect(event_data->event_type, event_data->effect_id);
       break;
+    }
+    case FieldEVT::OPEN_DIALOG: {
+      PLOGD << "Event detected: OpenDialogEvent";
+      auto *event_data = static_cast<OpenDialogEvent*>(event.get());
+      Vector2 position = {97, 183};
+
+      panel = make_unique<DialogPanel>(position, event_data->dialog, 
+                                       event_data->end_prompt);
+      panel_mode = true;
     }
   }
 }
