@@ -131,12 +131,17 @@ enum class FieldEVT {
   COM_ADD_EFFECT,
   COM_RM_EFFECT,
   OPEN_DIALOG,
+  START_SEQUENCE
 };
 
 enum class ActorEVT {
   PLR_MOVING,
   PICKUP_IN,
   PICKUP_OUT,
+};
+
+enum class SequenceID {
+
 };
 
 enum class CombatEVT {

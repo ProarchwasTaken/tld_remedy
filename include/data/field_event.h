@@ -54,3 +54,7 @@ struct OpenDialogEvent : FieldEvent {
   bool end_prompt = false;
 };
 
+struct StartSequenceEvent : FieldEvent {
+  SequenceID sequence;
+};
+

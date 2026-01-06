@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <string>
 #include <raylib.h>
 #include <plog/Log.h>
@@ -9,7 +10,7 @@ using std::string;
 
 
 Actor* Actor::getActor(enum ActorType type) {
-  Actor *result;
+  Actor *result = NULL;
 
   for (Actor* actor : existing_actors) {
     if (actor->actor_type == type) {

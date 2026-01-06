@@ -61,6 +61,10 @@ FieldScene::FieldScene(Session *session_data) {
 }
 
 FieldScene::~FieldScene() {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
   Entity::clear(entities);
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
@@ -248,11 +252,6 @@ void FieldScene::update() {
     return;
   }
 
-  if (panel_mode) {
-    panelLogic();
-    return;
-  }
-
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
@@ -266,6 +265,15 @@ void FieldScene::update() {
 
     camera.follow(camera_target);
     eventProcessing();
+  }
+
+  if (panel_mode) {
+    panelLogic();
+    return;
+  }
+
+  if (sequence != nullptr) {
+    sequence->update();
   }
 }
 
@@ -462,7 +470,25 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
                                        event_data->end_prompt);
       panel_mode = true;
     }
+    case FieldEVT::START_SEQUENCE: {
+      PLOGD << "Event detected: StartSequenceEvent";
+      auto *event_data = static_cast<StartSequenceEvent*>(event.get());
+      SequenceID sequence_id = event_data->sequence;
+      initSequence(sequence_id);
+    }
   }
+}
+
+void FieldScene::initSequence(SequenceID sequence_id) {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
+  switch (sequence_id) {
+  
+  }
+
+  assert(sequence != nullptr);
 }
 
 void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {

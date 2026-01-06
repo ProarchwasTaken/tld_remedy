@@ -4,6 +4,7 @@
 #include <memory>
 #include "enums.h"
 #include "base/scene.h"
+#include "base/field_sequence.h"
 #include "base/entity.h"
 #include "data/actor.h"
 #include "data/field_event.h"
@@ -41,6 +42,7 @@ public:
   void eventProcessing();
   void eventHandling(std::unique_ptr<FieldEvent> &event);
 
+  void initSequence(SequenceID sequence_id);
   void addStatusEffect(FieldEVT type, StatusID effect_id);
   void removeStatusEffect(FieldEVT type, StatusID effect_id);
   void addItem(ItemID item);
@@ -58,12 +60,13 @@ public:
   static SoundAtlas sfx;
   static SpriteAtlas emotes;
 private:
+  std::unique_ptr<Session> session;
   std::unique_ptr<FieldMap> field;
+  std::unique_ptr<FieldSequence> sequence;
   Texture vignette;
 
   FieldHandler evt_handler;
   ActorHandler actor_handler;
-  std::unique_ptr<Session> session;
 
   FieldCamera camera;
   Entity *camera_target;
