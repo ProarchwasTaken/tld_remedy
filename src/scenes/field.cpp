@@ -28,6 +28,7 @@
 #include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
+#include "field/sequences/db_01.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -272,8 +273,14 @@ void FieldScene::update() {
     return;
   }
 
-  if (sequence != nullptr) {
-    sequence->update();
+  if (sequence == nullptr) {
+    return;
+  }
+
+  sequence->update();
+
+  if (sequence->end_sequence) {
+    sequence.reset();
   }
 }
 
@@ -469,12 +476,14 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       panel = make_unique<DialogPanel>(position, event_data->dialog, 
                                        event_data->end_prompt);
       panel_mode = true;
+      break;
     }
     case FieldEVT::START_SEQUENCE: {
       PLOGD << "Event detected: StartSequenceEvent";
       auto *event_data = static_cast<StartSequenceEvent*>(event.get());
       SequenceID sequence_id = event_data->sequence;
       initSequence(sequence_id);
+      break;
     }
   }
 }
@@ -484,8 +493,11 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     sequence.reset();
   }
 
-  switch (sequence_id) {
-  
+  switch (sequence_id) { 
+    case SequenceID::DB_01:{
+      sequence = make_unique<DBSequence01>();
+      break;
+    }
   }
 
   assert(sequence != nullptr);

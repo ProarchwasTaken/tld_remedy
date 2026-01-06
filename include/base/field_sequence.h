@@ -8,7 +8,7 @@
 class FieldSequence {
 public:
   FieldSequence(std::string name, SequenceID id);
-  ~FieldSequence();
+  virtual ~FieldSequence();
 
   virtual void update() = 0;
 
@@ -16,7 +16,7 @@ public:
   SequenceID id;
 
   int order = 0;
-  bool end_sequence = true;
+  bool end_sequence = false;
 protected:
   PlayerActor *player;
   CompanionActor *companion;

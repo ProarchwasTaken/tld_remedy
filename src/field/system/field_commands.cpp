@@ -26,6 +26,7 @@ void removeItemCommand(string item_id);
 void clearInventoryCommand();
 void addEffectCommand(string target, string effect_id);
 void removeEffectCommand(string target, string effect_id);
+void initSequenceCommand(string sequence_id);
 
 
 CommandSystem::CommandSystem() {
@@ -166,6 +167,10 @@ void CommandSystem::interpretCommand(CommandType type,
 
       removeEffectCommand(target, effect_id);
       break;
+    }
+    case CommandType::INIT_SEQUENCE: {
+      string sequence_id = findNextWord(buffer, iterator);
+      initSequenceCommand(sequence_id);
     }
   }
 }
@@ -421,3 +426,21 @@ void removeEffectCommand(string target, string effect_id) {
   }
 
 }
+
+void initSequenceCommand(string sequence_id) {
+  if (sequence_id.empty()) {
+    PLOGE << "Item ID not specified!";
+    return;
+  }
+
+  for (char letter : sequence_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  PLOGD << "Now executing command.";
+  SequenceID id = static_cast<SequenceID>(std::stoi(sequence_id));
+  FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE, id);
+} 

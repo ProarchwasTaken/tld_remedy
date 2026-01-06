@@ -141,7 +141,7 @@ enum class ActorEVT {
 };
 
 enum class SequenceID {
-
+  DB_01
 };
 
 enum class CombatEVT {
