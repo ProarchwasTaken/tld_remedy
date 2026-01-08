@@ -295,8 +295,22 @@ void FieldScene::panelLogic() {
 
 void FieldScene::panelTermination() {
   assert(panel != nullptr);
+
+  if (panel->id == PanelID::DIALOG) {
+    dialogHandling();
+  }
+
   panel.reset();
   panel_mode = false;
+}
+
+void FieldScene::dialogHandling() {
+  assert(panel != nullptr && panel->id == PanelID::DIALOG);
+
+  DialogPanel *dialog = static_cast<DialogPanel*>(panel.get());
+  if (dialog->selected != NULL && sequence != nullptr) {
+    sequence->dialogHandling(*dialog->selected);
+  }
 }
 
 void FieldScene::actorBehavior() {

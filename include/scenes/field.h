@@ -36,6 +36,7 @@ public:
 
   void panelLogic();
   void panelTermination();
+  void dialogHandling();
 
   void actorBehavior();
   void eventEvaluation(std::unique_ptr<ActorEvent> &event);

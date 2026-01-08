@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "enums.h"
+#include "menu/panels/dialog.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
 
@@ -11,6 +12,7 @@ public:
   virtual ~FieldSequence();
 
   virtual void update() = 0;
+  virtual void dialogHandling(PromptOptions selected) {};
 
   std::string name;
   SequenceID id;
