@@ -54,7 +54,7 @@ private:
     {"CLEAR_INV", CommandType::CLR_INV},
     {"ADD_EFFECT", CommandType::ADD_EFFECT},
     {"RM_EFFECT", CommandType::RM_EFFECT},
-    {"INIT_SEQUENCE", CommandType::INIT_SEQUENCE}
+    {"SEQUENCE", CommandType::INIT_SEQUENCE}
   };
 
   inline static std::string buffer;

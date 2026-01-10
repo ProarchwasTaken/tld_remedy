@@ -28,10 +28,11 @@
 #include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
-#include "field/sequences/db_01.h"
+#include "field/sequences/save.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
+#include "field/sequences/db_01.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
@@ -508,8 +509,14 @@ void FieldScene::initSequence(SequenceID sequence_id) {
   }
 
   switch (sequence_id) { 
+    #ifndef NDEBUG
     case SequenceID::DB_01:{
       sequence = make_unique<DBSequence01>();
+      break;
+    } 
+    #endif // !NDEBUG
+    case SequenceID::SAVE: {
+      sequence = make_unique<SaveSequence>();
       break;
     }
   }

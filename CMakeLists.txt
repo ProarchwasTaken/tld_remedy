@@ -91,7 +91,7 @@ set(HEADERS
 "include/field/actors/enemy.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
-"include/field/sequences/db_01.h"
+"include/field/sequences/save.h"
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
@@ -170,7 +170,7 @@ set(SOURCE
 "src/field/actors/enemy.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
-"src/field/sequences/db_01.cpp"
+"src/field/sequences/save.cpp"
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
@@ -214,9 +214,11 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
+  "include/field/sequences/db_01.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
+  "src/field/sequences/db_01.cpp"
   )
 endif()
 
