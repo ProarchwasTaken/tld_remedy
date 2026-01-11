@@ -137,8 +137,8 @@ enum class FieldEVT {
 
 enum class ActorEVT {
   PLR_MOVING,
-  PICKUP_IN,
-  PICKUP_OUT,
+  INTERACT_IN,
+  INTERACT_OUT,
 };
 
 enum class SequenceID {

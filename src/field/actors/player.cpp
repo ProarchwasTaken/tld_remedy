@@ -15,6 +15,7 @@
 #include "field/system/actor_handler.h"
 #include "field/system/field_handler.h"
 #include "field/entities/pickup.h"
+#include "field/entities/save_point.h"
 #include "field/actors/player.h"
 
 using std::unique_ptr;
@@ -39,9 +40,9 @@ Actor("Mary", ActorType::PLAYER, position, direction)
 }
 
 PlayerActor::~PlayerActor() {
-  if (pickup_event != nullptr) {
-    pickup_event.reset();
-    PLOGD << "Cleared held event: PickupInRange";
+  if (interact_event != nullptr) {
+    interact_event.reset();
+    PLOGD << "Cleared held event: InteractableInRange";
   }
 
   atlas.release();
@@ -63,29 +64,29 @@ void PlayerActor::behavior() {
 }
 
 void PlayerActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
-  bool holding_event = pickup_event != nullptr;
+  bool holding_event = interact_event != nullptr;
   ActorEVT type = event->event_type;
-  if (!holding_event && type == ActorEVT::PICKUP_IN) {
+  if (!holding_event && type == ActorEVT::INTERACT_IN) {
     int id = event->sender->entity_id;
 
-    PLOGD << "Player in range of Pickup Entity [ID: " << id << "]";
-    pickup_event.swap(event);
+    PLOGD << "Player in range of Interactable Entity [ID: " << id << "]";
+    interact_event.swap(event);
   } 
-  else if (holding_event && type == ActorEVT::PICKUP_OUT) {
-    dropPickupEvent(event);
+  else if (holding_event && type == ActorEVT::INTERACT_OUT) {
+    dropInteractEvent(event);
   }
 }
 
-void PlayerActor::dropPickupEvent(unique_ptr<ActorEvent> &out_range) {
-  int first_id = pickup_event->sender->entity_id;
+void PlayerActor::dropInteractEvent(unique_ptr<ActorEvent> &out_range) {
+  int first_id = interact_event->sender->entity_id;
   int second_id = out_range->sender->entity_id;
 
   bool from_same_entity = first_id == second_id;
 
   if (from_same_entity) {
-    PLOGD << "Player has exited range of Pickup Entity [ID: " 
+    PLOGD << "Player has exited range of Interactable Entity [ID: " 
       << second_id << "]";
-    pickup_event.reset();
+    interact_event.reset();
   }
 }
 
@@ -126,14 +127,34 @@ bool PlayerActor::isMoving() {
 void PlayerActor::interactInput(bool gamepad) {
   bool interact = Input::pressed(keybinds->interact, gamepad);
 
-  if (interact && pickup_event != nullptr) {
-    Pickup *pickup = static_cast<Pickup*>(pickup_event->sender);
-
-    PLOGI << "Interacting with Pickup [ID: " << pickup->entity_id << "]";
-    pickup->interact();
-
-    pickup_event.reset();
+  if (!interact || interact_event == nullptr) {
+    return;
   }
+
+  EntityType entity_type = interact_event->sender->entity_type;
+  switch (entity_type) {
+    case PICKUP: {
+      Pickup *pickup = static_cast<Pickup*>(interact_event->sender);
+
+      PLOGI << "Interacting with Pickup [ID: " << pickup->entity_id << 
+        "]";
+      pickup->interact();
+      break;
+    }
+    case SAVE_POINT: {
+      auto *save_point = static_cast<SavePoint*>(interact_event->sender);
+
+      PLOGI << "Interacting with SavePoint [ID: " << save_point->entity_id 
+        << "]";
+      save_point->interact();
+      break;
+    }
+    default: {
+      PLOGE << "Entity cannot be interacted with!";
+    }
+  }
+
+  interact_event.reset();
 }
 
 void PlayerActor::openMenuInput(bool gamepad) {

@@ -72,11 +72,11 @@ void Pickup::update() {
 
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
-    ActorHandler::queue<ActorEvent>(this, ActorEVT::PICKUP_IN);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::INTERACT_IN);
     in_range = true;
   }
   else if (in_range && !inside) { 
-    ActorHandler::queue<ActorEvent>(this, ActorEVT::PICKUP_OUT);
+    ActorHandler::queue<ActorEvent>(this, ActorEVT::INTERACT_OUT);
     in_range = false;
   }
 }
