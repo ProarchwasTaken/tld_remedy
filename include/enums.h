@@ -19,6 +19,7 @@ enum class PanelID {
 enum EntityType {
   ACTOR,
   PICKUP,
+  SAVE_POINT,
   MAP_TRANSITION,
   DMG_NUMBER,
   STATUS_TEXT,

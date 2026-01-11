@@ -29,6 +29,8 @@ public:
   void findEnemies(nlohmann::json &layer_objects);
   std::vector<Direction> parseEnemyRoutine(std::string &raw_routine);
 
+  void findSavePoints(nlohmann::json &layer_objects);
+
   int activeObject(Session &session, std::string &map_name, 
                     int object_id);
   void setupCommonData(Session &session, std::string &map_name, 

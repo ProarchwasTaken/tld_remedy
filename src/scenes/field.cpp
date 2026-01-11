@@ -28,6 +28,7 @@
 #include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
+#include "field/entities/save_point.h"
 #include "field/sequences/save.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
@@ -230,6 +231,12 @@ void FieldScene::setupEntities() {
       case EntityType::PICKUP: {
         PickupData *pick_data = static_cast<PickupData*>(data.get());
         entity = make_unique<Pickup>(*pick_data);
+        break;
+      }
+      case EntityType::SAVE_POINT: {
+        SavePointData *save_data = static_cast<SavePointData*>(
+          data.get());
+        entity = make_unique<SavePoint>(*save_data);
         break;
       }
       default: {
