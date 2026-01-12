@@ -48,6 +48,7 @@ public:
 
   static SpriteAtlas atlas;
   static SpriteAtlas status_atlas;
+  static SpriteAtlas portrait_atlas;
 private:
   PartyMember *user = NULL;
 
@@ -73,6 +74,4 @@ private:
 
   float shake_clock = 0.0;
   float shake_time = 0.25;
-
-  SpriteAtlas bust_atlas = SpriteAtlas("hud", "");
 };

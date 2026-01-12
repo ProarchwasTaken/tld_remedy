@@ -106,7 +106,7 @@ void CombatScene::initializeCombatants() {
   item_hud = make_unique<ItemCmdHud>((Vector2){350, 222});
   item_hud->assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop3();
+  EnemyTroop troop = DBTroop1();
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
