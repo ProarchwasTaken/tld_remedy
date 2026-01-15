@@ -16,6 +16,7 @@
 #include "menu/panels/config.h"
 #include "menu/panels/status.h"
 #include "menu/panels/items.h"
+#include "menu/panels/tech.h"
 #include "menu/panels/confirm.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
@@ -181,6 +182,10 @@ void CampMenuScene::selectOption() {
       hide_party_hud = false;
       break;
     }
+    case CampMenuOption::TECHS: {
+      panel = make_unique<TechsPanel>(session, &description);
+      break;
+    }
     case CampMenuOption::STATUS: {
       panel = make_unique<StatusPanel>(session, &description);
       break;
@@ -194,9 +199,6 @@ void CampMenuScene::selectOption() {
       "(Unsaved progress will be lost.)";
 
       panel = make_unique<ConfirmPanel>(menu_atlas, keybinds, message);
-    }
-    default: {
-
     }
   }
 

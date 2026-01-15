@@ -13,6 +13,7 @@ enum class PanelID {
   CONFIRM,
   STATUS,
   ITEMS,
+  TECH,
   DIALOG
 };
 
