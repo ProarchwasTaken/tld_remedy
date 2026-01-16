@@ -9,6 +9,7 @@
 #include "data/session.h"
 #include "utils/input.h"
 #include "utils/menu.h"
+#include "utils/text.h"
 #include "scenes/camp_menu.h"
 #include "menu/panels/tech.h"
 #include <plog/Log.h>
@@ -20,13 +21,18 @@ TechsPanel::TechsPanel(Session *session, string *description) {
   id = PanelID::TECH;
   frame = LoadTexture("graphics/menu/tech_frame.png");
 
-  options[0] = &session->player;
-  options[1] = &session->companion;
-  selected = options.begin();
-
   keybinds = &Game::settings.menu_keybinds;
   assert(description != NULL);
-  *description = "Press 'SELECT' to enable scrolling.";
+  *description = "Press 'CONFIRM' to enable scrolling.";
+
+  options[0] = &session->player;
+  options[1] = &session->companion;
+
+  selected = options.begin();
+  updateStyleText();
+
+  tech_canvas = LoadRenderTexture(219, 133);
+  updateTechCanvas();
 
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
@@ -42,19 +48,168 @@ TechsPanel::TechsPanel(Session *session, string *description) {
 
 TechsPanel::~TechsPanel() {
   UnloadTexture(frame);
+  UnloadRenderTexture(tech_canvas);
   menu_atlas->release();
   camp_atlas->release();
   sfx->release();
+}
+
+void TechsPanel::updateStyleText() {
+  Character *party_member = *selected;
+  switch (party_member->member_id) {
+    case PartyMemberID::MARY: 
+    case PartyMemberID::ERWIN: {
+      style_text = "Weapon Techniques";
+      break;
+    }
+  }
+
+  Font *font = &Game::med_font;
+  style_position = TextUtils::alignRight(style_text.c_str(), {412, 45}, 
+                                         *font, -2, 0);
+}
+
+string TechsPanel::weaponTechInfo(SubWeaponID id) {
+  switch (id) {
+    case SubWeaponID::KNIFE: {
+      return 
+      "<Cleave> - MP Cost: 8\n"
+      "\"We all have to start somewhere.\"\n\n"
+
+      "Mary performs a slash attack that inflicts\n"
+      "an average amount of damage to the first\n"
+      "enemy in front of him. The action itself also\n"
+      "has a shorter windup if canceled into.\n\n"
+
+      "<Piercer> - MP Cost: 12\n"
+      "\"Commit when it counts. \"\n\n"
+
+      "Mary thrusts his knife while propelling\n"
+      "himself forward in the direction he's facing.\n"
+      "It's an attack that's capable of piercing\n"
+      "multiple enemies at once. If used successfuly,\n"
+      "Mary will proceed to brutally yank out the\n"
+      "knife, inflicting more damage to all enemies\n"
+      "who got pierced by the initial attack.\n\n";
+    }
+  }
+}
+
+string TechsPanel::getTechEntry() {
+  Character *party_member = *selected;
+
+  switch (party_member->member_id) {
+    case PartyMemberID::MARY: {
+      Player *player = static_cast<Player*>(party_member);
+      string text =
+        "--[DEFENSIVE ACTIONS]--\n\n"
+
+        "<Ghost Step> - HP Cost: 5.5\n"
+        "Input: 'DEFENSIVE' + 'LEFT' / 'RIGHT'\n"
+        "\"You can't afford be to be reckless.\"\n\n"
+
+        "Mary dashes forwards or backwards\n"
+        "depending on the input used. When\n"
+        "performing the action, Mary is rendered\n"
+        "intangible to any and all attacks. Only\n"
+        "becoming vulnerable again once he enters end\n"
+        "lag.\n\n"
+
+        "If Mary is in the end lag of any action that\n"
+        "isn't Ghost Step, he could cancel into it.\n"
+        "Mary could also cancel into any action \n"
+        "during the end lag of Ghost Step. Both of\n"
+        "these acts are referred as Ghost Cancelling.\n\n"
+
+        "<Evade> - HP Cost: Varies\n"
+        "Input: 'DEFENSIVE' + 'DOWN'\n"
+        "\"Save your energy, and play the long game.\"\n\n"
+
+        "After a brief windup, Mary braces himself to\n"
+        "dodge the first attack that comes his way.\n"
+        "If successful, the damage Mary would've\n"
+        "taken will instead be converted to Exhaustion\n"
+        "that will deplete overtime.\n\n"
+
+        "After a successful evade, Mary will also be\n"
+        "rendered intangible to all attacks during end\n"
+        "lag, along with being able to cancel Evade\n"
+        "into any action.\n\n"
+
+        "--[PASSIVES]--\n\n"
+
+        "<Humanity>\n"
+        "\"May your spirit always shine through.\"\n\n"
+
+        "Mary's basic attack only inflicts Morale\n"
+        "damage. In return, he gains Morale\n"
+        "proportional to how much damage was dealt.\n"
+        "If Mary isn't Despondent, a percentage of\n"
+        "the Morale gained will be shared with all\n"
+        "other party members.\n\n"
+
+        "<Auto-Evade>\n"
+        "\"All it takes is one hit, so you better learn\n"
+        "how to DODGE.\"\n\n"
+
+        "Mary automatically dodges most attacks at the\n"
+        "cost of losing Morale. The amount lost is\n"
+        "dependent on the victims's Persistence vs.\n"
+        "the assailant's Intimidation.\n\n"
+
+        "If Mary's Morale ends up below 0, he will\n"
+        "become Despondent. During which,\n"
+        "Auto-Evade becomes much easier to bypass.\n\n"
+      ;
+      return weaponTechInfo(player->weapon_id) + text;
+    }
+    case PartyMemberID::ERWIN: {
+      return 
+      "This is Erwin's entry!";
+    }
+  }
+}
+
+void TechsPanel::updateTechCanvas() {
+  string text = getTechEntry();
+  Vector2 position = {0, -scroll_y};
+  Font *font = &Game::sm_font;
+  int txt_size = font->baseSize;
+
+  float max_height = tech_canvas.texture.height;
+  float height = MeasureTextEx(*font, text.c_str(), txt_size, -3).y;
+  PLOGD << "Height: " << height << "/" << max_height;
+
+  if (height > max_height) {
+    max_scroll = height - max_height;
+  }
+  else {
+    max_scroll = 0;
+  }
+
+  SetTextLineSpacing(12);
+  BeginTextureMode(tech_canvas);
+  {
+    ClearBackground(BLACK);
+    DrawTextEx(*font, text.c_str(), position, txt_size, -3, WHITE);
+  }
+  EndTextureMode();
+  SetTextLineSpacing(16);
 }
 
 void TechsPanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
     heightLerp();
+    return;
   }
-  else {
+
+  if (!scrolling_mode) {
     blink_clock += Game::deltaTime();
     optionNavigation();
+  }
+  else {
+    scrollingInput();
   }
 }
 
@@ -74,15 +229,26 @@ void TechsPanel::optionNavigation() {
 
   if (Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected);
+    updateStyleText();
+    updateTechCanvas();
 
     sfx->play("menu_navigate");
+    scroll_y = 0;
     blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected);
+    updateStyleText();
+    updateTechCanvas();
 
     sfx->play("menu_navigate");
+    scroll_y = 0;
     blink_clock = 0.0;
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    scrolling_mode = true;
+    blink_clock = 1.0;
+    sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
@@ -90,9 +256,41 @@ void TechsPanel::optionNavigation() {
   }
 }
 
+void TechsPanel::scrollingInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->cancel, gamepad)) {
+    scrolling_mode = false;
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  if (max_scroll <= 0) {
+    return;
+  }
+
+  bool down = Input::down(keybinds->down, gamepad);
+  bool up = Input::down(keybinds->up, gamepad);
+  int direction = down - up;
+
+  if (direction != 0) {
+    scroll_y += (scroll_speed * direction) * Game::deltaTime();
+    scroll_y = Clamp(scroll_y, 0.0, max_scroll);
+    updateTechCanvas();
+  }
+}
+
 void TechsPanel::draw() {
   Rectangle source = {0, 0, 224, frame_height};
   DrawTextureRec(frame, source, frame_position, WHITE);
+
+  if (state == PanelState::READY) {
+    Font *font = &Game::med_font;
+    int txt_size = font->baseSize;
+    DrawTextEx(*font, style_text.c_str(), style_position, txt_size, -2, 
+               WHITE);
+
+    DrawTextureRec(tech_canvas.texture, canvas_source, {194, 60}, WHITE);
+  }
 
   drawOptions();
 }
