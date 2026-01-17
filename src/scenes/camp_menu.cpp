@@ -420,8 +420,8 @@ string CampMenuScene::getDescription(CampMenuOption option) {
     }
     case CampMenuOption::TECHS: {
       return 
-      "View information about the Techniques a\n"
-      "party member can perform in Combat.";
+      "Read information about a party member's\n"
+      "capabilities in Combat.";
     }
     case CampMenuOption::STATUS: {
       return 

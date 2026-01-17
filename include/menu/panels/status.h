@@ -31,7 +31,7 @@ public:
   void drawMorale(Font *font, int txt_size, float initial, float max);
 
   void drawClass(Font *font, int txt_size, PartyMemberID id);
-  void drawStyle(Font *font, int txt_size, PartyMemberID id);
+  void drawCombatLvl(Font *font, int txt_size, Character *member);
 
   void drawStats(Font *font, int txt_size, Character *member);
   void drawStatus(Font *font, int txt_size, Character *member);

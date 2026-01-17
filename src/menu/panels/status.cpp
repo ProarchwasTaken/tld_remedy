@@ -148,7 +148,7 @@ void StatusPanel::drawPartyMemberInfo(Character *party_member) {
              party_member->max_morale);
 
   drawClass(sm_font, sm_size, party_member->member_id);
-  drawStyle(sm_font, sm_size, party_member->member_id);
+  drawCombatLvl(sm_font, sm_size, party_member);
 
   drawStats(sm_font, sm_size, party_member);
   drawStatus(sm_font, sm_size, party_member);
@@ -161,9 +161,12 @@ void StatusPanel::drawName(Font *font, int txt_size, const char *name) {
 
 void StatusPanel::drawTitle(Font *font, int txt_size, PartyMemberID id) {
   string title;
+  Color color = Game::palette[40];
+
   switch (id) {
     case PartyMemberID::MARY: {
-      title = "Former Nurse";
+      title = "Martyr";
+      color = {3, 3, 3, 255};
       break;
     }
     case PartyMemberID::ERWIN: {
@@ -174,7 +177,6 @@ void StatusPanel::drawTitle(Font *font, int txt_size, PartyMemberID id) {
 
   Vector2 position = Vector2Add(frame_position, {156, 1});
   position = TextUtils::alignRight(title.c_str(), position, *font, -2, 0);
-  Color color = Game::palette[40];
 
   DrawTextEx(*font, title.c_str(), position, txt_size, -2, color);
 }
@@ -220,12 +222,9 @@ void StatusPanel::drawMorale(Font *font, int txt_size, float initial,
 void StatusPanel::drawClass(Font *font, int txt_size, PartyMemberID id) {
   string text;
   switch (id) {
-    case PartyMemberID::MARY: {
-      text = "MARTYR";
-      break;
-    }
+    case PartyMemberID::MARY: 
     case PartyMemberID::ERWIN: {
-      text = "MAVERICK";
+      text = "HUMAN - MID TIER";
       break;
     }
   }
@@ -235,19 +234,20 @@ void StatusPanel::drawClass(Font *font, int txt_size, PartyMemberID id) {
   DrawTextEx(*font, text.c_str(), position, txt_size, -3, color);
 }
 
-void StatusPanel::drawStyle(Font *font, int txt_size, PartyMemberID id) {
-  string text;
-  switch (id) {
-    case PartyMemberID::MARY:
-    case PartyMemberID::ERWIN: {
-      text = "WEAPON TECH";
-      break;
-    }
-  }
+void StatusPanel::drawCombatLvl(Font *font, int txt_size, 
+                                Character *member)
+{
+  float offense = member->offense;
+  float defense = member->defense;
+  float intimid = member->intimid;
+  float persist = member->persist;
 
-  Vector2 position = Vector2Add(frame_position, {41, 60});
-  Color color = Game::palette[42];
-  DrawTextEx(*font, text.c_str(), position, txt_size, -3, color);
+  float level = (offense + defense + intimid + persist) / 4;
+  const char *text = TextFormat("%00.02f", level);
+
+  Vector2 position = Vector2Add(frame_position, {70, 60});
+  Color color = Game::palette[22];
+  DrawTextEx(*font, text, position, txt_size, -3, color); 
 }
 
 void StatusPanel::drawStats(Font *font, int txt_size, Character *member) {

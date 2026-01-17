@@ -51,7 +51,7 @@ private:
   Rectangle canvas_source = {0, 0, 219, -133};
 
   bool scrolling_mode = false;
-  float scroll_speed = 128;
+  float scroll_speed = 96;
 
   float scroll_y = 0;
   float max_scroll = 0;
