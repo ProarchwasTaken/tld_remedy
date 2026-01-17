@@ -183,7 +183,7 @@ void CampMenuScene::selectOption() {
       break;
     }
     case CampMenuOption::TECHS: {
-      panel = make_unique<TechsPanel>(session, &description);
+      panel = make_unique<TechsPanel>(session, &description, &desc_color);
       break;
     }
     case CampMenuOption::STATUS: {

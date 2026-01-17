@@ -12,7 +12,8 @@
 
 class TechsPanel : public Panel {
 public:
-  TechsPanel(Session *session, std::string *description);
+  TechsPanel(Session *session, std::string *description, 
+             Color *desc_color);
   ~TechsPanel();
 
   void updateStyleText();
@@ -35,6 +36,9 @@ private:
   SoundAtlas *sfx;
   MenuKeybinds *keybinds;
 
+  std::string *description;
+  Color *desc_color;
+
   Texture frame;
   constexpr static Vector2 frame_position = {192, 44};
   float frame_height = 0;
@@ -47,7 +51,7 @@ private:
   Rectangle canvas_source = {0, 0, 219, -133};
 
   bool scrolling_mode = false;
-  float scroll_speed = 96;
+  float scroll_speed = 128;
 
   float scroll_y = 0;
   float max_scroll = 0;

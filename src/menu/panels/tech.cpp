@@ -17,13 +17,18 @@
 using std::string;
 
 
-TechsPanel::TechsPanel(Session *session, string *description) {
+TechsPanel::TechsPanel(Session *session, string *description, 
+                       Color *desc_color) 
+{
   id = PanelID::TECH;
   frame = LoadTexture("graphics/menu/tech_frame.png");
 
-  keybinds = &Game::settings.menu_keybinds;
   assert(description != NULL);
+  this->description = description;
   *description = "Press 'CONFIRM' to enable scrolling.";
+
+  assert(desc_color != NULL);
+  this->desc_color = desc_color;
 
   options[0] = &session->player;
   options[1] = &session->companion;
@@ -43,6 +48,7 @@ TechsPanel::TechsPanel(Session *session, string *description) {
   sfx = &Game::menu_sfx;
   sfx->use();
 
+  keybinds = &Game::settings.menu_keybinds;
   PLOGI << "Techs Panel: Initialized";
 }
 
@@ -164,8 +170,66 @@ string TechsPanel::getTechEntry() {
       return weaponTechInfo(player->weapon_id) + text;
     }
     case PartyMemberID::ERWIN: {
-      return 
-      "This is Erwin's entry!";
+      string text = 
+        "<Provoke> - MP Cost: 8 | CD: 5s\n"
+        "\"Buying us a little more time. I trust that you\n"
+        "can make every second count.\"\n\n"
+
+        "Erwin performs a taunt that draws the aggro\n"
+        "of all enemies that happen to be targeting\n"
+        "Mary. There is a limit to how many enemies that\n"
+        "can be provoked though. Erwin also receives\n"
+        "intangibility that lasts until the end lag of\n"
+        "the action.\n\n"
+
+        "<3rd Party> - MP Cost: 10 | CD: 8s\n"
+        "\"The notion of playing 'fair' when your life\n"
+        "is on the line strikes me as foolish.\"\n\n"
+
+        "Erwin runs to the enemy that Mary was\n"
+        "targeting at the time of when the Assist was\n"
+        "called. Once within range, Erwin will perform\n"
+        "a dropkick that inflicts a hight amount of\n"
+        "knockback if it hits. Obviously, this Assist\n"
+        "cannot be called if Mary isn't targeting\n"
+        "anybody.\n\n"
+
+        "--[PASSIVES]--\n\n"
+
+        "<Maverick>\n"
+        "\"Working together by working separately\"\n\n"
+
+        "Erwin's overall gameplan is focused around\n"
+        "relieving pressure rather than inflicting\n"
+        "damage; preferring to target enemies that\n"
+        "Mary isn't already targeting. In exchange\n"
+        "for higher self-sufficiency, the cooldowns\n"
+        "for Erwin's Assists take longer finish.\n\n"
+
+        "<Humanity>\n"
+        "\"May your spirit always shine through.\"\n\n"
+
+        "Erwin's basic attack only inflicts Morale\n"
+        "damage. In return, he gains Morale\n"
+        "proportional to how much damage was dealt.\n"
+        "If Erwin isn't Despondent, a percentage of\n"
+        "the Morale gained will be shared with all\n"
+        "other party members.\n\n"
+
+        "<Auto-Evade>\n"
+        "\"All it takes is one hit, so you better learn\n"
+        "how to DODGE.\"\n\n"
+
+        "Erwin automatically dodges most attacks at\n"
+        "the cost of losing Morale. The amount lost is\n"
+        "dependent on the victims's Persistence vs.\n"
+        "the assailant's Intimidation.\n\n"
+
+        "If Erwin's Morale ends up below 0, he will\n"
+        "become Despondent. During which,\n"
+        "Auto-Evade becomes much easier to bypass.\n\n"
+      ;
+      return text;
     }
   }
 }
@@ -178,7 +242,6 @@ void TechsPanel::updateTechCanvas() {
 
   float max_height = tech_canvas.texture.height;
   float height = MeasureTextEx(*font, text.c_str(), txt_size, -3).y;
-  PLOGD << "Height: " << height << "/" << max_height;
 
   if (height > max_height) {
     max_scroll = height - max_height;
@@ -246,6 +309,9 @@ void TechsPanel::optionNavigation() {
     blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
+    *description = "Press 'CANCEL' to disable scrolling.";
+    *desc_color = Game::palette[22];
+
     scrolling_mode = true;
     blink_clock = 1.0;
     sfx->play("menu_select");
@@ -259,6 +325,9 @@ void TechsPanel::optionNavigation() {
 void TechsPanel::scrollingInput() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybinds->cancel, gamepad)) {
+    *description = "Press 'CONFIRM' to enable scrolling.";
+    *desc_color = WHITE;
+
     scrolling_mode = false;
     sfx->play("menu_cancel");
     return;
