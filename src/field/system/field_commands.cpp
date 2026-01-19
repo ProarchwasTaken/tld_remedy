@@ -53,7 +53,7 @@ void CommandSystem::process() {
     return;
   }
 
-  if (IsKeyPressed(KEY_BACKSPACE)) {
+  if (IsKeyPressed(KEY_BACKSPACE) && !buffer.empty()) {
     buffer.pop_back();
     return;
   }

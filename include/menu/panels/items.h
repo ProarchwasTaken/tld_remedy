@@ -1,5 +1,7 @@
 #pragma once
+#include <memory>
 #include <array>
+#include <vector>
 #include <cstddef>
 #include <unordered_set>
 #include <string>
@@ -10,6 +12,7 @@
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "menu/panels/dialog.h"
 #include "menu/hud/reticle.h"
 
 
@@ -25,8 +28,13 @@ public:
   std::string getDescription(ItemID item);
 
   void useItem();
+  void openDialog(std::vector<std::string> &dialog);
+  void openRejectDialog(Character *member);
+  void openHealDialog(Character *member, float healed);
+  void openSplintDialog(Character *member, StatusID effect);
 
   void update() override;
+  void panelLogic();
   void heightLerp();
   void optionNavigation();
   void targetNavigation();
@@ -74,4 +82,7 @@ private:
   TargetReticle reticle;
 
   constexpr static Vector2 count_position = {107, 42};
+
+  std::unique_ptr<DialogPanel> panel;
+  bool panel_mode = false;
 };
