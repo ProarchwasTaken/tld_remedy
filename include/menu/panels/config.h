@@ -9,7 +9,6 @@
 #include "data/personal.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
-#include "menu/panels/confirm.h"
 
 
 enum class ConfigOption {
@@ -31,7 +30,7 @@ public:
 
   void update() override;
   void heightLerp();
-  void terminateConfirmPanel();
+  void panelTermination();
 
   void verticalNavigation(bool gamepad);
   void horizontalInput(bool gamepad);
@@ -80,7 +79,7 @@ private:
   Settings settings;
   bool unapplied = false;
 
-  std::unique_ptr<ConfirmPanel> panel;
+  std::unique_ptr<Panel> panel;
   bool panel_mode = false;
 
   std::unordered_set<ConfigOption> disallowed;

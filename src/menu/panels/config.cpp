@@ -13,6 +13,7 @@
 #include "utils/text.h"
 #include "utils/menu.h"
 #include "menu/panels/confirm.h"
+#include "menu/panels/remap.h"
 #include "menu/panels/config.h"
 #include <plog/Log.h>
 
@@ -70,7 +71,7 @@ void ConfigPanel::update() {
   panel->update();
 
   if (panel->terminate) {
-    terminateConfirmPanel();
+    panelTermination();
   }
 }
 
@@ -86,11 +87,25 @@ void ConfigPanel::heightLerp() {
   frame_height = 161 * percentage;
 }
 
-void ConfigPanel::terminateConfirmPanel() {
+void ConfigPanel::panelTermination() {
   assert(panel != nullptr);
 
-  if (*panel->selected == ConfirmOption::YES) {
-    state = PanelState::CLOSING;
+  switch (panel->id) {
+    case PanelID::CONFIRM: {
+      ConfirmPanel *confirm = static_cast<ConfirmPanel*>(panel.get());
+      if (*confirm->selected == ConfirmOption::YES) {
+        state = PanelState::CLOSING;
+      }
+      break;
+    }
+    case PanelID::REMAP: {
+      PLOGI << "Checking for unapplied settings.";
+      unapplied = settings != Game::settings;
+      break;
+    }
+    default: {
+
+    }
   }
 
   panel.reset();
@@ -196,7 +211,10 @@ void ConfigPanel::selectOption() {
       break;
     }
     case ConfigOption::CONTROLS: {
-      PLOGE << "Controls Remapping hasn't been implemented yet!";
+      panel = make_unique<RemapPanel>(atlas, &settings);
+      panel_mode = true;
+      sfx->play("menu_select");
+      break;
     }
     default: {
       sfx->play("menu_cancel");
