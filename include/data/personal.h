@@ -19,7 +19,10 @@ struct Settings {
     this->sfx_volume != cfg.sfx_volume ||
     this->bgm_volume != cfg.bgm_volume ||
     this->fullscreen != cfg.fullscreen ||
-    this->framerate != cfg.framerate; 
+    this->framerate != cfg.framerate ||
+    this->field_keybinds != cfg.field_keybinds ||
+    this->combat_keybinds != cfg.combat_keybinds; 
+
   }
 };
 
