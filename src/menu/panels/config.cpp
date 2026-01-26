@@ -402,7 +402,7 @@ string ConfigPanel::getOptionName(ConfigOption id) {
       return "Framerate";
     }
     case ConfigOption::CONTROLS: {
-      return "CONTROLS";
+      return "REMAP CONTROLS";
     }
     case ConfigOption::APPLY: {
       if (unapplied) {

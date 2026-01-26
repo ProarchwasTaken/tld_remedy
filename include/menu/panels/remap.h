@@ -54,6 +54,7 @@ public:
   void drawKeybind(RemapOption &option, Vector2 position, Font *font,
                         int txt_size);
   std::string getKeyName(KeyboardKey key);
+  std::string getButtonName(GamepadButton button);
 
   std::string getFieldKeybindName(RemapOption option);
   std::string getCombatKeyBindName(RemapOption option);

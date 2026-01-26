@@ -21,7 +21,6 @@ using std::string;
 
 RemapPanel::RemapPanel(SpriteAtlas *menu_atlas, Settings *settings) {
   id = PanelID::REMAP;
-
   frame = LoadTexture("graphics/menu/remap_frame.png");
 
   atlas = menu_atlas;
@@ -291,21 +290,87 @@ void RemapPanel::drawKeybind(RemapOption &option, Vector2 position,
   string key_name = getKeyName(keybind->key);
   
   position.x += 155;
-  position = TextUtils::alignCenter(key_name.c_str(), position, *font, -2, 
-                                    0);
-  DrawTextEx(*font, key_name.c_str(), position, txt_size, -2, WHITE);
+  Vector2 key_pos = TextUtils::alignCenter(key_name.c_str(), position, 
+                                           *font, -2, 0);
+
+  string button_name = getButtonName(keybind->button);
+
+  position.x += 78;
+  Vector2 button_pos = TextUtils::alignCenter(button_name.c_str(), position, 
+                                              *font, -2, 0);
+
+  DrawTextEx(*font, key_name.c_str(), key_pos, txt_size, -2, WHITE);
+  DrawTextEx(*font, button_name.c_str(), button_pos, txt_size, -2, WHITE);
 }
 
 string RemapPanel::getKeyName(KeyboardKey key) {
   string name;
 
   switch (key) {
+    case KEY_NULL: {
+      name = "--------";
+      break;
+    }
+    case KEY_RIGHT: {
+      name = "Right";
+      break;
+    }
+    case KEY_LEFT: {
+      name = "Left";
+      break;
+    }
+    case KEY_DOWN: {
+      name = "Down";
+      break;
+    }
+    case KEY_UP: {
+      name = "Up";
+      break;
+    }
+    case KEY_TAB: {
+      name = "Tab";
+      break;
+    }
+    case KEY_LEFT_SHIFT: {
+      name = "LShift";
+      break;
+    }
+    case KEY_LEFT_CONTROL: {
+      name = "LControl";
+      break;
+    }
+    case KEY_LEFT_ALT: {
+      name = "LAlt";
+      break;
+    }
+    case KEY_ENTER: {
+      name = "Return";
+      break;
+    }
+    case KEY_RIGHT_SHIFT: {
+      name = "RShift";
+      break;
+    }
+    case KEY_RIGHT_CONTROL: {
+      name = "RControl";
+      break;
+    }
+    case KEY_RIGHT_ALT: {
+      name = "RAlt";
+      break;
+    }
     default: {
       char letter = key;
       name.push_back(letter);
     }
   }
 
+  return name;
+}
+
+string RemapPanel::getButtonName(GamepadButton button) {
+  int id = button;
+  const char *name = TextFormat("BUTTON_%i", id);
   return name;
 }
 
