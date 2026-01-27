@@ -156,8 +156,13 @@ void RemapPanel::update() {
     return;
   }
 
-  optionNavigation();
-  blink_clock += Game::deltaTime();
+  if (!input_mode) {
+    optionNavigation();
+    blink_clock += Game::deltaTime();
+  }
+  else {
+    inputPrompting();
+  }
 }
 
 void RemapPanel::heightLerp() {
@@ -200,10 +205,53 @@ void RemapPanel::optionNavigation() {
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    input_mode = true;
+    sfx->play("menu_select");
+  }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
     sfx->play("menu_cancel");
   }
+}
+
+void RemapPanel::inputPrompting() {
+  int key = GetKeyPressed();
+
+  bool gamepad = IsGamepadAvailable(0);
+  int button = 0;
+
+  if (gamepad) {
+    delay_clock += Game::deltaTime() / gamepad_delay;
+  }
+
+  if (delay_clock >= 1.0) {
+    button = GetGamepadButtonPressed();
+  }
+
+  if (key == 0 && button == 0) {
+    return;
+  }
+
+  KeyBind *keybind;
+  if (*current_category == InputCategory::FIELD) {
+    keybind = retrieveFieldKeybind(*selected);
+  }
+  else {
+    keybind = retrieveCombatKeyBind(*selected);
+  }
+
+  assert(keybind != NULL);
+  if (key != 0) {
+    keybind->key = static_cast<KeyboardKey>(key);
+  }
+
+  if (button != 0) {
+    keybind->button = static_cast<GamepadButton>(button);
+  }
+
+  input_mode = false;
+  delay_clock = 0.0;
 }
 
 void RemapPanel::draw() {
@@ -247,6 +295,7 @@ void RemapPanel::drawOptions(Font *font, int txt_size) {
 
     if (selected == &option) {
       drawCursor(position);
+      drawRedBar(position);
     }
 
     string text;
@@ -267,12 +316,24 @@ void RemapPanel::drawOptions(Font *font, int txt_size) {
 
 void RemapPanel::drawCursor(Vector2 position) {
   Color color = WHITE;
-  float sin_a = std::sinf(blink_clock * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+  if (!input_mode) {
+    float sin_a = std::sinf(blink_clock * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   position = Vector2Add(position, {-11, 2});
   DrawTextureRec(atlas->sheet, atlas->sprites[0], position, color);
+}
+
+void RemapPanel::drawRedBar(Vector2 position) {
+  if (!input_mode) {
+    return;
+  }
+
+  Rectangle rect = {192, position.y, 156, 16};
+  Color color = Game::palette[32];
+  DrawRectangleRec(rect, color);
 }
 
 void RemapPanel::drawKeybind(RemapOption &option, Vector2 position,
@@ -343,6 +404,10 @@ string RemapPanel::getKeyName(KeyboardKey key) {
       name = "LAlt";
       break;
     }
+    case KEY_SPACE: {
+      name = "Space";
+      break;
+    }
     case KEY_ENTER: {
       name = "Return";
       break;
@@ -357,6 +422,10 @@ string RemapPanel::getKeyName(KeyboardKey key) {
     }
     case KEY_RIGHT_ALT: {
       name = "RAlt";
+      break;
+    }
+    case KEY_BACKSPACE: {
+      name = "Backspace";
       break;
     }
     default: {

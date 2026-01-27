@@ -45,11 +45,13 @@ public:
   void update() override;
   void heightLerp();
   void optionNavigation();
+  void inputPrompting();
 
   void draw() override;
   void drawCategory(Font *font, int txt_size);
   void drawOptions(Font *font, int txt_size);
   void drawCursor(Vector2 position);
+  void drawRedBar(Vector2 position);
 
   void drawKeybind(RemapOption &option, Vector2 position, Font *font,
                         int txt_size);
@@ -86,6 +88,10 @@ private:
   std::array<RemapOption, 12>::iterator selected;
   std::unordered_set<RemapOption> disallowed;
   float blink_clock = 0;
+
+  bool input_mode = false;
+  float gamepad_delay = 0.25;
+  float delay_clock = 0.0;
 
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
