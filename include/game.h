@@ -5,6 +5,7 @@
 #include "base/scene.h"
 #include "data/session.h"
 #include "data/personal.h"
+#include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
 #define PLATFORM_WINDOWS 0
@@ -91,6 +92,8 @@ public:
   static Font med_font;
   static Color* palette;
   static std::mt19937_64 RNG;
+
+  static SpriteAtlas menu_atlas;
   static SoundAtlas menu_sfx;
 
   #ifndef NDEBUG

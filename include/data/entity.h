@@ -21,3 +21,8 @@ struct PickupData : EntityData {
   PickupType pickup_type;
   int count;
 };
+
+struct SavePointData : EntityData {
+  Vector2 position;
+  bool camp_point;
+};

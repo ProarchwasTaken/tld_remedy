@@ -1,8 +1,11 @@
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <string>
+#include <vector>
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -15,10 +18,11 @@
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "scenes/camp_menu.h"
+#include "menu/panels/dialog.h"
 #include "menu/panels/items.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique, std::vector;
 SpriteAtlas ItemsPanel::portraits("menu", "item_portraits");
 
 
@@ -38,7 +42,7 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   this->sfx = &Game::menu_sfx;
   this->camp_atlas = &CampMenuScene::atlas;
-  this->menu_atlas = &CampMenuScene::menu_atlas;
+  this->menu_atlas = &Game::menu_atlas;
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();
@@ -189,36 +193,61 @@ void ItemsPanel::useItem() {
 
   switch (item) {
     case ItemID::I_BANDAGE: {
+      if (member->life >= member->max_life) {
+        openRejectDialog(member);
+        return;
+      }
+
       float heal = std::ceilf(member->max_life * 0.35);
       PLOGI << "Healing combatant by: " << heal << " Life";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
+      openHealDialog(member, heal);
       break;
     }
     case ItemID::M_SPLINT: {
+      bool successful = false;
       for (int index = member->status_limit - 1; index >= 0; index--) {
         StatusID *effect = &member->status[index];
 
         if (*effect != StatusID::NONE) {
           PLOGI << "Curing persistant status ailment.";
+          StatusID cured_effect = *effect;
           *effect = StatusID::NONE;
+
           member->status_count--;
           assert(member->status_count >= 0);
+
+          openSplintDialog(member, cured_effect);
+          successful = true;
           break;
         }
+      }
+
+      if (!successful) {
+        openRejectDialog(member);
+        return;
       }
 
       break;
     }
     case ItemID::S_BANDAGE: {
+      if (member->life >= member->max_life) {
+        openRejectDialog(member);
+        return;
+      }
+
       float heal = std::ceilf(member->max_life * 0.50);
       PLOGI << "Healing combatant by: " << heal << " Life";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
+      openHealDialog(member, heal);
       break;
     }
     default: {
       assert(item != ItemID::NONE);
+      vector<string> dialog = {"This item can only be used in combat!"};
+      openDialog(dialog);
       sfx->play("menu_cancel");
       return;
     }
@@ -230,10 +259,115 @@ void ItemsPanel::useItem() {
   sfx->play("menu_item");
 }
 
+void ItemsPanel::openDialog(vector<string> &dialog) {
+  Vector2 position = {185, 187};
+  panel = make_unique<DialogPanel>(position, dialog);
+  panel_mode = true;
+}
+
+void ItemsPanel::openRejectDialog(Character *member) {
+  char name[9];
+  std::strcpy(name, member->name);
+
+  const char *text = TextFormat("%s seems to be just fine.", name);
+  vector<string> dialog = {text};
+
+  openDialog(dialog);
+  sfx->play("menu_cancel");
+}
+
+void ItemsPanel::openHealDialog(Character *member, float healed) {
+  char name[9];
+  std::strcpy(name, member->name);
+
+  vector<string> dialog;
+  if (member->member_id == PartyMemberID::MARY) {
+    string text = TextFormat("%s proceeds to treat his wounds.", name);
+    dialog.push_back(text);
+  }
+  else {
+    string text = TextFormat("Mary proceeds to treat %s's\n"
+                             "wounds.", name);
+    dialog.push_back(text);
+  }
+
+  bool maxed_out = member->life >= member->max_life;
+  if (maxed_out) {
+    string text = TextFormat("%s's Life was maxed out.", name);
+    dialog.push_back(text);
+  }
+  else {
+    string text = TextFormat("%s recovers %00.00f Life.", 
+                                  name, healed);
+    dialog.push_back(text);
+  }
+
+  if (maxed_out && member->status_count != 0) {
+    string text = 
+      "There's still some underlying issues\n"
+      "that require proper medical attention,\n"
+      "but this should be enough for now."
+    ;
+    dialog.push_back(text);
+  }
+
+  openDialog(dialog);
+}
+
+void ItemsPanel::openSplintDialog(Character *member, StatusID effect) {
+  vector<string> dialog;
+
+  char name[9];
+  std::strcpy(name, member->name);
+
+  string txt_effect;
+  switch (effect) {
+    case StatusID::BROKEN_ARM: {
+      txt_effect = "broken arm";
+      break;
+    }
+    case StatusID::CRIPPLED_LEG: {
+      txt_effect = "crippled leg";
+      break;
+    }
+    case StatusID::MANGLED: {
+      txt_effect = "mangled body";
+      break;
+    }
+    default: {
+      txt_effect = "N/A";
+    }
+  }
+
+  if (member->member_id == PartyMemberID::MARY) {
+    string text = TextFormat("%s carefully applies a splint to\n"
+                             "his %s.",
+                             name, txt_effect.c_str());
+    dialog.push_back(text);
+  }
+  else {
+    string text = TextFormat("Mary carefully applies a splint to\n"
+                             "%s's %s.", name, txt_effect.c_str());
+    dialog.push_back(text);
+  }
+
+  string text = TextFormat("%s's %s is now\n"
+                           "properly stabilized, and fixed.", 
+                           name, txt_effect.c_str());
+  dialog.push_back(text);
+
+  openDialog(dialog);
+}
+
 void ItemsPanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
     heightLerp();
+    return;
+  }
+
+  if (panel_mode) {
+    panelLogic();
     return;
   }
 
@@ -245,6 +379,16 @@ void ItemsPanel::update() {
   }
 
   blink_clock += Game::deltaTime();
+}
+
+void ItemsPanel::panelLogic() {
+  assert(panel != nullptr == panel_mode);
+  panel->update();
+
+  if (panel->terminate) {
+    panel.reset();
+    panel_mode = false;
+  }
 }
 
 void ItemsPanel::heightLerp() {
@@ -330,6 +474,10 @@ void ItemsPanel::draw() {
 
     Vector2 position = {213.0f + (104.0f * !leader), 148};
     reticle.draw(position, blink_clock);
+  }
+
+  if (panel_mode) {
+    panel->draw();
   }
 }
 

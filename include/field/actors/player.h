@@ -15,8 +15,8 @@ public:
   ~PlayerActor();
 
   void behavior() override;
-  void processEvents();
-  void dropPickupEvent(std::unique_ptr<ActorEvent> &out_range);
+  void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
+  void dropInteractEvent(std::unique_ptr<ActorEvent> &out_range);
   void movementInput(bool gamepad);
   bool isMoving();
   void interactInput(bool gamepad);
@@ -51,5 +51,5 @@ private:
   Animation anim_up = {{6, 7, 8, 7}, 0.25};
   Animation anim_left = {{9, 10, 11, 10}, 0.25};
 
-  std::unique_ptr<ActorEvent> pickup_event;
+  std::unique_ptr<ActorEvent> interact_event;
 };

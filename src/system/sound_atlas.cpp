@@ -74,18 +74,23 @@ void SoundAtlas::release() {
   }
 }
 
-void SoundAtlas::play(string sound_name) {
+void SoundAtlas::play(string sound_name, float pitch, bool restart) {
   assert(user_count != 0);
   auto data = sound_table.find(sound_name);
 
-  if (data != sound_table.end()) {
-    PlaySound(data->second);
-
-    float volume = Game::settings.sfx_volume;
-    SetSoundVolume(data->second, volume);
-  }
-  else {
+  if (data == sound_table.end()) {
     PLOGE << "Sound: '" << sound_name << "' not found!";
     return;
   }
+
+  if (restart) {
+    StopSound(data->second);
+  }
+
+  PlaySound(data->second);
+
+  float master_volume = Game::settings.master_volume;
+  float volume = Game::settings.sfx_volume * master_volume;
+  SetSoundVolume(data->second, volume);
+  SetSoundPitch(data->second, pitch);
 }

@@ -19,6 +19,7 @@
 using std::string, std::unique_ptr;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
 SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
+SpriteAtlas LifeHud::portrait_atlas("hud", "combat_portraits");
 
 
 LifeHud::LifeHud(Vector2 position) {
@@ -26,16 +27,13 @@ LifeHud::LifeHud(Vector2 position) {
   morale_color = Game::palette[42];
   atlas.use();
   status_atlas.use();
+  portrait_atlas.use();
 }
 
 LifeHud::~LifeHud() {
   atlas.release();
-
-  if (bust_atlas.users() != 0) {
-    bust_atlas.release();
-  }
-
   status_atlas.release();
+  portrait_atlas.release();
 }
 
 void LifeHud::assign(PartyMember *combatant) {
@@ -43,25 +41,8 @@ void LifeHud::assign(PartyMember *combatant) {
 
   if (user == NULL) {
     return;
-  }
+  } 
 
-  string sprite_group;
-  switch (combatant->id) {
-    case PartyMemberID::MARY: {
-      sprite_group = "mary_bust";
-      break;
-    }
-    case PartyMemberID::ERWIN: {
-      sprite_group = "erwin_bust";
-      break;
-    }
-    default: {
-      PLOGE << "There are no bust graphics for this combatant!";
-    }
-  }
-
-  bust_atlas = SpriteAtlas("hud", sprite_group);
-  bust_atlas.use();
   PLOGD << "Lifehud instance assigned to Combatant: '" 
     << user->name << "'";
 }
@@ -218,12 +199,14 @@ void LifeHud::shakeTimer() {
 }
 
 void LifeHud::drawBustGraphic(Vector2 position) {
-  assert(bust_atlas.users() != 0);
-
-  position = Vector2Subtract(position, {26, 49});
+  int id = static_cast<int>(user->id);
+  Rectangle *sprite = &portrait_atlas.sprites[id];
+  
+  position = Vector2Subtract(position, {26, 41});
   Color tint = user->spriteTint();
   tint.a = 255;
-  DrawTextureRec(bust_atlas.sheet, bust_atlas.sprites[0], position, tint);
+
+  DrawTextureRec(portrait_atlas.sheet, *sprite, position, tint);
 }
 
 void LifeHud::drawStatusIcons(Vector2 position) {

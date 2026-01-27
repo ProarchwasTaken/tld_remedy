@@ -11,13 +11,17 @@ enum class SceneID {
 enum class PanelID {
   CONFIG,
   CONFIRM,
+  REMAP,
   STATUS,
-  ITEMS
+  ITEMS,
+  TECH,
+  DIALOG
 };
 
 enum EntityType {
   ACTOR,
   PICKUP,
+  SAVE_POINT,
   MAP_TRANSITION,
   DMG_NUMBER,
   STATUS_TEXT,
@@ -128,13 +132,23 @@ enum class FieldEVT {
   PLR_ADD_EFFECT,
   PLR_RM_EFFECT,
   COM_ADD_EFFECT,
-  COM_RM_EFFECT
+  COM_RM_EFFECT,
+  OPEN_DIALOG,
+  START_SEQUENCE
 };
 
 enum class ActorEVT {
   PLR_MOVING,
-  PICKUP_IN,
-  PICKUP_OUT,
+  INTERACT_IN,
+  INTERACT_OUT,
+};
+
+enum class SequenceID {
+  #ifndef NDEBUG
+  DB_01, 
+  #endif // !NDEBUG
+
+  SAVE
 };
 
 enum class CombatEVT {

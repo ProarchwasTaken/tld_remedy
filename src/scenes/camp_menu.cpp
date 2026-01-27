@@ -16,13 +16,13 @@
 #include "menu/panels/config.h"
 #include "menu/panels/status.h"
 #include "menu/panels/items.h"
+#include "menu/panels/tech.h"
 #include "menu/panels/confirm.h"
 #include "scenes/camp_menu.h"
 #include <plog/Log.h>
 
 using std::string, std::make_unique;
 SpriteAtlas CampMenuScene::atlas("menu", "camp_menu");
-SpriteAtlas CampMenuScene::menu_atlas("menu", "menu_elements");
 
 
 CampMenuScene::CampMenuScene(Session *session) {
@@ -41,6 +41,7 @@ CampMenuScene::CampMenuScene(Session *session) {
   gradient1 = LoadTexture("graphics/overlays/camp_gradient.png");
   gradient2 = atlas.getTexturefromSprite(8);
 
+  menu_atlas = &Game::menu_atlas;
   sfx = &Game::menu_sfx;
   sfx->use();
 }
@@ -181,22 +182,23 @@ void CampMenuScene::selectOption() {
       hide_party_hud = false;
       break;
     }
+    case CampMenuOption::TECHS: {
+      panel = make_unique<TechsPanel>(session, &description, &desc_color);
+      break;
+    }
     case CampMenuOption::STATUS: {
       panel = make_unique<StatusPanel>(session, &description);
       break;
     }
     case CampMenuOption::CONFIG: {
-      panel = make_unique<ConfigPanel>(&menu_atlas, keybinds);
+      panel = make_unique<ConfigPanel>(menu_atlas, keybinds);
       break;
     }
     case CampMenuOption::END_GAME: {
       string message = "Return to the Title Screen?\n"
       "(Unsaved progress will be lost.)";
 
-      panel = make_unique<ConfirmPanel>(&menu_atlas, keybinds, message);
-    }
-    default: {
-
+      panel = make_unique<ConfirmPanel>(menu_atlas, keybinds, message);
     }
   }
 
@@ -418,8 +420,8 @@ string CampMenuScene::getDescription(CampMenuOption option) {
     }
     case CampMenuOption::TECHS: {
       return 
-      "View information about the Techniques a\n"
-      "party member can perform in Combat.";
+      "Read information about a party member's\n"
+      "capabilities in Combat.";
     }
     case CampMenuOption::STATUS: {
       return 

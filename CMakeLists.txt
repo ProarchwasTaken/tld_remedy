@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.12.0
+VERSION 1.13.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -41,6 +41,7 @@ set(HEADERS
 "include/base/panel.h"
 "include/base/entity.h"
 "include/base/actor.h"
+"include/base/field_sequence.h"
 "include/base/combatant.h"
 "include/base/combat_action.h"
 "include/base/status_effect.h"
@@ -74,8 +75,11 @@ set(HEADERS
 "include/scenes/title.h"
 "include/menu/panels/config.h"
 "include/menu/panels/confirm.h"
+"include/menu/panels/remap.h"
 "include/menu/panels/status.h"
 "include/menu/panels/items.h"
+"include/menu/panels/tech.h"
+"include/menu/panels/dialog.h"
 "include/menu/hud/party.h"
 "include/menu/hud/portrait.h"
 "include/menu/hud/reticle.h"
@@ -89,6 +93,8 @@ set(HEADERS
 "include/field/actors/enemy.h"
 "include/field/entities/map_trans.h"
 "include/field/entities/pickup.h"
+"include/field/entities/save_point.h"
+"include/field/sequences/save.h"
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
@@ -133,6 +139,7 @@ set(SOURCE
 "src/base/panel.cpp"
 "src/base/entity.cpp"
 "src/base/actor.cpp"
+"src/base/field_sequence.cpp"
 "src/base/combatant.cpp"
 "src/base/combat_action.cpp"
 "src/base/status_effect.cpp"
@@ -150,8 +157,11 @@ set(SOURCE
 "src/scenes/title.cpp"
 "src/menu/panels/config.cpp"
 "src/menu/panels/confirm.cpp"
+"src/menu/panels/remap.cpp"
 "src/menu/panels/status.cpp"
 "src/menu/panels/items.cpp"
+"src/menu/panels/tech.cpp"
+"src/menu/panels/dialog.cpp"
 "src/menu/hud/party.cpp"
 "src/menu/hud/portrait.cpp"
 "src/menu/hud/reticle.cpp"
@@ -165,6 +175,8 @@ set(SOURCE
 "src/field/actors/enemy.cpp"
 "src/field/entities/map_trans.cpp"
 "src/field/entities/pickup.cpp"
+"src/field/entities/save_point.cpp"
+"src/field/sequences/save.cpp"
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
@@ -208,9 +220,11 @@ if(${BUILD_DEV})
   message(STATUS "Including debug source and header files.")
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
+  "include/field/sequences/db_01.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
+  "src/field/sequences/db_01.cpp"
   )
 endif()
 

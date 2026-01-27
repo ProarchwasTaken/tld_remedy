@@ -1,9 +1,11 @@
 #pragma once
+#include <memory>
 #include <string>
-#include <raylib.h>
 #include <set>
+#include <raylib.h>
 #include "enums.h"
 #include "data/rect_ex.h"
+#include "data/actor_event.h"
 #include "base/entity.h"
 
 
@@ -25,7 +27,8 @@ public:
         enum Direction direction);
   ~Actor();
 
-  virtual void behavior() = 0;
+  virtual void behavior() {};
+  virtual void evaluateEvent(std::unique_ptr<ActorEvent> &event) {}
   virtual void drawDebug() override;
 
   std::string name;

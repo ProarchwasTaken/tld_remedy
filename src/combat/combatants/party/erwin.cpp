@@ -687,8 +687,7 @@ void Erwin::retreatingLogic() {
 }
 
 void Erwin::dodgingLogic() {
-  assert(target != NULL);
-  if (target->state == DEAD) {
+  if (target == NULL || target->state == DEAD) {
     PLOGI << "Aborting dodging goal.";
     ai_goal = ErwinGoals::IDLE;
     target = NULL;

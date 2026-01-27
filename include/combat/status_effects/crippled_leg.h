@@ -3,7 +3,7 @@
 #include "base/status_effect.h"
 
 
-/* Decreases the afflicted's speed_multiplier by 25%. Basically crippling
+/* Decreases the afflicted's speed_multiplier by 15%. Basically crippling
  * the Combatant's mobility and combo potential.*/
 class CrippledLeg : public StatusEffect {
 public:

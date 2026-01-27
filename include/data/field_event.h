@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "enums.h"
 
 struct FieldEvent {
@@ -46,5 +47,14 @@ struct AddEffectEvent : FieldEvent {
 
 struct RemoveEffectEvent : FieldEvent {
   StatusID effect_id;
+};
+
+struct OpenDialogEvent : FieldEvent {
+  std::vector<std::string> dialog;
+  bool end_prompt = false;
+};
+
+struct StartSequenceEvent : FieldEvent {
+  SequenceID sequence;
 };
 

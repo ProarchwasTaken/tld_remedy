@@ -10,6 +10,7 @@
 #include <memory>
 #include <plog/Log.h>
 #include "enums.h"
+#include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
@@ -34,6 +35,7 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+SpriteAtlas Game::menu_atlas("menu", "menu_elements");
 SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
 

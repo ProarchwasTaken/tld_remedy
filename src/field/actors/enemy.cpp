@@ -68,10 +68,6 @@ void EnemyActor::correctSightRect() {
   rectExCorrection(sight);
 }
 
-void EnemyActor::behavior() {
-
-}
-
 void EnemyActor::update() {
   if (awaiting_deletion) {
     FieldHandler::raise<DeleteEntityEvent>(FieldEVT::DELETE_ENTITY, 

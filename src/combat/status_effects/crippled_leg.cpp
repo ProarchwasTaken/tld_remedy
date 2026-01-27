@@ -12,7 +12,7 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
   persistent = true;
 
   float speed = afflicted->speed_multiplier;
-  float dec_speed = speed * 0.75;
+  float dec_speed = speed * 0.85;
   speed_lost = speed - dec_speed;
   PLOGD << "Speed to be lost: " << speed_lost;
 }
@@ -31,7 +31,7 @@ void CrippledLeg::init(bool hide_text) {
 }
 
 void CrippledLeg::applyPenalty() {
-  PLOGI << "Decreasing afflicted's speed multiplier by 25%";
+  PLOGI << "Decreasing afflicted's speed multiplier by 15%";
   afflicted->speed_multiplier -= speed_lost;
   negated = false;
 }

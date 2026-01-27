@@ -14,21 +14,26 @@
 #include "data/actor.h"
 #include "data/entity.h"
 #include "data/field_event.h"
+#include "data/actor_event.h"
 #include "data/session.h"
 #include "system/sound_atlas.h"
+#include "system/sprite_atlas.h"
+#include "utils/text.h"
+#include "menu/panels/dialog.h"
 #include "field/system/field_map.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
-#include "system/sprite_atlas.h"
-#include "utils/text.h"
 #include "field/actors/player.h"
 #include "field/actors/companion.h"
 #include "field/actors/enemy.h"
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
+#include "field/entities/save_point.h"
+#include "field/sequences/save.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
+#include "field/sequences/db_01.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
@@ -59,6 +64,10 @@ FieldScene::FieldScene(Session *session_data) {
 }
 
 FieldScene::~FieldScene() {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
   Entity::clear(entities);
   assert(Actor::existing_actors.empty());
   assert(Entity::existing_entities.empty());
@@ -68,6 +77,10 @@ FieldScene::~FieldScene() {
   session.reset();
 
   sfx.release();
+
+  if (panel != nullptr) {
+    panel.reset();
+  }
   PLOGI << "Unloaded the Field scene.";
 }
 
@@ -220,6 +233,12 @@ void FieldScene::setupEntities() {
         entity = make_unique<Pickup>(*pick_data);
         break;
       }
+      case EntityType::SAVE_POINT: {
+        SavePointData *save_data = static_cast<SavePointData*>(
+          data.get());
+        entity = make_unique<SavePoint>(*save_data);
+        break;
+      }
       default: {
 
       }
@@ -245,11 +264,8 @@ void FieldScene::update() {
   #ifndef NDEBUG
   CommandSystem::process();
   #endif // !NDEBUG
-  
-  for (Actor *actor : Actor::existing_actors) {
-    actor->behavior();
-  }
-  actor_handler.clearEvents();
+
+  actorBehavior();
 
   if (Game::state() == GameState::READY) {
     for (unique_ptr<Entity> &entity : entities) {
@@ -258,6 +274,72 @@ void FieldScene::update() {
 
     camera.follow(camera_target);
     eventProcessing();
+  }
+
+  if (panel_mode) {
+    panelLogic();
+    return;
+  }
+
+  if (sequence == nullptr) {
+    return;
+  }
+
+  sequence->update();
+
+  if (sequence->end_sequence) {
+    sequence.reset();
+  }
+}
+
+void FieldScene::panelLogic() {
+  assert(panel != nullptr);
+  panel->update();
+
+  if (panel->terminate) {
+    panelTermination();
+  }
+}
+
+void FieldScene::panelTermination() {
+  assert(panel != nullptr);
+
+  if (panel->id == PanelID::DIALOG) {
+    dialogHandling();
+  }
+
+  panel.reset();
+  panel_mode = false;
+}
+
+void FieldScene::dialogHandling() {
+  assert(panel != nullptr && panel->id == PanelID::DIALOG);
+
+  DialogPanel *dialog = static_cast<DialogPanel*>(panel.get());
+  if (dialog->selected != NULL && sequence != nullptr) {
+    sequence->dialogHandling(*dialog->selected);
+  }
+}
+
+void FieldScene::actorBehavior() {
+  for (auto &event : *actor_handler.get()) {
+    eventEvaluation(event);
+  }
+
+  for (Actor *actor : Actor::existing_actors) {
+    actor->behavior();
+  }
+
+  actor_handler.clearEvents();
+}
+
+void FieldScene::eventEvaluation(unique_ptr<ActorEvent> &event) {
+  for (Actor *actor : Actor::existing_actors) {
+    if (event == nullptr) {
+      break;
+    }
+
+    actor->evaluateEvent(event);
   }
 }
 
@@ -408,7 +490,45 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       removeStatusEffect(event_data->event_type, event_data->effect_id);
       break;
     }
+    case FieldEVT::OPEN_DIALOG: {
+      PLOGD << "Event detected: OpenDialogEvent";
+      auto *event_data = static_cast<OpenDialogEvent*>(event.get());
+      Vector2 position = {97, 183};
+
+      panel = make_unique<DialogPanel>(position, event_data->dialog, 
+                                       event_data->end_prompt);
+      panel_mode = true;
+      break;
+    }
+    case FieldEVT::START_SEQUENCE: {
+      PLOGD << "Event detected: StartSequenceEvent";
+      auto *event_data = static_cast<StartSequenceEvent*>(event.get());
+      SequenceID sequence_id = event_data->sequence;
+      initSequence(sequence_id);
+      break;
+    }
   }
+}
+
+void FieldScene::initSequence(SequenceID sequence_id) {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
+  switch (sequence_id) { 
+    #ifndef NDEBUG
+    case SequenceID::DB_01:{
+      sequence = make_unique<DBSequence01>();
+      break;
+    } 
+    #endif // !NDEBUG
+    case SequenceID::SAVE: {
+      sequence = make_unique<SaveSequence>();
+      break;
+    }
+  }
+
+  assert(sequence != nullptr);
 }
 
 void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {
@@ -611,6 +731,10 @@ void FieldScene::draw() {
   EndMode2D();
 
   DrawTextureV(vignette, {0, 0}, WHITE);
+
+  if (panel_mode) {
+    panel->draw();
+  }
 
   #ifndef NDEBUG
   CommandSystem::drawBuffer();

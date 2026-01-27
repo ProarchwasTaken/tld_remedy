@@ -86,6 +86,9 @@ void FieldMap::parseMapData(Session &session, string &map_name,
     else if (layer_name == "Enemies") {
       findEnemies(layer["objects"]);
     }
+    else if (layer_name == "Savepoints") {
+      findSavePoints(layer["objects"]);
+    }
   }
 
   file.close();
@@ -382,6 +385,19 @@ vector<Direction> FieldMap::parseEnemyRoutine(string &raw_routine) {
   }
 
   return routine;
+}
+
+void FieldMap::findSavePoints(json &layer_objects) {
+  PLOGI << "Searching for Savepoint data.";
+  for (basic_json object : layer_objects) {
+    float x = object["x"];
+    float y = object["y"];
+    Vector2 position = {x, y};
+
+    SavePointData data = {SAVE_POINT, position, false};
+    PLOGD << "Savepoint data: {X: " << x << ", Y: " << y << "}";
+    entity_queue.push_back(make_unique<SavePointData>(data));
+  }
 }
 
 int FieldMap::activeObject(Session &session, string &map_name, 

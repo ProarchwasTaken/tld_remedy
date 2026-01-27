@@ -14,8 +14,6 @@ public:
              float speed);
   ~EnemyActor();
   void correctSightRect();
-
-  void behavior() override;
   
   void update() override;
   void normalLogic();
