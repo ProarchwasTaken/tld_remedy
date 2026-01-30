@@ -532,6 +532,7 @@ void Game::loadSession() {
   file.close();
 
   PLOGI << "Successfully loaded session data.";
+  PLOGD << "Map Name: " << session.map_name;
   PLOGD << "Location: " << session.location;
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;

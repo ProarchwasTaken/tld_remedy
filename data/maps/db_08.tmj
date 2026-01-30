@@ -4,7 +4,7 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_08.png",
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/maps\/db_08.png",
          "imageheight":336,
          "imagewidth":384,
          "name":"Map Image",
@@ -259,7 +259,7 @@
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":128,
                  "y":136
                 }, 
@@ -278,7 +278,7 @@
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":112,
                  "y":136
                 }, 
@@ -291,7 +291,7 @@
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_08-1",
                  "x":40,
                  "y":128
@@ -328,7 +328,7 @@
                          "type":"string",
                          "value":"db_06-3"
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
                  "width":16,
                  "x":16,
                  "y":112
@@ -353,7 +353,7 @@
                          "type":"int",
                          "value":10
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
                  "type":"Supplies",
                  "x":48,
                  "y":240
@@ -366,7 +366,7 @@
                          "type":"int",
                          "value":5
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
                  "type":"Supplies",
                  "x":336,
                  "y":288
@@ -379,7 +379,7 @@
                          "type":"int",
                          "value":8
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
                  "type":"Supplies",
                  "x":304,
                  "y":112
@@ -409,7 +409,7 @@
                          "type":"float",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/enemy.tx",
                  "x":344,
                  "y":152
                 }, 
@@ -426,7 +426,7 @@
                          "type":"float",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/enemy.tx",
                  "x":304,
                  "y":248
                 }, 
@@ -443,7 +443,7 @@
                          "type":"float",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/enemy.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/enemy.tx",
                  "x":80,
                  "y":296
                 }],
@@ -456,6 +456,12 @@
  "nextlayerid":9,
  "nextobjectid":13,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"location",
+         "type":"string",
+         "value":"Debug"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":16,

@@ -4,7 +4,7 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/maps\/graphics\/maps\/db_05.png",
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/maps\/db_05.png",
          "imageheight":176,
          "imagewidth":224,
          "name":"Map Image",
@@ -89,7 +89,7 @@
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":64,
                  "y":112
                 }, 
@@ -108,7 +108,7 @@
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "x":48,
                  "y":112
                 }, 
@@ -121,7 +121,7 @@
                          "type":"int",
                          "value":-1
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
                  "type":"db_05-1",
                  "x":184,
                  "y":112
@@ -158,7 +158,7 @@
                          "type":"string",
                          "value":"db_06-1"
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
                  "width":16,
                  "x":192,
                  "y":96
@@ -183,7 +183,7 @@
                          "type":"int",
                          "value":3
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
                  "type":"Supplies",
                  "x":104,
                  "y":88
@@ -196,7 +196,7 @@
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/OneDrive\/Pictures\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
                  "type":"Supplies",
                  "x":56,
                  "y":136
@@ -210,6 +210,12 @@
  "nextlayerid":7,
  "nextobjectid":11,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"location",
+         "type":"string",
+         "value":"Debug"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":16,

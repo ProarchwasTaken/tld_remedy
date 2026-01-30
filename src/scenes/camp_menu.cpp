@@ -335,8 +335,7 @@ void CampMenuScene::drawTopInfo(Vector2 position) {
   int txt_size = font->baseSize;
   position = Vector2Add(position, {11, 1});
 
-  DrawTextEx(*font, "The Outside - Cathedral", position, txt_size, -2, 
-             WHITE);
+  DrawTextEx(*font, session->location, position, txt_size, -2, WHITE);
 }
 
 void CampMenuScene::drawBottomBar() {

@@ -89,7 +89,7 @@ void FieldScene::setup() {
   scene_id = SceneID::FIELD;
 
   field = make_unique<FieldMap>();
-  mapLoadProcedure(session->location);
+  mapLoadProcedure(session->map_name);
 
   #ifndef NDEBUG
   static CommandSystem command_system;
@@ -172,7 +172,7 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
 
-  std::strcpy(session->location, map_name.c_str());
+  std::strcpy(session->map_name, map_name.c_str());
   map_ready = true;
 
   PLOGI << "Procedure complete.";
@@ -674,7 +674,7 @@ void FieldScene::updateCommonData(int object_id, bool active) {
 
     string map_name = data->map_name;
 
-    if (map_name != session->location) {
+    if (map_name != session->map_name) {
       continue;
     }
 
@@ -759,7 +759,7 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string location = TextFormat("Location: %s", session->location);
+  string location = TextFormat("Location: %s", session->map_name);
   Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
                                           *font, -3, 0);
   y += spacing;

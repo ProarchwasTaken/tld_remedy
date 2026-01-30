@@ -362,6 +362,12 @@
  "nextlayerid":7,
  "nextobjectid":17,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"location",
+         "type":"string",
+         "value":"Debug"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":16,

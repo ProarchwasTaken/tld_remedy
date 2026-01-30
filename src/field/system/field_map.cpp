@@ -91,6 +91,18 @@ void FieldMap::parseMapData(Session &session, string &map_name,
     }
   }
 
+  if (map_data.find("properties") != map_data.end()) {
+    for (basic_json property : map_data["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "location") {
+        string location = property["value"];
+
+        PLOGI << "Detected location: " << location;
+        std::strcpy(session.location, location.c_str());
+      }
+    }
+  }
+
   file.close();
 }
 

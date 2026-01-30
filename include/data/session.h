@@ -43,7 +43,9 @@ struct CommonData {
 struct Session {
   unsigned int version;
   double playtime = 0.0;
-  char location[16] = "db_05";
+
+  char map_name[16] = "db_05";
+  char location[16] = "";
 
   Player player;
   Companion companion;
