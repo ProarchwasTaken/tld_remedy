@@ -12,6 +12,11 @@ struct LoadMapEvent : FieldEvent {
   std::string spawn_point;
 };
 
+struct InitCombatFEvent : FieldEvent {
+  TroopID id;
+  int reward = 0;
+};
+
 struct UpdateCommonEvent : FieldEvent {
   int object_id;
   bool active;

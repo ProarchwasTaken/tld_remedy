@@ -2,7 +2,7 @@
   "Debug": [
     {
       "id": 2,
-      "weight": 90,
+      "weight": 60,
       "reward": 10
     },
     {
@@ -12,7 +12,7 @@
     },
     {
       "id": 4,
-      "weight": 20,
+      "weight": 25,
       "reward": 20
     }
   ]

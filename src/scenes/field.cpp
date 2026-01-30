@@ -392,6 +392,17 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       sfx.play("combat_init");
       break;
     }
+    case FieldEVT::INIT_COMBAT_FORCED: {
+      PLOGD << "Event Detected: InitCombatFEvent";
+      auto *event_data = static_cast<InitCombatFEvent*>(event.get());
+
+      TroopID id = event_data->id;
+      int reward = event_data->reward;
+
+      Game::initCombat(session.get(), id, reward);
+      sfx.play("combat_init");
+      break;
+    }
     case FieldEVT::GOTO_TITLE: {
       PLOGD << "Event Detected: GotoTitleEvent";
       Game::loadTitleScreen();
