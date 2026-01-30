@@ -77,6 +77,8 @@ enum class TroopID {
   DB_TROOP1,
   DB_TROOP2,
   DB_TROOP3,
+  DB_TROOP4,
+  DB_TROOP5
 };
 
 enum class ActionID {

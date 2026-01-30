@@ -44,7 +44,7 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
 
-CombatScene::CombatScene(Session *session) {
+CombatScene::CombatScene(Session *session, TroopID id, int reward) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
   float start_time = GetTime();
@@ -57,7 +57,8 @@ CombatScene::CombatScene(Session *session) {
   menu_sfx->use();
 
   stage.loadStage("debug");
-  initializeCombatants();
+  initializeCombatants(id);
+  this->reward = reward;
 
   combo_hud = make_unique<ComboHud>((Vector2){24, 27});
   toasts = make_unique<CombatToasts>((Vector2){24, 21});
@@ -95,7 +96,7 @@ CombatScene::~CombatScene() {
   PLOGI << "Unloaded the Combat scene.";
 }
 
-void CombatScene::initializeCombatants() {
+void CombatScene::initializeCombatants(TroopID id) {
   PLOGI << "Initializing combatants.";
   initializePlayer();
   initializeCompanion();
@@ -106,7 +107,7 @@ void CombatScene::initializeCombatants() {
   item_hud = make_unique<ItemCmdHud>((Vector2){350, 222});
   item_hud->assign(player, companion, session);
 
-  EnemyTroop troop = DBTroop1();
+  EnemyTroop troop = getTroop(id);
   assert(troop.id != TroopID::INVALID && !troop.enemies.empty());
   initializeTroop(&troop);
 }
@@ -145,6 +146,30 @@ void CombatScene::initializeCompanion() {
   assist_hud->assign(this->companion);
 
   entities.push_back(std::move(companion));
+}
+
+EnemyTroop CombatScene::getTroop(TroopID id) {
+  switch (id) {
+    case TroopID::DB_TROOP1: {
+      return DBTroop1();
+    }
+    case TroopID::DB_TROOP2: {
+      return DBTroop2();
+    }
+    case TroopID::DB_TROOP3: {
+      return DBTroop3();
+    }
+    case TroopID::DB_TROOP4: {
+      return DBTroop4();
+    }
+    case TroopID::DB_TROOP5: {
+      return DBTroop5();
+    }
+    default: {
+      PLOGE << "Invalid Troop ID!";
+      throw;
+    }
+  }
 }
 
 void CombatScene::initializeTroop(EnemyTroop *troop) {
@@ -469,6 +494,7 @@ void CombatScene::endCombatProcedure() {
   PLOGD << "Updating companion attributes.";
   updatePartyAttr(companion, com_data);
 
+  session->supplies += reward;
   Game::returnToField();
 }
 

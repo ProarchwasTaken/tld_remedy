@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <vector>
 #include <memory>
+#include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
 #include "base/party_member.h"
@@ -31,13 +32,14 @@
 
 class CombatScene : public Scene {
 public:
-  CombatScene(Session *session);
+  CombatScene(Session *session, TroopID id, int reward);
   ~CombatScene();
 
-  void initializeCombatants();
+  void initializeCombatants(TroopID id);
   void initializePlayer();
   void initializeCompanion();
 
+  EnemyTroop getTroop(TroopID id);
   void initializeTroop(EnemyTroop *troop);
   std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
@@ -88,6 +90,7 @@ private:
 
   bool paused = false;
   bool game_over = false;
+  int reward;
 
   Mary *player = NULL;
   std::unique_ptr<LifeHud> plr_hud;
