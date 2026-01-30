@@ -1,0 +1,19 @@
+{
+  "Debug": [
+    {
+      "id": 2,
+      "weight": 90,
+      "reward": 10
+    },
+    {
+      "id": 3,
+      "weight": 50,
+      "reward": 15
+    },
+    {
+      "id": 4,
+      "weight": 20,
+      "reward": 20
+    }
+  ]
+}

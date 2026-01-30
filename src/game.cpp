@@ -1,3 +1,5 @@
+#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <cassert>
 #include <fstream>
@@ -8,7 +10,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
-#include <plog/Log.h>
 #include "enums.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
@@ -20,10 +21,12 @@
 #include "data/personal.h"
 #include "utils/math.h"
 #include "game.h"
+#include <plog/Log.h>
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
 std::filesystem::create_directory, std::chrono::system_clock, 
-std::string, std::mt19937_64;
+std::string, std::mt19937_64, std::uniform_int_distribution,
+nlohmann::json, nlohmann::basic_json;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
@@ -603,11 +606,69 @@ void Game::openCampMenu(Session *data) {
   SKIP_FRAME = true;
 }
 
-void Game::initCombat(Session *data) {
+void Game::initCombat(Session *session) {
   PLOGI << "Battle Time!";
   assert(reserve == nullptr);
 
-  reserve = make_unique<CombatScene>(data);
+  ifstream file("data/troops.json");
+  json parsed_data = json::parse(file);
+ 
+  string location = session->location;
+  basic_json pool = parsed_data.at(location);
+  PLOGI << "Selecting a random troop in pool: " << location; 
+
+  int sum_of_weight = 0;
+  for (basic_json troop : pool) {
+    int id = troop.at("id");
+    int weight = troop.at("weight");
+    PLOGD << "{Troop ID: " << id << ", Weight: " << weight << "}";
+
+    sum_of_weight += weight;
+  }
+
+  PLOGD << "Weight Sum: " << sum_of_weight;
+  
+  uniform_int_distribution<int> range(0, sum_of_weight);
+  int random_num = range(RNG);
+  PLOGD << "RNG Value: " << random_num;
+
+  TroopID troop_id;
+  int reward;
+  bool successful = false;
+  for (basic_json troop : pool) {
+    int weight = troop.at("weight");
+
+    if (random_num < weight) {
+      int id = troop.at("id");
+      troop_id = static_cast<TroopID>(id);
+
+      reward = troop.at("reward");
+
+      PLOGI << "Troop Selected: {ID: " << id << ", Reward: " << reward 
+        << "}";
+      successful = true;
+      break;
+    }
+    else {
+      random_num -= weight;
+    }
+  }
+
+  assert(successful);
+  file.close();
+
+  reserve = make_unique<CombatScene>(session, troop_id, reward);
+  flash_color = WHITE;
+
+  game_state = GameState::INIT_COMBAT;
+  SKIP_FRAME = true;
+}
+
+void Game::initCombat(Session *data, TroopID id, int reward) {
+  PLOGI << "Battle Time! (Forced Style!)";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CombatScene>(data, id, reward);
   flash_color = WHITE;
 
   game_state = GameState::INIT_COMBAT;

@@ -58,6 +58,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
 
   stage.loadStage("debug");
   initializeCombatants(id);
+
   this->reward = reward;
 
   combo_hud = make_unique<ComboHud>((Vector2){24, 27});
@@ -72,6 +73,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Enemy::memberCount(); 
+  PLOGI << "Reward: " << reward;
 
   float end_time = GetTime();
   PLOGD << "Load Time: " << end_time - start_time;
@@ -494,7 +496,9 @@ void CombatScene::endCombatProcedure() {
   PLOGD << "Updating companion attributes.";
   updatePartyAttr(companion, com_data);
 
-  session->supplies += reward;
+  if (!game_over) {
+    session->supplies += reward;
+  }
   Game::returnToField();
 }
 

@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <memory>
 #include <random>
+#include "enums.h"
 #include "base/scene.h"
 #include "data/session.h"
 #include "data/personal.h"
@@ -72,6 +73,7 @@ public:
 
   static void openCampMenu(Session *data);
   static void initCombat(Session *data);
+  static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
 
   static void fadeout(float seconds);
