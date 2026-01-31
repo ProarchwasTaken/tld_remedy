@@ -29,6 +29,12 @@
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 
+enum class CombatState {
+  NEUTRAL,
+  LOSE,
+  WIN
+};
+
 
 class CombatScene : public Scene {
 public:
@@ -50,9 +56,16 @@ public:
 
   void update() override;
   void pauseLogic();
+  void panelLogic();
   void combatantBehavior();
   void eventEvaluation(std::unique_ptr<CombatantEvent> &event);
   void eventProcessing();
+
+  void endConditions();
+  void winProcedure();
+  const char *playerWinText();
+  const char *companionWinText();
+
   void updateHud();
 
   void eventHandling(std::unique_ptr<CombatEvent> &event);
@@ -88,8 +101,9 @@ private:
   CombatKeybinds *keybinds;
   SoundAtlas *menu_sfx;
 
+  CombatState state = CombatState::NEUTRAL;
+  bool end_combat = false;
   bool paused = false;
-  bool game_over = false;
   int reward;
 
   Mary *player = NULL;

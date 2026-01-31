@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <cmath>
 #include <utility>
@@ -22,6 +23,7 @@
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
+#include "menu/panels/dialog.h"
 #include "combat/system/evt_handler.h"
 #include "combat/hud/life.h"
 #include "combat/hud/enemy.h"
@@ -233,10 +235,15 @@ bool CombatScene::shouldPause() {
 }
 
 bool CombatScene::canPause() {
-  return player->state == NEUTRAL && Enemy::memberCount() > 0;
+  return state == CombatState::NEUTRAL && player->state == NEUTRAL;
 }
 
 void CombatScene::update() {
+  if (end_combat) {
+    endCombatProcedure();
+    return;
+  }
+
   #ifndef NDEBUG
   debugKeybinds(); 
   #endif // !NDEBUG
@@ -266,6 +273,14 @@ void CombatScene::update() {
     updateHud();
     eventProcessing();
   }
+
+  if (state == CombatState::NEUTRAL) {
+    endConditions();
+  }
+
+  if (panel_mode) {
+    panelLogic();
+  }
 }
 
 void CombatScene::pauseLogic() {
@@ -275,6 +290,23 @@ void CombatScene::pauseLogic() {
   if (Input::pressed(keybinds->pause, gamepad) && IsWindowFocused()) {
     resume();
   }
+}
+
+void CombatScene::panelLogic() {
+  assert(panel != nullptr);
+  panel->update();
+
+  if (!panel->terminate) {
+    return;
+  }
+
+  if (state == CombatState::WIN && panel->id == PanelID::DIALOG) {
+    Game::fadeout(1);
+    end_combat = true;
+  }
+
+  panel.reset();
+  panel_mode = false;
 }
 
 void CombatScene::combatantBehavior() {
@@ -327,14 +359,91 @@ void CombatScene::eventProcessing() {
     }
 
     evt_handler.clear();
-  }
-
-  game_over = player == NULL;
-  if (game_over || Enemy::memberCount() == 0) {
-    endCombatProcedure();
-  }
+  } 
 
   cbt_handler.transferEvents();
+}
+
+void CombatScene::endConditions() {
+  bool game_over = player == NULL;
+  if (game_over) {
+    PLOGI << "The player has died.";
+    state = CombatState::LOSE;
+    end_combat = true;
+  }
+  else if (Enemy::memberCount() == 0) {
+    PLOGI << "All enemies have been defeated.";
+    winProcedure();
+  }
+}
+
+void CombatScene::winProcedure() {
+  assert(player != NULL);
+  player->depleteInstant();
+
+  if (companion != NULL) {
+    companion->depleteInstant();
+  }
+
+  vector<string> dialog;
+  string page = "Conflict Resolved.\n";
+
+  page += playerWinText();
+  page += companionWinText(); 
+  dialog.push_back(page);
+
+  page = TextFormat("Gained %i supplies from scavenging\n"
+                    "the remains.", reward);
+  dialog.push_back(page);
+
+  Vector2 position = {16, 8};
+  panel = make_unique<DialogPanel>(position, dialog);
+
+  player->setEnabled(false);
+  black_bars.setTargetValues(5, 28);
+
+  state = CombatState::WIN;
+  panel_mode = true;
+}
+
+const char *CombatScene::playerWinText() {
+  char name[9];
+  std::strcpy(name, session->player.name);
+
+  assert(player != NULL);
+  if (player->critical_life) {
+    return TextFormat("%s is injured.\n", name);
+  }
+  else if (player->life / player->max_life < 0.75) {
+    return TextFormat("%s is hurt, but he'll be okay.\n", name);
+  }
+  else if (!FloatEquals(player->life, player->max_life)) {
+    return TextFormat("%s looks a little worse for wear.\n", name);
+  }
+  else {
+    return TextFormat("%s had made it unscathed.\n", name);
+  }
+}
+
+const char *CombatScene::companionWinText() {
+  char name[9];
+  std::strcpy(name, session->companion.name);
+
+  if (companion == NULL) {
+    return TextFormat("%s needs medical attention.", name);
+  }
+  else if (companion->critical_life) {
+    return TextFormat("%s had taken significant damage.", name);
+  }
+  else if (companion->life / companion->max_life < 0.75) {
+    return TextFormat("%s is still alright.", name);
+  }
+  else if (!FloatEquals(companion->life, companion->max_life)) {
+    return TextFormat("%s seem to be fine.", name);
+  }
+  else {
+    return TextFormat("%s is in top condition.", name);
+  }
 }
 
 void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
@@ -496,7 +605,7 @@ void CombatScene::endCombatProcedure() {
   PLOGD << "Updating companion attributes.";
   updatePartyAttr(companion, com_data);
 
-  if (!game_over) {
+  if (state != CombatState::LOSE) {
     session->supplies += reward;
   }
   Game::returnToField();
@@ -586,6 +695,11 @@ void CombatScene::drawHud() {
   item_hud->draw();
   combo_hud->draw();
   toasts->draw();
+
+  if (panel_mode) {
+    assert(panel != nullptr);
+    panel->draw();
+  }
 }
 
 void CombatScene::drawPauseMenu() {
@@ -654,7 +768,7 @@ void CombatScene::debugKeybinds() {
     companion->increaseTenacity(magnitude, threshold);
   }
   else if (IsKeyPressed(KEY_F7)) {
-    endCombatProcedure();
+    end_combat = true;
   }
 }
 
