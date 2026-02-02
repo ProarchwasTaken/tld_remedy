@@ -17,13 +17,16 @@ using std::string, std::vector;
 
 
 DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
-                         bool end_prompt) {
+                         bool end_prompt, bool visible_frame, 
+                         float auto_time) 
+{
   id = PanelID::DIALOG;
   main_position = position;
   text_position = Vector2Add(position, {2, 1});
 
   texture = LoadTexture("graphics/menu/dialog_frame1.png");
   frame_height = texture.height;
+  visible = visible_frame;
 
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
@@ -39,6 +42,10 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
 
   if (end_prompt) {
     selected = prompt_options.begin();
+  }
+
+  if (auto_time >= 0) {
+    auto_mode = true;
   }
 }
 
@@ -72,9 +79,14 @@ void DialogPanel::update() {
     menuNavigation(gamepad);
   }
 
+  if (auto_mode && dialog_state == DialogState::END_OF_LINE) {
+    autoConfirm();
+  }
+
   if (Input::pressed(keybinds->confirm, gamepad)) {
     confirm();
   }
+
 }
 
 void DialogPanel::menuNavigation(bool gamepad) {
@@ -149,6 +161,7 @@ void DialogPanel::confirm() {
     case DialogState::END_OF_LINE: {
       PLOGI << "Moving to the next line.";
       current_line++;
+      auto_clock = 0.0;
 
       if (current_line != dialog.end()) {
         current_char = current_line->begin();
@@ -173,10 +186,29 @@ void DialogPanel::confirm() {
   }
 }
 
+void DialogPanel::autoConfirm() {
+  assert(auto_time >= 0);
+  assert(dialog_state == DialogState::END_OF_LINE);
+
+  auto_clock += Game::deltaTime() / auto_time;
+  if (auto_clock > 1.0) {
+    current_line++;
+
+    if (current_line != dialog.end()) {
+      current_char = current_line->begin();
+      buffer.clear();
+    }
+
+    auto_clock = 0.0;
+  }
+}
+
 void DialogPanel::draw() {
-  float width = texture.width;
-  Rectangle source = {0, 0, width, frame_height};
-  DrawTextureRec(texture, source, main_position, WHITE);
+  if (visible) {
+    float width = texture.width;
+    Rectangle source = {0, 0, width, frame_height};
+    DrawTextureRec(texture, source, main_position, WHITE);
+  }
 
   if (state != PanelState::READY) {
     return;

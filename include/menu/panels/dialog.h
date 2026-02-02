@@ -25,7 +25,8 @@ enum class PromptOptions {
 class DialogPanel : public Panel {
 public:
   DialogPanel(Vector2 position, std::vector<std::string> dialog, 
-              bool end_prompt = false);
+              bool end_prompt = false, bool visible_frame = true,
+              float auto_time = -1);
   ~DialogPanel();
 
   void update() override;
@@ -35,6 +36,7 @@ public:
 
   void menuNavigation(bool gamepad);
   void confirm();
+  void autoConfirm();
 
   void draw() override;
   void drawOptions();
@@ -57,6 +59,7 @@ private:
 
   Texture texture;
   float frame_height;
+  bool visible;
 
   std::vector<std::string> dialog;
   std::vector<std::string>::iterator current_line;
@@ -66,4 +69,8 @@ private:
   float text_speed = 0.025;
   float text_clock = 0.0;
   float blink_clock = 0.0;
+
+  bool auto_mode = false;
+  float auto_time = -1;
+  float auto_clock = 0.0;
 };
