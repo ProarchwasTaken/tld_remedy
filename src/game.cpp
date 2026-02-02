@@ -17,6 +17,7 @@
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
 #include "scenes/combat.h"
+#include "scenes/game_over.h"
 #include "data/session.h"
 #include "data/personal.h"
 #include "utils/math.h"
@@ -30,7 +31,7 @@ nlohmann::json, nlohmann::basic_json;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
-bool Game::SKIP_FRAME = false;
+bool Game::SKIP_FRAME = true;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -83,7 +84,7 @@ void Game::init() {
   PLOGD << "RNG Seed: " << seed;
 
   menu_sfx.use();
-  scene = make_unique<TitleScene>();
+  scene = make_unique<GameOverScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }

@@ -5,7 +5,8 @@ enum class SceneID {
   TITLE,
   FIELD,
   CAMP_MENU,
-  COMBAT
+  COMBAT,
+  GAME_OVER
 };
 
 enum class PanelID {

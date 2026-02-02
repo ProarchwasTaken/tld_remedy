@@ -45,6 +45,7 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
   }
 
   if (auto_time >= 0) {
+    this->auto_time = auto_time;
     auto_mode = true;
   }
 }
