@@ -27,9 +27,18 @@ Mending::Mending(PartyMember *afflicted, float percentage, float speed):
 }
 
 Mending::~Mending() {
-  if (end) {
-    afflicted->sfx.play("mending_loss");
+  if (!end) {
+    return;
   }
+
+  if (to_be_healed > 0) {
+    PLOGI << "Effect has ended before healing could be complete.";
+    afflicted->increaseLife(to_be_healed);
+  }
+  else {
+    afflicted->sfx.play("mending_loss"); 
+  }
+
 }
 
 void Mending::refresh(float percentage, float speed) {
