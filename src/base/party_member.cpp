@@ -241,6 +241,15 @@ StatusID PartyMember::selectRandomID(set<StatusID> &effect_pool) {
   return id;
 }
 
+void PartyMember::clearNonPersistant() {
+  PLOGI << name << ": clearing all non-persistent status effects.";
+  for (auto &effect : status) {
+    if (!effect->isPersistent()) {
+      effect->end = true;
+    }
+  }
+}
+
 void PartyMember::damageMorale(float magnitude) {
   float new_morale = morale - magnitude;
   morale = Clamp(new_morale, -max_morale, max_morale);

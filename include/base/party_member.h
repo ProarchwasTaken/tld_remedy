@@ -38,6 +38,8 @@ public:
   std::set<StatusID> getEffectPool();
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
 
+  void clearNonPersistant();
+
   void damageMorale(float magnitude) override;
   void increaseMorale(float magnitude, bool mp_share) override;
 
