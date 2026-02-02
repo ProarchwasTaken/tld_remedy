@@ -118,10 +118,6 @@ void UseItem::applySplint() {
 
   PLOGI << "Cured Despondence as well.";
   despondent->end = true;
-
-  if (target->morale < 0) {
-    target->morale = 0;
-  }
 }
 
 void UseItem::applyRefreshed() {

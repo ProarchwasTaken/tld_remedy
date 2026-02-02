@@ -33,12 +33,19 @@ void Despondent::init(bool hide_text) {
 }
 
 Despondent::~Despondent() {
-  if (end) {
-    PLOGI << "Reversing stat penalties.";
-    afflicted->demoralized = false;
-    afflicted->intimid += intimid_lost;
+  if (!end) {
+    return;
+  }
 
-    afflicted->sfx.play("despondent_recover");
+  PLOGI << "Reversing stat penalties.";
+  afflicted->demoralized = false;
+  afflicted->intimid += intimid_lost;
+
+  if (afflicted->morale < 0) {
+    afflicted->morale = 0;
+  }
+  else {
+    afflicted->sfx.play("despondent_recover"); 
   }
 }
 

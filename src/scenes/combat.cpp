@@ -380,9 +380,11 @@ void CombatScene::endConditions() {
 void CombatScene::winProcedure() {
   assert(player != NULL);
   player->depleteInstant();
+  player->clearNonPersistant();
 
   if (companion != NULL) {
     companion->depleteInstant();
+    companion->clearNonPersistant();
   }
 
   vector<string> dialog;
