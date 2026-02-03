@@ -19,6 +19,7 @@ void deleteEntityCommand(string argument);
 void saveCommand();
 void initCombatCommand(string troop_id);
 void gotoTitleCommand();
+void gameoverCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
 void addItemCommand(string item_id);
@@ -122,6 +123,10 @@ void CommandSystem::interpretCommand(CommandType type,
       gotoTitleCommand();
       break;
     }
+    case CommandType::GAME_OVER: {
+      gameoverCommand();
+      break;
+    }
     case CommandType::DELETE_ENT: {
       string argument = findNextWord(buffer, iterator);
 
@@ -172,6 +177,7 @@ void CommandSystem::interpretCommand(CommandType type,
     case CommandType::INIT_SEQUENCE: {
       string sequence_id = findNextWord(buffer, iterator);
       initSequenceCommand(sequence_id);
+      break;
     }
   }
 }
@@ -254,6 +260,12 @@ void initCombatCommand(string troop_id) {
 void gotoTitleCommand() {
   PLOGD << "Now executing command.";
   FieldHandler::raise<FieldEvent>(FieldEVT::GOTO_TITLE);
+}
+
+void gameoverCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<GameOverEvent>(FieldEVT::GAME_OVER, 
+                                     "Triggered by debug command.");
 }
 
 void deleteEntityCommand(string argument) {

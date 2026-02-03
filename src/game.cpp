@@ -84,7 +84,7 @@ void Game::init() {
   PLOGD << "RNG Seed: " << seed;
 
   menu_sfx.use();
-  scene = make_unique<GameOverScene>();
+  scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
@@ -264,6 +264,11 @@ void Game::gameLogic() {
       initCombatProcedure();
       break;
     }
+    case GameState::GAME_OVER: {
+      gameoverProcedure();
+      scene->update();
+      break;
+    }
     case GameState::RETURN_TO_FIELD: {
       returnFieldProcedure();
       break;
@@ -399,6 +404,26 @@ void Game::initCombatProcedure() {
     setupCanvas();
     Game::fadein(0.25);
     fadeScreenProcedure();
+  }
+}
+
+void Game::gameoverProcedure() {
+  static float clock = 0.0;
+  static float sequence_time = 3.42;
+  
+  clock += GetFrameTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Game Over scene.";
+    scene.swap(reserve);
+    assert(scene != nullptr && scene->scene_id == SceneID::GAME_OVER);
+
+    reserve.reset();
+    clock = 0.0;
+
+    game_state = GameState::READY;
+    setTimeScale(1.0);
   }
 }
 
@@ -688,6 +713,22 @@ void Game::returnToField() {
   assert(reserve != nullptr);
 
   game_state = GameState::RETURN_TO_FIELD;
+}
+
+void Game::gameover(string reason) {
+  PLOGI << "GAME OVER! Reason: " << reason;
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  reserve = make_unique<GameOverScene>(reason);
+  game_state = GameState::GAME_OVER;
+
+  setTimeScale(0.25);
+  menu_sfx.play("gameover");
+
+  SKIP_FRAME = true;
+  run_timer = false;
 }
 
 float Game::deltaTime() {

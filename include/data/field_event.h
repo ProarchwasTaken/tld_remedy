@@ -17,6 +17,10 @@ struct InitCombatFEvent : FieldEvent {
   int reward = 0;
 };
 
+struct GameOverEvent : FieldEvent {
+  std::string reason;
+};
+
 struct UpdateCommonEvent : FieldEvent {
   int object_id;
   bool active;

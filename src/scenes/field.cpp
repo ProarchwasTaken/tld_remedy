@@ -70,7 +70,6 @@ FieldScene::~FieldScene() {
 
   Entity::clear(entities);
   assert(Actor::existing_actors.empty());
-  assert(Entity::existing_entities.empty());
 
   UnloadTexture(vignette);
   field.reset();
@@ -267,7 +266,7 @@ void FieldScene::update() {
 
   actorBehavior();
 
-  if (Game::state() == GameState::READY) {
+  if (Game::state() != GameState::SLEEP) {
     for (unique_ptr<Entity> &entity : entities) {
       entity->update();
     }
@@ -406,6 +405,14 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::GOTO_TITLE: {
       PLOGD << "Event Detected: GotoTitleEvent";
       Game::loadTitleScreen();
+      break;
+    }
+    case FieldEVT::GAME_OVER: {
+      PLOGD << "Event Detected: GameOverEvent";
+      auto *event_data = static_cast<GameOverEvent*>(event.get());
+      string reason = event_data->reason;
+
+      Game::gameover(reason);
       break;
     }
     case FieldEVT::DELETE_ENTITY: {

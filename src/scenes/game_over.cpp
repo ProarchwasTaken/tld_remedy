@@ -13,8 +13,9 @@
 using std::vector, std::string, std::make_unique;
 
 
-GameOverScene::GameOverScene() {
+GameOverScene::GameOverScene(string reason) {
   scene_id = SceneID::GAME_OVER;
+  this->reason = reason;
 }
 
 void GameOverScene::startDialog() {
@@ -154,7 +155,25 @@ bool GameOverScene::responseHandling() {
 }
 
 void GameOverScene::draw() {
+  if (start_clock < 0.33) {
+    drawGameOverText();
+  }
+
   if (panel_mode) {
     panel->draw();
   }
+}
+
+void GameOverScene::drawGameOverText() {
+  Font *med_font = &Game::med_font;
+  int med_size = med_font->baseSize * 1.5;
+
+  Font *sm_font = &Game::sm_font;
+  int sm_size = sm_font->baseSize;
+
+  Color red = Game::palette[32];
+  Color yellow = Game::palette[22];
+
+  DrawTextEx(*med_font, "GAME OVER", {2, 206}, med_size, 0, red);
+  DrawTextEx(*sm_font, reason.c_str(), {2, 224}, sm_size, -3, yellow);
 }

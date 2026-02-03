@@ -123,7 +123,7 @@ void PartyMember::takeDamage(DamageData &data) {
     sfx.play("critical_life");
   }
 
-  if (apply_hitstop) {
+  if (apply_hitstop && state != DEAD) {
     Game::sleep(data.hit_stop);
   }
 }
@@ -378,4 +378,13 @@ void PartyMember::tintFlash() {
   unsigned char b = Lerp(start_tint.b, 255, percentage);
 
   tint = {r, g, b, 255};
+}
+
+void PartyMember::death() {
+  Combatant::death();
+
+  if (important) {
+    PLOGI << "An important PartyMember has died!";
+    Game::gameover(name + " has died...");
+  }
 }

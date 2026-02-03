@@ -50,6 +50,7 @@ public:
   void techniqueCooldown();
 
   void tintFlash();
+  void death() override;
 
   PartyMemberID id;
   bool important = false;

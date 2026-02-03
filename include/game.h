@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <memory>
 #include <random>
+#include <string>
 #include "enums.h"
 #include "base/scene.h"
 #include "data/session.h"
@@ -20,6 +21,7 @@ enum class GameState {
   OPEN_CAMPMENU,
   INIT_COMBAT,
   RETURN_TO_FIELD,
+  GAME_OVER,
   FADING_OUT,
   FADING_IN,
   SLEEP,
@@ -50,6 +52,7 @@ public:
   void switchSceneProcedure();
   void openCampMenuProcedure();
   void initCombatProcedure();
+  void gameoverProcedure();
   void returnFieldProcedure();
   void sleepProcedure();
 
@@ -75,6 +78,7 @@ public:
   static void initCombat(Session *data);
   static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
+  static void gameover(std::string reason);
 
   static void fadeout(float seconds);
   static void fadein(float seconds);

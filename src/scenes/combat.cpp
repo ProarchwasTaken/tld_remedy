@@ -239,6 +239,10 @@ bool CombatScene::canPause() {
 }
 
 void CombatScene::update() {
+  if (player == NULL) {
+    return;
+  }
+
   if (end_combat) {
     endCombatProcedure();
     return;
@@ -260,7 +264,7 @@ void CombatScene::update() {
   
   combatantBehavior();
 
-  if (Game::state() == GameState::READY) {
+  if (Game::state() != GameState::SLEEP) {
     stage.update();
 
     for (unique_ptr<Entity> &entity : entities) {
@@ -365,13 +369,7 @@ void CombatScene::eventProcessing() {
 }
 
 void CombatScene::endConditions() {
-  bool game_over = player == NULL;
-  if (game_over) {
-    PLOGI << "The player has died.";
-    state = CombatState::LOSE;
-    end_combat = true;
-  }
-  else if (Enemy::memberCount() == 0) {
+  if (Enemy::memberCount() == 0) {
     PLOGI << "All enemies have been defeated.";
     winProcedure();
   }
