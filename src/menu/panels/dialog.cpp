@@ -136,9 +136,11 @@ float DialogPanel::getSpeedMultiplier() {
 
   string::iterator prev_char = current_char - 1;
   switch (*prev_char) {
-    case ',':
-    case ';': {
+    case ',': {
       return 3.0;
+    }
+    case ';': {
+      return 6.0;
     }
     case '.':
     case '?':

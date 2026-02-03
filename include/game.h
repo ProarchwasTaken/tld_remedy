@@ -66,7 +66,7 @@ public:
   static void fullscreenCheck();
   static void newSession(SubWeaponID sub_weapon, CompanionID companion);
   static void saveSession(Session *data);
-  static void loadSession();
+  static bool loadSession();
   static bool existingSession();
 
   static void loadTitleScreen();

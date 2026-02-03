@@ -515,13 +515,15 @@ void Game::saveSession(Session *data) {
   PLOGI << "Session data saved successfully.";
 }
 
-void Game::loadSession() {
+bool Game::loadSession() {
   PLOGI << "Attempting to load session data.";
   ifstream file;
   file.open("data/session.data", std::ios::binary);
 
   if (!file.is_open()) {
     PLOGE << "'data/session.data' is not found.";
+    file.close();
+    return false;
   }
 
   Session session;
@@ -530,7 +532,7 @@ void Game::loadSession() {
   if (file.fail()) {
     PLOGE << "Error opening file!";
     file.close();
-    return;
+    return false;
   }
 
   file.close();
@@ -544,7 +546,7 @@ void Game::loadSession() {
 
   if (session.version != session_version) {
     PLOGE << "Loaded session data is outdated!";
-    return;
+    return false;
   }
 
   assert(reserve == nullptr);
@@ -554,6 +556,7 @@ void Game::loadSession() {
   run_timer = true;
 
   game_state = GameState::SWITCHING_SCENE;
+  return true;
 }
 
 bool Game::existingSession() {
