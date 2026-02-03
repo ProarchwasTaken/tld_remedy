@@ -414,12 +414,26 @@ void Game::gameoverProcedure() {
   clock += GetFrameTime() / sequence_time;
   clock = Clamp(clock, 0.0, 1.0);
 
+  float percentage = Clamp((-0.305 + clock) / 0.10, 0.0, 1.0);
+  flash_color.a = Lerp(0, 255, percentage);
+
+  float end_height = window_res.y * 0.008;
+  canvas_dest.height = Lerp(window_res.y, end_height, percentage);
+  canvas_origin.y = canvas_dest.height / 2;
+
+  // percentage = Clamp((-0.405 + clock) / 0.550, 0.0, 1.0);
+  // canvas_dest.width = Math::smoothstep(window_res.x, 0, percentage);
+  // canvas_origin.x = canvas_dest.width / 2;
+
   if (clock == 1.0) {
     PLOGI << "Switching over to the Game Over scene.";
     scene.swap(reserve);
+
     assert(scene != nullptr && scene->scene_id == SceneID::GAME_OVER);
+    setupCanvas();
 
     reserve.reset();
+    flash_color.a = 0;
     clock = 0.0;
 
     game_state = GameState::READY;
@@ -506,6 +520,10 @@ void Game::fadein(float seconds) {
 }
 
 void Game::sleep(float seconds) {
+  if (game_state == GameState::GAME_OVER) {
+    return;
+  }
+
   PLOGI << "Pausing game logic for: " << seconds << " seconds";
   Game::sleep_time = seconds;
   game_state = GameState::SLEEP;
@@ -722,11 +740,13 @@ void Game::gameover(string reason) {
   }
 
   reserve = make_unique<GameOverScene>(reason);
-  game_state = GameState::GAME_OVER;
+  flash_color = palette[32];
+  flash_color.a = 0;
 
   setTimeScale(0.25);
   menu_sfx.play("gameover");
 
+  game_state = GameState::GAME_OVER;
   SKIP_FRAME = true;
   run_timer = false;
 }

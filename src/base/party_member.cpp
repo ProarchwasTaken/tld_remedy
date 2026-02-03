@@ -123,7 +123,7 @@ void PartyMember::takeDamage(DamageData &data) {
     sfx.play("critical_life");
   }
 
-  if (apply_hitstop && state != DEAD) {
+  if (apply_hitstop) {
     Game::sleep(data.hit_stop);
   }
 }
