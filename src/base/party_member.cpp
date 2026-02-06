@@ -120,6 +120,9 @@ void PartyMember::takeDamage(DamageData &data) {
   if (entered_critical && state != CombatantState::DEAD) {
     CombatStage::tintStage(Game::palette[32]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
+
+    Game::noise->setTint(Game::palette[32]);
+    Game::noise->setAlpha(0.10);
     sfx.play("critical_life");
   }
 
@@ -152,6 +155,19 @@ void PartyMember::damageLife(float magnitude) {
   bool entered_critical = in_critical != critical_life;
   if (entered_critical && state != CombatantState::DEAD) {
     afflictPersistent();
+  }
+}
+
+void PartyMember::increaseLife(float magnitude) {
+  bool in_critical = critical_life;
+
+  Combatant::increaseLife(magnitude);
+
+  bool exited_critical = in_critical != critical_life;
+  if (exited_critical && important) {
+    PLOGD << "Reseting noise effect.";
+    Game::noise->setTint(WHITE);
+    Game::noise->setAlpha(0.0);
   }
 }
 
@@ -323,10 +339,18 @@ void PartyMember::depleteExhaustion() {
   exhaustion = Clamp(exhaustion - magnitude, 0, max_life);
   life = Clamp(life + magnitude, 0, max_life);
 
-  if (critical_life && life >= max_life * LOW_LIFE_THRESHOLD) {
-    PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
-      "] is no longer Winded.";
-    critical_life = false;
+  if (!critical_life || life < max_life * LOW_LIFE_THRESHOLD) {
+    return;
+  }
+
+  PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
+    "] is no longer Winded.";
+  critical_life = false;
+
+  if (important && Game::noise->getAlpha() != 0) {
+    PLOGD << "Reseting noise effect.";
+    Game::noise->setTint(WHITE);
+    Game::noise->setAlpha(0.0);
   }
 }
 
@@ -334,10 +358,18 @@ void PartyMember::depleteInstant() {
   life += exhaustion;
   exhaustion = 0;
 
-  if (critical_life && life >= max_life * LOW_LIFE_THRESHOLD) {
-    PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
-      "] is no longer Winded.";
-    critical_life = false;
+  if (!critical_life || life < max_life * LOW_LIFE_THRESHOLD) {
+    return;
+  }
+
+  PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
+    "] is no longer Winded.";
+  critical_life = false;
+
+  if (important && Game::noise->getAlpha() != 0) {
+    PLOGD << "Reseting noise effect.";
+    Game::noise->setTint(WHITE);
+    Game::noise->setAlpha(0.0);
   }
 }
 

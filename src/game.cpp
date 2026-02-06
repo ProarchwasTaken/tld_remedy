@@ -11,6 +11,7 @@
 #include <raymath.h>
 #include <memory>
 #include "enums.h"
+#include "system/noise_effect.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "scenes/title.h"
@@ -39,9 +40,11 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+
 SpriteAtlas Game::menu_atlas("menu", "menu_elements");
 SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
+unique_ptr<NoiseEffect> Game::noise;
 
 Settings Game::settings;
 
@@ -84,6 +87,7 @@ void Game::init() {
   PLOGD << "RNG Seed: " << seed;
 
   menu_sfx.use();
+  noise = make_unique<NoiseEffect>();
   scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
@@ -126,6 +130,7 @@ void Game::loadPersonal() {
 }
 
 Game::~Game() {
+  noise.reset();
   scene.reset();
 
   if (reserve != nullptr) {
@@ -289,6 +294,8 @@ void Game::gameLogic() {
       break;
     }
   }
+
+  noise->update();
 }
 
 void Game::fadeScreenProcedure() {
@@ -401,6 +408,8 @@ void Game::initCombatProcedure() {
     assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
 
     clock = 0.0;
+    noise->setAlpha(0.0);
+
     setupCanvas();
     Game::fadein(0.25);
     fadeScreenProcedure();
@@ -414,16 +423,16 @@ void Game::gameoverProcedure() {
   clock += GetFrameTime() / sequence_time;
   clock = Clamp(clock, 0.0, 1.0);
 
-  float percentage = Clamp((-0.305 + clock) / 0.10, 0.0, 1.0);
-  flash_color.a = Lerp(0, 255, percentage);
+  float percentage = Clamp(clock / 0.10, 0.0, 1.0);
+  flash_color.a = Lerp(255, 0, percentage);
 
-  float end_height = window_res.y * 0.008;
+  percentage = Clamp((-0.305 + clock) / 0.10, 0.0, 1.0);
+  float end_height = window_res.y * 0.004;
   canvas_dest.height = Lerp(window_res.y, end_height, percentage);
   canvas_origin.y = canvas_dest.height / 2;
 
-  // percentage = Clamp((-0.405 + clock) / 0.550, 0.0, 1.0);
-  // canvas_dest.width = Math::smoothstep(window_res.x, 0, percentage);
-  // canvas_origin.x = canvas_dest.width / 2;
+  percentage = Clamp(clock / 0.405, 0.0, 1.0);
+  noise->setAlpha(percentage);
 
   if (clock == 1.0) {
     PLOGI << "Switching over to the Game Over scene.";
@@ -438,6 +447,9 @@ void Game::gameoverProcedure() {
 
     game_state = GameState::READY;
     setTimeScale(1.0);
+
+    noise->setAlpha(0.0);
+    noise->setTint(WHITE);
   }
 }
 
@@ -457,6 +469,7 @@ void Game::drawScene() {
   {
     ClearBackground(BLACK);
     scene->draw();
+    noise->draw();
   }
   EndTextureMode();
 
@@ -707,6 +720,9 @@ void Game::initCombat(Session *session) {
   reserve = make_unique<CombatScene>(session, troop_id, reward);
   flash_color = WHITE;
 
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
+
   game_state = GameState::INIT_COMBAT;
   SKIP_FRAME = true;
 }
@@ -717,6 +733,9 @@ void Game::initCombat(Session *data, TroopID id, int reward) {
 
   reserve = make_unique<CombatScene>(data, id, reward);
   flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
 
   game_state = GameState::INIT_COMBAT;
   SKIP_FRAME = true;
@@ -741,9 +760,11 @@ void Game::gameover(string reason) {
 
   reserve = make_unique<GameOverScene>(reason);
   flash_color = palette[32];
-  flash_color.a = 0;
+  flash_color.a = 255;
 
-  setTimeScale(0.25);
+  noise->setTint(palette[32]);
+
+  setTimeScale(0.75);
   menu_sfx.play("gameover");
 
   game_state = GameState::GAME_OVER;

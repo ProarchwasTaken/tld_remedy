@@ -31,6 +31,7 @@ public:
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
+  void increaseLife(float magnitude) override;
 
   void afflictPersistent();
   void afflictPersistent(StatusID id, bool hide_text = false);
