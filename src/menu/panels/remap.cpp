@@ -21,7 +21,7 @@ using std::string;
 
 RemapPanel::RemapPanel(SpriteAtlas *menu_atlas, Settings *settings) {
   id = PanelID::REMAP;
-  frame = LoadTexture("graphics/menu/remap_frame.png");
+  frame = LoadTexture("graphics/menu/frames/remap.png");
 
   atlas = menu_atlas;
   atlas->use();

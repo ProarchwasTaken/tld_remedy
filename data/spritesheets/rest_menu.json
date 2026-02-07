@@ -1,0 +1,19 @@
+{
+  "frames": [
+    {
+      "filename": "opt_frame",
+      "frame": {"x": 0, "y": 0, "w": 101, "h": 22}
+    },
+    {
+      "filename": "bust_mary",
+      "frame": {"x": 0, "y": 32, "w": 80, "h": 128}
+    },
+    {
+      "filename": "bust_erwin",
+      "frame": {"x": 80, "y": 32, "w": 80, "h": 128}
+    }
+  ],
+  "meta": {
+    "size": {"w": 160, "h": 160}
+  }
+}

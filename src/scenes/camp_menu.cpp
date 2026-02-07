@@ -37,7 +37,7 @@ CampMenuScene::CampMenuScene(Session *session) {
   atlas.use();
   main_bar = atlas.getTexturefromSprite(3);
 
-  background = LoadTexture("graphics/menu/camp_background.png");
+  background = LoadTexture("graphics/menu/backgrounds/camp_menu.png");
   gradient1 = LoadTexture("graphics/overlays/camp_gradient.png");
   gradient2 = atlas.getTexturefromSprite(8);
 

@@ -25,7 +25,7 @@ ConfigPanel::ConfigPanel(SpriteAtlas *menu_atlas,
 {
   id = PanelID::CONFIG;
 
-  frame = LoadTexture("graphics/menu/config_frame.png");
+  frame = LoadTexture("graphics/menu/frames/config.png");
   selected = options.begin();
 
   settings = Game::settings;

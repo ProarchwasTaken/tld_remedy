@@ -24,7 +24,7 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
   main_position = position;
   text_position = Vector2Add(position, {2, 1});
 
-  texture = LoadTexture("graphics/menu/dialog_frame1.png");
+  texture = LoadTexture("graphics/menu/frames/dialog1.png");
   frame_height = texture.height;
   visible = visible_frame;
 

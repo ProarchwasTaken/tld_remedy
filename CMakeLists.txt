@@ -74,6 +74,9 @@ set(HEADERS
 "include/system/sound_atlas.h"
 "include/system/noise_effect.h"
 "include/scenes/title.h"
+"include/scenes/camp_menu.h"
+"include/scenes/rest_menu.h"
+"include/scenes/game_over.h"
 "include/menu/panels/config.h"
 "include/menu/panels/confirm.h"
 "include/menu/panels/remap.h"
@@ -132,9 +135,8 @@ set(HEADERS
 "include/combat/status_effects/mending.h"
 "include/combat/status_effects/refreshed.h"
 "include/combat/status_effects/endurance.h"
-"include/scenes/camp_menu.h"
-"include/scenes/game_over.h"
 )
+
 set(SOURCE
 "src/main.cpp"
 "src/game.cpp"
@@ -158,6 +160,9 @@ set(SOURCE
 "src/system/sound_atlas.cpp"
 "src/system/noise_effect.cpp"
 "src/scenes/title.cpp"
+"src/scenes/camp_menu.cpp"
+"src/scenes/rest_menu.cpp"
+"src/scenes/game_over.cpp"
 "src/menu/panels/config.cpp"
 "src/menu/panels/confirm.cpp"
 "src/menu/panels/remap.cpp"
@@ -216,8 +221,6 @@ set(SOURCE
 "src/combat/status_effects/mending.cpp"
 "src/combat/status_effects/refreshed.cpp"
 "src/combat/status_effects/endurance.cpp"
-"src/scenes/camp_menu.cpp"
-"src/scenes/game_over.cpp"
 )
 
 if(${BUILD_DEV})

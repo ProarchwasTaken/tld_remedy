@@ -29,7 +29,7 @@ SpriteAtlas ItemsPanel::portraits("menu", "item_portraits");
 ItemsPanel::ItemsPanel(Session *session, string *description, 
                        Color *desc_color) {
   id = PanelID::ITEMS;
-  frame = LoadTexture("graphics/menu/items_frame.png");
+  frame = LoadTexture("graphics/menu/frames/items.png");
 
   this->session = session;
   this->description = description;

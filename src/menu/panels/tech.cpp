@@ -21,7 +21,7 @@ TechsPanel::TechsPanel(Session *session, string *description,
                        Color *desc_color) 
 {
   id = PanelID::TECH;
-  frame = LoadTexture("graphics/menu/tech_frame.png");
+  frame = LoadTexture("graphics/menu/frames/tech.png");
 
   assert(description != NULL);
   this->description = description;
