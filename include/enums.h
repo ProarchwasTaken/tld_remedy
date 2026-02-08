@@ -122,6 +122,7 @@ enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
   OPEN_MENU,
+  OPEN_REST,
   INIT_COMBAT,
   INIT_COMBAT_FORCED,
   GOTO_TITLE,
@@ -154,7 +155,8 @@ enum class SequenceID {
   DB_01, 
   #endif // !NDEBUG
 
-  SAVE
+  SAVE,
+  REST
 };
 
 enum class CombatEVT {

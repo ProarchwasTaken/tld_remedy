@@ -17,6 +17,7 @@
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
+#include "scenes/rest_menu.h"
 #include "scenes/combat.h"
 #include "scenes/game_over.h"
 #include "data/session.h"
@@ -265,6 +266,10 @@ void Game::gameLogic() {
       openCampMenuProcedure();
       break;
     }
+    case GameState::OPEN_RESTMENU: {
+      openRestMenuProcedure();
+      break;
+    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
       break;
@@ -378,6 +383,14 @@ void Game::openCampMenuProcedure() {
     menu_sfx.play("menu_camp");
     return;
   }
+}
+
+void Game::openRestMenuProcedure() {
+  PLOGI << "Switching over to the Rest Menu scene.";
+  scene.swap(reserve);
+  assert(scene != nullptr && scene->scene_id == SceneID::REST_MENU);
+
+  game_state = GameState::READY;
 }
 
 void Game::initCombatProcedure() {
@@ -663,6 +676,15 @@ void Game::openCampMenu(Session *data) {
 
   game_state = GameState::OPEN_CAMPMENU;
   menu_sfx.play("menu_camp_open");
+  SKIP_FRAME = true;
+}
+
+void Game::openRestMenu(Session *data) {
+  assert(reserve == nullptr);
+
+  reserve = make_unique<RestMenuScene>(data);
+
+  game_state = GameState::OPEN_RESTMENU;
   SKIP_FRAME = true;
 }
 

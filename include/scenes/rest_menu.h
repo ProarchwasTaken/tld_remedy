@@ -12,10 +12,12 @@ public:
 
   void loadBackground(std::string location);
 
-  // void update() override;
-  // void draw() override;
+  void update() override;
+  void draw() override;
 private:
   Session *session;
+  Camera2D camera;
+
   Texture background;
   Color bg_color;
 };

@@ -30,6 +30,7 @@
 #include "field/entities/pickup.h"
 #include "field/entities/save_point.h"
 #include "field/sequences/save.h"
+#include "field/sequences/rest.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -384,6 +385,11 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::openCampMenu(session.get());
       break;
     }
+    case FieldEVT::OPEN_REST: {
+      PLOGD << "Event Detected: OpenRestMenuEvent";
+      Game::openRestMenu(session.get());
+      break;
+    }
     case FieldEVT::INIT_COMBAT: {
       PLOGD << "Event Detected: InitCombatEvent";
 
@@ -542,6 +548,10 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     #endif // !NDEBUG
     case SequenceID::SAVE: {
       sequence = make_unique<SaveSequence>();
+      break;
+    }
+    case SequenceID::REST: {
+      sequence = make_unique<RestSequence>();
       break;
     }
   }

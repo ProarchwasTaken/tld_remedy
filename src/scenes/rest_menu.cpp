@@ -13,6 +13,10 @@ RestMenuScene::RestMenuScene(Session *session) {
   this->session = session;
 
   loadBackground(session->location);
+  camera.target = {0, 0};
+  camera.offset = {213, 120};
+  camera.rotation = 0;
+  camera.zoom = 1.0;
 }
 
 RestMenuScene::~RestMenuScene() {
@@ -24,4 +28,16 @@ void RestMenuScene::loadBackground(string location) {
     background = LoadTexture("graphics/menu/backgrounds/cathedral.png");
     bg_color = Game::palette[40];
   }
+}
+
+void RestMenuScene::update() {
+
+}
+
+void RestMenuScene::draw() {
+  BeginMode2D(camera);
+  {
+    DrawTextureV(background, {-250, -150}, bg_color);
+  }
+  EndMode2D();
 }

@@ -20,6 +20,7 @@ enum class GameState {
   TOGGLE_FULLSCREEN,
   SWITCHING_SCENE,
   OPEN_CAMPMENU,
+  OPEN_RESTMENU,
   INIT_COMBAT,
   RETURN_TO_FIELD,
   GAME_OVER,
@@ -52,6 +53,7 @@ public:
   void fadeScreenProcedure();
   void switchSceneProcedure();
   void openCampMenuProcedure();
+  void openRestMenuProcedure();
   void initCombatProcedure();
   void gameoverProcedure();
   void returnFieldProcedure();
@@ -76,6 +78,7 @@ public:
   static void loadTitleScreen();
 
   static void openCampMenu(Session *data);
+  static void openRestMenu(Session *data);
   static void initCombat(Session *data);
   static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
