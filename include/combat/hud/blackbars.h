@@ -2,36 +2,36 @@
 #include <memory>
 #include <raylib.h>
 #include "data/combatant_event.h"
-#include "combat/system/camera.h"
 
 
 class BlackBars {
 public:
-  BlackBars();
+  BlackBars(float y_offset = 0, bool alternate = false);
   ~BlackBars();
 
+  void setTint(Color tint);
   void setValues(float speed, float zoom);
   void setTargetValues(float speed, float zoom, float duration = -1);
   void resetTargetValues();
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
-  void update(CombatCamera *camera);
+  void update(Camera2D *camera);
 
   void speedLerp();
   void zoomLerp();
   void targetTimer();
 
   void draw();
-private:
-  Vector2 top_position = {213, 24};
-  Vector2 bottom_position = {213, 216};
 
+  bool enabled = true;
+private:
   Texture texture;
   Color tint = WHITE;
-  Rectangle source = {0, 0, 430, 80};
+  Rectangle source = {0, 0, 458, 80};
 
-  Rectangle top_dest = {0, 24, 430, 80};
-  Rectangle bottom_dest = {0, 216, 430, 80};
+  Rectangle top_dest = {0, 24, 458, 80};
+  Rectangle bottom_dest = {0, 216, 458, 80};
+  float y_offset;
 
   static constexpr float DEFAULT_SPEED = 10;
   float speed = DEFAULT_SPEED;

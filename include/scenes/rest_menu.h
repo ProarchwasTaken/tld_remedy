@@ -4,6 +4,7 @@
 #include "base/scene.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
+#include "combat/hud/blackbars.h"
 
 
 class RestMenuScene : public Scene {
@@ -15,10 +16,12 @@ public:
   void setupCharacters();
 
   void update() override;
+  void openingLogic();
   void draw() override;
 private:
   Session *session;
   Camera2D camera;
+  BlackBars black_bars = BlackBars(120, true);
 
   Texture background;
   Color bg_color;
@@ -29,6 +32,14 @@ private:
 
   Rectangle *com_sprite;
   Vector2 com_position;
+
+  enum {
+    OPENING,
+    READY
+  } state = OPENING;
+
+  float state_clock = 0.0;
+  float state_time = 2.0;
 
   SpriteAtlas atlas = SpriteAtlas("menu", "rest_menu");
 };
