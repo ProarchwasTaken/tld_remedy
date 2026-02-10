@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <random>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -10,7 +11,7 @@
 #include "utils/math.h"
 #include "scenes/rest_menu.h"
 
-using std::string;
+using std::string, std::uniform_int_distribution;
 
 
 RestMenuScene::RestMenuScene(Session *session) {
@@ -73,6 +74,8 @@ void RestMenuScene::update() {
       if (IsKeyPressed(KEY_K)) {
         state = OPENING;
       }
+
+      flickeringLogic();
       break;
     }
   }
@@ -103,6 +106,41 @@ void RestMenuScene::openingLogic() {
   if (state_clock == 1.0) {
     state = READY;
     state_clock = 0.0;
+  }
+}
+
+void RestMenuScene::flickeringLogic() {
+  tick_clock += Game::deltaTime() / tick_time;
+  if (tick_clock < 1.0) {
+    return;
+  }
+
+  tick_clock = 1.0;
+
+  bool end = false;
+  if (char_color.a != 255) {
+    char_color.a = 255;
+    end = true;
+  }
+
+  if (bg_color.a != 255) {
+    bg_color.a = 255;
+    end = true;
+  }
+
+  if (end) {
+    return;
+  }
+
+  uniform_int_distribution<int> range(1, 50);
+  int number = range(Game::RNG);
+  if (number == 50) {
+    char_color.a = 200;
+  }
+
+  number = range(Game::RNG);
+  if (number < 2) {
+    bg_color.a = 128;
   }
 }
 

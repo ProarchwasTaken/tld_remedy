@@ -17,6 +17,7 @@ public:
 
   void update() override;
   void openingLogic();
+  void flickeringLogic();
   void draw() override;
 private:
   Session *session;
@@ -40,6 +41,9 @@ private:
 
   float state_clock = 0.0;
   float state_time = 2.0;
+
+  float tick_clock = 0.0;
+  float tick_time = 1.0 / 60.0;
 
   SpriteAtlas atlas = SpriteAtlas("menu", "rest_menu");
 };
