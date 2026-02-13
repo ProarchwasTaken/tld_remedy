@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <random>
+#include <memory>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -11,9 +12,10 @@
 #include "utils/math.h"
 #include "utils/menu.h"
 #include "utils/input.h"
+#include "menu/panels/confirm.h"
 #include "scenes/rest_menu.h"
 
-using std::string, std::uniform_int_distribution;
+using std::string, std::uniform_int_distribution, std::make_unique;
 
 
 RestMenuScene::RestMenuScene(Session *session) {
@@ -78,14 +80,20 @@ void RestMenuScene::update() {
       openingLogic();
       break;
     }
+    case CLOSING: {
+      closingLogic();
+      break;
+    }
     case READY: {
-      if (opt_clock < 1.0) {
-        opt_clock += Game::deltaTime() / opt_time;
-        opt_clock = Clamp(opt_clock, 0.0, 1.0);
-      }
-
-      optionNavigation();
-      flickeringLogic();
+      normalLogic();
+      break;
+    }
+    case OPENING_PANEL: { 
+      openingPanel();
+      break;
+    }
+    case CLOSING_PANEL: {
+      closingPanel();
       break;
     }
   }
@@ -119,6 +127,64 @@ void RestMenuScene::openingLogic() {
   }
 }
 
+void RestMenuScene::closingLogic() {
+  state_clock += Game::deltaTime() / state_time;
+  state_clock = Clamp(state_clock, 0.0, 1.0);
+
+  float percentage = Clamp(state_clock / 0.40, 0.0, 1.0);
+  percentage = 1.0 - percentage;
+
+  bg_color.a = 255 * percentage;
+  char_color.a = 255 * percentage;
+
+  percentage = Clamp(state_clock / 0.50, 0.0, 1.0);
+  camera.zoom = Math::smoothstep(1.0, 0.85, percentage);
+
+
+  if (state_clock == 1.0) {
+    Game::returnToField();
+  }
+}
+
+void RestMenuScene::normalLogic() {
+  if (opt_clock < 1.0) {
+    opt_clock += Game::deltaTime() / opt_time;
+    opt_clock = Clamp(opt_clock, 0.0, 1.0);
+  }
+
+  flickering();
+
+  if (!panel_mode) {
+    optionNavigation();
+    return;
+  }
+
+  panel->update();
+
+  if (panel->terminate) {
+    panelTermination();
+  }
+}
+
+void RestMenuScene::openingPanel() {
+  panel_clock += Game::deltaTime() / panel_time;
+  panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+  if (panel_clock == 1.0) {
+    panel_mode = true;
+    state = READY;
+  }
+}
+
+void RestMenuScene::closingPanel() {
+  panel_clock -= Game::deltaTime() / panel_time;
+  panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+  if (panel_clock == 0.0) {
+    state = READY;
+  }
+}
+
 void RestMenuScene::optionNavigation() {
   if (opt_clock < 1.0) {
     return;
@@ -139,9 +205,59 @@ void RestMenuScene::optionNavigation() {
     opt_clock = 0.0;
     sfx->play("menu_navigate");
   }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectOption();
+    sfx->play("menu_select");
+  }
 }
 
-void RestMenuScene::flickeringLogic() {
+void RestMenuScene::selectOption() {
+  switch (*selected) {
+    case RestMenuOptions::LEAVE: {
+      panel = make_unique<ConfirmPanel>(&Game::menu_atlas, keybinds,
+                                        "Ready to set off?");
+      break;
+    }
+    default: {
+      return;
+    }
+  }
+
+  prev_selected = NULL;
+  state = OPENING_PANEL;
+  black_bars.setTargetValues(5, 24);
+}
+
+void RestMenuScene::panelTermination() {
+  assert(panel != nullptr);
+  bool exiting = false;
+  switch (panel->id) {
+    case PanelID::CONFIRM: {
+      ConfirmPanel *confirm = static_cast<ConfirmPanel*>(panel.get());
+      if (*confirm->selected == ConfirmOption::YES) {
+        exiting = true;
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+  panel.reset();
+  panel_mode = false;
+
+  if (!exiting) {
+    black_bars.setTargetValues(5, 8);
+    state = CLOSING_PANEL;
+  }
+  else {
+    black_bars.setTargetValues(20, -56);
+    state = CLOSING;
+  }
+}
+
+void RestMenuScene::flickering() {
   tick_clock += Game::deltaTime() / tick_time;
   if (tick_clock < 1.0) {
     return;
@@ -179,6 +295,10 @@ void RestMenuScene::flickeringLogic() {
 void RestMenuScene::draw() {
   drawBackground();
   drawOptions();
+  
+  if (panel_mode) {
+    panel->draw();
+  }
 }
 
 void RestMenuScene::drawBackground() {
@@ -193,11 +313,17 @@ void RestMenuScene::drawBackground() {
 }
 
 void RestMenuScene::drawOptions() {
+  if (state == CLOSING) {
+    return;
+  }
+
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
 
   int offset = (options.size() - 1) - disallowed.size();
-  Vector2 base_position = {-16.0f, 226.0f - (offset* 16)};
+  Vector2 base_position = {-16.0f, 226.0f - (offset * 16)};
+  Color base_color = Game::palette[2];
+  baseOptionLerp(base_position, base_color);
 
   for (RestMenuOptions &option : options) {
     if (disallowed.find(option) != disallowed.end()) {
@@ -205,7 +331,7 @@ void RestMenuScene::drawOptions() {
     }
 
     Vector2 position = base_position;
-    Color color = Game::palette[2];
+    Color color = base_color;
 
     if (&option == selected) {
       selectedLogic(opt_clock, position, color);
@@ -213,12 +339,8 @@ void RestMenuScene::drawOptions() {
     else if (&option == prev_selected) {
       selectedLogic(1.0 - opt_clock, position, color);
     }
-
-    if (state == OPENING) {
-      float percentage = Clamp((-0.70 + state_clock) / 0.30, 0.0, 1.0);
-      position.x = Math::smoothstep(position.x - 32, position.x, 
-                                    percentage);
-      color.a = 255 * percentage; 
+    else {
+      unselectedLogic(position, color);
     }
 
     DrawTextureRec(atlas.sheet, atlas.sprites[0], position, color);
@@ -231,9 +353,33 @@ void RestMenuScene::drawOptions() {
   }
 }
 
+void RestMenuScene::baseOptionLerp(Vector2 &position, Color &color) {
+  if (state == OPENING) {
+    float percentage = Clamp((-0.70 + state_clock) / 0.30, 0.0, 1.0);
+    position.x = Math::smoothstep(position.x - 32, position.x, 
+                                  percentage);
+    color.a = 255 * percentage; 
+  }
+}
+
 void RestMenuScene::selectedLogic(float clock, Vector2 &position, 
                                   Color &color)
 {
+  if (state == OPENING_PANEL || state == CLOSING_PANEL) {
+    float percentage = Clamp((-0.75 + panel_clock) / 0.25, 0.0, 1.0);
+    percentage = 1.0 - percentage;
+
+    color = WHITE;
+    color.a = 255 * percentage;
+    position.x += 16;
+    return;
+  }
+  else if (state == READY && panel_mode) {
+    color = WHITE;
+    color.a = 0;
+    return;
+  }
+
   if (clock == 1.0) {
     color = WHITE;
     position.x += 16;
@@ -251,6 +397,20 @@ void RestMenuScene::selectedLogic(float clock, Vector2 &position,
   unsigned char b = Lerp(start_color.b, 255, clock);
 
   color = {r, g, b, 255};
+}
+
+void RestMenuScene::unselectedLogic(Vector2 &position, Color &color) {
+  if (state == OPENING_PANEL || state == CLOSING_PANEL) {
+    float percentage = Clamp(panel_clock / 0.5, 0.0, 1.0);
+    position.x = Math::smoothstep(position.x, position.x - 32, 
+                                  percentage);
+
+    percentage = 1.0 - percentage;
+    color.a = 255 * percentage;
+  }
+  else if (state == READY && panel_mode) {
+    color.a = 0;
+  }
 }
 
 const char *RestMenuScene::getOptionText(RestMenuOptions option) {
