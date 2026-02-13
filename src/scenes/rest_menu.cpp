@@ -4,6 +4,7 @@
 #include <random>
 #include <memory>
 #include <string>
+#include <vector>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -13,9 +14,11 @@
 #include "utils/menu.h"
 #include "utils/input.h"
 #include "menu/panels/confirm.h"
+#include "menu/panels/dialog.h"
 #include "scenes/rest_menu.h"
 
-using std::string, std::uniform_int_distribution, std::make_unique;
+using std::string, std::vector, std::uniform_int_distribution, 
+std::make_unique;
 
 
 RestMenuScene::RestMenuScene(Session *session) {
@@ -213,6 +216,16 @@ void RestMenuScene::optionNavigation() {
 
 void RestMenuScene::selectOption() {
   switch (*selected) {
+    case RestMenuOptions::SAVE: {
+      vector<string> dialog = {
+        "Record your progress?\n"
+        "(Existing data will be overwritten.)"
+      };
+
+      Vector2 position = {16, 183};
+      panel = make_unique<DialogPanel>(position, dialog, true);
+      break;
+    }
     case RestMenuOptions::LEAVE: {
       panel = make_unique<ConfirmPanel>(&Game::menu_atlas, keybinds,
                                         "Ready to set off?");
@@ -238,6 +251,24 @@ void RestMenuScene::panelTermination() {
         exiting = true;
       }
       break;
+    }
+    case PanelID::DIALOG: {
+      DialogPanel *ptr = static_cast<DialogPanel*>(panel.get());
+
+      if (ptr->selected == NULL) {
+        break;
+      }
+
+      if (*ptr->selected == PromptOptions::YES) {
+        Game::saveSession(session);
+
+        panel.reset();
+
+        vector<string> dialog = {"Progress has been saved."};
+        Vector2 position = {16, 183};
+        panel = make_unique<DialogPanel>(position, dialog);
+        return;
+      }
     }
     default: {
       break;
