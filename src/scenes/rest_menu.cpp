@@ -13,6 +13,7 @@
 #include "utils/math.h"
 #include "utils/menu.h"
 #include "utils/input.h"
+#include "menu/panels/diagnose.h"
 #include "menu/panels/confirm.h"
 #include "menu/panels/dialog.h"
 #include "scenes/rest_menu.h"
@@ -216,6 +217,10 @@ void RestMenuScene::optionNavigation() {
 
 void RestMenuScene::selectOption() {
   switch (*selected) {
+    case RestMenuOptions::DIAGNOSE: {
+      panel = make_unique<DiagnosePanel>(session, &atlas);
+      break;
+    }
     case RestMenuOptions::SAVE: {
       vector<string> dialog = {
         "Record your progress?\n"
