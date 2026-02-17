@@ -1,6 +1,7 @@
 #include <string>
 #include <array>
 #include <unordered_set>
+#include <memory>
 #include <raylib.h>
 #include "enums.h"
 #include "base/panel.h"
@@ -8,6 +9,7 @@
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "menu/panels/dialog.h"
 #include "menu/hud/portrait.h"
 
 enum class DiagnoseOptions { 
@@ -27,13 +29,22 @@ public:
 
   void update() override;
   void heightLerp();
+  void panelTermination();
+  void promptHanding();
   void menuNavigation();
   void selectOption();
+
+  void enterHealMode();
+  void openEffectDialog();
 
   void healModeInput();
   void incHealSegments(float life, float max_life);
   void decHealSegments(float life, float max_life);
+  void openHealDialog();
+  void applyHeal();
   float calculateToBeHealed(float life, float max_life);
+
+  void cureEffect();
 
   void draw() override;
   void drawSupplyCount();
@@ -55,7 +66,6 @@ private:
   SpriteAtlas *menu_atlas;
   SpriteAtlas *rest_atlas;
 
-  Session *session;
   MenuKeybinds *keybind;
   SoundAtlas *sfx;
 
@@ -85,4 +95,7 @@ private:
   float to_be_healed = 0;
 
   Portrait portrait = Portrait({81, 54});
+
+  bool panel_mode = false;
+  std::unique_ptr<DialogPanel> panel;
 };

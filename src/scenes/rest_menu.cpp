@@ -174,6 +174,8 @@ void RestMenuScene::openingPanel() {
   panel_clock += Game::deltaTime() / panel_time;
   panel_clock = Clamp(panel_clock, 0.0, 1.0);
 
+  bg_color.a = Lerp(255, 127, panel_clock);
+
   if (panel_clock == 1.0) {
     panel_mode = true;
     state = READY;
@@ -183,6 +185,8 @@ void RestMenuScene::openingPanel() {
 void RestMenuScene::closingPanel() {
   panel_clock -= Game::deltaTime() / panel_time;
   panel_clock = Clamp(panel_clock, 0.0, 1.0);
+
+  bg_color.a = Lerp(255, 127, panel_clock);
 
   if (panel_clock == 0.0) {
     state = READY;
@@ -307,8 +311,15 @@ void RestMenuScene::flickering() {
     end = true;
   }
 
-  if (bg_color.a != 255) {
-    bg_color.a = 255;
+  int bg_limit = 255;
+  int bg_min = 200;
+  if (panel_mode) {
+    bg_limit = 127;
+    bg_min = 60;
+  }
+
+  if (bg_color.a != bg_limit) {
+    bg_color.a = bg_limit;
     end = true;
   }
 
@@ -324,7 +335,7 @@ void RestMenuScene::flickering() {
 
   number = range(Game::RNG);
   if (number == 50) {
-    bg_color.a = 200;
+    bg_color.a = bg_min;
   }
 }
 

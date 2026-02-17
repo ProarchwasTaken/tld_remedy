@@ -2,6 +2,8 @@
 #include <cctype>
 #include <cmath>
 #include <cstddef>
+#include <memory>
+#include <vector>
 #include <string>
 #include <raylib.h>
 #include <raymath.h>
@@ -14,10 +16,11 @@
 #include "utils/menu.h"
 #include "utils/math.h"
 #include "system/sprite_atlas.h"
+#include "menu/panels/dialog.h"
 #include "menu/panels/diagnose.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique, std::vector;
 
 
 DiagnosePanel::DiagnosePanel(Session *session, SpriteAtlas *rest_atlas) {
@@ -70,6 +73,13 @@ void DiagnosePanel::update() {
     transitionLogic();
     heightLerp();
   }
+  else if (panel_mode) {
+    panel->update();
+
+    if (panel->terminate) {
+      panelTermination();
+    }
+  }
   else if (!heal_mode) {
     blink_clock += Game::deltaTime();
     menuNavigation();
@@ -90,6 +100,28 @@ void DiagnosePanel::heightLerp() {
   }
 
   frame_height = 192 * percentage;
+}
+
+void DiagnosePanel::panelTermination() {
+  assert(panel->selected != NULL);
+  
+  promptHanding();
+
+  panel.reset();
+  panel_mode = false;
+}
+
+void DiagnosePanel::promptHanding() {
+  if (*panel->selected != PromptOptions::YES) {
+    return;
+  }
+
+  if (*selected == DiagnoseOptions::LIFE) {
+    applyHeal();
+  }
+  else {
+    cureEffect();
+  }
 }
 
 void DiagnosePanel::menuNavigation() {
@@ -139,26 +171,66 @@ void DiagnosePanel::menuNavigation() {
 
 void DiagnosePanel::selectOption() {
   assert(selected != NULL);
+
   switch (*selected) {
     case DiagnoseOptions::LIFE: {
-      PLOGI << "Entering Heal Mode.";
-
-      Character *party_member = *current_member;
-      if (party_member->life == party_member->max_life) {
-        PLOGE << "Party Member is alright at full Life!";
-        sfx->play("menu_cancel");
-        break;
-      }
-
-      heal_mode = true;
+      enterHealMode();
       break;
     }
     case DiagnoseOptions::EFFECT_1:
     case DiagnoseOptions::EFFECT_2:
     case DiagnoseOptions::EFFECT_3: {
+      openEffectDialog();
       break;
     }
   }
+}
+
+void DiagnosePanel::enterHealMode() {
+  PLOGI << "Entering Heal Mode.";
+  Character *party_member = *current_member;
+
+  if (party_member->life == party_member->max_life) {
+    PLOGE << "Party Member is already at full Life!";
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  heal_mode = true;
+}
+
+void DiagnosePanel::openEffectDialog() {
+  PLOGI << "Opening cure ailment dialog.";
+  Character *party_member = *current_member;
+
+  int index = static_cast<int>(*selected) - 1;
+  assert(index != STATUS_LIMIT);
+
+  PLOGD << "Attempting to access effect at index: " << index;
+  StatusID *effect_slot = &party_member->status[index];
+  assert(*effect_slot != StatusID::NONE);
+
+  int cost = getSupplyCost(*effect_slot);
+  PLOGD << "Supply Cost: " << cost;
+
+  if (*supplies < cost) {
+    PLOGE << "Cost is too expensive!";
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  string name = party_member->name;
+  string effect_name = getStatusName(*effect_slot);
+  PLOGD << "Effect Name: " << effect_name;
+
+  const char *text = TextFormat("Spend %i supplies to fix %s's\n"
+                                "%s?", 
+                                cost, name.c_str(), effect_name.c_str());
+
+  vector<string> dialog = {text};
+  Vector2 position = {16, 183};
+  panel = make_unique<DialogPanel>(position, dialog, true);
+  panel_mode = true;
 }
 
 void DiagnosePanel::healModeInput() {
@@ -175,6 +247,10 @@ void DiagnosePanel::healModeInput() {
   else if (Input::pressed(keybind->left, gamepad)) {
     decHealSegments(life, max_life);
     sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybind->confirm, gamepad)) {
+    openHealDialog();
+    sfx->play("menu_select");
   }
   else if (Input::pressed(keybind->cancel, gamepad)) {
     PLOGI << "Canceling heal mode.";
@@ -212,6 +288,39 @@ void DiagnosePanel::decHealSegments(float life, float max_life) {
   }
 }
 
+void DiagnosePanel::openHealDialog() {
+  PLOGI << "Opening heal dialog.";
+  Character *party_member = *current_member;
+  string name = party_member->name;
+
+  int cost = heal_segments * 2;
+  const char *text = TextFormat("Spend %i supplies to heal %s\n"
+                                "for %00.00f Life?",
+                                cost, name.c_str(), to_be_healed);
+
+  vector<string> dialog = {text};
+  Vector2 position = {16, 183};
+  panel = make_unique<DialogPanel>(position, dialog, true);
+  panel_mode = true;
+}
+
+void DiagnosePanel::applyHeal() {
+  assert(heal_mode);
+  Character *party_member = *current_member;
+  float *life = &party_member->life;
+  float max_life = party_member->max_life;
+  int cost = heal_segments * 2;
+
+  PLOGI << "Healing " << party_member->name << " for " << to_be_healed <<
+    "Life";
+  *life = Clamp(*life + to_be_healed, 0, max_life);
+  *supplies -= cost;
+
+  heal_mode = false;
+  heal_segments = 0;
+  sfx->play("menu_item");
+}
+
 float DiagnosePanel::calculateToBeHealed(float life, float max_life) {
   float percentage = life / max_life;
   int segments = std::floorf(percentage * 10);
@@ -231,6 +340,29 @@ float DiagnosePanel::calculateToBeHealed(float life, float max_life) {
   return to_be_healed;
 }
 
+void DiagnosePanel::cureEffect() {
+  assert(*selected != DiagnoseOptions::LIFE);
+  Character *party_member = *current_member;
+
+  int index = static_cast<int>(*selected) - 1;
+  PLOGI << "Curing effect at index: " << index;
+  assert(index != STATUS_LIMIT);
+
+  StatusID *effect_slot = &party_member->status[index];
+  assert(*effect_slot != StatusID::NONE);
+
+  int cost = getSupplyCost(*effect_slot);
+  *supplies -= cost;
+
+  *effect_slot = StatusID::NONE;
+  party_member->status_count--;
+  assert(party_member->status_count >= 0);
+
+  updateDisallowed();
+  MenuUtils::prevOption(options, selected, &disallowed);
+  sfx->play("menu_item");
+}
+
 void DiagnosePanel::draw() {
   Rectangle source = {0, 0, 274, frame_height};
   DrawTextureRec(frame, source, frame_position, WHITE);
@@ -242,6 +374,10 @@ void DiagnosePanel::draw() {
     drawCursor();
     drawLife();
     drawStatus();
+  }
+
+  if (panel_mode) {
+    panel->draw();
   }
 }
 
@@ -333,7 +469,6 @@ void DiagnosePanel::drawCursor() {
 }
 
 void DiagnosePanel::drawLife() {
-
   Character *party_member = *current_member;
   float life = party_member->life;
   float max_life = party_member->max_life;
@@ -475,7 +610,7 @@ string DiagnosePanel::getStatusName(StatusID id) {
       return "Crippled Leg";
     }
     case StatusID::MANGLED: {
-      return "Mangled";
+      return "Mangled Body";
     }
     default: {
       return "INVALID";
