@@ -1,5 +1,6 @@
 #include <string>
 #include <array>
+#include <unordered_set>
 #include <raylib.h>
 #include "enums.h"
 #include "base/panel.h"
@@ -9,11 +10,20 @@
 #include "system/sound_atlas.h"
 #include "menu/hud/portrait.h"
 
+enum class DiagnoseOptions { 
+  LIFE,
+  EFFECT_1,
+  EFFECT_2,
+  EFFECT_3
+};
+
 
 class DiagnosePanel : public Panel {
 public:
   DiagnosePanel(Session *session, SpriteAtlas *rest_atlas);
   ~DiagnosePanel();
+
+  void updateDisallowed();
 
   void update() override;
   void heightLerp();
@@ -23,6 +33,8 @@ public:
   void drawSupplyCount();
   void drawMemberName();
   void drawPortrait();
+
+  void drawCursor();
   void drawLife();
   void drawGauge(float life, float max_life, Color default_color);
 
@@ -49,6 +61,18 @@ private:
   std::array<Character*, 2> party;
   std::array<Character*, 2>::iterator current_member;
   int *supplies;
+
+  std::array<DiagnoseOptions, 4> options = {
+    DiagnoseOptions::LIFE,
+    DiagnoseOptions::EFFECT_1,
+    DiagnoseOptions::EFFECT_2,
+    DiagnoseOptions::EFFECT_3
+  };
+  std::array<int, 4> y_values = {46, 68, 118, 168};
+  std::array<DiagnoseOptions, 2>::iterator selected = options.begin();
+  std::unordered_set<DiagnoseOptions> disallowed;
+
+  float blink_clock = 0.0;
 
   Portrait portrait = Portrait({81, 54});
 };

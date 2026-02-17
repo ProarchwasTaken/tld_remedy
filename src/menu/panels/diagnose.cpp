@@ -37,6 +37,7 @@ DiagnosePanel::DiagnosePanel(Session *session, SpriteAtlas *rest_atlas) {
   party = {&session->player, &session->companion};
   current_member = party.begin();
   supplies = &session->supplies;
+  updateDisallowed();
   PLOGD << "DiagnosePanel has been initialized.";
 }
 
@@ -45,12 +46,32 @@ DiagnosePanel::~DiagnosePanel() {
   sfx->release();
 }
 
+void DiagnosePanel::updateDisallowed() {
+  disallowed.clear();
+
+  Character *party_member = *current_member;
+  StatusID status[3];
+  std::copy(party_member->status, party_member->status + 3, status);
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID effect = status[x];
+
+    if (effect == StatusID::NONE) {
+      DiagnoseOptions option = static_cast<DiagnoseOptions>(x + 1);
+      disallowed.emplace(option);
+    }
+  }
+
+  PLOGD << "Updated disallowed options.";
+}
+
 void DiagnosePanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
     heightLerp();
   }
   else {
+    blink_clock += Game::deltaTime();
     menuNavigation();
   }
 
@@ -76,13 +97,31 @@ void DiagnosePanel::menuNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (Input::pressed(keybind->right, gamepad)) {
     MenuUtils::nextOption(party, current_member);
-    sfx->play("menu_navigate");
+    selected = options.begin();
+    updateDisallowed();
+
     portrait.fade_clock = 0.0;
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybind->left, gamepad)) {
     MenuUtils::prevOption(party, current_member);
-    sfx->play("menu_navigate");
+    selected = options.begin();
+    updateDisallowed();
+
     portrait.fade_clock = 0.0;
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybind->down, gamepad)) {
+    MenuUtils::nextOption(options, selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybind->up, gamepad)) {
+    MenuUtils::prevOption(options, selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybind->cancel, gamepad)) {
     state = PanelState::CLOSING;
@@ -98,6 +137,7 @@ void DiagnosePanel::draw() {
   if (state == PanelState::READY) {
     drawMemberName();
     drawPortrait();
+    drawCursor();
     drawLife();
     drawStatus();
   }
@@ -162,6 +202,21 @@ void DiagnosePanel::drawPortrait() {
 
   DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
   portrait.draw(id);
+}
+
+void DiagnosePanel::drawCursor() {
+  int index = static_cast<int>(*selected);
+  float y = y_values[index];
+
+  Rectangle *sprite = &menu_atlas->sprites[0];
+  Vector2 position = {152, y};
+  Color color = WHITE;
+
+  float sin_a = std::sinf(blink_clock * 2.5);
+  sin_a = (sin_a / 2) + 0.5;
+  color.a = 255 * sin_a;
+
+  DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
 }
 
 void DiagnosePanel::drawLife() {
