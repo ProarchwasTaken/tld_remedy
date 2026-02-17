@@ -1,5 +1,7 @@
+#include <string>
 #include <array>
 #include <raylib.h>
+#include "enums.h"
 #include "base/panel.h"
 #include "data/keybinds.h"
 #include "data/session.h"
@@ -18,12 +20,23 @@ public:
   void menuNavigation();
 
   void draw() override;
+  void drawSupplyCount();
   void drawMemberName();
   void drawPortrait();
+  void drawLife();
+  void drawGauge(float life, float max_life, Color default_color);
+
+  void drawStatus();
+  void setStatusColors(StatusID id, Color &name_color, Color &desc_color, 
+                       Color &cost_color);
+  std::string getStatusName(StatusID id);
+  std::string getStatusDesc(StatusID id);
+  int getSupplyCost(StatusID id);
 private:
   SpriteAtlas *menu_atlas;
   SpriteAtlas *rest_atlas;
 
+  Session *session;
   MenuKeybinds *keybind;
   SoundAtlas *sfx;
 
@@ -35,5 +48,7 @@ private:
 
   std::array<Character*, 2> party;
   std::array<Character*, 2>::iterator current_member;
+  int *supplies;
+
   Portrait portrait = Portrait({81, 54});
 };

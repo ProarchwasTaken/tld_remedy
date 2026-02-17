@@ -41,7 +41,7 @@
       "frame": {"x": 16, "y": 32, "w": 16, "h": 5}
     },
     {
-      "filename": "life_segment_heal",
+      "filename": "life_segment_half",
       "frame": {"x": 32, "y": 32, "w": 16, "h": 5}
     }
   ],
