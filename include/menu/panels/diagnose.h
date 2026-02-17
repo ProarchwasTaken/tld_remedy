@@ -28,6 +28,12 @@ public:
   void update() override;
   void heightLerp();
   void menuNavigation();
+  void selectOption();
+
+  void healModeInput();
+  void incHealSegments(float life, float max_life);
+  void decHealSegments(float life, float max_life);
+  float calculateToBeHealed(float life, float max_life);
 
   void draw() override;
   void drawSupplyCount();
@@ -36,6 +42,7 @@ public:
 
   void drawCursor();
   void drawLife();
+  void drawLifeText(float life, float max_life, Color color);
   void drawGauge(float life, float max_life, Color default_color);
 
   void drawStatus();
@@ -71,8 +78,11 @@ private:
   std::array<int, 4> y_values = {46, 68, 118, 168};
   std::array<DiagnoseOptions, 2>::iterator selected = options.begin();
   std::unordered_set<DiagnoseOptions> disallowed;
-
   float blink_clock = 0.0;
+
+  bool heal_mode = false;
+  int heal_segments = 0;
+  float to_be_healed = 0;
 
   Portrait portrait = Portrait({81, 54});
 };

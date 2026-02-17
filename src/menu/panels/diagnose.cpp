@@ -70,9 +70,12 @@ void DiagnosePanel::update() {
     transitionLogic();
     heightLerp();
   }
-  else {
+  else if (!heal_mode) {
     blink_clock += Game::deltaTime();
     menuNavigation();
+  }
+  else {
+    healModeInput();
   }
 
   portrait.update(percentage);
@@ -123,10 +126,109 @@ void DiagnosePanel::menuNavigation() {
     blink_clock = 0.0;
     sfx->play("menu_navigate");
   }
+  else if (Input::pressed(keybind->confirm, gamepad)) {
+    selectOption();
+    blink_clock = 0.0;
+    sfx->play("menu_select");
+  }
   else if (Input::pressed(keybind->cancel, gamepad)) {
     state = PanelState::CLOSING;
     sfx->play("menu_cancel");
   }
+}
+
+void DiagnosePanel::selectOption() {
+  assert(selected != NULL);
+  switch (*selected) {
+    case DiagnoseOptions::LIFE: {
+      PLOGI << "Entering Heal Mode.";
+
+      Character *party_member = *current_member;
+      if (party_member->life == party_member->max_life) {
+        PLOGE << "Party Member is alright at full Life!";
+        sfx->play("menu_cancel");
+        break;
+      }
+
+      heal_mode = true;
+      break;
+    }
+    case DiagnoseOptions::EFFECT_1:
+    case DiagnoseOptions::EFFECT_2:
+    case DiagnoseOptions::EFFECT_3: {
+      break;
+    }
+  }
+}
+
+void DiagnosePanel::healModeInput() {
+  bool gamepad = IsGamepadAvailable(0);
+
+  Character *party_member = *current_member;
+  float life = party_member->life;
+  float max_life = party_member->max_life;
+
+  if (Input::pressed(keybind->right, gamepad)) {
+    incHealSegments(life, max_life);
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybind->left, gamepad)) {
+    decHealSegments(life, max_life);
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybind->cancel, gamepad)) {
+    PLOGI << "Canceling heal mode.";
+    heal_mode = false;
+    heal_segments = 0;
+    sfx->play("menu_cancel");
+  }
+}
+
+void DiagnosePanel::incHealSegments(float life, float max_life) {
+  float life_percentage = life / max_life;
+  int life_segments = std::floor(life_percentage * 10);
+  if (life_segments + (heal_segments + 1) > 10) {
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  int resulting_supply_cost = (heal_segments + 1) * 2;
+  if (*supplies >= resulting_supply_cost) {
+    heal_segments++;
+    to_be_healed = calculateToBeHealed(life, max_life);
+  }
+  else {
+    sfx->play("menu_cancel");
+  }
+}
+
+void DiagnosePanel::decHealSegments(float life, float max_life) {
+  if (heal_segments != 0) {
+    heal_segments--;
+    to_be_healed = calculateToBeHealed(life, max_life);
+  }
+  else {
+    sfx->play("menu_cancel");
+  }
+}
+
+float DiagnosePanel::calculateToBeHealed(float life, float max_life) {
+  float percentage = life / max_life;
+  int segments = std::floorf(percentage * 10);
+  float heal_seg = heal_segments;
+
+  float to_be_healed = 0;
+  float leftover = (percentage * 10) - segments;
+
+  if (leftover != 0) {
+    float segment_life = max_life * 0.10;
+    to_be_healed = segment_life * (1.0 - leftover);
+    heal_seg--;
+  }
+
+  percentage = (heal_seg / 10.0);
+  to_be_healed += max_life * percentage;
+  return to_be_healed;
 }
 
 void DiagnosePanel::draw() {
@@ -167,10 +269,19 @@ void DiagnosePanel::drawSupplyCount() {
   position = {3 - offset, 9};
   DrawTextEx(*sm_font, "SUPPLIES", position, sm_size, -1, main_color);
 
-  const char *text = TextFormat("%02i", *supplies);
-  position = TextUtils::alignRight(text, {96 - offset, 7}, *med_font, -2, 
-                                   0);
-  DrawTextEx(*med_font, text, position, med_size, -2, count_color);
+  string text = TextFormat("%02i", *supplies);
+  position = TextUtils::alignRight(text.c_str(), {96 - offset, 7}, 
+                                   *med_font, -2, 0);
+  DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
+             count_color);
+
+  if (heal_segments != 0) {
+    int cost = heal_segments * 2;
+    text = TextFormat("-%i", cost);
+    Vector2 position = {96, 7};
+    DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
+               Game::palette[33]);
+  }
 }
 
 void DiagnosePanel::drawMemberName() {
@@ -212,16 +323,16 @@ void DiagnosePanel::drawCursor() {
   Vector2 position = {152, y};
   Color color = WHITE;
 
-  float sin_a = std::sinf(blink_clock * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+  if (!heal_mode) {
+    float sin_a = std::sinf(blink_clock * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
 }
 
 void DiagnosePanel::drawLife() {
-  Font *font = &Game::med_font;
-  int txt_size = font->baseSize;
 
   Character *party_member = *current_member;
   float life = party_member->life;
@@ -235,6 +346,15 @@ void DiagnosePanel::drawLife() {
     color = WHITE;
   }
 
+  drawLifeText(life, max_life, color);
+  drawGauge(life, max_life, color);
+}
+
+void DiagnosePanel::drawLifeText(float life, float max_life, Color color) 
+{
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
   Vector2 position = {163, 40};
   DrawTextEx(*font, "LIFE", position, txt_size, -2, color);
 
@@ -242,7 +362,13 @@ void DiagnosePanel::drawLife() {
   position = TextUtils::alignRight(text.c_str(), {344, 40}, *font, -2, 0);
   DrawTextEx(*font, text.c_str(), position, txt_size, -2, color);
 
-  drawGauge(life, max_life, color);
+  if (heal_segments != 0) {
+    string text = TextFormat("(+%00.02f)", to_be_healed);
+    Vector2 position = TextUtils::alignRight(text.c_str(), {294, 40}, 
+                                             *font, -2, 0);
+    DrawTextEx(*font, text.c_str(), position, txt_size, -2, 
+               Game::palette[14]);
+  }
 }
 
 void DiagnosePanel::drawGauge(float life, float max_life, 
@@ -250,8 +376,11 @@ void DiagnosePanel::drawGauge(float life, float max_life,
 {
   float percentage = life / max_life;
   int segments = std::floorf(percentage * 10);
+  float leftover = 0;
 
-  float leftover = percentage - (percentage * 10);
+  if (heal_segments == 0) {
+    leftover = (percentage * 10) - segments;
+  }
 
   for (int x = 0; x < 10; x++) {
     float offset = 18 * x;
@@ -263,6 +392,10 @@ void DiagnosePanel::drawGauge(float life, float max_life,
     if (x < segments) {
       sprite = &menu_atlas->sprites[8];
       color = default_color;
+    }
+    else if (x < segments + heal_segments) {
+      sprite = &menu_atlas->sprites[10];
+      color = Game::palette[14]; 
     }
     else if (leftover != 0) {
       sprite = &menu_atlas->sprites[10];
