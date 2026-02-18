@@ -98,7 +98,7 @@ private:
   float opt_time = 0.2;
 
   float panel_clock = 0.0;
-  float panel_time = 0.4;
+  float panel_time = 0.8;
 
   SpriteAtlas atlas = SpriteAtlas("menu", "rest_menu");
   SoundAtlas *sfx;
