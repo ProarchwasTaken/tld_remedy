@@ -14,6 +14,7 @@
 #include "utils/menu.h"
 #include "utils/input.h"
 #include "menu/panels/diagnose.h"
+#include "menu/panels/crafting.h"
 #include "menu/panels/confirm.h"
 #include "menu/panels/dialog.h"
 #include "scenes/rest_menu.h"
@@ -223,6 +224,10 @@ void RestMenuScene::selectOption() {
   switch (*selected) {
     case RestMenuOptions::DIAGNOSE: {
       panel = make_unique<DiagnosePanel>(session, &atlas);
+      break;
+    }
+    case RestMenuOptions::CRAFTING: {
+      panel = make_unique<CraftingPanel>(session, &atlas);
       break;
     }
     case RestMenuOptions::SAVE: {

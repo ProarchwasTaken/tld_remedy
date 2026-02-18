@@ -45,6 +45,7 @@ DiagnosePanel::DiagnosePanel(Session *session, SpriteAtlas *rest_atlas) {
 }
 
 DiagnosePanel::~DiagnosePanel() {
+  UnloadTexture(frame);
   menu_atlas->release();
   sfx->release();
 }

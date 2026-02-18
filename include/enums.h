@@ -18,7 +18,8 @@ enum class PanelID {
   ITEMS,
   TECH,
   DIALOG,
-  DIAGNOSE
+  DIAGNOSE,
+  CRAFTING
 };
 
 enum EntityType {
