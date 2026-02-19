@@ -1,12 +1,14 @@
 #include <array>
-#include <raylib.h>
 #include <string>
+#include <memory>
+#include <raylib.h>
 #include "enums.h"
 #include "base/panel.h"
 #include "data/keybinds.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "menu/panels/dialog.h"
 
 
 class CraftingPanel : public Panel {
@@ -16,8 +18,12 @@ public:
 
   void update() override;
   void heightLerp();
+  void panelLogic();
   void slotSelection();
   void itemSelection();
+
+  void openCraftingDialog();
+  void craftItem();
 
   void draw() override;
   void drawSupplyCount();
@@ -58,5 +64,6 @@ private:
   };
   std::array<ItemID, 5>::iterator selected_option = craft_options.begin();
 
+  std::unique_ptr<DialogPanel> panel;
   bool panel_mode = false;
 };

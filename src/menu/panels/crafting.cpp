@@ -1,7 +1,10 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <cstddef>
 #include <string>
+#include <vector>
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include "base/panel.h"
@@ -13,10 +16,11 @@
 #include "utils/menu.h"
 #include "utils/input.h"
 #include "system/sprite_atlas.h"
+#include "menu/panels/dialog.h"
 #include "menu/panels/crafting.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::make_unique, std::vector;
 
 
 CraftingPanel::CraftingPanel(Session *session, SpriteAtlas *rest_atlas) {
@@ -51,6 +55,9 @@ void CraftingPanel::update() {
     transitionLogic();
     heightLerp();
   }
+  else if (panel_mode) {
+    panelLogic();
+  }
   else if (!craft_mode) {
     blink_clock += Game::deltaTime();
     slotSelection();
@@ -70,6 +77,24 @@ void CraftingPanel::heightLerp() {
   }
 
   frame_height = 168 * percentage;
+}
+
+void CraftingPanel::panelLogic() {
+  panel->update();
+
+  if (!panel->terminate) {
+    return;
+  }
+
+  assert(panel->selected != NULL);
+  if (*panel->selected == PromptOptions::YES) {
+    craftItem();
+    sfx->play("menu_craft");
+    craft_mode = false;
+  }
+
+  panel.reset();
+  panel_mode = false;
 }
 
 void CraftingPanel::slotSelection() {
@@ -109,11 +134,57 @@ void CraftingPanel::itemSelection() {
     blink_clock = 0;
     sfx->play("menu_navigate");
   }
+  else if (Input::pressed(keybinds->confirm, gamepad)) { 
+    openCraftingDialog();
+    blink_clock = 0;
+    sfx->play("menu_select");
+  }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     craft_mode = false;
     blink_clock = 0;
     sfx->play("menu_cancel");
   }
+}
+
+void CraftingPanel::openCraftingDialog() {
+  PLOGI << "Attempting to open crafting dialog.";
+
+  int item_cost = getSupplyCost(*selected_option);
+  PLOGD << "Item Cost: " << item_cost;
+
+  if (session->supplies < item_cost) {
+    PLOGI << "Item is too expensive!";
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  string item_name = getName(*selected_option);
+  string text = TextFormat("Spend %i supplies to craft\n"
+                           "%s?", item_cost, item_name.c_str());
+
+  vector<string> dialog = {text};
+  Vector2 position = {16, 183};
+
+  panel = make_unique<DialogPanel>(position, dialog, true);
+  panel_mode = true;
+}
+
+void CraftingPanel::craftItem() {
+  PLOGI << "Crafting Item...";
+  ItemID item = *selected_option;
+  int cost = getSupplyCost(item);
+
+  session->supplies -= cost;
+
+  if (*selected_slot == ItemID::NONE) {
+    session->item_count++;
+    assert(session->item_count <= session->item_limit);
+  }
+
+  *selected_slot = item;
+
+  PLOGD << "Copying over changes to session inventory.";
+  std::copy(inventory.begin(), inventory.end(), session->inventory);
 }
 
 void CraftingPanel::draw() {
@@ -125,6 +196,10 @@ void CraftingPanel::draw() {
     drawHelpText();
     drawInventory();
     drawOptions();
+  }
+
+  if (panel_mode) {
+    panel->draw();
   }
 }
 

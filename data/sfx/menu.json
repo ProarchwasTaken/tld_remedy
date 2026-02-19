@@ -31,6 +31,10 @@
     {
       "name": "gameover",
       "filename": "menu/gameover.mp3"
+    },
+    {
+      "name": "menu_craft",
+      "filename": "menu/menu_craft.mp3"
     }
   ]
 }
