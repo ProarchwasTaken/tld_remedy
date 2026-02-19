@@ -88,7 +88,10 @@ void TitleScene::selectOption() {
     }
     case TitleOption::LOAD_GAME: {
       assert(valid_session);
-      Game::loadSession();
+      valid_session = Game::loadSession();
+      if (!valid_session) {
+        disallowed.emplace(TitleOption::LOAD_GAME);
+      }
       break;
     }
     case TitleOption::CONFIG: {
