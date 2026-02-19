@@ -406,7 +406,10 @@ void FieldMap::findSavePoints(json &layer_objects) {
     float y = object["y"];
     Vector2 position = {x, y};
 
-    SavePointData data = {SAVE_POINT, position, false};
+    string type = object["type"];
+    bool rest_point = type == "rest";
+
+    SavePointData data = {SAVE_POINT, position, rest_point};
     PLOGD << "Savepoint data: {X: " << x << ", Y: " << y << "}";
     entity_queue.push_back(make_unique<SavePointData>(data));
   }

@@ -24,5 +24,5 @@ struct PickupData : EntityData {
 
 struct SavePointData : EntityData {
   Vector2 position;
-  bool camp_point;
+  bool rest_point;
 };

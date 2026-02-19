@@ -24,8 +24,8 @@ void SaveSequence::update() {
         "The air here doesn't feel as tense\n"
         "as anywhere else. Might be a good\n"
         "spot to take a breather.",
-        "Record your progress? (Existing save\n"
-        "data will be overwritten.)"
+        "Record your progress?\n"
+        "(Existing data will be overwritten.)"
       };
 
       FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, dialog,

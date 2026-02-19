@@ -81,21 +81,34 @@
          "name":"Spawnpoints",
          "objects":[
                 {
+                 "height":0,
                  "id":3,
                  "name":"Player",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
+                 "type":"initial",
+                 "visible":true,
+                 "width":0,
                  "x":128,
                  "y":128
                 }, 
                 {
+                 "height":0,
                  "id":4,
                  "name":"Companion",
+                 "point":true,
                  "properties":[
                         {
                          "name":"actor_type",
@@ -108,21 +121,34 @@
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
+                 "type":"initial",
+                 "visible":true,
+                 "width":0,
                  "x":128,
                  "y":112
                 }, 
                 {
+                 "height":0,
                  "id":5,
                  "name":"From db_06",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":-2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
                  "type":"db_07-1",
+                 "visible":true,
+                 "width":0,
                  "x":128,
                  "y":184
                 }],
@@ -158,7 +184,9 @@
                          "type":"string",
                          "value":"db_06-2"
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":32,
                  "x":112,
                  "y":192
@@ -181,7 +209,7 @@
                  "name":"Savepoint",
                  "point":true,
                  "rotation":0,
-                 "type":"basic",
+                 "type":"rest",
                  "visible":true,
                  "width":0,
                  "x":128,

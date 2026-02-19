@@ -17,6 +17,7 @@ SpriteAtlas SavePoint::atlas("entities", "savepoint_entity");
 
 SavePoint::SavePoint(SavePointData &data) {
   entity_type = EntityType::SAVE_POINT;
+  rest_point = data.rest_point;
 
   position = data.position;
   bounding_box.scale = {32, 32};
@@ -29,6 +30,7 @@ SavePoint::SavePoint(SavePointData &data) {
 
   atlas.use();
   sprite = &atlas.sprites[0];
+  alt_sprite = &atlas.sprites[4];
   PLOGI << "Entity Created: SavePoint [ID: " << entity_id << "]";
 }
 
@@ -39,13 +41,23 @@ SavePoint::~SavePoint() {
 void SavePoint::interact() {
   PLOGD << "Interaction function for SavePoint [ID: " << entity_id << "]"
   " has been called.";
-  FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
-                                          SequenceID::SAVE);
+  if (!rest_point) {
+    FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
+                                            SequenceID::SAVE);
+  }
+  else {
+    FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
+                                            SequenceID::REST);
+  }
 }
 
 void SavePoint::update() {
   SpriteAnimation::play(animation, &anim_idle, true);
   sprite = &atlas.sprites[*animation->current];
+
+  if (rest_point) {
+    *alt_sprite = atlas.sprites[*animation->current + 4];
+  }
 
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);
   if (!in_range && inside) {
@@ -61,4 +73,9 @@ void SavePoint::update() {
 void SavePoint::draw() {
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
+
+  if (rest_point) {
+    DrawTexturePro(atlas.sheet, *alt_sprite, bounding_box.rect, {0, 0}, 
+                   0, WHITE);
+  }
 }
