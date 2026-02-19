@@ -26,6 +26,10 @@ struct UpdateCommonEvent : FieldEvent {
   bool active;
 };
 
+struct MarkAsDeadEvent : FieldEvent {
+  int object_id;
+};
+
 struct DeleteEntityEvent : FieldEvent {
   int entity_id;
 };

@@ -154,7 +154,8 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
   bool found_initial_plr = false;
   bool found_initial_com = false;
   for (basic_json object : layer_objects) {
-    if (object.find("type") != object.end()) {
+    string type = object["type"];
+    if (type != "initial") {
       continue;
     }
 
@@ -169,7 +170,7 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
         direction = property["value"];
       }
       else if (property_name == "actor_type") {
-        actor_type = ActorType::COMPANION;
+        actor_type = property["value"];
       }
     }
 

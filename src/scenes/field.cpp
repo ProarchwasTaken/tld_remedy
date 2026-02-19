@@ -197,10 +197,7 @@ void FieldScene::setupActor(ActorData *data) {
     }
     case ActorType::ENEMY: {
       EnemyActorData *enemy_data = static_cast<EnemyActorData*>(data);
-      vector<Direction> routine = enemy_data->routine;
-      float speed = enemy_data->speed;
-
-      entity = make_unique<EnemyActor>(position, routine, speed);
+      entity = make_unique<EnemyActor>(*enemy_data);
       break;
     }
   }
@@ -441,6 +438,22 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGI << "Updating common data associated with Object ID: " 
         << object_id;
       updateCommonData(object_id, active);
+      break;
+    }
+    case FieldEVT::MARK_AS_DEAD: {
+      PLOGD << "Event detected: MarkAsDeadEvent";
+      auto *event_data = static_cast<MarkAsDeadEvent*>(event.get());
+
+      int object_id = event_data->object_id;
+
+      PLOGI << "Marking enemy associated with Object ID: " << object_id <<
+      " as dead.";
+      markEnemyAsDead(object_id);
+      break;
+    }
+    case FieldEVT::REVIVE_ENEMIES: {
+      PLOGD << "Event detected: ReviveEnemiesEvent";
+      reviveDeadEnemies();
       break;
     }
     case FieldEVT::CHANGE_SUPPLIES: {
@@ -734,6 +747,18 @@ void FieldScene::markEnemyAsDead(int object_id) {
 
   PLOGE << "Failed to find enemy data associated with object id:" <<
   object_id;
+}
+
+void FieldScene::reviveDeadEnemies() {
+  int enemy_count = session->enemy_count;
+  for (int x = 0; x < enemy_count; x++) {
+    CommonData *data = &session->enemy[x];
+
+    if (!data->active) {
+      data->active = true;
+      PLOGD << "Object [ID:" << data->object_id << "] is now active.";
+    }
+  }
 }
 
 void FieldScene::deleteEntity(int entity_id) {
