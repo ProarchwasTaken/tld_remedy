@@ -62,6 +62,8 @@ FieldScene::FieldScene(Session *session_data) {
   session = make_unique<Session>();
   *session = *session_data;
   setup();
+  
+  PlayerActor::setControllable(true);
 }
 
 FieldScene::~FieldScene() {

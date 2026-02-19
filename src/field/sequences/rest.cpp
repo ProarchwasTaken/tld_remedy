@@ -20,7 +20,10 @@ void RestSequence::update() {
   switch (order) {
     case 0: {
       vector<string> dialog = {
-        "Open the rest menu?"
+        "A rare, but valuable blind spot hidden\n"
+        "away from the prying eyes of this\n"
+        "hostile \"reality\".",
+        "Would you like to rest?"
       };
 
       FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, dialog,
@@ -31,6 +34,7 @@ void RestSequence::update() {
     case 1: {
       if (said_yes) {
         FieldHandler::raise<FieldEvent>(FieldEVT::OPEN_REST);
+        FieldHandler::raise<FieldEvent>(FieldEVT::REVIVE_ENEMIES);
       }
 
       order++;
