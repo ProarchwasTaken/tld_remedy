@@ -715,6 +715,27 @@ void FieldScene::updateCommonData(int object_id, bool active) {
   PLOGE << "Failed to find common data!";
 }
 
+void FieldScene::markEnemyAsDead(int object_id) {
+  int enemy_count = session->enemy_count;
+  for (int x = 0; x < enemy_count; x++) {
+    CommonData *data = &session->enemy[x];
+
+    string map_name = data->map_name;
+
+    if (map_name != session->map_name) {
+      continue;
+    }
+
+    if (object_id == data->object_id) {
+      data->active = false;
+      return;
+    }
+  }
+
+  PLOGE << "Failed to find enemy data associated with object id:" <<
+  object_id;
+}
+
 void FieldScene::deleteEntity(int entity_id) {
   vector<unique_ptr<Entity>> temporary;
 
@@ -797,6 +818,11 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
+  string time = TextFormat("Playtime: %00.03f", Game::playtime());
+  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
+  y += spacing;
+
   Player *player = &session->player;
   string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
                              player->life, player->max_life);
@@ -814,15 +840,16 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
-  string time = TextFormat("Playtime: %00.03f", Game::playtime());
-  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
-                                           *font, -3, 0);
-  y += spacing;
-
   string common = TextFormat("Common Count: %i / %i", 
                              session->common_count, session->common_limit);
   Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
                                              *font, -3, 0);
+  y += spacing;
+
+  string enemy = TextFormat("Enemy Count: %i / %i",
+                            session->enemy_count, session->enemy_limit);
+  Vector2 enemy_pos = TextUtils::alignRight(enemy.c_str(), {base_x, y}, 
+                                            *font, -3, 0);
   y += spacing;
 
   string pursue = TextFormat("Persuing Enemy: %i", 
@@ -833,10 +860,11 @@ void FieldScene::drawSessionInfo() {
 
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, enemy.c_str(), enemy_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }
 #endif // !NDEBUG

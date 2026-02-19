@@ -13,6 +13,7 @@ struct ActorData : EntityData {
 
 
 struct EnemyActorData : ActorData {
+  int object_id;
   std::vector<Direction> routine;
   float speed;
 };

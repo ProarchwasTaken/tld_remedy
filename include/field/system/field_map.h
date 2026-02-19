@@ -10,6 +10,16 @@
 #include "data/line.h"
 
 
+/* During the process of loading a Map, this class and the FieldScene work
+ * hand in hand. The FieldMap is mainly responsible for reading an 
+ * external map file, and parsing it into data that the FieldScene can 
+ * understand; Data which will then be used to decide which entities 
+ * should be created and where. The responsibility of creating these
+ * entities is left up to the FieldScene.
+ *
+ * The FieldMap is also responsible for setting the Map's textures and
+ * collisions. As well as setup common data that the game will use to
+ * "remember" certain information between maps.*/
 class FieldMap {
 public:
   ~FieldMap();
@@ -26,15 +36,18 @@ public:
   void findMapTransitions(nlohmann::json &layer_objects);
   void findPickups(Session &session, std::string &map_name, 
                    nlohmann::json &layer_objects);
-  void findEnemies(nlohmann::json &layer_objects);
+  void findEnemies(Session &session, std::string &map_name, 
+                   nlohmann::json &layer_objects);
   std::vector<Direction> parseEnemyRoutine(std::string &raw_routine);
 
   void findSavePoints(nlohmann::json &layer_objects);
 
-  int activeObject(Session &session, std::string &map_name, 
-                    int object_id);
-  void setupCommonData(Session &session, std::string &map_name, 
-                       int object_id);
+  /* This function, along with setupCommonData both utilize TERRIFYING
+   * pointer arithmetic, and must be handled with care.*/
+  int activeObject(std::string map_name, int object_id, CommonData *begin,
+                   int count);
+  void setupCommonData(std::string map_name, int object_id,
+                       CommonData *begin, int *count, int limit);
 
   void draw();
   void drawCollLines();
