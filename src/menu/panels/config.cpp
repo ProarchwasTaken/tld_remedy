@@ -228,6 +228,7 @@ void ConfigPanel::applySettings() {
 
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
+  Game::bgm->updateVolume();
 
   Game::fullscreenCheck();
 

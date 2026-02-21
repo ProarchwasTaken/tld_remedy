@@ -190,6 +190,7 @@ void Game::defineColorPalette() {
 
 void Game::start() {
   assert(scene != nullptr);
+  bgm->play();
 
   while (!EXIT_GAME && !WindowShouldClose()) {
     topLevelInput();

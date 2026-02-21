@@ -42,7 +42,6 @@ void MusicPlayer::prepare(string song_name) {
 
     string path = "audio/bgm/" + filename;
     primary = LoadMusicStream(path.c_str());
-    PauseMusicStream(primary);
 
     if (bgm_data.find("loop_start") != bgm_data.end()) {
       loop_start = bgm_data["loop_start"];
@@ -54,26 +53,43 @@ void MusicPlayer::prepare(string song_name) {
       PLOGD << "Loop End: " << loop_end;
     }
 
-    looping = loop_start <= 0 && loop_end < 0;
+    looping = loop_start >= 0 && loop_end > 0;
     break;
   }
 }
 
 void MusicPlayer::play() {
   assert(IsMusicReady(primary));
+  PLOGI << "Playing music.";
+  PlayMusicStream(primary);
+  updateVolume();
+}
+
+void MusicPlayer::updateVolume() {
   float master_volume = Game::settings.master_volume;
   float bgm_volume = Game::settings.bgm_volume;
-  SetMusicVolume(primary, (volume * bgm_volume) * master_volume);
-  ResumeMusicStream(primary);
+  SetMusicVolume(primary, (volume * bgm_volume) * master_volume); 
 }
 
 void MusicPlayer::update() {
-  if (!looping || !IsMusicStreamPlaying(primary)) {
+  UpdateMusicStream(primary);
+
+  if (looping && IsMusicStreamPlaying(primary)) {
+    loopingLogic();
     return;
   }
+}
+
+void MusicPlayer::loopingLogic() {
+  assert(looping);
 
   float position = GetMusicTimePlayed(primary);
   if (position >= loop_end) {
+    PLOGD << "Looping back to the start of the loop: " << loop_start;
+
+    StopMusicStream(primary);
     SeekMusicStream(primary, loop_start);
+    PlayMusicStream(primary);
+    updateVolume();
   }
 }

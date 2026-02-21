@@ -9,6 +9,8 @@ public:
 
   void prepare(std::string song_name);
   void play();
+  void updateVolume();
+  void loopingLogic();
 
   void update();
 private:

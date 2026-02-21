@@ -30,6 +30,9 @@ TitleScene::TitleScene() {
   if (!valid_session) {
     disallowed.emplace(TitleOption::LOAD_GAME);
   }
+
+  Game::bgm->prepare("title");
+  PLOGI << "TitleScene has been initialized.";
 }
 
 TitleScene::~TitleScene() {
