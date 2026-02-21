@@ -399,6 +399,10 @@ void CombatScene::winProcedure() {
   Vector2 position = {16, 8};
   panel = make_unique<DialogPanel>(position, dialog);
 
+  if (item_hud->enabled) {
+    item_hud->disable();
+  }
+
   player->setEnabled(false);
   black_bars.setTargetValues(5, 28);
 
