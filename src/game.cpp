@@ -14,6 +14,7 @@
 #include "system/noise_effect.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "system/music_player.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
@@ -45,6 +46,8 @@ Color Game::flash_color = {0, 0, 0, 0};
 SpriteAtlas Game::menu_atlas("menu", "menu_elements");
 SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
+
+unique_ptr<MusicPlayer> Game::bgm;
 unique_ptr<NoiseEffect> Game::noise;
 
 Settings Game::settings;
@@ -88,6 +91,7 @@ void Game::init() {
   PLOGD << "RNG Seed: " << seed;
 
   menu_sfx.use();
+  bgm = make_unique<MusicPlayer>();
   noise = make_unique<NoiseEffect>();
   scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
@@ -131,6 +135,7 @@ void Game::loadPersonal() {
 }
 
 Game::~Game() {
+  bgm.reset();
   noise.reset();
   scene.reset();
 
@@ -300,6 +305,7 @@ void Game::gameLogic() {
     }
   }
 
+  bgm->update();
   noise->update();
 }
 

@@ -9,6 +9,7 @@
 #include "data/personal.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "system/music_player.h"
 #include "system/noise_effect.h"
 
 #define PLATFORM_WINDOWS 0
@@ -103,6 +104,7 @@ public:
 
   static Color* palette;
   static std::mt19937_64 RNG;
+  static std::unique_ptr<MusicPlayer> bgm;
   static std::unique_ptr<NoiseEffect> noise;
 
   static SpriteAtlas menu_atlas;
