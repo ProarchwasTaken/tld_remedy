@@ -19,48 +19,36 @@ GameOverScene::GameOverScene(string reason) {
 }
 
 void GameOverScene::startDialog() {
-  vector<string> dialog = {
-    "Martyrs aren't expected to live;\n"
-    "let alone succeed.",
-
-    "So many ways it could go wrong, most\n"
-    "of which conjured by their own\n"
-    "imagination and paranoia.",
-
+  vector<string> dialog = { 
     "Mary had always been aware of how\n"
     "insignificant he was in the grand\n"
     "scheme of things.",
-
-    "After all, He was a human who came\n"
+    "After all, he was a human who came\n"
     "from nothing, and would inevitably\n"
     "return to it in death.",
-
-    "He was never significant enough to\n"
-    "play a major role...\n"
-    "And yet, he lasted longer than most.",
-
-    "It was because of that fact that I\n"
-    "decided to deem him as a Martyr\n"
-    "in the first place.",
-
-    "For they are the stepping stones that\n"
-    "set the initial conditions for the\n"
-    "real game to begin.",
-
-    "While a hero is one who defeats the\n"
-    "villain, a Martyr is one who proves\n"
-    "that they can bleed.",
- 
-    "If Mary fails, then someone else\n"
-    "will surely take his place.\n"
-    "That's just how expendable he is.",
-
-    "Of course, you won't settle for just\n"
-    "that... Wouldn't you, Mary?"
+    "If there is someone who could defeat\n"
+    "the villain, it certainly isn't him.",
+    "And yet... he has lasted longer than\n"
+    "most.",
+    "Rather than submitting to his\n"
+    "circumstances, he chose to rise to\n"
+    "the occasion.",
+    "Instead of allowing himself to go\n"
+    "through the motions, he willingly\n"
+    "swam against the current.",
+    "The decision to trek the path of\n"
+    "thorns was entirely his own.",
+    "All for the chance at a better life.\n"
+    "If not for him... then maybe someone\n"
+    "else.",
+    "These are the core traits that\n"
+    "define a Martyr.",
+    "Although... It wouldn't hurt to strive\n"
+    "for more than that. Right, Mary?"
   };
 
   panel = make_unique<DialogPanel>((Vector2){16, 8}, dialog, true, 
-                                   false, 1.5);
+                                   true, 1.5);
   panel_mode = true;
 }
 
