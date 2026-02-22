@@ -24,7 +24,7 @@ using std::string;
 StatusPanel::StatusPanel(Session *session, string *description) 
 {
   id = PanelID::STATUS;
-  frame = LoadTexture("graphics/menu/status_frame.png");
+  frame = LoadTexture("graphics/menu/frames/status.png");
 
   options[0] = &session->player;
   options[1] = &session->companion;

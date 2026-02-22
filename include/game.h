@@ -2,11 +2,15 @@
 #include <raylib.h>
 #include <memory>
 #include <random>
+#include <string>
+#include "enums.h"
 #include "base/scene.h"
 #include "data/session.h"
 #include "data/personal.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "system/music_player.h"
+#include "system/noise_effect.h"
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
@@ -17,8 +21,10 @@ enum class GameState {
   TOGGLE_FULLSCREEN,
   SWITCHING_SCENE,
   OPEN_CAMPMENU,
+  OPEN_RESTMENU,
   INIT_COMBAT,
   RETURN_TO_FIELD,
+  GAME_OVER,
   FADING_OUT,
   FADING_IN,
   SLEEP,
@@ -48,7 +54,9 @@ public:
   void fadeScreenProcedure();
   void switchSceneProcedure();
   void openCampMenuProcedure();
+  void openRestMenuProcedure();
   void initCombatProcedure();
+  void gameoverProcedure();
   void returnFieldProcedure();
   void sleepProcedure();
 
@@ -65,14 +73,17 @@ public:
   static void fullscreenCheck();
   static void newSession(SubWeaponID sub_weapon, CompanionID companion);
   static void saveSession(Session *data);
-  static void loadSession();
+  static bool loadSession();
   static bool existingSession();
 
   static void loadTitleScreen();
 
   static void openCampMenu(Session *data);
+  static void openRestMenu(Session *data);
   static void initCombat(Session *data);
+  static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
+  static void gameover(std::string reason);
 
   static void fadeout(float seconds);
   static void fadein(float seconds);
@@ -82,7 +93,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 5;
+  static constexpr unsigned int session_version = 7;
   static constexpr unsigned int personal_version = 4;
   static constexpr float TARGET_FPS = 60.0;
 
@@ -90,8 +101,11 @@ public:
 
   static Font sm_font;
   static Font med_font;
+
   static Color* palette;
   static std::mt19937_64 RNG;
+  static std::unique_ptr<MusicPlayer> bgm;
+  static std::unique_ptr<NoiseEffect> noise;
 
   static SpriteAtlas menu_atlas;
   static SoundAtlas menu_sfx;

@@ -43,13 +43,14 @@ struct CommonData {
 struct Session {
   unsigned int version;
   double playtime = 0.0;
-  char location[16] = "db_05";
+  int supplies = 0;
+
+  char map_name[16] = "db_05";
+  char location[16] = "";
 
   Player player;
   Companion companion;
   
-  int supplies = 0;
-
   int item_count = 2;
   int item_limit = ITEM_LIMIT;
   ItemID inventory[8] = {
@@ -66,4 +67,8 @@ struct Session {
   int common_count = 0;
   int common_limit = 64;
   CommonData common[64];
+
+  int enemy_count = 0;
+  int enemy_limit = 64;
+  CommonData enemy[64];
 };

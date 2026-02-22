@@ -74,7 +74,7 @@ public:
   void applyDamage(float damage, DamageData &data);
 
   virtual void damageLife(float magnitude);
-  void increaseLife(float magnitude);
+  virtual void increaseLife(float magnitude);
 
   void damageTenacity(float magnitude);
   void increaseTenacity(float magnitude, float threshold);

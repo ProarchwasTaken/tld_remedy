@@ -1,3 +1,5 @@
+#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <cassert>
 #include <fstream>
@@ -8,26 +10,31 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
-#include <plog/Log.h>
 #include "enums.h"
+#include "system/noise_effect.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "system/music_player.h"
 #include "scenes/title.h"
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
+#include "scenes/rest_menu.h"
 #include "scenes/combat.h"
+#include "scenes/game_over.h"
 #include "data/session.h"
 #include "data/personal.h"
 #include "utils/math.h"
 #include "game.h"
+#include <plog/Log.h>
 
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
 std::filesystem::create_directory, std::chrono::system_clock, 
-std::string, std::mt19937_64;
+std::string, std::mt19937_64, std::uniform_int_distribution,
+nlohmann::json, nlohmann::basic_json;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
-bool Game::SKIP_FRAME = false;
+bool Game::SKIP_FRAME = true;
 unique_ptr<Scene> Game::reserve;
 
 Font Game::sm_font;
@@ -35,9 +42,13 @@ Font Game::med_font;
 
 Color *Game::palette;
 Color Game::flash_color = {0, 0, 0, 0};
+
 SpriteAtlas Game::menu_atlas("menu", "menu_elements");
 SoundAtlas Game::menu_sfx("menu");
 mt19937_64 Game::RNG;
+
+unique_ptr<MusicPlayer> Game::bgm;
+unique_ptr<NoiseEffect> Game::noise;
 
 Settings Game::settings;
 
@@ -80,6 +91,8 @@ void Game::init() {
   PLOGD << "RNG Seed: " << seed;
 
   menu_sfx.use();
+  bgm = make_unique<MusicPlayer>();
+  noise = make_unique<NoiseEffect>();
   scene = make_unique<TitleScene>();
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
@@ -122,6 +135,8 @@ void Game::loadPersonal() {
 }
 
 Game::~Game() {
+  bgm.reset();
+  noise.reset();
   scene.reset();
 
   if (reserve != nullptr) {
@@ -175,7 +190,6 @@ void Game::defineColorPalette() {
 
 void Game::start() {
   assert(scene != nullptr);
-
   while (!EXIT_GAME && !WindowShouldClose()) {
     topLevelInput();
     gameLogic();
@@ -256,8 +270,17 @@ void Game::gameLogic() {
       openCampMenuProcedure();
       break;
     }
+    case GameState::OPEN_RESTMENU: {
+      openRestMenuProcedure();
+      break;
+    }
     case GameState::INIT_COMBAT: {
       initCombatProcedure();
+      break;
+    }
+    case GameState::GAME_OVER: {
+      gameoverProcedure();
+      scene->update();
       break;
     }
     case GameState::RETURN_TO_FIELD: {
@@ -280,6 +303,9 @@ void Game::gameLogic() {
       break;
     }
   }
+
+  bgm->update();
+  noise->update();
 }
 
 void Game::fadeScreenProcedure() {
@@ -364,6 +390,14 @@ void Game::openCampMenuProcedure() {
   }
 }
 
+void Game::openRestMenuProcedure() {
+  PLOGI << "Switching over to the Rest Menu scene.";
+  scene.swap(reserve);
+  assert(scene != nullptr && scene->scene_id == SceneID::REST_MENU);
+
+  game_state = GameState::READY;
+}
+
 void Game::initCombatProcedure() {
   static float clock = 0.0;
   static float sequence_time = 1.5;
@@ -392,9 +426,52 @@ void Game::initCombatProcedure() {
     assert(scene != nullptr && scene->scene_id == SceneID::COMBAT);
 
     clock = 0.0;
+    noise->setAlpha(0.0);
     setupCanvas();
+
+    bgm->play();
+    bgm->setBaseVolume(0.0);
+    bgm->fade(1.0, 0.25);
+
     Game::fadein(0.25);
     fadeScreenProcedure();
+  }
+}
+
+void Game::gameoverProcedure() {
+  static float clock = 0.0;
+  static float sequence_time = 3.42;
+  
+  clock += GetFrameTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  float percentage = Clamp(clock / 0.10, 0.0, 1.0);
+  flash_color.a = Lerp(255, 0, percentage);
+
+  percentage = Clamp((-0.305 + clock) / 0.10, 0.0, 1.0);
+  float end_height = window_res.y * 0.004;
+  canvas_dest.height = Lerp(window_res.y, end_height, percentage);
+  canvas_origin.y = canvas_dest.height / 2;
+
+  percentage = Clamp(clock / 0.405, 0.0, 1.0);
+  noise->setAlpha(percentage);
+
+  if (clock == 1.0) {
+    PLOGI << "Switching over to the Game Over scene.";
+    scene.swap(reserve);
+
+    assert(scene != nullptr && scene->scene_id == SceneID::GAME_OVER);
+    setupCanvas();
+
+    reserve.reset();
+    flash_color.a = 0;
+    clock = 0.0;
+
+    game_state = GameState::READY;
+    setTimeScale(1.0);
+
+    noise->setAlpha(0.0);
+    noise->setTint(WHITE);
   }
 }
 
@@ -414,6 +491,7 @@ void Game::drawScene() {
   {
     ClearBackground(BLACK);
     scene->draw();
+    noise->draw();
   }
   EndTextureMode();
 
@@ -477,6 +555,10 @@ void Game::fadein(float seconds) {
 }
 
 void Game::sleep(float seconds) {
+  if (game_state == GameState::GAME_OVER) {
+    return;
+  }
+
   PLOGI << "Pausing game logic for: " << seconds << " seconds";
   Game::sleep_time = seconds;
   game_state = GameState::SLEEP;
@@ -491,6 +573,7 @@ void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new game.";
   assert(reserve == nullptr);
 
+  bgm->stop();
   reserve = make_unique<FieldScene>(sub_weapon, companion);
 
   session_playtime = 0;
@@ -511,13 +594,15 @@ void Game::saveSession(Session *data) {
   PLOGI << "Session data saved successfully.";
 }
 
-void Game::loadSession() {
+bool Game::loadSession() {
   PLOGI << "Attempting to load session data.";
   ifstream file;
   file.open("data/session.data", std::ios::binary);
 
   if (!file.is_open()) {
     PLOGE << "'data/session.data' is not found.";
+    file.close();
+    return false;
   }
 
   Session session;
@@ -526,12 +611,13 @@ void Game::loadSession() {
   if (file.fail()) {
     PLOGE << "Error opening file!";
     file.close();
-    return;
+    return false;
   }
 
   file.close();
 
   PLOGI << "Successfully loaded session data.";
+  PLOGD << "Map Name: " << session.map_name;
   PLOGD << "Location: " << session.location;
   PLOGD << "Medical Supplies: " << session.supplies;
   PLOGD << "Player Life: " << session.player.life;
@@ -539,16 +625,18 @@ void Game::loadSession() {
 
   if (session.version != session_version) {
     PLOGE << "Loaded session data is outdated!";
-    return;
+    return false;
   }
 
   assert(reserve == nullptr);
+  bgm->stop();
   reserve = make_unique<FieldScene>(&session);
 
   session_playtime = session.playtime;
   run_timer = true;
 
   game_state = GameState::SWITCHING_SCENE;
+  return true;
 }
 
 bool Game::existingSession() {
@@ -598,16 +686,93 @@ void Game::openCampMenu(Session *data) {
   flash_color.a = 0;
 
   game_state = GameState::OPEN_CAMPMENU;
+  bgm->fade(0.25, 1.8);
+
   menu_sfx.play("menu_camp_open");
   SKIP_FRAME = true;
 }
 
-void Game::initCombat(Session *data) {
-  PLOGI << "Battle Time!";
+void Game::openRestMenu(Session *data) {
   assert(reserve == nullptr);
 
-  reserve = make_unique<CombatScene>(data);
+  bgm->stop();
+  reserve = make_unique<RestMenuScene>(data);
+
+  game_state = GameState::OPEN_RESTMENU;
+  SKIP_FRAME = true;
+}
+
+void Game::initCombat(Session *session) {
+  PLOGI << "Battle Time!";
+  assert(reserve == nullptr);
+  bgm->stop();
+
+  ifstream file("data/troops.json");
+  json parsed_data = json::parse(file);
+ 
+  string location = session->location;
+  basic_json pool = parsed_data.at(location);
+  PLOGI << "Selecting a random troop in pool: " << location; 
+
+  int sum_of_weight = 0;
+  for (basic_json troop : pool) {
+    int id = troop.at("id");
+    int weight = troop.at("weight");
+    PLOGD << "{Troop ID: " << id << ", Weight: " << weight << "}";
+
+    sum_of_weight += weight;
+  }
+
+  PLOGD << "Weight Sum: " << sum_of_weight;
+  
+  uniform_int_distribution<int> range(0, sum_of_weight);
+  int random_num = range(RNG);
+  PLOGD << "RNG Value: " << random_num;
+
+  TroopID troop_id;
+  int reward;
+  bool successful = false;
+  for (basic_json troop : pool) {
+    int weight = troop.at("weight");
+
+    if (random_num < weight) {
+      int id = troop.at("id");
+      troop_id = static_cast<TroopID>(id);
+
+      reward = troop.at("reward");
+
+      PLOGI << "Troop Selected: {ID: " << id << ", Reward: " << reward 
+        << "}";
+      successful = true;
+      break;
+    }
+    else {
+      random_num -= weight;
+    }
+  }
+
+  assert(successful);
+  file.close();
+
+  reserve = make_unique<CombatScene>(session, troop_id, reward);
   flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
+
+  game_state = GameState::INIT_COMBAT;
+  SKIP_FRAME = true;
+}
+
+void Game::initCombat(Session *data, TroopID id, int reward) {
+  PLOGI << "Battle Time! (Forced Style!)";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CombatScene>(data, id, reward);
+  flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
 
   game_state = GameState::INIT_COMBAT;
   SKIP_FRAME = true;
@@ -622,6 +787,27 @@ void Game::returnToField() {
   assert(reserve != nullptr);
 
   game_state = GameState::RETURN_TO_FIELD;
+}
+
+void Game::gameover(string reason) {
+  PLOGI << "GAME OVER! Reason: " << reason;
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  reserve = make_unique<GameOverScene>(reason);
+  flash_color = palette[32];
+  flash_color.a = 255;
+
+  noise->setTint(palette[32]);
+
+  setTimeScale(0.75);
+  bgm->stop();
+  menu_sfx.play("gameover");
+
+  game_state = GameState::GAME_OVER;
+  SKIP_FRAME = true;
+  run_timer = false;
 }
 
 float Game::deltaTime() {

@@ -29,7 +29,7 @@ ConfirmPanel::ConfirmPanel(SpriteAtlas *menu_atlas,
   this->txt_yes = txt_yes;
   this->txt_no = txt_no;
 
-  frame = LoadTexture("graphics/menu/confirm_frame.png");
+  frame = LoadTexture("graphics/menu/frames/confirm.png");
   selected = options.begin();
 
   keybinds = menu_keybinds;

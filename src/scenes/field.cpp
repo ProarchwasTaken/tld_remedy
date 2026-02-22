@@ -30,6 +30,7 @@
 #include "field/entities/pickup.h"
 #include "field/entities/save_point.h"
 #include "field/sequences/save.h"
+#include "field/sequences/rest.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -60,7 +61,7 @@ FieldScene::FieldScene(Session *session_data) {
   PLOGI << "Loading existing session data.";
   session = make_unique<Session>();
   *session = *session_data;
-  setup();
+  setup();  
 }
 
 FieldScene::~FieldScene() {
@@ -70,7 +71,6 @@ FieldScene::~FieldScene() {
 
   Entity::clear(entities);
   assert(Actor::existing_actors.empty());
-  assert(Entity::existing_entities.empty());
 
   UnloadTexture(vignette);
   field.reset();
@@ -89,7 +89,8 @@ void FieldScene::setup() {
   scene_id = SceneID::FIELD;
 
   field = make_unique<FieldMap>();
-  mapLoadProcedure(session->location);
+  mapLoadProcedure(session->map_name);
+  PlayerActor::setControllable(true);
 
   #ifndef NDEBUG
   static CommandSystem command_system;
@@ -98,6 +99,9 @@ void FieldScene::setup() {
   
   sfx.use();
   vignette = LoadTexture("graphics/overlays/field_vignette.png");
+
+  Game::bgm->prepare("field");
+  Game::bgm->play();
   PLOGI << "Field scene is ready to go!";
 }
 
@@ -172,7 +176,7 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   camera_target = Actor::getActor(ActorType::PLAYER);
   camera.target = camera_target->position;
 
-  std::strcpy(session->location, map_name.c_str());
+  std::strcpy(session->map_name, map_name.c_str());
   map_ready = true;
 
   PLOGI << "Procedure complete.";
@@ -197,10 +201,7 @@ void FieldScene::setupActor(ActorData *data) {
     }
     case ActorType::ENEMY: {
       EnemyActorData *enemy_data = static_cast<EnemyActorData*>(data);
-      vector<Direction> routine = enemy_data->routine;
-      float speed = enemy_data->speed;
-
-      entity = make_unique<EnemyActor>(position, routine, speed);
+      entity = make_unique<EnemyActor>(*enemy_data);
       break;
     }
   }
@@ -267,7 +268,7 @@ void FieldScene::update() {
 
   actorBehavior();
 
-  if (Game::state() == GameState::READY) {
+  if (Game::state() != GameState::SLEEP) {
     for (unique_ptr<Entity> &entity : entities) {
       entity->update();
     }
@@ -385,6 +386,11 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::openCampMenu(session.get());
       break;
     }
+    case FieldEVT::OPEN_REST: {
+      PLOGD << "Event Detected: OpenRestMenuEvent";
+      Game::openRestMenu(session.get());
+      break;
+    }
     case FieldEVT::INIT_COMBAT: {
       PLOGD << "Event Detected: InitCombatEvent";
 
@@ -392,9 +398,28 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       sfx.play("combat_init");
       break;
     }
+    case FieldEVT::INIT_COMBAT_FORCED: {
+      PLOGD << "Event Detected: InitCombatFEvent";
+      auto *event_data = static_cast<InitCombatFEvent*>(event.get());
+
+      TroopID id = event_data->id;
+      int reward = event_data->reward;
+
+      Game::initCombat(session.get(), id, reward);
+      sfx.play("combat_init");
+      break;
+    }
     case FieldEVT::GOTO_TITLE: {
       PLOGD << "Event Detected: GotoTitleEvent";
       Game::loadTitleScreen();
+      break;
+    }
+    case FieldEVT::GAME_OVER: {
+      PLOGD << "Event Detected: GameOverEvent";
+      auto *event_data = static_cast<GameOverEvent*>(event.get());
+      string reason = event_data->reason;
+
+      Game::gameover(reason);
       break;
     }
     case FieldEVT::DELETE_ENTITY: {
@@ -417,6 +442,22 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGI << "Updating common data associated with Object ID: " 
         << object_id;
       updateCommonData(object_id, active);
+      break;
+    }
+    case FieldEVT::MARK_AS_DEAD: {
+      PLOGD << "Event detected: MarkAsDeadEvent";
+      auto *event_data = static_cast<MarkAsDeadEvent*>(event.get());
+
+      int object_id = event_data->object_id;
+
+      PLOGI << "Marking enemy associated with Object ID: " << object_id <<
+      " as dead.";
+      markEnemyAsDead(object_id);
+      break;
+    }
+    case FieldEVT::REVIVE_ENEMIES: {
+      PLOGD << "Event detected: ReviveEnemiesEvent";
+      reviveDeadEnemies();
       break;
     }
     case FieldEVT::CHANGE_SUPPLIES: {
@@ -524,6 +565,10 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     #endif // !NDEBUG
     case SequenceID::SAVE: {
       sequence = make_unique<SaveSequence>();
+      break;
+    }
+    case SequenceID::REST: {
+      sequence = make_unique<RestSequence>();
       break;
     }
   }
@@ -674,7 +719,7 @@ void FieldScene::updateCommonData(int object_id, bool active) {
 
     string map_name = data->map_name;
 
-    if (map_name != session->location) {
+    if (map_name != session->map_name) {
       continue;
     }
 
@@ -685,6 +730,39 @@ void FieldScene::updateCommonData(int object_id, bool active) {
   }
 
   PLOGE << "Failed to find common data!";
+}
+
+void FieldScene::markEnemyAsDead(int object_id) {
+  int enemy_count = session->enemy_count;
+  for (int x = 0; x < enemy_count; x++) {
+    CommonData *data = &session->enemy[x];
+
+    string map_name = data->map_name;
+
+    if (map_name != session->map_name) {
+      continue;
+    }
+
+    if (object_id == data->object_id) {
+      data->active = false;
+      return;
+    }
+  }
+
+  PLOGE << "Failed to find enemy data associated with object id:" <<
+  object_id;
+}
+
+void FieldScene::reviveDeadEnemies() {
+  int enemy_count = session->enemy_count;
+  for (int x = 0; x < enemy_count; x++) {
+    CommonData *data = &session->enemy[x];
+
+    if (!data->active) {
+      data->active = true;
+      PLOGD << "Object [ID:" << data->object_id << "] is now active.";
+    }
+  }
 }
 
 void FieldScene::deleteEntity(int entity_id) {
@@ -759,7 +837,7 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string location = TextFormat("Location: %s", session->location);
+  string location = TextFormat("Location: %s", session->map_name);
   Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
                                           *font, -3, 0);
   y += spacing;
@@ -767,6 +845,11 @@ void FieldScene::drawSessionInfo() {
   string supplies = TextFormat("Supplies: %03i", session->supplies);
   Vector2 sup_pos = TextUtils::alignRight(supplies.c_str(), {base_x, y}, 
                                           *font, -3, 0);
+  y += spacing;
+
+  string time = TextFormat("Playtime: %00.03f", Game::playtime());
+  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
   y += spacing;
 
   Player *player = &session->player;
@@ -786,15 +869,16 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
   y += spacing;
 
-  string time = TextFormat("Playtime: %00.03f", Game::playtime());
-  Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
-                                           *font, -3, 0);
-  y += spacing;
-
   string common = TextFormat("Common Count: %i / %i", 
                              session->common_count, session->common_limit);
   Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
                                              *font, -3, 0);
+  y += spacing;
+
+  string enemy = TextFormat("Enemy Count: %i / %i",
+                            session->enemy_count, session->enemy_limit);
+  Vector2 enemy_pos = TextUtils::alignRight(enemy.c_str(), {base_x, y}, 
+                                            *font, -3, 0);
   y += spacing;
 
   string pursue = TextFormat("Persuing Enemy: %i", 
@@ -805,10 +889,11 @@ void FieldScene::drawSessionInfo() {
 
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
   DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
   DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, enemy.c_str(), enemy_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);
 }
 #endif // !NDEBUG

@@ -1,0 +1,28 @@
+{
+  "bgm": [
+    {
+      "name": "title",
+      "filename": "Postlude.mp3",
+      "loop_start": 0,
+      "loop_end": 144
+    },
+    {
+      "name": "field",
+      "filename": "Twilight Zone.mp3",
+      "loop_start": 0,
+      "loop_end": 126
+    },
+    {
+      "name": "combat",
+      "filename": "Courage.mp3",
+      "loop_start": 0,
+      "loop_end": 114
+    },
+    {
+      "name": "rest",
+      "filename": "Delicate Respite.mp3",
+      "loop_start": 0,
+      "loop_end": 144
+    }
+  ]
+}

@@ -2,16 +2,16 @@
 #include <raylib.h>
 #include <vector>
 #include "enums.h"
-#include "data/rect_ex.h"
 #include "base/actor.h"
+#include "data/actor.h"
+#include "data/rect_ex.h"
 #include "field/actors/player.h"
 #include "system/sprite_atlas.h"
 
 
 class EnemyActor : public Actor {
 public:
-  EnemyActor(Vector2 position, std::vector<Direction> routine, 
-             float speed);
+  EnemyActor(EnemyActorData &data);
   ~EnemyActor();
   void correctSightRect();
   
@@ -30,6 +30,8 @@ public:
   static SpriteAtlas atlas;
   static int pursuing_enemy;
 private:
+  int object_id;
+
   std::vector<Direction> routine;
   std::vector<Direction>::iterator current_direction;
   float routine_clock = 0.0;

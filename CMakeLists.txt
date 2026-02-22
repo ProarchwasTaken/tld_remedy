@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.13.0
+VERSION 1.14.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -72,7 +72,12 @@ set(HEADERS
 "include/utils/math.h"
 "include/system/sprite_atlas.h"
 "include/system/sound_atlas.h"
+"include/system/noise_effect.h"
+"include/system/music_player.h"
 "include/scenes/title.h"
+"include/scenes/camp_menu.h"
+"include/scenes/rest_menu.h"
+"include/scenes/game_over.h"
 "include/menu/panels/config.h"
 "include/menu/panels/confirm.h"
 "include/menu/panels/remap.h"
@@ -80,6 +85,8 @@ set(HEADERS
 "include/menu/panels/items.h"
 "include/menu/panels/tech.h"
 "include/menu/panels/dialog.h"
+"include/menu/panels/diagnose.h"
+"include/menu/panels/crafting.h"
 "include/menu/hud/party.h"
 "include/menu/hud/portrait.h"
 "include/menu/hud/reticle.h"
@@ -95,6 +102,7 @@ set(HEADERS
 "include/field/entities/pickup.h"
 "include/field/entities/save_point.h"
 "include/field/sequences/save.h"
+"include/field/sequences/rest.h"
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
@@ -131,8 +139,8 @@ set(HEADERS
 "include/combat/status_effects/mending.h"
 "include/combat/status_effects/refreshed.h"
 "include/combat/status_effects/endurance.h"
-"include/scenes/camp_menu.h"
 )
+
 set(SOURCE
 "src/main.cpp"
 "src/game.cpp"
@@ -154,7 +162,12 @@ set(SOURCE
 "src/utils/math.cpp"
 "src/system/sprite_atlas.cpp"
 "src/system/sound_atlas.cpp"
+"src/system/noise_effect.cpp"
+"src/system/music_player.cpp"
 "src/scenes/title.cpp"
+"src/scenes/camp_menu.cpp"
+"src/scenes/rest_menu.cpp"
+"src/scenes/game_over.cpp"
 "src/menu/panels/config.cpp"
 "src/menu/panels/confirm.cpp"
 "src/menu/panels/remap.cpp"
@@ -162,6 +175,8 @@ set(SOURCE
 "src/menu/panels/items.cpp"
 "src/menu/panels/tech.cpp"
 "src/menu/panels/dialog.cpp"
+"src/menu/panels/diagnose.cpp"
+"src/menu/panels/crafting.cpp"
 "src/menu/hud/party.cpp"
 "src/menu/hud/portrait.cpp"
 "src/menu/hud/reticle.cpp"
@@ -177,6 +192,7 @@ set(SOURCE
 "src/field/entities/pickup.cpp"
 "src/field/entities/save_point.cpp"
 "src/field/sequences/save.cpp"
+"src/field/sequences/rest.cpp"
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
@@ -213,7 +229,6 @@ set(SOURCE
 "src/combat/status_effects/mending.cpp"
 "src/combat/status_effects/refreshed.cpp"
 "src/combat/status_effects/endurance.cpp"
-"src/scenes/camp_menu.cpp"
 )
 
 if(${BUILD_DEV})

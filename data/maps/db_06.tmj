@@ -129,21 +129,34 @@
          "name":"Spawnpoints",
          "objects":[
                 {
+                 "height":0,
                  "id":3,
                  "name":"Player",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
+                 "type":"initial",
+                 "visible":true,
+                 "width":0,
                  "x":256,
                  "y":336
                 }, 
                 {
+                 "height":0,
                  "id":4,
                  "name":"Companion",
+                 "point":true,
                  "properties":[
                         {
                          "name":"actor_type",
@@ -156,49 +169,82 @@
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
+                 "type":"initial",
+                 "visible":true,
+                 "width":0,
                  "x":256,
                  "y":320
                 }, 
                 {
+                 "height":0,
                  "id":6,
                  "name":"From db_05",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":1
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
                  "type":"db_06-1",
+                 "visible":true,
+                 "width":0,
                  "x":40,
                  "y":336
                 }, 
                 {
+                 "height":0,
                  "id":7,
                  "name":"From db_07",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
                  "type":"db_06-2",
+                 "visible":true,
+                 "width":0,
                  "x":256,
                  "y":104
                 }, 
                 {
+                 "height":0,
                  "id":8,
                  "name":"From db_08",
+                 "point":true,
                  "properties":[
+                        {
+                         "name":"actor_type",
+                         "propertytype":"ActorType",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"direction",
                          "type":"int",
                          "value":-1
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/spawn_point.tx",
+                 "rotation":0,
                  "type":"db_06-3",
+                 "visible":true,
+                 "width":0,
                  "x":472,
                  "y":336
                 }],
@@ -234,7 +280,9 @@
                          "type":"string",
                          "value":"db_05-1"
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":16,
                  "x":16,
                  "y":320
@@ -259,7 +307,9 @@
                          "type":"string",
                          "value":"db_07-1"
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":32,
                  "x":240,
                  "y":80
@@ -284,7 +334,9 @@
                          "type":"string",
                          "value":"db_08-1"
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/map_transition.tx",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
                  "width":16,
                  "x":480,
                  "y":320
@@ -302,54 +354,74 @@
          "name":"Pickups",
          "objects":[
                 {
+                 "height":0,
                  "id":12,
+                 "name":"Pickup",
+                 "point":true,
                  "properties":[
                         {
                          "name":"count",
                          "type":"int",
                          "value":3
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "rotation":0,
                  "type":"Supplies",
+                 "visible":true,
+                 "width":0,
                  "x":272,
                  "y":224
                 }, 
                 {
+                 "height":0,
                  "id":13,
+                 "name":"Pickup",
+                 "point":true,
                  "properties":[
                         {
                          "name":"count",
                          "type":"int",
                          "value":5
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "rotation":0,
                  "type":"Supplies",
+                 "visible":true,
+                 "width":0,
                  "x":248,
                  "y":136
                 }, 
                 {
+                 "height":0,
                  "id":14,
+                 "name":"Pickup",
+                 "point":true,
                  "properties":[
                         {
                          "name":"count",
                          "type":"int",
                          "value":2
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "rotation":0,
                  "type":"Supplies",
+                 "visible":true,
+                 "width":0,
                  "x":100,
                  "y":360
                 }, 
                 {
+                 "height":0,
                  "id":15,
+                 "name":"Pickup",
+                 "point":true,
                  "properties":[
                         {
                          "name":"count",
                          "type":"int",
                          "value":3
                         }],
-                 "template":"..\/..\/..\/..\/Documents\/remedy_assets\/tiled_templates\/pickup.tx",
+                 "rotation":0,
                  "type":"Supplies",
+                 "visible":true,
+                 "width":0,
                  "x":408,
                  "y":324
                 }],
@@ -362,6 +434,12 @@
  "nextlayerid":7,
  "nextobjectid":17,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"location",
+         "type":"string",
+         "value":"Debug"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":16,

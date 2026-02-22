@@ -31,12 +31,15 @@ public:
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
+  void increaseLife(float magnitude) override;
 
   void afflictPersistent();
   void afflictPersistent(StatusID id, bool hide_text = false);
   void afflictPersistent(StatusID status[STATUS_LIMIT]);
   std::set<StatusID> getEffectPool();
   StatusID selectRandomID(std::set<StatusID> &effect_pool);
+
+  void clearNonPersistant();
 
   void damageMorale(float magnitude) override;
   void increaseMorale(float magnitude, bool mp_share) override;
@@ -48,6 +51,7 @@ public:
   void techniqueCooldown();
 
   void tintFlash();
+  void death() override;
 
   PartyMemberID id;
   bool important = false;

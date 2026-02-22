@@ -5,7 +5,9 @@ enum class SceneID {
   TITLE,
   FIELD,
   CAMP_MENU,
-  COMBAT
+  REST_MENU,
+  COMBAT,
+  GAME_OVER
 };
 
 enum class PanelID {
@@ -15,7 +17,9 @@ enum class PanelID {
   STATUS,
   ITEMS,
   TECH,
-  DIALOG
+  DIALOG,
+  DIAGNOSE,
+  CRAFTING
 };
 
 enum EntityType {
@@ -77,6 +81,8 @@ enum class TroopID {
   DB_TROOP1,
   DB_TROOP2,
   DB_TROOP3,
+  DB_TROOP4,
+  DB_TROOP5
 };
 
 enum class ActionID {
@@ -118,9 +124,14 @@ enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
   OPEN_MENU,
+  OPEN_REST,
   INIT_COMBAT,
+  INIT_COMBAT_FORCED,
   GOTO_TITLE,
+  GAME_OVER,
   UPDATE_COMMON_DATA,
+  MARK_AS_DEAD,
+  REVIVE_ENEMIES,
   DELETE_ENTITY,
   CHANGE_SUPPLIES,
   ADD_SUPPLIES,
@@ -148,7 +159,8 @@ enum class SequenceID {
   DB_01, 
   #endif // !NDEBUG
 
-  SAVE
+  SAVE,
+  REST
 };
 
 enum class CombatEVT {

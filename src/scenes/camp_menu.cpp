@@ -37,7 +37,7 @@ CampMenuScene::CampMenuScene(Session *session) {
   atlas.use();
   main_bar = atlas.getTexturefromSprite(3);
 
-  background = LoadTexture("graphics/menu/camp_background.png");
+  background = LoadTexture("graphics/menu/backgrounds/camp_menu.png");
   gradient1 = LoadTexture("graphics/overlays/camp_gradient.png");
   gradient2 = atlas.getTexturefromSprite(8);
 
@@ -107,6 +107,7 @@ void CampMenuScene::closingLogic() {
 
   if (state_clock == 0.0) {
     Game::returnToField();    
+    Game::bgm->fade(1.0, 1.3);
   }
 }
 
@@ -335,8 +336,7 @@ void CampMenuScene::drawTopInfo(Vector2 position) {
   int txt_size = font->baseSize;
   position = Vector2Add(position, {11, 1});
 
-  DrawTextEx(*font, "The Outside - Cathedral", position, txt_size, -2, 
-             WHITE);
+  DrawTextEx(*font, session->location, position, txt_size, -2, WHITE);
 }
 
 void CampMenuScene::drawBottomBar() {

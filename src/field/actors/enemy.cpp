@@ -1,15 +1,15 @@
 #include <cassert>
 #include <cmath>
-#include <vector>
 #include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/actor.h"
-#include "system/sprite_atlas.h"
+#include "data/actor.h"
 #include "data/field_event.h"
 #include "data/line.h"
+#include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/field_map.h"
@@ -17,18 +17,18 @@
 #include "field/actors/enemy.h"
 #include <plog/Log.h>
 
-using std::vector;
 SpriteAtlas EnemyActor::atlas("actors", "enemy_actor");
 int EnemyActor::pursuing_enemy = -1;
 
 
-EnemyActor::EnemyActor(Vector2 position, vector<Direction> routine, 
-                       float speed):
-Actor("Enemy", ActorType::ENEMY, position, *routine.begin())
+EnemyActor::EnemyActor(EnemyActorData &data):
+Actor("Enemy", ActorType::ENEMY, data.position, *data.routine.begin())
 {
-  this->routine = routine;
+  object_id = data.object_id;
+
+  this->routine = data.routine;
   this->current_direction = this->routine.begin();
-  this->speed = speed;
+  this->speed = data.speed;
 
   bounding_box.scale = {32, 38};
   bounding_box.offset = {-16, -34};
@@ -72,6 +72,8 @@ void EnemyActor::update() {
   if (awaiting_deletion) {
     FieldHandler::raise<DeleteEntityEvent>(FieldEVT::DELETE_ENTITY, 
                                            this->entity_id);
+    FieldHandler::raise<MarkAsDeadEvent>(FieldEVT::MARK_AS_DEAD,
+                                         object_id);
     plr->setControllable(true);
     return;
   }
@@ -113,6 +115,7 @@ void EnemyActor::normalLogic() {
     plr->setControllable(false);
 
     FieldScene::sfx.play("enemy_alert");
+    Game::bgm->fade(0.0, 1.0);
     Game::sleep(1.0);
   }
 }

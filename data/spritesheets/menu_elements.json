@@ -31,9 +31,21 @@
     {
       "filename": "selector",
       "frame": {"x": 48, "y": 0, "w": 18, "h": 18}
+    },
+    {
+      "filename": "life_segment",
+      "frame": {"x": 0, "y": 32, "w": 16, "h": 5}
+    },
+    {
+      "filename": "life_segment_empty",
+      "frame": {"x": 16, "y": 32, "w": 16, "h": 5}
+    },
+    {
+      "filename": "life_segment_half",
+      "frame": {"x": 32, "y": 32, "w": 16, "h": 5}
     }
   ],
   "meta": {
-    "size": {"w": 48, "h": 32}
+    "size": {"w": 66, "h": 48}
   }
 }

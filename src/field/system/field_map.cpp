@@ -84,10 +84,22 @@ void FieldMap::parseMapData(Session &session, string &map_name,
       findPickups(session, map_name, layer["objects"]);
     }
     else if (layer_name == "Enemies") {
-      findEnemies(layer["objects"]);
+      findEnemies(session, map_name, layer["objects"]);
     }
     else if (layer_name == "Savepoints") {
       findSavePoints(layer["objects"]);
+    }
+  }
+
+  if (map_data.find("properties") != map_data.end()) {
+    for (basic_json property : map_data["properties"]) {
+      string property_name = property["name"];
+      if (property_name == "location") {
+        string location = property["value"];
+
+        PLOGI << "Detected location: " << location;
+        std::strcpy(session.location, location.c_str());
+      }
     }
   }
 
@@ -142,7 +154,8 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
   bool found_initial_plr = false;
   bool found_initial_com = false;
   for (basic_json object : layer_objects) {
-    if (object.find("type") != object.end()) {
+    string type = object["type"];
+    if (type != "initial") {
       continue;
     }
 
@@ -157,7 +170,7 @@ void FieldMap::findSpawnpoints(json &layer_objects) {
         direction = property["value"];
       }
       else if (property_name == "actor_type") {
-        actor_type = ActorType::COMPANION;
+        actor_type = property["value"];
       }
     }
 
@@ -281,7 +294,8 @@ void FieldMap::findPickups(Session &session, string &map_name,
     int object_id = object["id"];
     PLOGD << "Object ID: " << object_id;
 
-    int active = activeObject(session, map_name, object_id);
+    int active = activeObject(map_name, object_id, session.common,
+                              session.common_count);
     if (active == 0) {
       PLOGD << "Object [ID: " << object_id << "] is marked as inactive.";
       continue;
@@ -327,17 +341,31 @@ void FieldMap::findPickups(Session &session, string &map_name,
     entity_queue.push_back(make_unique<PickupData>(data));
 
     if (active == 2) {
-      setupCommonData(session, map_name, object_id);
+      setupCommonData(map_name, object_id, session.common, 
+                      &session.common_count, session.common_limit);
     }
   }
 }
 
-void FieldMap::findEnemies(json &layer_objects) {
+void FieldMap::findEnemies(Session &session, string &map_name,
+                           json &layer_objects) {
   PLOGI << "Searching for enemy data";
 
   for (basic_json object : layer_objects) {
+    int object_id = object["id"];
+    PLOGD << "Object ID: " << object_id;
+
+    int active = activeObject(map_name, object_id, session.enemy, 
+                              session.enemy_count);
+    if (active == 0) {
+      PLOGD << "Enemy Object [ID: " << object_id << "] is marked as " <<
+        "dead.";
+      continue;
+    }
+
     float x = object["x"];
     float y = object["y"];
+    Vector2 position = {x, y};
 
     vector<Direction> routine;
     float speed;
@@ -355,9 +383,14 @@ void FieldMap::findEnemies(json &layer_objects) {
     assert(!routine.empty());
 
     PLOGD << "{X: " << x << ", Y: " << y << "}";
-    EnemyActorData data = {ACTOR, ActorType::ENEMY, {x, y}, DOWN, 
-      routine, speed};
+    EnemyActorData data = {ACTOR, ActorType::ENEMY, position, DOWN, 
+      object_id, routine, speed};
     entity_queue.push_back(make_unique<EnemyActorData>(data));
+
+    if (active == 2) {
+      setupCommonData(map_name, object_id, session.enemy, 
+                      &session.enemy_count, session.enemy_limit);
+    }
   }
 }
 
@@ -394,19 +427,20 @@ void FieldMap::findSavePoints(json &layer_objects) {
     float y = object["y"];
     Vector2 position = {x, y};
 
-    SavePointData data = {SAVE_POINT, position, false};
+    string type = object["type"];
+    bool rest_point = type == "rest";
+
+    SavePointData data = {SAVE_POINT, position, rest_point};
     PLOGD << "Savepoint data: {X: " << x << ", Y: " << y << "}";
     entity_queue.push_back(make_unique<SavePointData>(data));
   }
 }
 
-int FieldMap::activeObject(Session &session, string &map_name, 
-                            int object_id) {
-  int common_count = session.common_count;
-  PLOGD << "Common Count: " << common_count;
-
-  for (int x = 0; x < common_count; x++) {
-    CommonData *data = &session.common[x];
+int FieldMap::activeObject(std::string map_name, int object_id, 
+                            CommonData *begin, int count) 
+{
+  for (int x = 0; x < count; x++) {
+    CommonData *data = begin + x;
 
     if (map_name != data->map_name) {
       continue;
@@ -420,23 +454,23 @@ int FieldMap::activeObject(Session &session, string &map_name,
     }
   }
 
+  PLOGD << "There isn't any common data created for Object [ID:" <<
+    object_id << "] yet.";
   return 2;
 }
 
-void FieldMap::setupCommonData(Session &session, string &map_name, 
-                               int object_id) {
-  int common_count = session.common_count;
-  int common_limit = session.common_limit;
-  assert(common_count != common_limit);
-
-  CommonData *data = &session.common[common_count];
+void FieldMap::setupCommonData(string map_name, int object_id,
+                               CommonData *begin, int *count, int limit)
+{
+  assert(*count < limit);
+  CommonData *data = begin + *count;
   data->object_id = object_id;
   data->active = true;
   std::strcpy(data->map_name, map_name.c_str());
 
   PLOGD << "Created Common Data. {Object ID: " << data->object_id << 
     ", Map Name: " << data->map_name << "}";
-  session.common_count++;
+  *count += 1;
 }
 
 void FieldMap::draw() {

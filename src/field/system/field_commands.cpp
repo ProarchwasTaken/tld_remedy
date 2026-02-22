@@ -17,8 +17,9 @@ string findNextWord(string &buffer, string::iterator &iterator,
 void loadMapCommand(string map_name, string spawn_name);
 void deleteEntityCommand(string argument);
 void saveCommand();
-void initCombatCommand();
+void initCombatCommand(string troop_id);
 void gotoTitleCommand();
+void gameoverCommand();
 void setSuppliesCommand(string argument);
 void setLifeCommand(string target, string value);
 void addItemCommand(string item_id);
@@ -114,11 +115,16 @@ void CommandSystem::interpretCommand(CommandType type,
       break;
     }
     case CommandType::INIT_COMBAT: {
-      initCombatCommand();
+      string troop_id = findNextWord(buffer, iterator);
+      initCombatCommand(troop_id);
       break;
     }
     case CommandType::TITLE: {
       gotoTitleCommand();
+      break;
+    }
+    case CommandType::GAME_OVER: {
+      gameoverCommand();
       break;
     }
     case CommandType::DELETE_ENT: {
@@ -171,6 +177,7 @@ void CommandSystem::interpretCommand(CommandType type,
     case CommandType::INIT_SEQUENCE: {
       string sequence_id = findNextWord(buffer, iterator);
       initSequenceCommand(sequence_id);
+      break;
     }
   }
 }
@@ -192,7 +199,7 @@ string findNextWord(string &buffer, string::iterator &iterator,
   PLOGD << "Searching for next word in buffer: '" << buffer << "'";
   if (iterator == buffer.end()) {
     PLOGD << "Iterator has reached end of buffer.";
-    return " ";
+    return "";
   }
 
   while (*iterator == ' ' && iterator != buffer.end()) {
@@ -232,14 +239,33 @@ void saveCommand() {
   FieldHandler::raise<FieldEvent>(FieldEVT::SAVE_SESSION);
 }
 
-void initCombatCommand() {
+void initCombatCommand(string troop_id) {
   PLOGD << "Now executing command.";
-  FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+  if (troop_id.empty()) {
+    FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+    return;
+  }
+
+  for (char letter : troop_id) {
+    if (!std::isdigit(letter)) {
+      PLOGE << "Invalid Argument! Expecting whole number!";
+      return;
+    }
+  }
+
+  TroopID id = static_cast<TroopID>(std::stoi(troop_id));
+  FieldHandler::raise<InitCombatFEvent>(FieldEVT::INIT_COMBAT_FORCED, id);
 }
 
 void gotoTitleCommand() {
   PLOGD << "Now executing command.";
   FieldHandler::raise<FieldEvent>(FieldEVT::GOTO_TITLE);
+}
+
+void gameoverCommand() {
+  PLOGD << "Now executing command.";
+  FieldHandler::raise<GameOverEvent>(FieldEVT::GAME_OVER, 
+                                     "Triggered by debug command.");
 }
 
 void deleteEntityCommand(string argument) {

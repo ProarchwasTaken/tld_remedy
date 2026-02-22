@@ -8,20 +8,33 @@
 #include "base/party_member.h"
 #include "data/combatant_event.h"
 #include "utils/math.h"
-#include "combat/system/camera.h"
 #include "combat/hud/blackbars.h"
 #include <plog/Log.h>
 
 using std::unique_ptr;
 
 
-BlackBars::BlackBars() {
-  texture = LoadTexture("graphics/hud/blackbar.png");
+BlackBars::BlackBars(float y_offset, bool alternate) {
+  if (!alternate) {
+    texture = LoadTexture("graphics/hud/blackbar.png");
+  }
+  else {
+    texture = LoadTexture("graphics/hud/blackbar2.png"); 
+  }
   tint.a = 225;
+
+  this->y_offset = y_offset;
+  top_dest.y -= y_offset;
+  bottom_dest.y -= y_offset;
 }
 
 BlackBars::~BlackBars() {
   UnloadTexture(texture);
+}
+
+void BlackBars::setTint(Color tint) {
+  this->tint = tint;
+  this->tint.a = 225;
 }
 
 void BlackBars::setValues(float speed, float zoom) {
@@ -98,9 +111,15 @@ void BlackBars::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 }
 
-void BlackBars::update(CombatCamera *camera) {
+void BlackBars::update(Camera2D *camera) {
+  if (!enabled) {
+    return;
+  }
+
   top_dest.x = camera->target.x;
+  top_dest.y = (24 - y_offset) + camera->target.y;
   bottom_dest.x = camera->target.x;
+  bottom_dest.y = (216 - y_offset) + camera->target.y;
 
   if (speed != target_speed) {
     speedLerp();
@@ -151,13 +170,17 @@ void BlackBars::targetTimer() {
 }
 
 void BlackBars::draw() {
+  if (!enabled) {
+    return;
+  }
+
   source.x += speed * Game::deltaTime();
 
   if (source.x > 16) {
     source.x = source.x - 16;
   }
 
-  DrawTexturePro(texture, source, top_dest, {215, zoom}, 178, tint);
-  DrawTexturePro(texture, source, bottom_dest, {215, zoom}, -2, tint);
+  DrawTexturePro(texture, source, top_dest, {229, zoom}, 178, tint);
+  DrawTexturePro(texture, source, bottom_dest, {229, zoom}, -2, tint);
 }
 

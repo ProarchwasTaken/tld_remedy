@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <vector>
 #include <memory>
+#include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
 #include "base/party_member.h"
@@ -28,16 +29,23 @@
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/enemy/dummy.h"
 
+enum class CombatState {
+  NEUTRAL,
+  LOSE,
+  WIN
+};
+
 
 class CombatScene : public Scene {
 public:
-  CombatScene(Session *session);
+  CombatScene(Session *session, TroopID id, int reward);
   ~CombatScene();
 
-  void initializeCombatants();
+  void initializeCombatants(TroopID id);
   void initializePlayer();
   void initializeCompanion();
 
+  EnemyTroop getTroop(TroopID id);
   void initializeTroop(EnemyTroop *troop);
   std::unique_ptr<Enemy> createEnemy(EnemyData &data);
 
@@ -48,9 +56,16 @@ public:
 
   void update() override;
   void pauseLogic();
+  void panelLogic();
   void combatantBehavior();
   void eventEvaluation(std::unique_ptr<CombatantEvent> &event);
   void eventProcessing();
+
+  void endConditions();
+  void winProcedure();
+  const char *playerWinText();
+  const char *companionWinText();
+
   void updateHud();
 
   void eventHandling(std::unique_ptr<CombatEvent> &event);
@@ -86,8 +101,10 @@ private:
   CombatKeybinds *keybinds;
   SoundAtlas *menu_sfx;
 
+  CombatState state = CombatState::NEUTRAL;
+  bool end_combat = false;
   bool paused = false;
-  bool game_over = false;
+  int reward;
 
   Mary *player = NULL;
   std::unique_ptr<LifeHud> plr_hud;
