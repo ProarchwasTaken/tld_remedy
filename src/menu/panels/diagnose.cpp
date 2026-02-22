@@ -460,7 +460,7 @@ void DiagnosePanel::drawCursor() {
   Vector2 position = {152, y};
   Color color = WHITE;
 
-  if (!heal_mode) {
+  if (!heal_mode && !panel_mode) {
     float sin_a = std::sinf(blink_clock * 2.5);
     sin_a = (sin_a / 2) + 0.5;
     color.a = 255 * sin_a;
@@ -635,7 +635,7 @@ string DiagnosePanel::getStatusDesc(StatusID id) {
     }
     case StatusID::MANGLED: {
       return 
-      "Defense and Recover are\n"
+      "Defense and Recovery are\n"
       "lowered by 50%";
     }
     default: {
