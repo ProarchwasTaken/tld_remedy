@@ -61,9 +61,7 @@ FieldScene::FieldScene(Session *session_data) {
   PLOGI << "Loading existing session data.";
   session = make_unique<Session>();
   *session = *session_data;
-  setup();
-  
-  PlayerActor::setControllable(true);
+  setup();  
 }
 
 FieldScene::~FieldScene() {
@@ -92,6 +90,7 @@ void FieldScene::setup() {
 
   field = make_unique<FieldMap>();
   mapLoadProcedure(session->map_name);
+  PlayerActor::setControllable(true);
 
   #ifndef NDEBUG
   static CommandSystem command_system;
