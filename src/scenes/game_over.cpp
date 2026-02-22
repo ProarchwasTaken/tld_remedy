@@ -48,7 +48,7 @@ void GameOverScene::startDialog() {
   };
 
   panel = make_unique<DialogPanel>((Vector2){16, 8}, dialog, true, 
-                                   true, 1.5);
+                                   false, 1.5);
   panel_mode = true;
 }
 
