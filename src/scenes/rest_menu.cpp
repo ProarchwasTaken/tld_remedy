@@ -43,6 +43,8 @@ RestMenuScene::RestMenuScene(Session *session) {
   atlas.use();
   setupCharacters();
 
+  Game::bgm->prepare("rest");
+
   sfx = &Game::menu_sfx;
   sfx->use();
 }
@@ -117,6 +119,9 @@ void RestMenuScene::openingLogic() {
 
   if (!black_bars.enabled && state_clock >= 0.60) {
     black_bars.enabled = true;
+    Game::bgm->play();
+    Game::bgm->setBaseVolume(0.0);
+    Game::bgm->fade(1.0, 2.0);
   }
 
   float percentage = Clamp((-0.5 + state_clock) / 0.25, 0.0, 1.0);
@@ -147,6 +152,9 @@ void RestMenuScene::closingLogic() {
 
 
   if (state_clock == 1.0) {
+    black_bars.enabled = false;
+    Game::bgm->prepare("field");
+    Game::bgm->play();
     Game::returnToField();
   }
 }
@@ -298,6 +306,7 @@ void RestMenuScene::panelTermination() {
   }
   else {
     black_bars.setTargetValues(20, -56);
+    Game::bgm->fade(0.0, 1.0);
     state = CLOSING;
   }
 }

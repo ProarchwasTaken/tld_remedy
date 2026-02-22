@@ -695,6 +695,7 @@ void Game::openCampMenu(Session *data) {
 void Game::openRestMenu(Session *data) {
   assert(reserve == nullptr);
 
+  bgm->stop();
   reserve = make_unique<RestMenuScene>(data);
 
   game_state = GameState::OPEN_RESTMENU;
