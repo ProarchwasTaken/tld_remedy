@@ -115,6 +115,7 @@ void EnemyActor::normalLogic() {
     plr->setControllable(false);
 
     FieldScene::sfx.play("enemy_alert");
+    Game::bgm->fade(0.0, 1.0);
     Game::sleep(1.0);
   }
 }

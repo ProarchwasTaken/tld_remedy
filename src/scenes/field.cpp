@@ -100,6 +100,9 @@ void FieldScene::setup() {
   
   sfx.use();
   vignette = LoadTexture("graphics/overlays/field_vignette.png");
+
+  Game::bgm->prepare("field");
+  Game::bgm->play();
   PLOGI << "Field scene is ready to go!";
 }
 

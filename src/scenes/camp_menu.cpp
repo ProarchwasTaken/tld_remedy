@@ -107,6 +107,7 @@ void CampMenuScene::closingLogic() {
 
   if (state_clock == 0.0) {
     Game::returnToField();    
+    Game::bgm->fade(1.0, 1.3);
   }
 }
 

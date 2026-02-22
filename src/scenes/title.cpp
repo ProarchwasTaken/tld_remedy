@@ -32,6 +32,7 @@ TitleScene::TitleScene() {
   }
 
   Game::bgm->prepare("title");
+  Game::bgm->play();
   PLOGI << "TitleScene has been initialized.";
 }
 
@@ -92,9 +93,11 @@ void TitleScene::selectOption() {
     case TitleOption::LOAD_GAME: {
       assert(valid_session);
       valid_session = Game::loadSession();
+
       if (!valid_session) {
-        disallowed.emplace(TitleOption::LOAD_GAME);
+        disallowed.emplace(TitleOption::LOAD_GAME); 
       }
+
       break;
     }
     case TitleOption::CONFIG: {

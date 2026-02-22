@@ -190,8 +190,6 @@ void Game::defineColorPalette() {
 
 void Game::start() {
   assert(scene != nullptr);
-  bgm->play();
-
   while (!EXIT_GAME && !WindowShouldClose()) {
     topLevelInput();
     gameLogic();
@@ -429,8 +427,12 @@ void Game::initCombatProcedure() {
 
     clock = 0.0;
     noise->setAlpha(0.0);
-
     setupCanvas();
+
+    bgm->play();
+    bgm->setBaseVolume(0.0);
+    bgm->fade(1.0, 0.25);
+
     Game::fadein(0.25);
     fadeScreenProcedure();
   }
@@ -571,6 +573,7 @@ void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
   PLOGI << "Starting a new game.";
   assert(reserve == nullptr);
 
+  bgm->stop();
   reserve = make_unique<FieldScene>(sub_weapon, companion);
 
   session_playtime = 0;
@@ -626,6 +629,7 @@ bool Game::loadSession() {
   }
 
   assert(reserve == nullptr);
+  bgm->stop();
   reserve = make_unique<FieldScene>(&session);
 
   session_playtime = session.playtime;
@@ -682,6 +686,8 @@ void Game::openCampMenu(Session *data) {
   flash_color.a = 0;
 
   game_state = GameState::OPEN_CAMPMENU;
+  bgm->fade(0.25, 1.8);
+
   menu_sfx.play("menu_camp_open");
   SKIP_FRAME = true;
 }
@@ -698,6 +704,7 @@ void Game::openRestMenu(Session *data) {
 void Game::initCombat(Session *session) {
   PLOGI << "Battle Time!";
   assert(reserve == nullptr);
+  bgm->stop();
 
   ifstream file("data/troops.json");
   json parsed_data = json::parse(file);
@@ -794,6 +801,7 @@ void Game::gameover(string reason) {
   noise->setTint(palette[32]);
 
   setTimeScale(0.75);
+  bgm->stop();
   menu_sfx.play("gameover");
 
   game_state = GameState::GAME_OVER;

@@ -72,6 +72,8 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
   #ifndef NDEBUG
   debug_overlay = LoadTexture("graphics/stages/debug_overlay.png"); 
   #endif // !NDEBUG
+  
+  Game::bgm->prepare("combat");
 
   PLOGI << "Player Party: " << PartyMember::memberCount();
   PLOGI << "Enemies present: " << Enemy::memberCount(); 
@@ -218,6 +220,8 @@ void CombatScene::pause() {
 
   black_bars.setTargetValues(5, 48);
   paused = true;
+
+  Game::bgm->pause();
   menu_sfx->play("menu_select");
   PLOGI << "Pausing the game.";
 }
@@ -225,6 +229,8 @@ void CombatScene::pause() {
 void CombatScene::resume() {
   black_bars.resetTargetValues();
   paused = false;
+
+  Game::bgm->resume();
   menu_sfx->play("menu_cancel");
   PLOGI << "Resuming the game.";
 }
@@ -369,7 +375,8 @@ void CombatScene::eventProcessing() {
 }
 
 void CombatScene::endConditions() {
-  if (Enemy::memberCount() == 0) {
+  bool player_alive = player != NULL && player->state != DEAD;
+  if (player_alive && Enemy::memberCount() == 0) {
     PLOGI << "All enemies have been defeated.";
     winProcedure();
   }
@@ -408,6 +415,7 @@ void CombatScene::winProcedure() {
 
   state = CombatState::WIN;
   panel_mode = true;
+  Game::bgm->stop();
 }
 
 const char *CombatScene::playerWinText() {
@@ -612,6 +620,10 @@ void CombatScene::endCombatProcedure() {
   if (state != CombatState::LOSE) {
     session->supplies += reward;
   }
+
+  Game::bgm->prepare("field");
+  Game::bgm->play();
+
   Game::returnToField();
 }
 
