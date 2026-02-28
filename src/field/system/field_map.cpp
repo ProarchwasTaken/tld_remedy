@@ -369,6 +369,8 @@ void FieldMap::findEnemies(Session &session, string &map_name,
 
     vector<Direction> routine;
     float speed;
+    TroopID troop;
+
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
       if (property_name == "routine") {
@@ -378,13 +380,17 @@ void FieldMap::findEnemies(Session &session, string &map_name,
       else if (property_name == "speed") {
         speed = property["value"];
       }
+      else if (property_name == "troop_id") {
+        int id = property["value"];
+        troop = static_cast<TroopID>(id);
+      }
     }
 
     assert(!routine.empty());
 
     PLOGD << "{X: " << x << ", Y: " << y << "}";
     EnemyActorData data = {ACTOR, ActorType::ENEMY, position, DOWN, 
-      object_id, routine, speed};
+      object_id, routine, speed, troop};
     entity_queue.push_back(make_unique<EnemyActorData>(data));
 
     if (active == 2) {

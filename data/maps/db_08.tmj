@@ -454,6 +454,11 @@
                          "name":"speed",
                          "type":"float",
                          "value":2
+                        }, 
+                        {
+                         "name":"troop_id",
+                         "type":"int",
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"",
@@ -477,6 +482,11 @@
                          "name":"speed",
                          "type":"float",
                          "value":2
+                        }, 
+                        {
+                         "name":"troop_id",
+                         "type":"int",
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"",
@@ -500,6 +510,11 @@
                          "name":"speed",
                          "type":"float",
                          "value":2
+                        }, 
+                        {
+                         "name":"troop_id",
+                         "type":"int",
+                         "value":4
                         }],
                  "rotation":0,
                  "type":"",

@@ -1,8 +1,10 @@
 #pragma once
-#include <raylib.h>
+#include <nlohmann/json_fwd.hpp>
 #include <memory>
 #include <random>
 #include <string>
+#include <tuple>
+#include <raylib.h>
 #include "enums.h"
 #include "base/scene.h"
 #include "data/session.h"
@@ -80,7 +82,9 @@ public:
 
   static void openCampMenu(Session *data);
   static void openRestMenu(Session *data);
-  static void initCombat(Session *data);
+  static void initCombat(Session *data, TroopID id = TroopID::INVALID);
+  static std::tuple<TroopID, int> selectRandomTroop(nlohmann::json &pool);
+  static int getTroopReward(TroopID troop_id, nlohmann::json &pool);
   static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
   static void gameover(std::string reason);

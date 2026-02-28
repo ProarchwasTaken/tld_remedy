@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 1.14.0
+VERSION 0.1.0
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -11,10 +11,10 @@ option(BUILD_DEV "Build the game for development purposes." OFF)
 if(${BUILD_DEV})
   message(STATUS "Using debug flags.")
   set(COMPILE_OPTIONS --debug -O0)
-  set(PROJECT_STAGE "Pre-Alpha (Devmode)")
+  set(PROJECT_STAGE "Alpha (Devmode)")
 else()
   set(COMPILE_OPTIONS -DNDEBUG)
-  set(PROJECT_STAGE "Pre-Alpha")
+  set(PROJECT_STAGE "Alpha")
 endif()
 
 if(WIN32)

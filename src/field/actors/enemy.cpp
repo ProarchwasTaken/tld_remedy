@@ -25,6 +25,7 @@ EnemyActor::EnemyActor(EnemyActorData &data):
 Actor("Enemy", ActorType::ENEMY, data.position, *data.routine.begin())
 {
   object_id = data.object_id;
+  troop_id = data.troop_id;
 
   this->routine = data.routine;
   this->current_direction = this->routine.begin();
@@ -91,9 +92,10 @@ void EnemyActor::update() {
     pursue();
   }
 
+  // Oh! It turns out past me had already thought of that.
   if (CheckCollisionRecs(collis_box.rect, plr->collis_box.rect)) {
     PLOGI << "Player has collided with enemy.";
-    FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+    FieldHandler::raise<InitCombatEvent>(FieldEVT::INIT_COMBAT, troop_id);
     direction = static_cast<Direction>(plr->direction * -1);
     awaiting_deletion = true;
   }

@@ -31,6 +31,7 @@ public:
   static int pursuing_enemy;
 private:
   int object_id;
+  TroopID troop_id;
 
   std::vector<Direction> routine;
   std::vector<Direction>::iterator current_direction;

@@ -242,7 +242,7 @@ void saveCommand() {
 void initCombatCommand(string troop_id) {
   PLOGD << "Now executing command.";
   if (troop_id.empty()) {
-    FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+    FieldHandler::raise<InitCombatEvent>(FieldEVT::INIT_COMBAT);
     return;
   }
 
