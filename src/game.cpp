@@ -29,7 +29,7 @@
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
 std::filesystem::create_directory, std::chrono::system_clock, 
 std::string, std::mt19937_64, std::uniform_int_distribution,
-nlohmann::json, nlohmann::basic_json, std::tuple, std::make_tuple;
+nlohmann::json, nlohmann::basic_json, std::tuple;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
@@ -63,6 +63,19 @@ float Game::time_scale = 1.0;
 double Game::session_playtime = 0.0;
 bool Game::run_timer = false;
 
+Game::Game(int argc, char *argv[]) {
+  PLOGI << "Evaluating command line arguments.";
+
+  for (int x = 0; x < argc; x++) {
+    string arg = argv[x];
+
+    if (arg == "-m" && x + 1 != argc) {
+      quick_load = true;
+      ql_map = argv[x + 1];
+      PLOGI << "Quick loading map: " << ql_map;
+    }
+  }
+}
 
 void Game::init() {
   loadPersonal();
@@ -92,7 +105,14 @@ void Game::init() {
   menu_sfx.use();
   bgm = make_unique<MusicPlayer>();
   noise = make_unique<NoiseEffect>();
-  scene = make_unique<TitleScene>();
+
+  if (!quick_load) {
+    scene = make_unique<TitleScene>();
+  }
+  else {
+    scene = make_unique<FieldScene>(ql_map);
+  }
+
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }

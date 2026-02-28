@@ -22,6 +22,7 @@ class FieldScene : public Scene {
 public:
   FieldScene(SubWeaponID sub_weapon, CompanionID companion);
   FieldScene(Session *session_data);
+  FieldScene(std::string map_name);
   ~FieldScene();
 
   void setup();

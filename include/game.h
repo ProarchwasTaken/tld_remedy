@@ -35,6 +35,7 @@ enum class GameState {
 
 class Game {
 public:
+  Game(int argc, char *argv[]);
   void init();
   void loadPersonal();
   void setupCanvas();
@@ -119,6 +120,9 @@ public:
   #else
   static constexpr bool devmode = false;
   #endif // !NDEBUG
+
+  bool quick_load = false;
+  std::string ql_map;
 private:
   static GameState game_state;
   static bool EXIT_GAME;

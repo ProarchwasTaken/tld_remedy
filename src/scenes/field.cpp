@@ -64,6 +64,18 @@ FieldScene::FieldScene(Session *session_data) {
   setup();  
 }
 
+FieldScene::FieldScene(string map_name) {
+  PLOGI << "Initializing the field scene with the map: " << map_name;
+  session = make_unique<Session>();
+  session->version = Game::session_version;
+  std::strcpy(session->map_name, map_name.c_str());
+
+  initPlayerData(SubWeaponID::KNIFE);
+  initCompanionData(CompanionID::ERWIN);
+
+  setup();
+}
+
 FieldScene::~FieldScene() {
   if (sequence != nullptr) {
     sequence.reset();
