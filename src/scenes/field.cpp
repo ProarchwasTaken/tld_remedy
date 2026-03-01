@@ -850,8 +850,13 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string location = TextFormat("Location: %s", session->map_name);
-  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
+  string map_name = TextFormat("Map: %s", session->map_name);
+  Vector2 map_pos = TextUtils::alignRight(map_name.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string location = TextFormat("Location: %s", session->location);
+  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y},
                                           *font, -3, 0);
   y += spacing;
 
@@ -900,6 +905,7 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
 
 
+  DrawTextEx(*font, map_name.c_str(), map_pos, text_size, -3, GREEN);
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);

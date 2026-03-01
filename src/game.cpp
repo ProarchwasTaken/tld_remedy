@@ -111,6 +111,7 @@ void Game::init() {
   }
   else {
     scene = make_unique<FieldScene>(ql_map);
+    run_timer = true;
   }
 
   PLOGI << "Time Scale: " << time_scale;
