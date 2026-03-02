@@ -78,11 +78,14 @@ enum class EnemyID {
 
 enum class TroopID {
   INVALID = -1,
-  DB_TROOP1,
-  DB_TROOP2,
-  DB_TROOP3,
-  DB_TROOP4,
-  DB_TROOP5
+  CD_TROOP1,
+  CD_TROOP2,
+  CD_TROOP3,
+  DB_TROOP1 = 95,
+  DB_TROOP2 = 96,
+  DB_TROOP3 = 97,
+  DB_TROOP4 = 98,
+  DB_TROOP5 = 99
 };
 
 enum class ActionID {

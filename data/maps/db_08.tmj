@@ -4,7 +4,7 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/maps\/db_08.png",
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/db_08.png",
          "imageheight":336,
          "imagewidth":384,
          "name":"Map Image",
@@ -514,7 +514,7 @@
                         {
                          "name":"troop_id",
                          "type":"int",
-                         "value":4
+                         "value":99
                         }],
                  "rotation":0,
                  "type":"",

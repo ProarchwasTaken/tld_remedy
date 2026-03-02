@@ -156,6 +156,15 @@ void CombatScene::initializeCompanion() {
 
 EnemyTroop CombatScene::getTroop(TroopID id) {
   switch (id) {
+    case TroopID::CD_TROOP1: {
+      return CDTroop1();
+    }
+    case TroopID::CD_TROOP2: {
+      return CDTroop2();
+    }
+    case TroopID::CD_TROOP3: {
+      return CDTroop3();
+    }
     case TroopID::DB_TROOP1: {
       return DBTroop1();
     }

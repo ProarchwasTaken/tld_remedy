@@ -14,6 +14,35 @@ struct EnemyTroop {
   std::vector<EnemyData> enemies;
 };
 
+struct CDTroop1 : EnemyTroop {
+  CDTroop1() {
+    id = TroopID::CD_TROOP1;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+    };
+  }
+};
+
+struct CDTroop2 : EnemyTroop {
+  CDTroop2() {
+    id = TroopID::CD_TROOP2;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {160, 152}, LEFT},
+    };
+  }
+};
+
+struct CDTroop3 : EnemyTroop {
+  CDTroop3() {
+    id = TroopID::CD_TROOP3;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+    };
+  }
+};
+
 struct DBTroop1 : EnemyTroop {
   DBTroop1() {
     id = TroopID::DB_TROOP1;
