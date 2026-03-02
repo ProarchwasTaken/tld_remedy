@@ -125,7 +125,7 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->member_id = PartyMemberID::MARY;
   player->weapon_id = weapon_id;
 
-  player->life = 15;
+  player->life = 7;
   player->max_life = 15;
 
   player->init_morale = 10;

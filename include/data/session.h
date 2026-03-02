@@ -43,7 +43,7 @@ struct CommonData {
 struct Session {
   unsigned int version;
   double playtime = 0.0;
-  int supplies = 0;
+  int supplies = 8;
 
   char map_name[16] = "db_05";
   char location[16] = "";
@@ -56,7 +56,7 @@ struct Session {
   ItemID inventory[8] = {
     ItemID::I_BANDAGE,
     ItemID::M_SPLINT,
-    ItemID::NONE,
+    ItemID::S_BANDAGE,
     ItemID::NONE,
     ItemID::NONE,
     ItemID::NONE,
