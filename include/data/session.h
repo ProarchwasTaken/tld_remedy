@@ -51,7 +51,7 @@ struct Session {
   Player player;
   Companion companion;
   
-  int item_count = 2;
+  int item_count = 3;
   int item_limit = ITEM_LIMIT;
   ItemID inventory[8] = {
     ItemID::I_BANDAGE,
