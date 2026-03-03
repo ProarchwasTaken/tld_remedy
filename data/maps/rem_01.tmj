@@ -255,7 +255,43 @@
          "draworder":"topdown",
          "id":6,
          "name":"Pickups",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":11,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"Supplies",
+                 "visible":true,
+                 "width":0,
+                 "x":160,
+                 "y":144
+                }, 
+                {
+                 "height":0,
+                 "id":12,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":2
+                        }],
+                 "rotation":0,
+                 "type":"Supplies",
+                 "visible":true,
+                 "width":0,
+                 "x":48,
+                 "y":112
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -287,7 +323,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":11,
+ "nextobjectid":14,
  "orientation":"orthogonal",
  "properties":[
         {

@@ -57,7 +57,7 @@ RestMenuScene::~RestMenuScene() {
 }
 
 void RestMenuScene::loadBackground(string location) {
-  if (location == "Cathedral" || location == "Debug") {
+  if (location == "Cathedral F2" || location == "Debug") {
     background = LoadTexture("graphics/menu/backgrounds/cathedral.png");
     bg_color = Game::palette[40];
     bg_color.a = 0.0;

@@ -267,7 +267,35 @@
          "draworder":"topdown",
          "id":7,
          "name":"Enemies",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":10,
+                 "name":"Enemy",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"routine",
+                         "type":"string",
+                         "value":"2,"
+                        }, 
+                        {
+                         "name":"speed",
+                         "type":"float",
+                         "value":2
+                        }, 
+                        {
+                         "name":"troop_id",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":176,
+                 "y":168
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -287,7 +315,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":10,
+ "nextobjectid":11,
  "orientation":"orthogonal",
  "properties":[
         {

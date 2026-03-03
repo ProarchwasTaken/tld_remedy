@@ -119,8 +119,8 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":272.363636363636,
-                 "y":110.727272727273
+                 "x":272,
+                 "y":112
                 }, 
                 {
                  "height":0,
@@ -271,7 +271,19 @@
          "draworder":"topdown",
          "id":8,
          "name":"Savepoints",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":10,
+                 "name":"Savepoint",
+                 "point":true,
+                 "rotation":0,
+                 "type":"basic",
+                 "visible":true,
+                 "width":0,
+                 "x":272,
+                 "y":112
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -279,7 +291,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":9,
+ "nextobjectid":11,
  "orientation":"orthogonal",
  "properties":[
         {
