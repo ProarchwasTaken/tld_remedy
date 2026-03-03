@@ -16,6 +16,7 @@
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
+#define PLATFORM_APPLE 2
 
 
 enum class GameState {

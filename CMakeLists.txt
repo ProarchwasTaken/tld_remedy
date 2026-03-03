@@ -18,9 +18,14 @@ else()
 endif()
 
 if(WIN32)
+  message(STATUS "Detected Platform: Windows")
   set(PLATFORM 0)
-else()
+elseif(UNIX)
+  message(STATUS "Detected Platform: Linux")
   set(PLATFORM 1)
+else()
+  message(STATUS "Detected Platform: MacOS")
+  set(PLATFORM 2)
 endif()
 
 set(META_DATA
