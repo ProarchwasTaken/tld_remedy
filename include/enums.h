@@ -47,6 +47,10 @@ enum class CompanionID {
   ERWIN
 };
 
+enum class FlagID {
+  NONE = -1,
+};
+
 enum class ItemID {
   NONE = -1,
   I_BANDAGE,

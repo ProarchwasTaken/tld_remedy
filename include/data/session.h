@@ -3,6 +3,7 @@
 
 #define STATUS_LIMIT 3
 #define ITEM_LIMIT 8
+#define FLAG_COUNT 8
 
 
 struct Character {
@@ -40,6 +41,11 @@ struct CommonData {
   char map_name[16] = "";
 };
 
+struct GameFlag {
+  FlagID id = FlagID::NONE;
+  bool raised = false;
+};
+
 struct Session {
   unsigned int version;
   double playtime = 0.0;
@@ -71,4 +77,16 @@ struct Session {
   int enemy_count = 0;
   int enemy_limit = 64;
   CommonData enemy[64];
+  
+  int flag_count = FLAG_COUNT;
+  GameFlag flags[8] {
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+    {FlagID::NONE, false},
+  };
 };
