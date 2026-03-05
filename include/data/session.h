@@ -70,14 +70,6 @@ struct Session {
     ItemID::NONE,
   };
 
-  int common_count = 0;
-  int common_limit = 64;
-  CommonData common[64];
-
-  int enemy_count = 0;
-  int enemy_limit = 64;
-  CommonData enemy[64];
-  
   int flag_count = FLAG_COUNT;
   GameFlag flags[8] {
     {FlagID::NONE, false},
@@ -89,4 +81,13 @@ struct Session {
     {FlagID::NONE, false},
     {FlagID::NONE, false},
   };
+
+  int common_count = 0;
+  int common_limit = 64;
+  CommonData common[64];
+
+  int enemy_count = 0;
+  int enemy_limit = 64;
+  CommonData enemy[64];
+ 
 };
