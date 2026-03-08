@@ -43,6 +43,28 @@ struct CDTroop3 : EnemyTroop {
   }
 };
 
+struct CDTroop4 : EnemyTroop {
+  CDTroop4() {
+    id = TroopID::CD_TROOP4;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {160, 152}, LEFT},
+      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+    };
+  }
+};
+
+struct CDTroop5 : EnemyTroop {
+  CDTroop5() {
+    id = TroopID::CD_TROOP5;
+    enemies = {
+      {EnemyID::SERVANT, {64, 152}, LEFT},
+      {EnemyID::SERVANT, {128, 152}, LEFT},
+      {EnemyID::SERVANT, {192, 152}, LEFT},
+    };
+  }
+};
+
 struct DBTroop1 : EnemyTroop {
   DBTroop1() {
     id = TroopID::DB_TROOP1;

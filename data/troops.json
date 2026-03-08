@@ -16,6 +16,28 @@
       "reward": 10
     }
   ],
+  "Cathedral F1": [
+    {
+      "id": 0,
+      "weight": 10,
+      "reward": 5
+    },
+    {
+      "id": 1,
+      "weight": 30,
+      "reward": 10
+    },
+    {
+      "id": 2,
+      "weight": 30,
+      "reward": 10
+    },
+    {
+      "id": 3,
+      "weight": 30,
+      "reward": 15
+    }
+  ],
   "Debug": [
     {
       "id": 97,

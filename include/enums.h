@@ -85,11 +85,15 @@ enum class TroopID {
   CD_TROOP1,
   CD_TROOP2,
   CD_TROOP3,
+  CD_TROOP4,
+  CD_TROOP5,
+  #ifndef NDEBUG
   DB_TROOP1 = 95,
   DB_TROOP2 = 96,
   DB_TROOP3 = 97,
   DB_TROOP4 = 98,
-  DB_TROOP5 = 99
+  DB_TROOP5 = 99 
+  #endif // !NDEBUG
 };
 
 enum class ActionID {
@@ -162,12 +166,11 @@ enum class ActorEVT {
 };
 
 enum class SequenceID {
-  #ifndef NDEBUG
-  DB_01 = -1, 
-  #endif // !NDEBUG
-
   SAVE,
-  REST
+  REST,
+  #ifndef NDEBUG
+  DB_01 = 95, 
+  #endif // !NDEBUG
 };
 
 enum class CombatEVT {
