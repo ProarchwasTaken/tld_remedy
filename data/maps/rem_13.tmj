@@ -1,12 +1,12 @@
 { "compressionlevel":-1,
- "height":31,
+ "height":36,
  "infinite":false,
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_09.png",
-         "imageheight":496,
-         "imagewidth":192,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_13.png",
+         "imageheight":576,
+         "imagewidth":256,
          "name":"Map Image",
          "offsetx":0,
          "offsety":0.402371,
@@ -32,77 +32,97 @@
                          "y":0
                         }, 
                         {
-                         "x":16,
+                         "x":32,
                          "y":0
                         }, 
                         {
-                         "x":16,
+                         "x":32,
                          "y":-16
                         }, 
                         {
-                         "x":144,
+                         "x":112,
                          "y":-16
                         }, 
                         {
-                         "x":144,
-                         "y":48
+                         "x":112,
+                         "y":-320
                         }, 
                         {
-                         "x":144,
-                         "y":288
+                         "x":80,
+                         "y":-320
                         }, 
                         {
-                         "x":32,
-                         "y":288
+                         "x":80,
+                         "y":-336
                         }, 
                         {
-                         "x":32,
-                         "y":176
+                         "x":112,
+                         "y":-336
                         }, 
                         {
-                         "x":16,
-                         "y":176
+                         "x":112,
+                         "y":-400
                         }, 
                         {
-                         "x":16,
-                         "y":160
+                         "x":-80,
+                         "y":-400
+                        }, 
+                        {
+                         "x":-80,
+                         "y":-336
+                        }, 
+                        {
+                         "x":-48,
+                         "y":-336
+                        }, 
+                        {
+                         "x":-48,
+                         "y":-320
+                        }, 
+                        {
+                         "x":-80,
+                         "y":-320
+                        }, 
+                        {
+                         "x":-80,
+                         "y":-16
                         }, 
                         {
                          "x":0,
-                         "y":160
-                        }, 
-                        {
-                         "x":0,
-                         "y":128
+                         "y":-16
                         },
                     
                         {
-                         "x":80,
-                         "y":128
+                         "x":0,
+                         "y":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":112,
+                 "y":560
+                }, 
+                {
+                 "height":0,
+                 "id":2,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
                         }, 
                         {
-                         "x":80,
-                         "y":256
+                         "x":64,
+                         "y":0
                         }, 
                         {
-                         "x":96,
-                         "y":256
-                        }, 
-                        {
-                         "x":96,
-                         "y":48
-                        }, 
-                        {
-                         "x":16,
-                         "y":48
-                        }, 
-                        {
-                         "x":16,
-                         "y":32
+                         "x":64,
+                         "y":16
                         }, 
                         {
                          "x":0,
-                         "y":32
+                         "y":16
                         }, 
                         {
                          "x":0,
@@ -112,8 +132,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":16,
-                 "y":176
+                 "x":96,
+                 "y":224
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -129,7 +149,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":2,
+                 "id":3,
                  "name":"Player",
                  "point":true,
                  "properties":[
@@ -148,12 +168,12 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":136,
-                 "y":208
+                 "x":128,
+                 "y":480
                 }, 
                 {
                  "height":0,
-                 "id":3,
+                 "id":4,
                  "name":"Companion",
                  "point":true,
                  "properties":[
@@ -172,13 +192,13 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":136,
-                 "y":192
+                 "x":128,
+                 "y":464
                 }, 
                 {
                  "height":0,
-                 "id":4,
-                 "name":"From rem_05",
+                 "id":5,
+                 "name":"From rem_12",
                  "point":true,
                  "properties":[
                         {
@@ -190,38 +210,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":1
+                         "value":-2
                         }],
                  "rotation":0,
-                 "type":"rem_09-1",
+                 "type":"rem_13-1",
                  "visible":true,
                  "width":0,
-                 "x":40,
-                 "y":192
-                }, 
-                {
-                 "height":0,
-                 "id":7,
-                 "name":"From rem_10",
-                 "point":true,
-                 "properties":[
-                        {
-                         "name":"actor_type",
-                         "propertytype":"ActorType",
-                         "type":"int",
-                         "value":0
-                        }, 
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":1
-                        }],
-                 "rotation":0,
-                 "type":"rem_09-2",
-                 "visible":true,
-                 "width":0,
-                 "x":40,
-                 "y":320
+                 "x":128,
+                 "y":536
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -236,58 +232,31 @@
          "name":"MapTransitions",
          "objects":[
                 {
-                 "height":32,
-                 "id":5,
-                 "name":"To rem_05",
-                 "properties":[
-                        {
-                         "name":"direction",
-                         "type":"int",
-                         "value":-1
-                        }, 
-                        {
-                         "name":"map_dest",
-                         "type":"string",
-                         "value":"rem_05"
-                        }, 
-                        {
-                         "name":"spawn_dest",
-                         "type":"string",
-                         "value":"rem_05-5"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":16,
-                 "y":176
-                }, 
-                {
-                 "height":32,
+                 "height":16,
                  "id":6,
-                 "name":"To rem_10",
+                 "name":"To rem_12",
                  "properties":[
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":-1
+                         "value":2
                         }, 
                         {
                          "name":"map_dest",
                          "type":"string",
-                         "value":"rem_10"
+                         "value":"rem_12"
                         }, 
                         {
                          "name":"spawn_dest",
                          "type":"string",
-                         "value":"rem_10-1"
+                         "value":"rem_12-2"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":16,
-                 "x":16,
-                 "y":304
+                 "width":32,
+                 "x":112,
+                 "y":544
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -332,13 +301,13 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":8,
+ "nextobjectid":7,
  "orientation":"orthogonal",
  "properties":[
         {
          "name":"location",
          "type":"string",
-         "value":"Cathedral F2"
+         "value":"Cathedral F1"
         }],
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
@@ -347,5 +316,5 @@
  "tilewidth":16,
  "type":"map",
  "version":"1.10",
- "width":12
+ "width":16
 }
