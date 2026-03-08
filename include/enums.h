@@ -163,7 +163,7 @@ enum class ActorEVT {
 
 enum class SequenceID {
   #ifndef NDEBUG
-  DB_01, 
+  DB_01 = -1, 
   #endif // !NDEBUG
 
   SAVE,

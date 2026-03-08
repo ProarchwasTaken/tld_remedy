@@ -144,6 +144,10 @@ void CompanionActor::draw() {
   assert(sprite != NULL);
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
+
+  if (emote != NULL) {
+    drawEmote();
+  }
 }
 
 void CompanionActor::drawDebug() {

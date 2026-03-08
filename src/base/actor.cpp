@@ -4,9 +4,11 @@
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "system/sprite_atlas.h"
 #include "base/actor.h"
 
 using std::string;
+SpriteAtlas Actor::emotes("entities", "emote_balloons");
 
 
 Actor* Actor::getActor(enum ActorType type) {
@@ -36,13 +38,22 @@ Actor::Actor(string name, enum ActorType actor_type, Vector2 position,
   bool successful = existing_actors.emplace(this).second;
 
   assert(successful);
+  emotes.use();
   PLOGI << "ACTOR: '" << name << "' [ID: " << entity_id << "]";
 }
 
 Actor::~Actor() {
   int erased = existing_actors.erase(this);
   assert(erased == 1);
+
+  emotes.release();
   PLOGI << "Removed actor: '" << name << "'";
+}
+
+void Actor::drawEmote() {
+  assert(emote != NULL);
+  Rectangle dest = {position.x, bounding_box.position.y, 16, 16};
+  DrawTexturePro(emotes.sheet, *emote, dest, {8, 16}, 0, WHITE);
 }
 
 void Actor::drawDebug() {

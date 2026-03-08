@@ -10,7 +10,6 @@
 #include "data/field_event.h"
 #include "data/actor_event.h"
 #include "data/session.h"
-#include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "field/system/field_map.h"
 #include "field/system/camera.h"
@@ -65,7 +64,6 @@ public:
   #endif // !NDEBUG
 
   static SoundAtlas sfx;
-  static SpriteAtlas emotes;
 private:
   std::unique_ptr<Session> session;
   std::unique_ptr<FieldMap> field;

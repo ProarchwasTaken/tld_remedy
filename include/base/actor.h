@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <set>
@@ -7,6 +8,7 @@
 #include "data/rect_ex.h"
 #include "data/actor_event.h"
 #include "base/entity.h"
+#include "system/sprite_atlas.h"
 
 
 /* Actors are the main focus of the FieldScene, as do Actors in a 
@@ -29,10 +31,14 @@ public:
 
   virtual void behavior() {};
   virtual void evaluateEvent(std::unique_ptr<ActorEvent> &event) {}
+  void drawEmote();
   virtual void drawDebug() override;
 
   std::string name;
   ActorType actor_type;
   Direction direction;
   RectEx collis_box;
+
+  static SpriteAtlas emotes;
+  Rectangle *emote = NULL;
 };
