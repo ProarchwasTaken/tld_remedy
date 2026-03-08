@@ -4,7 +4,7 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/maps\/db_05.png",
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/db_05.png",
          "imageheight":176,
          "imagewidth":224,
          "name":"Map Image",

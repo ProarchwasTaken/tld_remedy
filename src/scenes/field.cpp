@@ -241,7 +241,7 @@ void FieldScene::setupEntities() {
       }
       case EntityType::PICKUP: {
         PickupData *pick_data = static_cast<PickupData*>(data.get());
-        entity = make_unique<Pickup>(*pick_data);
+        entity = make_unique<Pickup>(session.get(), *pick_data);
         break;
       }
       case EntityType::SAVE_POINT: {
@@ -867,6 +867,7 @@ void FieldScene::drawSessionInfo() {
   Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
                                            *font, -3, 0);
   y += spacing;
+
 
   Player *player = &session->player;
   string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 

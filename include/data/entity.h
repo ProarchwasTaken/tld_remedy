@@ -19,7 +19,7 @@ struct PickupData : EntityData {
   int object_id;
   Vector2 position;
   PickupType pickup_type;
-  int count;
+  int value;
 };
 
 struct SavePointData : EntityData {

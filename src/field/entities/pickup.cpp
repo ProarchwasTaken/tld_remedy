@@ -1,9 +1,12 @@
 #include <cassert>
 #include <cstddef>
+#include <vector>
+#include <string>
 #include <raylib.h>
 #include "enums.h"
 #include "base/actor.h"
 #include "data/entity.h"
+#include "data/session.h"
 #include "data/field_event.h"
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
@@ -16,14 +19,16 @@
 #include <plog/Log.h>
 
 SpriteAtlas Pickup::atlas("entities", "pickup_entity");
+using std::vector, std::string;
 
 
-Pickup::Pickup(PickupData &data) {
+Pickup::Pickup(Session *session, PickupData &data) {
   object_id = data.object_id;
   entity_type = EntityType::PICKUP;
 
+  this->session = session;
   pickup_type = data.pickup_type;
-  count = data.count;
+  value = data.value;
 
   position = data.position;
   bounding_box.scale = {16, 16};
@@ -35,6 +40,11 @@ Pickup::Pickup(PickupData &data) {
   plr = static_cast<PlayerActor*>(ptr);
 
   atlas.use();
+
+  if (pickup_type != PickupType::SUPPLIES) {
+    anim_idle = {{3, 4, 5}, 0.10};
+  }
+
   animation = &anim_idle;
   PLOGI << "Entity Created: Pickup [ID: " << entity_id << "]";
 }
@@ -50,7 +60,33 @@ void Pickup::interact() {
   switch (pickup_type) {
     case PickupType::SUPPLIES: {
       FieldHandler::raise<AddSuppliesEvent>(FieldEVT::ADD_SUPPLIES, 
-                                            count);
+                                            value);
+      break;
+    }
+    case PickupType::ITEM: {
+      ItemID item = static_cast<ItemID>(value);
+      vector<string> dialog;
+      string name = getShortenedName(item);
+
+      if (session->item_count < session->item_limit) {
+        FieldHandler::raise<AddItemEvent>(FieldEVT::ADD_ITEM, item);
+
+        dialog = {"Obtained " + name + "."};
+        FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, 
+                                             dialog);
+      }
+      else {
+        dialog = {
+          "Mary finds a " + name + ", but he lacks\n"
+          "the inventory space to take it with\n"
+          "him."
+        };
+        FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, 
+                                             dialog);
+        return;
+      }
+
+      break;
     }
   }
 
@@ -61,6 +97,30 @@ void Pickup::interact() {
 
   FieldScene::sfx.play("pickup");
   interacted = true;
+}
+
+string Pickup::getShortenedName(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE: {
+      return "I.Bandage";
+    }
+    case ItemID::M_SPLINT: {
+      return "M.Splint";
+    }
+    case ItemID::S_BANDAGE: {
+      return "S.Bandage";
+    }
+    case ItemID::S_WATER: {
+      return "S.Water";
+    }
+    case ItemID::P_KILLERS: {
+      return "P.Killers";
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return "N / A";
+    }
+  }
 }
 
 void Pickup::update() {
