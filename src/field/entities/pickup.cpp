@@ -11,6 +11,7 @@
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
+#include "utils/items.h"
 #include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
@@ -66,7 +67,7 @@ void Pickup::interact() {
     case PickupType::ITEM: {
       ItemID item = static_cast<ItemID>(value);
       vector<string> dialog;
-      string name = getShortenedName(item);
+      string name = ItemUtils::getShortened(item);
 
       if (session->item_count < session->item_limit) {
         FieldHandler::raise<AddItemEvent>(FieldEVT::ADD_ITEM, item);
@@ -97,30 +98,6 @@ void Pickup::interact() {
 
   FieldScene::sfx.play("pickup");
   interacted = true;
-}
-
-string Pickup::getShortenedName(ItemID item) {
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      return "I.Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "M.Splint";
-    }
-    case ItemID::S_BANDAGE: {
-      return "S.Bandage";
-    }
-    case ItemID::S_WATER: {
-      return "S.Water";
-    }
-    case ItemID::P_KILLERS: {
-      return "P.Killers";
-    }
-    default: {
-      assert(item != ItemID::NONE);
-      return "N / A";
-    }
-  }
 }
 
 void Pickup::update() {

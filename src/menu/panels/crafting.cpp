@@ -15,6 +15,7 @@
 #include "utils/text.h"
 #include "utils/menu.h"
 #include "utils/input.h"
+#include "utils/items.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/dialog.h"
 #include "menu/panels/crafting.h"
@@ -158,7 +159,7 @@ void CraftingPanel::openCraftingDialog() {
     return;
   }
 
-  string item_name = getName(*selected_option);
+  string item_name = ItemUtils::getName(*selected_option);
   string text = TextFormat("Spend %i supplies to craft\n"
                            "%s?", item_cost, item_name.c_str());
 
@@ -257,7 +258,7 @@ void CraftingPanel::drawInventory() {
   Vector2 position = {81, 68};
 
   for (ItemID &item : inventory) {
-    string name = getShortenedName(item);
+    string name = ItemUtils::getShortened(item);
     Color color = WHITE;
     Color cursor_color = WHITE;
 
@@ -285,7 +286,7 @@ void CraftingPanel::drawOptions() {
   Vector2 position = {168, 68};
 
   for (ItemID &option : craft_options) {
-    string name = getName(option);
+    string name = ItemUtils::getName(option);
     int item_cost = getSupplyCost(option);
     Color color = WHITE;
 
@@ -326,55 +327,6 @@ void CraftingPanel::drawCursor(Vector2 position, Color color, bool blink)
   }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
-}
-
-string CraftingPanel::getShortenedName(ItemID id) {
-  switch (id) {
-    case ItemID::NONE: {
-      return "--------";
-    }
-    case ItemID::I_BANDAGE: {
-      return "I.Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "M.Splint";
-    }
-    case ItemID::S_BANDAGE: {
-      return "S.Bandage";
-    }
-    case ItemID::S_WATER: {
-      return "S.Water";
-    }
-    case ItemID::P_KILLERS: {
-      return "P.Killers";
-    }
-    default: {
-      return "INVALID";
-    }
-  }
-}
-
-string CraftingPanel::getName(ItemID id) {
-  switch (id) {
-    case ItemID::I_BANDAGE: {
-      return "Improvised Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "Makeshift Splint";
-    }
-    case ItemID::S_BANDAGE: {
-      return "Sterilized Bandage";
-    }
-    case ItemID::S_WATER: {
-      return "Sparkling Water";
-    }
-    case ItemID::P_KILLERS: {
-      return "Painkillers";
-    }
-    default: {
-      return "INVALID";
-    }
-  }
 }
 
 int CraftingPanel::getSupplyCost(ItemID id) {

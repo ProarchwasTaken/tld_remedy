@@ -16,6 +16,7 @@
 #include "utils/math.h"
 #include "utils/menu.h"
 #include "utils/text.h"
+#include "utils/items.h"
 #include "system/sprite_atlas.h"
 #include "scenes/camp_menu.h"
 #include "menu/panels/dialog.h"
@@ -82,7 +83,7 @@ void ItemsPanel::updateSelected() {
 
     if (*item != ItemID::NONE) {
       selected = options.begin() + index;
-      item_name = getName(*selected);
+      item_name = ItemUtils::getName(*selected);
       PLOGD << "Selected set to: " << static_cast<int>(*item);
       return;
     }
@@ -92,97 +93,6 @@ void ItemsPanel::updateSelected() {
   selected = NULL;
 }
 
-string ItemsPanel::getName(ItemID item) {
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      return "Improvised Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "Makeshift Splint";
-    }
-    case ItemID::S_BANDAGE: {
-      return "Sterilized Bandage";
-    }
-    case ItemID::S_WATER: {
-      return "Sparkling Water";
-    }
-    case ItemID::P_KILLERS: {
-      return "Painkillers";
-    }
-    default: {
-      assert(item != ItemID::NONE);
-      return "";
-    }
-  }
-}
-
-string ItemsPanel::getShortenedName(ItemID item) {
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      return "I.Bandage";
-    }
-    case ItemID::M_SPLINT: {
-      return "M.Splint";
-    }
-    case ItemID::S_BANDAGE: {
-      return "S.Bandage";
-    }
-    case ItemID::S_WATER: {
-      return "S.Water";
-    }
-    case ItemID::P_KILLERS: {
-      return "P.Killers";
-    }
-    default: {
-      assert(item != ItemID::NONE);
-      return "N / A";
-    }
-  }
-}
-
-string ItemsPanel::getDescription(ItemID item) {
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      return 
-      "Restores 35% of a Combatant's\n"
-      "Life.\n"
-      "In Combat: Instead applies the\n"
-      "Mending status effect.";
-    }
-    case ItemID::M_SPLINT: {
-      return
-      "Can cure Broken Arm,\n"
-      "Crippled Leg, and Mangled.\n"
-      "In Combat: Also cures the\n"
-      "Despondent status ailment.";
-    }
-    case ItemID::S_BANDAGE: {
-      return
-      "Restores 50% of a Combatant's\n"
-      "Life.\n"
-      "In Combat: Applies Mending\n"
-      "that heals at a faster rate.";
-    }
-    case ItemID::S_WATER: {
-      return 
-      "Grants a 20% boost to a \n"
-      "Combatant's Speed and Recovery.\n"
-      "Morale will also regenerate\n"
-      "while the effect is active.";
-    }
-    case ItemID::P_KILLERS: {
-      return 
-      "Temporarily negates the negative\n"
-      "effects of Broken Arm,\n"
-      "Crippled Leg, and Mangled.\n"
-      "Also grants Tenacity.";
-    }
-    default: {
-      assert(item != ItemID::NONE);
-      return "DESCRIPTION NOT\nAVAILIABLE";
-    }
-  }
-}
 
 void ItemsPanel::useItem() {
   assert(target_mode);
@@ -407,13 +317,13 @@ void ItemsPanel::optionNavigation() {
   if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
-    item_name = getName(*selected);
+    item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
   }
   else if (selected != NULL && Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected, &disallowed);
     sfx->play("menu_navigate");
-    item_name = getName(*selected);
+    item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
   }
   else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
@@ -540,7 +450,7 @@ void ItemsPanel::drawOptions() {
       continue;
     }
 
-    string name = getShortenedName(*item);
+    string name = ItemUtils::getShortened(*item);
     Vector2 position = option_position;
     position.y += 16 * multiplier;
 
@@ -657,7 +567,7 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
 }
 
 void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
-  string desc = getDescription(*selected);
+  string desc = ItemUtils::getDescription(*selected);
   Vector2 position = Vector2Add(frame_position, {2, 40});
   DrawTextEx(*font, desc.c_str(), position, txt_size, -2, WHITE);
 }

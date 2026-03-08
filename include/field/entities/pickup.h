@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include "enums.h"
 #include "base/entity.h"
 #include "data/entity.h"
@@ -15,7 +14,6 @@ public:
   ~Pickup();
 
   void interact();
-  std::string getShortenedName(ItemID item);
 
   void update() override;
   void draw() override;

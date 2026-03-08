@@ -23,9 +23,6 @@ public:
   ~ItemsPanel();
 
   void updateSelected();
-  std::string getName(ItemID item);
-  std::string getShortenedName(ItemID item);
-  std::string getDescription(ItemID item);
 
   void useItem();
   void openDialog(std::vector<std::string> &dialog);
