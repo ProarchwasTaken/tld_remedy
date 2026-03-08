@@ -72,13 +72,13 @@ struct Session {
 
   int flag_count = FLAG_COUNT;
   GameFlag flags[8] {
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
-    {FlagID::NONE, false},
+    {FlagID::CDF2_AFTER_INTRO, false},
+    {FlagID::CDF2_BEFORE_FIRST, false},
+    {FlagID::CDF2_AFTER_FIRST, false},
+    {FlagID::CDF2_REST_TALK, false},
+    {FlagID::CDF1_REST_TALK, false},
+    {FlagID::CDF1_KEY, false},
+    {FlagID::CD_ENTRANCE, false},
     {FlagID::NONE, false},
   };
 
@@ -88,6 +88,5 @@ struct Session {
 
   int enemy_count = 0;
   int enemy_limit = 64;
-  CommonData enemy[64];
- 
+  CommonData enemy[64]; 
 };

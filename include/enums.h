@@ -49,6 +49,13 @@ enum class CompanionID {
 
 enum class FlagID {
   NONE = -1,
+  CDF2_AFTER_INTRO,
+  CDF2_BEFORE_FIRST,
+  CDF2_AFTER_FIRST,
+  CDF2_REST_TALK,
+  CDF1_REST_TALK,
+  CDF1_KEY,
+  CD_ENTRANCE
 };
 
 enum class ItemID {
