@@ -13,6 +13,7 @@ struct MapTransData : EntityData {
   std::string spawn_dest;
   Rectangle rect;
   Direction direction;
+  FlagID flag;
 };
 
 struct PickupData : EntityData {

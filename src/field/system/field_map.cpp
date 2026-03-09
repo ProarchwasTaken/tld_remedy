@@ -266,6 +266,9 @@ void FieldMap::findMapTransitions(json &layer_objects) {
     string spawn_dest;
     Direction direction;
 
+    FlagID flag = FlagID::NONE;
+    bool require_flag = false;
+
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
       if (property_name == "map_dest") {
@@ -277,12 +280,24 @@ void FieldMap::findMapTransitions(json &layer_objects) {
       else if (property_name == "direction") {
         direction = static_cast<Direction>(property["value"]);
       }
+      else if (property_name == "require_flag") {
+        require_flag = property["value"];
+      }
+      else if (property_name == "flag") {
+        int id = property["value"];
+        flag = static_cast<FlagID>(id);
+      }
+    }
+
+    if (!require_flag) {
+      flag = FlagID::NONE;
     }
 
     MapTransData data = {MAP_TRANSITION, map_dest, spawn_dest, rect, 
-      direction};
+      direction, flag};
     PLOGD << "Trigger Data: {Map Destination: '" << map_dest <<
-      "' Spawnpoint: '" << spawn_dest << "' Direction: " << direction;
+      "', Spawnpoint: '" << spawn_dest << "', Direction: " << direction
+    << ", Flag Required: " << static_cast<int>(flag) << "}";
     entity_queue.push_back(make_unique<MapTransData>(data));
   }
 }

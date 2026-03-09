@@ -11,7 +11,7 @@ bool Flag::check(Session *session, FlagID id) {
     GameFlag *flag = &session->flags[x];
 
     if (flag->id == id) {
-      PLOGD << "Return value of Flag ID: " << static_cast<int>(id);
+      PLOGD << "Returning value of Flag ID: " << static_cast<int>(id);
       return flag->raised;
     }
   }

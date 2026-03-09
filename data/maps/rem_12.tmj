@@ -266,9 +266,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_10"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -293,9 +304,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_13"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -320,9 +342,20 @@
                          "value":-1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_14"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -347,9 +380,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":5
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_17"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"spawn_dest",

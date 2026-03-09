@@ -236,7 +236,7 @@ void FieldScene::setupEntities() {
       }
       case EntityType::MAP_TRANSITION: {
         MapTransData *trans_data = static_cast<MapTransData*>(data.get());
-        entity = make_unique<MapTransition>(*trans_data);
+        entity = make_unique<MapTransition>(session.get(), *trans_data);
         break;
       }
       case EntityType::PICKUP: {
