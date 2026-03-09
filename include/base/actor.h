@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <list>
 #include <set>
 #include <raylib.h>
 #include "enums.h"
@@ -9,6 +10,11 @@
 #include "data/actor_event.h"
 #include "base/entity.h"
 #include "system/sprite_atlas.h"
+
+struct MovePoint {
+  Vector2 position;
+  Direction direction;
+};
 
 
 /* Actors are the main focus of the FieldScene, as do Actors in a 
@@ -31,6 +37,8 @@ public:
 
   virtual void behavior() {};
   virtual void evaluateEvent(std::unique_ptr<ActorEvent> &event) {}
+  void pathfind();
+
   void drawEmote();
   virtual void drawDebug() override;
 
@@ -41,4 +49,9 @@ public:
 
   static SpriteAtlas emotes;
   Rectangle *emote = NULL;
+
+  std::list<MovePoint> move_points;
+
+  float default_speed;
+  float movement_speed = -1;
 };

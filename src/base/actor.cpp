@@ -2,8 +2,10 @@
 #include <cstddef>
 #include <string>
 #include <raylib.h>
+#include <raymath.h>
 #include <plog/Log.h>
 #include "enums.h"
+#include "game.h"
 #include "system/sprite_atlas.h"
 #include "base/actor.h"
 
@@ -50,6 +52,25 @@ Actor::~Actor() {
   PLOGI << "Removed actor: '" << name << "'";
 }
 
+void Actor::pathfind() {
+  if (move_points.empty()) {
+    return;
+  }
+
+  MovePoint *first_point = &move_points.front();
+  
+  Vector2 target = first_point->position;
+  direction = first_point->direction;
+
+  assert(movement_speed != -1);
+  float speed = movement_speed * Game::deltaTime();
+  position = Vector2MoveTowards(position, target, speed);
+
+  if (Vector2Equals(position, target)) {
+    move_points.pop_front();
+  }
+}
+
 void Actor::drawEmote() {
   assert(emote != NULL);
   Rectangle dest = {position.x, bounding_box.position.y, 16, 16};
@@ -59,4 +80,15 @@ void Actor::drawEmote() {
 void Actor::drawDebug() {
   Entity::drawDebug();
   DrawRectangleLinesEx(collis_box.rect, 1, RED);
+
+  if (move_points.empty()) {
+    return;
+  }
+
+  MovePoint *first_point = &move_points.front();
+  DrawLineV(position, first_point->position, YELLOW);
+
+  for (MovePoint point : move_points) {
+    DrawCircleV(point.position, 2, YELLOW);
+  }
 }
