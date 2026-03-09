@@ -177,9 +177,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_14"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -204,7 +215,25 @@
          "draworder":"topdown",
          "id":6,
          "name":"Pickups",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"Flag",
+                 "visible":true,
+                 "width":0,
+                 "x":208,
+                 "y":208
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -236,7 +265,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":7,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "properties":[
         {

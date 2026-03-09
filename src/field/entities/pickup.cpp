@@ -12,6 +12,7 @@
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
 #include "utils/items.h"
+#include "utils/flag.h"
 #include "scenes/field.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
@@ -87,6 +88,13 @@ void Pickup::interact() {
         return;
       }
 
+      break;
+    }
+    case PickupType::FLAG: {
+      FlagID flag = static_cast<FlagID>(value);
+
+      PLOGI << "Attempting to raise Flag of ID: " << value;
+      Flag::set(session, flag, true);
       break;
     }
   }

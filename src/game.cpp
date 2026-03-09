@@ -86,7 +86,6 @@ void Game::init() {
   SetTargetFPS(settings.framerate);
   SetTextLineSpacing(16);
 
-  HideCursor();
   setupCanvas();
 
   if (settings.fullscreen) {

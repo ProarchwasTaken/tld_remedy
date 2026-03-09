@@ -328,7 +328,8 @@ void FieldMap::findPickups(Session &session, string &map_name,
     // Thank goodness that past me has already thought of this.
     std::map<string, PickupType> type_table = {
       {"SUPPLIES", PickupType::SUPPLIES},
-      {"ITEM", PickupType::ITEM}
+      {"ITEM", PickupType::ITEM},
+      {"FLAG", PickupType::FLAG}
     };
 
     auto result = type_table.find(pickup_class);

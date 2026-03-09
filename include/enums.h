@@ -136,7 +136,8 @@ enum Direction {
 
 enum class PickupType {
   SUPPLIES,
-  ITEM
+  ITEM,
+  FLAG,
 };
 
 enum class FieldEVT {

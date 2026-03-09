@@ -26,9 +26,11 @@ void Flag::set(Session *session, FlagID id, bool value) {
 
     if (flag->id == id) {
       PLOGD << "Flag of ID: " << static_cast<int>(id) << 
-        "has been set to: " << value;
+        " has been set to: " << value;
       flag->raised = value;
-      break;
+      return;
     }
   }
+
+  PLOGE << "Invalid Flag!";
 }
