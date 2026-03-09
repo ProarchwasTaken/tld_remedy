@@ -51,7 +51,7 @@ struct Session {
   double playtime = 0.0;
   int supplies = 8;
 
-  char map_name[16] = "db_05";
+  char map_name[16] = "rem_01";
   char location[16] = "";
 
   Player player;
