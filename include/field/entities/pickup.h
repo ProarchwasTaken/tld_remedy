@@ -14,6 +14,7 @@ public:
   ~Pickup();
 
   void interact();
+  void openFlagDialog(FlagID flag);
 
   void update() override;
   void draw() override;

@@ -73,15 +73,15 @@ void Pickup::interact() {
       if (session->item_count < session->item_limit) {
         FieldHandler::raise<AddItemEvent>(FieldEVT::ADD_ITEM, item);
 
-        dialog = {"Obtained " + name + "."};
+        dialog = {"Obtained <" + name + ">."};
         FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, 
                                              dialog);
       }
       else {
         dialog = {
-          "Mary finds a " + name + ", but he lacks\n"
-          "the inventory space to take it with\n"
-          "him."
+          "Mary finds a <" + name + ">, but he\n"
+          "lacks the inventory space to take it\n"
+          "with him."
         };
         FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, 
                                              dialog);
@@ -95,6 +95,7 @@ void Pickup::interact() {
 
       PLOGI << "Attempting to raise Flag of ID: " << value;
       Flag::set(session, flag, true);
+      openFlagDialog(flag);
       break;
     }
   }
@@ -106,6 +107,23 @@ void Pickup::interact() {
 
   FieldScene::sfx.play("pickup");
   interacted = true;
+}
+
+void Pickup::openFlagDialog(FlagID flag) {
+  vector<string> dialog;
+
+  switch (flag) {
+    case FlagID::CDF1_KEY: {
+      dialog = {"Obtained <Entrance Key>"};
+      break;
+    }
+    default: {
+      PLOGE << "There's no dialog availiable for flag of ID: " << value;
+      return;
+    }
+  }
+
+  FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, dialog);
 }
 
 void Pickup::update() {
