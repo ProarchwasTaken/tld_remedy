@@ -75,3 +75,8 @@ struct StartSequenceEvent : FieldEvent {
   SequenceID sequence;
 };
 
+struct StartFSequenceEvent : FieldEvent {
+  SequenceID sequence;
+  FlagID flag = FlagID::NONE;
+};
+

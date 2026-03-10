@@ -72,5 +72,8 @@ void MapTransition::update() {
   else {
     PLOGE << "Player does not meet the flag requirement to trigger this "
       << "Map Transition!";
+    FieldHandler::raise<StartFSequenceEvent>(
+      FieldEVT::START_FLAG_SEQUENCE, SequenceID::REJECT, required_flag
+    );
   }
 }

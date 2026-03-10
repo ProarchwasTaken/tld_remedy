@@ -165,7 +165,8 @@ enum class FieldEVT {
   COM_ADD_EFFECT,
   COM_RM_EFFECT,
   OPEN_DIALOG,
-  START_SEQUENCE
+  START_SEQUENCE,
+  START_FLAG_SEQUENCE,
 };
 
 enum class ActorEVT {
@@ -177,6 +178,7 @@ enum class ActorEVT {
 enum class SequenceID {
   SAVE,
   REST,
+  REJECT,
   #ifndef NDEBUG
   DB_01 = 95, 
   #endif // !NDEBUG

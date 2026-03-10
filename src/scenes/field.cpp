@@ -30,6 +30,7 @@
 #include "field/entities/save_point.h"
 #include "field/sequences/save.h"
 #include "field/sequences/rest.h"
+#include "field/sequences/reject.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -360,6 +361,7 @@ void FieldScene::eventProcessing() {
     PLOGI << "Field Events raised: " << event_pool->size();
     for (auto &event : *event_pool) {
       eventHandling(event);
+      event.reset();
     }
 
     evt_handler.clear();
@@ -559,6 +561,15 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       initSequence(sequence_id);
       break;
     }
+    case FieldEVT::START_FLAG_SEQUENCE: {
+      PLOGD << "Event detected: StartFSequenceEvent";
+      auto *event_data = static_cast<StartFSequenceEvent*>(event.get());
+
+      SequenceID sequence_id = event_data->sequence;
+      FlagID flag = event_data->flag;
+
+      initSequence(sequence_id, flag);
+    }
   }
 }
 
@@ -581,6 +592,29 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     case SequenceID::REST: {
       sequence = make_unique<RestSequence>();
       break;
+    }
+    default: {
+      PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
+      " is either invalid, or requires an Flag ID!";
+    }
+  }
+
+  assert(sequence != nullptr);
+}
+
+void FieldScene::initSequence(SequenceID sequence_id, FlagID flag) {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
+  switch (sequence_id) {
+    case SequenceID::REJECT: {
+      sequence = make_unique<RejectSequence>(flag);
+      break;
+    }
+    default: {
+      PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
+      " is either invalid, or doesn't require an Flag ID!";
     }
   }
 
