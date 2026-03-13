@@ -24,7 +24,6 @@ string ItemUtils::getName(ItemID item) {
       return "Painkillers";
     }
     default: {
-      assert(item != ItemID::NONE);
       return "";
     }
   }
@@ -32,6 +31,9 @@ string ItemUtils::getName(ItemID item) {
 
 string ItemUtils::getShortened(ItemID item) {
   switch (item) {
+    case ItemID::NONE: {
+      return "--------";
+    }
     case ItemID::I_BANDAGE: {
       return "I.Bandage";
     }
@@ -48,7 +50,6 @@ string ItemUtils::getShortened(ItemID item) {
       return "P.Killers";
     }
     default: {
-      assert(item != ItemID::NONE);
       return "N / A";
     }
   }

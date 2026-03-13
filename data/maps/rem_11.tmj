@@ -24,7 +24,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":2,
+                 "id":8,
                  "name":"",
                  "polyline":[
                         {
@@ -45,6 +45,55 @@
                         }, 
                         {
                          "x":48,
+                         "y":-40
+                        }, 
+                        {
+                         "x":40,
+                         "y":-40
+                        }, 
+                        {
+                         "x":40,
+                         "y":-120
+                        }, 
+                        {
+                         "x":48,
+                         "y":-120
+                        }, 
+                        {
+                         "x":48,
+                         "y":-144
+                        }, 
+                        {
+                         "x":40,
+                         "y":-144
+                        }, 
+                        {
+                         "x":40,
+                         "y":-136
+                        }, 
+                        {
+                         "x":-8,
+                         "y":-136
+                        }, 
+                        {
+                         "x":-8,
+                         "y":-144
+                        }, 
+                        {
+                         "x":-24,
+                         "y":-144
+                        }, 
+                        {
+                         "x":-24,
+                         "y":-136
+                        }, 
+                        {
+                         "x":-72,
+                         "y":-136
+                        },
+                    
+                        {
+                         "x":-72,
                          "y":-144
                         }, 
                         {
@@ -53,6 +102,22 @@
                         }, 
                         {
                          "x":-144,
+                         "y":-16
+                        }, 
+                        {
+                         "x":-72,
+                         "y":-16
+                        }, 
+                        {
+                         "x":-72,
+                         "y":-64
+                        }, 
+                        {
+                         "x":-24,
+                         "y":-64
+                        }, 
+                        {
+                         "x":-24,
                          "y":-16
                         }, 
                         {
@@ -69,6 +134,70 @@
                  "width":0,
                  "x":176,
                  "y":240
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":14.125,
+                         "y":0
+                        }, 
+                        {
+                         "x":14.25,
+                         "y":-13.25
+                        }, 
+                        {
+                         "x":46.25,
+                         "y":-13.25
+                        }, 
+                        {
+                         "x":46.25,
+                         "y":-11.75
+                        }, 
+                        {
+                         "x":60.125,
+                         "y":-11.875
+                        }, 
+                        {
+                         "x":60.375,
+                         "y":34.75
+                        }, 
+                        {
+                         "x":46.25,
+                         "y":34.75
+                        }, 
+                        {
+                         "x":46.25,
+                         "y":50.75
+                        }, 
+                        {
+                         "x":14.25,
+                         "y":50.75
+                        }, 
+                        {
+                         "x":14.25,
+                         "y":22.75
+                        }, 
+                        {
+                         "x":0.125,
+                         "y":22.875
+                        }, 
+                        {
+                         "x":0.0326086956521721,
+                         "y":0.40217391304347
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":41.75,
+                 "y":149.25
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -177,9 +306,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_10"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -204,7 +344,25 @@
          "draworder":"topdown",
          "id":6,
          "name":"Pickups",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":10,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":4
+                        }],
+                 "rotation":0,
+                 "type":"Item",
+                 "visible":true,
+                 "width":0,
+                 "x":96,
+                 "y":192
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -228,7 +386,19 @@
          "draworder":"topdown",
          "id":8,
          "name":"Savepoints",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":11,
+                 "name":"Savepoint",
+                 "point":true,
+                 "rotation":0,
+                 "type":"rest",
+                 "visible":true,
+                 "width":0,
+                 "x":64,
+                 "y":112
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -236,7 +406,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":8,
+ "nextobjectid":12,
  "orientation":"orthogonal",
  "properties":[
         {

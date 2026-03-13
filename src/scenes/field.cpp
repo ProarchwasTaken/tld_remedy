@@ -331,6 +331,11 @@ void FieldScene::dialogHandling() {
   if (dialog->selected != NULL && sequence != nullptr) {
     sequence->dialogHandling(*dialog->selected);
   }
+
+  if (sequence == nullptr) {
+    PLOGD << "Detected that dialog was closed outside of a sequence.";
+    PlayerActor::setControllable(true);
+  }
 }
 
 void FieldScene::actorBehavior() {
@@ -552,6 +557,12 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       panel = make_unique<DialogPanel>(position, event_data->dialog, 
                                        event_data->end_prompt);
       panel_mode = true;
+
+      if (sequence == nullptr) {
+        PLOGD << "Detected that dialog was opened outside of a sequence.";
+        PlayerActor::setControllable(false);
+      }
+
       break;
     }
     case FieldEVT::START_SEQUENCE: {

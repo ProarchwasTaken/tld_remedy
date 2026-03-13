@@ -73,7 +73,7 @@ void Pickup::interact() {
       if (session->item_count < session->item_limit) {
         FieldHandler::raise<AddItemEvent>(FieldEVT::ADD_ITEM, item);
 
-        dialog = {"Obtained <" + name + ">."};
+        dialog = {"Obtained <" + name + ">"};
         FieldHandler::raise<OpenDialogEvent>(FieldEVT::OPEN_DIALOG, 
                                              dialog);
       }
