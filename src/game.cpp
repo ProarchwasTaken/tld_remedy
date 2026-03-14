@@ -768,7 +768,7 @@ tuple<TroopID, int> Game::selectRandomTroop(json &pool) {
 
   PLOGD << "Weight Sum: " << sum_of_weight;
   
-  uniform_int_distribution<int> range(0, sum_of_weight);
+  uniform_int_distribution<int> range(1, sum_of_weight);
   int random_num = range(RNG);
   PLOGD << "RNG Value: " << random_num;
 
