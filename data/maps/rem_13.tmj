@@ -895,7 +895,7 @@
                         {
                          "name":"troop_id",
                          "type":"int",
-                         "value":4
+                         "value":5
                         }],
                  "rotation":0,
                  "type":"",

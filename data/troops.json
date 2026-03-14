@@ -41,6 +41,11 @@
       "id": 4,
       "weight": 0,
       "reward": 20
+    },
+    {
+      "id": 5,
+      "weight": 0,
+      "reward": 30 
     }
   ],
   "Debug": [

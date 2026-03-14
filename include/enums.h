@@ -94,12 +94,11 @@ enum class TroopID {
   CD_TROOP3,
   CD_TROOP4,
   CD_TROOP5,
+  CD_TROOP6,
   #ifndef NDEBUG
   DB_TROOP1 = 95,
   DB_TROOP2 = 96,
   DB_TROOP3 = 97,
-  DB_TROOP4 = 98,
-  DB_TROOP5 = 99 
   #endif // !NDEBUG
 };
 

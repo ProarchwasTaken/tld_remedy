@@ -171,6 +171,9 @@ EnemyTroop CombatScene::getTroop(TroopID id) {
     case TroopID::CD_TROOP5: {
       return CDTroop5();
     }
+    case TroopID::CD_TROOP6: {
+      return CDTroop6();
+    }
     #ifndef NDEBUG
     case TroopID::DB_TROOP1: {
       return DBTroop1();
@@ -181,12 +184,6 @@ EnemyTroop CombatScene::getTroop(TroopID id) {
     case TroopID::DB_TROOP3: {
       return DBTroop3();
     }
-    case TroopID::DB_TROOP4: {
-      return DBTroop4();
-    }
-    case TroopID::DB_TROOP5: {
-      return DBTroop5();
-    } 
     #endif // !NDEBUG
     default: {
       PLOGE << "Invalid Troop ID!";
