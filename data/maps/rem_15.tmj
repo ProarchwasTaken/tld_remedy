@@ -24,7 +24,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":1,
+                 "id":6,
                  "name":"",
                  "polyline":[
                         {
@@ -53,7 +53,23 @@
                         }, 
                         {
                          "x":-144,
-                         "y":-16
+                         "y":-32
+                        }, 
+                        {
+                         "x":-113.090909090909,
+                         "y":-31.9090909090909
+                        }, 
+                        {
+                         "x":-112.909090909091,
+                         "y":-103.636363636364
+                        }, 
+                        {
+                         "x":-7.18181818181819,
+                         "y":-103.727272727273
+                        }, 
+                        {
+                         "x":-6.90909090909091,
+                         "y":-15.9090909090909
                         }, 
                         {
                          "x":0,
@@ -177,9 +193,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_14"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -204,7 +231,25 @@
          "draworder":"topdown",
          "id":6,
          "name":"Pickups",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":8,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":4
+                        }],
+                 "rotation":0,
+                 "type":"Supplies",
+                 "visible":true,
+                 "width":0,
+                 "x":48,
+                 "y":200
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -216,7 +261,35 @@
          "draworder":"topdown",
          "id":7,
          "name":"Enemies",
-         "objects":[],
+         "objects":[
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"Enemy",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"routine",
+                         "type":"string",
+                         "value":"-2,"
+                        }, 
+                        {
+                         "name":"speed",
+                         "type":"float",
+                         "value":1
+                        }, 
+                        {
+                         "name":"troop_id",
+                         "type":"int",
+                         "value":5
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":116,
+                 "y":204
+                }],
          "opacity":1,
          "type":"objectgroup",
          "visible":true,
@@ -236,7 +309,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":6,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "properties":[
         {
