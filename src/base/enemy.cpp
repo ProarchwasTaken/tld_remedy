@@ -71,7 +71,7 @@ void Enemy::finalIntercept(float &damage, DamageData &data) {
 void Enemy::enterHitstun(DamageData &data) {
   assert(state != DEAD);
   if (state != HIT_STUN) {
-    stunned++;
+    stunned = Clamp(stunned + 1, 0, member_count);
   }
 
   if (data.stun_type != StunType::DEFENSIVE) {
