@@ -95,6 +95,11 @@ CombatScene::~CombatScene() {
   toasts.reset();
 
   Entity::clear(entities);
+
+  if (dead_companion != nullptr) {
+    dead_companion.reset();
+  }
+
   menu_sfx->release();
 
   UnloadTexture(debug_overlay);
@@ -609,9 +614,14 @@ void CombatScene::deleteEntity(int entity_id) {
       plr_cmd_hud->assign(player);
     }
     else if (companion == entity.get()) {
+      companion->targetable = false;
       companion = NULL;
       com_hud->assign(companion);
       assist_hud->assign(companion);
+
+      dead_companion.swap(entity);
+      assert(entity == nullptr);
+      continue;
     }
 
     entity.reset();
@@ -626,6 +636,7 @@ void CombatScene::endCombatProcedure() {
   Companion *com_data = &session->companion;
 
   PLOGD << "Updating player attributes.";
+  assert(player != NULL);
   updatePartyAttr(player, plr_data);
 
   PLOGD << "Updating companion attributes.";
@@ -644,9 +655,17 @@ void CombatScene::endCombatProcedure() {
 void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 
 {
   if (member == NULL) {
-    PLOGD << "Combatant is assumed to be dead. Setting Life to 1.";
+    PLOGD << "Combatant is assumed to be a dead companion.";
     data->life = 1;
-    return;
+
+    assert(dead_companion != nullptr);
+    assert(dead_companion->entity_type == EntityType::COMBATANT);
+    assert(dead_companion.get() != player);
+
+    PLOGD << "Retrieving address to dead companion, and setting it's life"
+      << " to 1.";
+    member = static_cast<PartyMember*>(dead_companion.get());
+    member->life = 1;
   }
 
   member->depleteInstant();

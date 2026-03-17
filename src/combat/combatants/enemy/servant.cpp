@@ -40,7 +40,7 @@ Servant::Servant(Vector2 position, Direction direction) :
   intimid = 6;
   persist = 6;
 
-  resilience = 1.0;
+  resilience = 0.8;
   ai_behavior = make_unique<ServantAI>();
 
   bounding_box.scale = {80, 80};

@@ -23,7 +23,7 @@ Dummy::Dummy(Vector2 position, Direction direction) :
   intimid = 6;
   persist = 6;
 
-  resilience = 1.0;
+  resilience = 0.8;
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
