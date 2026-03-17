@@ -1,3 +1,4 @@
+#include <cassert>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -31,6 +32,11 @@ Evade::Evade(PartyMember *user, SpriteAtlas &user_atlas, RectEx hitbox,
 }
 
 Evade::~Evade() {
+  if (!finished) {
+    user->priority--;
+    assert(user->priority >= 0);
+  }
+
   bool user_cancel = !finished && user->state == CombatantState::ACTION;
   if (!user_cancel) {
     user->intangible = false;
@@ -38,7 +44,6 @@ Evade::~Evade() {
   }
 
   ActionID new_action_id = user->action->id;
-
   if (new_action_id != ActionID::GHOST_STEP) {
     user->intangible = false;
   }
@@ -106,6 +111,7 @@ void Evade::windUp() {
   bool end_phase = state_clock >= 1.0;
   if (end_phase) {
     user->sprite = &user_atlas->sprites[sprite_set->id_active];
+    user->priority++;
     user->sfx.play("evade_ready");
   }
 }
@@ -137,6 +143,7 @@ void Evade::endLag() {
   bool end_phase = state_clock >= 1.0;
   if (end_phase) {
     user->intangible = false;
+    user->priority--;
   }
 }
 

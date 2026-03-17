@@ -832,8 +832,8 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Life: %02.02f/%02.02f", member->life,
-                    member->max_life);
+  text = TextFormat("Life: %02.02f/%02.02f/%02.02f", member->life,
+                    member->max_life, member->exhaustion);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
@@ -848,10 +848,6 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Exhaustion: %02.02f", member->exhaustion);
-  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
-  position.y += spacing;
-
   text = TextFormat("Speed Multiplier: %01.02f", 
                     member->speed_multiplier);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
@@ -862,6 +858,10 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   position.y += spacing;
 
   text = TextFormat("Resilience: %01.02f", member->resilience);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  position.y += spacing;
+
+  text = TextFormat("Priority: %i", member->priority); 
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y = 228;
 
