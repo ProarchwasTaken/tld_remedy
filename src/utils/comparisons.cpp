@@ -4,8 +4,15 @@
 
 using std::pair;
 
+
 bool Comparison::combatantDistance(const pair<float, Combatant *> &p1, 
                                    const pair<float, Combatant *> &p2) 
+{
+  return p1.first < p2.first;
+}
+
+bool Comparison::combatantPriority(const pair<float, Combatant *> &p1,
+                                   const pair<float, Combatant *> &p2)
 {
   int p1_priority = p1.second->priority;
   int p2_priority = p2.second->priority;
