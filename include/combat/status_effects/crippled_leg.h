@@ -3,8 +3,10 @@
 #include "base/status_effect.h"
 
 
-/* Decreases the afflicted's speed_multiplier by 15%. Basically crippling
- * the Combatant's mobility and combo potential.*/
+/* Decreases the afflicted's Speed Multiplier. Basically crippling the 
+ * Combatant's mobility and combo potential. The amount decreased is 
+ * determined by the combatant's Resilience. If Resilience is high
+ * enough, the negative effects will virtually be nullified.*/
 class CrippledLeg : public StatusEffect {
 public:
   CrippledLeg(Combatant *afflict);

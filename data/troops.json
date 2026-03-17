@@ -53,16 +53,6 @@
       "id": 97,
       "weight": 60,
       "reward": 10
-    },
-    {
-      "id": 98,
-      "weight": 50,
-      "reward": 15
-    },
-    {
-      "id": 99,
-      "weight": 25,
-      "reward": 20
-    }
+    } 
   ]
 }

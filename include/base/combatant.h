@@ -145,7 +145,7 @@ public:
 
   float speed_multiplier = 1.0;
   float recovery = 1.0;
-  float resilience;
+  float resilience = 1.0;
   int priority = 0;
 
   std::unique_ptr<CombatAction> action;

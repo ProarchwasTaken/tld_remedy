@@ -57,7 +57,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   intimid = data->intimid;
   persist = data->persist;
 
-  resilience = 0.60;
+  resilience = 0.70;
   ai_behavior = make_unique<ErwinAI>();
 
   tech1 = {"Provoke", TechCostType::MORALE, 8};
