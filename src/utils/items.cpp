@@ -66,7 +66,7 @@ string ItemUtils::getDescription(ItemID item) {
     }
     case ItemID::M_SPLINT: {
       return
-      "Can cure Broken Arm,\n"
+      "Can fix Broken Arm,\n"
       "Crippled Leg, and Mangled.\n"
       "In Combat: Also cures the\n"
       "Despondent status ailment.";

@@ -626,17 +626,17 @@ string DiagnosePanel::getStatusDesc(StatusID id) {
     }
     case StatusID::BROKEN_ARM: {
       return 
-      "Offence and Intimidation are\n"
-      "lowered by 10%";
+      "Decreased Offense and\n"
+      "Intimidation.";
     }
     case StatusID::CRIPPLED_LEG: {
       return 
-      "Speed is decreased by 15%";
+      "Decreased Movement Speed.";
     }
     case StatusID::MANGLED: {
       return 
-      "Defense and Recovery are\n"
-      "lowered by 50%";
+      "Decreased Defense and\n"
+      "Recovery.";
     }
     default: {
       return "INVALID DESCRIPTION";
