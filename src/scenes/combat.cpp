@@ -21,6 +21,7 @@
 #include "data/combatant_event.h"
 #include "utils/input.h"
 #include "utils/text.h"
+#include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "menu/panels/dialog.h"
@@ -691,6 +692,7 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
     }
   }
 
+  std::sort(status, status + 3, Comparison::effectAlgorithm);
   std::copy(status, status + 3, data->status);
 }
 

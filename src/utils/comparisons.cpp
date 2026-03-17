@@ -1,4 +1,5 @@
 #include <utility>
+#include "enums.h"
 #include "base/combatant.h"
 #include "utils/comparisons.h"
 
@@ -23,4 +24,13 @@ bool Comparison::combatantPriority(const pair<float, Combatant *> &p1,
   else {  
     return p1.first < p2.first;
   }
+}
+
+bool Comparison::effectAlgorithm(const StatusID effect1, 
+                                 const StatusID effect2) 
+{
+  int a = static_cast<int>(effect1);
+  int b = static_cast<int>(effect2);
+
+  return a > b;
 }
