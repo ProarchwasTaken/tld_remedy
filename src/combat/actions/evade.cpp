@@ -32,7 +32,7 @@ Evade::Evade(PartyMember *user, SpriteAtlas &user_atlas, RectEx hitbox,
 }
 
 Evade::~Evade() {
-  if (!finished) {
+  if (!finished && phase != ActionPhase::WIND_UP) {
     user->priority--;
     assert(user->priority >= 0);
   }
@@ -58,8 +58,7 @@ void Evade::intercept(DamageData &data) {
 
   PLOGI << "Conditions have been met to intercept damage function";
   PLOGD << "Timing: " << act_time * state_clock;
-  data.b_def = &user->persist;
-  data.def_mod += 0.75;
+  data.b_def = &user->dexterity;
 
   float damage = Clamp(user->damageCalculation(data), 0, 9999);
   PLOGD << "Result: " << damage;
@@ -69,7 +68,7 @@ void Evade::intercept(DamageData &data) {
 
   float sleep_time;
 
-  if (user->important && state_clock <= 0.25) {
+  if (user->important && state_clock <= 0.10) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
     user->sprite = &user_atlas->sprites[sprite_set->id_perfect];
     user->depleteInstant();
