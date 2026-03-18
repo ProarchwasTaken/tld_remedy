@@ -56,6 +56,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   defense = data->defense;
   intimid = data->intimid;
   persist = data->persist;
+  dexterity = data->dexterity;
 
   resilience = 0.70;
   ai_behavior = make_unique<ErwinAI>();

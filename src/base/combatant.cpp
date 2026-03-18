@@ -91,6 +91,8 @@ void Combatant::takeDamage(DamageData &data) {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] has "
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";
+  assert(data.damage_type != DamageType::RANGED && 
+         "Use DamageType::LIFE instead!");
 
   if (!status.empty()) {
     for (auto &status_effect : status) {
@@ -154,6 +156,14 @@ float Combatant::damageCalculation(DamageData &data) {
       if (atk_not_set) data.a_atk = &assailant->intimid;
       if (def_not_set) data.b_def = &persist; 
       break;
+    }
+    case DamageType::RANGED: {
+      if (atk_not_set) {
+        data.a_atk = &assailant->dexterity;
+      }
+      if (def_not_set) {
+        data.b_def = &defense;
+      }
     }
   }
 

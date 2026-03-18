@@ -20,6 +20,7 @@ struct Character {
   int defense;
   int intimid;
   int persist;
+  int dexterity;
 
   int status_count = 0;
   int status_limit = STATUS_LIMIT;
