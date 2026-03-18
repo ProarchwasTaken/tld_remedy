@@ -64,7 +64,7 @@ public:
   bool has_moved = false;
   bool moving = true;
 
-  const float gs_cost = 5.5;
+  const float gs_cost = 4.5;
 private:
   CombatKeybinds *keybinds;
 

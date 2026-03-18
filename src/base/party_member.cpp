@@ -385,6 +385,18 @@ void PartyMember::techniqueCooldown() {
   }
 }
 
+float PartyMember::calculateLifeCost(float base_cost) {
+  float max_cost = base_cost + std::ceilf(life / 4);
+  float max_reduction = max_cost - base_cost;
+
+  float reduction = (dexterity * speed_multiplier) / 2;
+  if (reduction > max_reduction) {
+    reduction = max_reduction;
+  }
+
+  return max_cost - reduction;
+}
+
 void PartyMember::tintFlash() {
   if (state == HIT_STUN || state == DEAD) {
     return;

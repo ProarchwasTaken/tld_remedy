@@ -455,7 +455,8 @@ void Erwin::attackHP() {
 }
 
 void Erwin::ghoststep(int direction_x) {
-  increaseExhaustion(5.5);
+  float cost = calculateLifeCost(5.5);
+  increaseExhaustion(cost);
 
   unique_ptr<CombatAction> action;
   action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);

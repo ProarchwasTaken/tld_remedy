@@ -123,7 +123,8 @@ Color PlayerCmdHud::determineGSColor() {
   }
 
   float gs_cost = player->gs_cost;
-  if (player->life - gs_cost <= 1.0) {
+  float cost = player->calculateLifeCost(gs_cost);
+  if (player->life - cost <= 1.0) {
     return Game::palette[26];
   }
   else {

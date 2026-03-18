@@ -49,6 +49,7 @@ public:
   void depleteInstant();
 
   void techniqueCooldown();
+  float calculateLifeCost(float base_cost);
 
   void tintFlash();
   void death() override;
