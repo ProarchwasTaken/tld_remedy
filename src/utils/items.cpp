@@ -59,7 +59,7 @@ string ItemUtils::getDescription(ItemID item) {
   switch (item) {
     case ItemID::I_BANDAGE: {
       return 
-      "Restores 35% of a Combatant's\n"
+      "Restores 35% of a combatant's\n"
       "Life.\n"
       "In Combat: Instead applies the\n"
       "Mending status effect.";
@@ -73,24 +73,23 @@ string ItemUtils::getDescription(ItemID item) {
     }
     case ItemID::S_BANDAGE: {
       return
-      "Restores 50% of a Combatant's\n"
+      "Restores 50% of a combatant's\n"
       "Life.\n"
       "In Combat: Applies Mending\n"
       "that heals at a faster rate.";
     }
     case ItemID::S_WATER: {
       return 
-      "Grants a 20% boost to a \n"
-      "Combatant's Speed and Recovery.\n"
-      "Morale will also regenerate\n"
-      "while the effect is active.";
+      "Boosts a combatant's Dexterity,\n"
+      "Speed, and Recovery by 20%.\n"
+      "Effect lasts for 20 seconds.";
     }
     case ItemID::P_KILLERS: {
       return 
-      "Temporarily negates the negative\n"
-      "effects of Broken Arm,\n"
-      "Crippled Leg, and Mangled.\n"
-      "Also grants Tenacity.";
+      "Temporarily boosts Resilience\n"
+      "by 20%, and negates the effects\n"
+      "of certain status ailments.\n"
+      "Effect also grants Tenacity.";
     }
     default: {
       assert(item != ItemID::NONE);
