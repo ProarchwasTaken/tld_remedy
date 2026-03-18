@@ -170,7 +170,7 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->defense = 6;
       companion->intimid = 7;
       companion->persist = 5;
-      companion->dexterity = 6;
+      companion->dexterity = 5;
 
       companion->recovery = 1.0;
       companion->resilience = 0.70;

@@ -171,7 +171,7 @@ void AssistCmdHud::drawCmdCooldown(Technique *tech, float offset,
                                 {remaining, 11 + offset}); 
   DrawTextureRec(atlas->sheet, source, position, WHITE);
 
-  float cooldown = tech->cooldown;
+  float cooldown = companion->calculateCooldown(tech->cooldown);
   float time_remaining = cooldown * (1 - percentage);
 
   const char *text = TextFormat("%01.01fs", time_remaining);

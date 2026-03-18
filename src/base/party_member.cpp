@@ -375,12 +375,14 @@ void PartyMember::depleteInstant() {
 
 void PartyMember::techniqueCooldown() {
   if (tech1.clock < 1.0) {
-    tech1.clock += Game::deltaTime() / tech1.cooldown;
+    float cooldown = calculateCooldown(tech1.cooldown);
+    tech1.clock += Game::deltaTime() / cooldown;
     tech1.clock = Clamp(tech1.clock, 0.0, 1.0);
   }
 
   if (tech2.clock < 1.0) {
-    tech2.clock += Game::deltaTime() / tech2.cooldown;
+    float cooldown = calculateCooldown(tech2.cooldown);
+    tech2.clock += Game::deltaTime() / cooldown;
     tech2.clock = Clamp(tech2.clock, 0.0, 1.0);
   }
 }
@@ -395,6 +397,14 @@ float PartyMember::calculateLifeCost(float base_cost) {
   }
 
   return max_cost - reduction;
+}
+
+float PartyMember::calculateCooldown(float base_cooldown) {
+  float penalty = (max_life / 100) - (dexterity / 25.0);
+  float percentage = speed_multiplier - penalty;
+  float modifier = (1 - percentage) * -1;
+
+  return base_cooldown * (1 - modifier);
 }
 
 void PartyMember::tintFlash() {
