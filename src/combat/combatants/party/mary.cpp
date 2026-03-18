@@ -48,7 +48,8 @@ Mary::Mary(Player *plr):
   persist = plr->persist;
   dexterity = plr->dexterity;
 
-  resilience = 0.80;
+  recovery = plr->recovery;
+  resilience = plr->resilience;
 
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);

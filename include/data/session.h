@@ -22,6 +22,9 @@ struct Character {
   int persist;
   int dexterity;
 
+  float recovery;
+  float resilience;
+
   int status_count = 0;
   int status_limit = STATUS_LIMIT;
   StatusID status[3] = {StatusID::NONE, StatusID::NONE, StatusID::NONE};

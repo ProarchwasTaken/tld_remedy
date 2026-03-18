@@ -136,6 +136,9 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->persist = 4;
   player->dexterity = 5;
 
+  player->recovery = 1.0;
+  player->resilience = 0.8;
+
   switch (weapon_id) {
     case SubWeaponID::KNIFE: {
       PLOGI << "Applying Knife status bonuses.";
@@ -168,6 +171,9 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->intimid = 7;
       companion->persist = 5;
       companion->dexterity = 6;
+
+      companion->recovery = 1.0;
+      companion->resilience = 0.70;
       break;
     }
   }
