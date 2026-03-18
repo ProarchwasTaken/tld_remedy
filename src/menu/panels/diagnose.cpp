@@ -631,12 +631,13 @@ string DiagnosePanel::getStatusDesc(StatusID id) {
     }
     case StatusID::CRIPPLED_LEG: {
       return 
-      "Decreased Movement Speed.";
+      "Decreased Dexterity and\n"
+      "Movement Speed.";
     }
     case StatusID::MANGLED: {
       return 
-      "Decreased Defense and\n"
-      "Recovery.";
+      "Decreased Defense, Recovery,\n"
+      "and Resilience.";
     }
     default: {
       return "INVALID DESCRIPTION";

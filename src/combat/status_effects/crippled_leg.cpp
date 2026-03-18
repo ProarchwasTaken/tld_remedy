@@ -1,3 +1,4 @@
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -21,9 +22,15 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
     return;
   }
 
+  float dexterity = afflicted->dexterity;
+  float dec_dex = dexterity * percentage;
+  dex_lost = std::ceilf(dexterity - dec_dex);
+
   float speed = afflicted->speed_multiplier;
   float dec_speed = speed * percentage;
   speed_lost = speed - dec_speed;
+
+  PLOGD << "Dexterity to be lost: " << dex_lost;
   PLOGD << "Speed to be lost: " << speed_lost;
 }
 
@@ -35,19 +42,22 @@ CrippledLeg::~CrippledLeg() {
 
 void CrippledLeg::init(bool hide_text) {
   applyPenalty();
-  PLOGD << "Result: " << afflicted->speed_multiplier;
+  PLOGD << "Result: {DEX: " << afflicted->dexterity << ", SPD: " << 
+    afflicted->speed_multiplier << "}";
 
   StatusEffect::init(hide_text);
 }
 
 void CrippledLeg::applyPenalty() {
-  PLOGI << "Decreasing afflicted's speed multiplier.";
+  PLOGI << "Decreasing afflicted's dexterity and speed multiplier.";
+  afflicted->dexterity -= dex_lost;
   afflicted->speed_multiplier -= speed_lost;
   negated = false;
 }
 
 void CrippledLeg::negateEffect() {
   PLOGI << "Reversing stat penalties.";
+  afflicted->dexterity += dex_lost;
   afflicted->speed_multiplier += speed_lost;
   negated = true;
 }
