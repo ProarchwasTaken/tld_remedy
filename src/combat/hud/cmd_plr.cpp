@@ -95,19 +95,21 @@ void PlayerCmdHud::updateDefendText() {
   } 
 }
 
-Color PlayerCmdHud::determineTechColor(float tech_cost)
+Color PlayerCmdHud::determineTechColor(float base_cost)
 {
   if (player->demoralized) {
     return Game::palette[32];
   }
 
-  if (player->morale < tech_cost) {
+  float cost = player->calculateMoraleCost(base_cost);
+
+  if (player->morale < cost) {
     return Game::palette[2];
   }
   else if (player->state == ACTION) {
     return Game::palette[51]; 
   }
-  else if (player->morale - (tech_cost * 2) < 0) {
+  else if (player->morale - (cost * 2) < 0) {
     return Game::palette[26];
   }
   else {

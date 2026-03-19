@@ -59,28 +59,36 @@ Color AssistCmdHud::decideTechColor(Technique *tech) {
     return Game::palette[32];
   }
 
-  bool morale_cost = tech->type == TechCostType::MORALE;
-  float tech_cost = tech->cost;
-  if (morale_cost && companion->morale < tech_cost) {
-    return Game::palette[2];
-  }
+  switch (tech->type) {
+    case TechCostType::LIFE: {
+      bool below_one = companion->life <= 1.0;
+      if (below_one) {
+        return Game::palette[32]; 
+      }
 
-  bool one_more_use = companion->morale - (tech_cost * 2) < 0;
-  if (morale_cost && one_more_use) {
-    return Game::palette[26];
-  }
+      float cost = companion->calculateLifeCost(tech->cost);
+      bool one_more_use = companion->life - cost <= 1.0;
+      if (one_more_use) { 
+        return Game::palette[26];
+      }
+      else {
+        return WHITE;
+      }
+    }
+    case TechCostType::MORALE: {
+      float cost = companion->calculateMoraleCost(tech->cost);
+      if (companion->morale < cost) {
+        return Game::palette[2];
+      }
 
-  bool below_one = companion->life <= 1.0;
-  if (!morale_cost && below_one) {
-    return Game::palette[32]; 
-  }
-
-  one_more_use = companion->life - tech_cost <= 1.0;
-  if (!morale_cost && one_more_use) { 
-    return Game::palette[26];
-  }
-  else {
-    return WHITE;
+      bool one_more_use = companion->morale - (cost * 2) < 0;
+      if (one_more_use) {
+        return Game::palette[26];
+      }
+      else {
+        return WHITE;
+      }
+    }
   }
 }
 

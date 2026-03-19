@@ -19,7 +19,7 @@ public:
   void update();
   void updateDefendText();
   Color determineAttackColor();
-  Color determineTechColor(float tech_cost);
+  Color determineTechColor(float base_cost);
   Color determineGSColor();
   Color determineEvadeColor();
 

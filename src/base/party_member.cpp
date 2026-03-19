@@ -388,10 +388,22 @@ void PartyMember::techniqueCooldown() {
 }
 
 float PartyMember::calculateLifeCost(float base_cost) {
-  float max_cost = base_cost + std::ceilf(life / 4);
+  float max_cost = base_cost + std::ceilf(max_life / 4);
   float max_reduction = max_cost - base_cost;
 
   float reduction = (dexterity * speed_multiplier) / 2;
+  if (reduction > max_reduction) {
+    reduction = max_reduction;
+  }
+
+  return max_cost - reduction;
+}
+
+float PartyMember::calculateMoraleCost(float base_cost) {
+  float max_cost = base_cost + std::ceilf(max_morale / 4);
+  float max_reduction = max_cost - base_cost;
+
+  float reduction = (discipline * resilience) / 2;
   if (reduction > max_reduction) {
     reduction = max_reduction;
   }

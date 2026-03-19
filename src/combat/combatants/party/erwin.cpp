@@ -64,10 +64,10 @@ Erwin::Erwin(Companion *data, Mary *player):
 
   ai_behavior = make_unique<ErwinAI>();
 
-  tech1 = {"Provoke", TechCostType::MORALE, 8};
+  tech1 = {"Provoke", TechCostType::MORALE, 5.45};
   tech1.cooldown = 5.0;
 
-  tech2 = {"3rd Party", TechCostType::MORALE, 10};
+  tech2 = {"3rd Party", TechCostType::MORALE, 7.45};
   tech2.cooldown = 8.0;
 
   afflictPersistent(data->status);
@@ -276,7 +276,10 @@ void Erwin::assistInput() {
 
 bool Erwin::lightAssistCondition() {
   bool off_cooldown = tech1.clock >= 1.0;
-  if (off_cooldown && !demoralized && morale >= tech1.cost) {
+  float cost = calculateMoraleCost(tech1.cost);
+  bool sufficent_morale = !demoralized && morale >= cost;
+
+  if (off_cooldown && sufficent_morale) {
     return true;
   }
   else {
@@ -287,7 +290,8 @@ bool Erwin::lightAssistCondition() {
 
 bool Erwin::heavyAssistCondition() {
   bool off_cooldown = tech2.clock >= 1.0;
-  bool sufficent_morale = !demoralized && morale >= tech2.cost;
+  bool cost = calculateMoraleCost(tech2.cost);
+  bool sufficent_morale = !demoralized && morale >= cost;
   bool valid = player->target != NULL && player->target->targetable;
 
   if (off_cooldown && sufficent_morale && valid) {
@@ -475,11 +479,12 @@ void Erwin::evade() {
 }
 
 void Erwin::provoke() {
-  if (morale < tech1.cost) {
+  float cost = calculateMoraleCost(tech1.cost);
+  if (morale < cost) {
     return;
   }
 
-  morale -= tech1.cost;
+  morale -= cost;
 
   unique_ptr<CombatAction> action;
   action = make_unique<Provoke>(this);
@@ -487,11 +492,12 @@ void Erwin::provoke() {
 }
 
 void Erwin::thirdparty() {
-  if (morale < tech2.cost) {
+  float cost = calculateMoraleCost(tech2.cost);
+  if (morale < cost) {
     return;
   }
 
-  morale -= tech2.cost;
+  morale -= cost;
 
   unique_ptr<CombatAction> action;
   action = make_unique<ThirdParty>(this);

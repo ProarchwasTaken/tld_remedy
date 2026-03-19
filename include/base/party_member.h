@@ -50,6 +50,7 @@ public:
 
   void techniqueCooldown();
   float calculateLifeCost(float base_cost);
+  float calculateMoraleCost(float base_cost);
   float calculateCooldown(float base_cooldown);
 
   void tintFlash();
