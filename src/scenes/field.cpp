@@ -135,6 +135,7 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->intimid = 6;
   player->persist = 4;
   player->dexterity = 5;
+  player->discipline = 6;
 
   player->recovery = 1.0;
   player->resilience = 0.8;
@@ -171,6 +172,7 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->intimid = 7;
       companion->persist = 5;
       companion->dexterity = 5;
+      companion->discipline = 7;
 
       companion->recovery = 1.0;
       companion->resilience = 0.70;

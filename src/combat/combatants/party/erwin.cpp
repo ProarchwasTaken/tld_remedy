@@ -57,6 +57,7 @@ Erwin::Erwin(Companion *data, Mary *player):
   intimid = data->intimid;
   persist = data->persist;
   dexterity = data->dexterity;
+  discipline = data->discipline;
 
   recovery = data->recovery;
   resilience = data->resilience;

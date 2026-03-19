@@ -29,7 +29,6 @@ enum CombatantState {
 enum class DamageType {
   LIFE,
   MORALE,
-  RANGED,
 };
 
 enum class StunType {
@@ -143,6 +142,7 @@ public:
   int intimid;
   int persist;
   int dexterity;
+  int discipline;
 
   float speed_multiplier = 1.0;
   float recovery = 1.0;

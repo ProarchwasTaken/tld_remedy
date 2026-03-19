@@ -47,6 +47,7 @@ Mary::Mary(Player *plr):
   intimid = plr->intimid;
   persist = plr->persist;
   dexterity = plr->dexterity;
+  discipline = plr->discipline;
 
   recovery = plr->recovery;
   resilience = plr->resilience;

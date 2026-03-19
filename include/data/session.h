@@ -21,6 +21,7 @@ struct Character {
   int intimid;
   int persist;
   int dexterity;
+  int discipline;
 
   float recovery;
   float resilience;

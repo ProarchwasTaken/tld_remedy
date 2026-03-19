@@ -23,6 +23,7 @@ Dummy::Dummy(Vector2 position, Direction direction) :
   intimid = 6;
   persist = 6;
   dexterity = 4;
+  discipline = 1;
 
   resilience = 0.8;
 
