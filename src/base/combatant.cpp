@@ -100,7 +100,10 @@ void Combatant::decelerate() {
     return;
   }
 
-  acceleration -= decel_rate * Game::deltaTime();
+  float modifier = 1.0 - (0.5 * critical_life);
+  float magnitude = (decel_rate * speed_multiplier) * modifier;
+
+  acceleration -= magnitude * Game::deltaTime();
   acceleration = Clamp(acceleration, 0.0, 1.0);
 }
 

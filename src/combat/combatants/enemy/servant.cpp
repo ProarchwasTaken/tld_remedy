@@ -630,7 +630,7 @@ void Servant::movement() {
     decelerate();
   }
 
-  float speed = default_speed * speed_multiplier;
+  float speed = (default_speed * speed_multiplier) * acceleration;
   float magnitude = speed * direction;
 
   position.x += magnitude * Game::deltaTime();

@@ -824,7 +824,7 @@ void Erwin::movement(float multiplier) {
     decelerate();
   }
 
-  float speed = default_speed * multiplier;
+  float speed = (default_speed * multiplier) * acceleration;
   float magnitude = speed * direction;
 
   position.x += magnitude * Game::deltaTime();

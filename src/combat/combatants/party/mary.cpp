@@ -51,6 +51,7 @@ Mary::Mary(Player *plr):
 
   recovery = plr->recovery;
   resilience = plr->resilience;
+  accel_rate = 8;
 
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
