@@ -7,6 +7,7 @@
 #include <set>
 #include <utility>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
@@ -428,6 +429,7 @@ void Servant::neutralLogic() {
   switch (ai_goal) {
     case ServantGoals::IDLE: {
       moving_x = 0;
+      movement();
       break;
     }
     case ServantGoals::TARGETING: {
@@ -468,6 +470,7 @@ void Servant::targetingLogic() {
   }
 
   if (waiting) {
+    decelerate();
     waitTimer();
     return;
   }
@@ -551,6 +554,10 @@ void Servant::dodgingLogic() {
     return;
   }
 
+  if (acceleration != 0.0) {
+    decelerate();
+  }
+
   float difference = position.x - target->position.x;
   if (difference > 0) {
     direction = LEFT;
@@ -611,11 +618,18 @@ void Servant::waitTimer() {
 }
 
 void Servant::movement() {
-  if (moving_x == 0) {
+  if (moving_x == 0 && acceleration == 0) {
     return;
   }
 
-  direction = static_cast<Direction>(moving_x);
+  if (moving_x != 0) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
+
   float speed = default_speed * speed_multiplier;
   float magnitude = speed * direction;
 
@@ -623,7 +637,7 @@ void Servant::movement() {
 }
 
 void Servant::useMovingAnimation() {
-  float difference = 1.0 - speed_multiplier;
+  float difference = 1.0 - (speed_multiplier * acceleration);
   float percentage = 1.0 + difference;
 
   anim_move.frame_duration = anim_move_speed * percentage;
@@ -655,7 +669,9 @@ void Servant::drawDebug() {
   Font *font = &Game::sm_font;
   int size = font->baseSize;
   const char *txt_goal = TextFormat("%i", static_cast<int>(ai_goal));
-  DrawTextEx(*font, txt_goal, position, size, -3, RED);
+
+  Vector2 txt_pos = Vector2Add(position, {0, 8});
+  DrawTextEx(*font, txt_goal, txt_pos, size, -3, RED);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();

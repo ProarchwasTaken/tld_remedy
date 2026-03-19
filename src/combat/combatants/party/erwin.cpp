@@ -553,6 +553,7 @@ void Erwin::neutralLogic() {
   switch (ai_goal) {
     case ErwinGoals::IDLE: {
       moving_x = 0;
+      movement(speed_multiplier);
       break;
     }
     case ErwinGoals::LOOK_AT_PLR: {
@@ -632,6 +633,7 @@ void Erwin::targetingLogic() {
   }
 
   if (waiting) {
+    decelerate();
     waitTimer();
     return;
   }
@@ -713,6 +715,10 @@ void Erwin::dodgingLogic() {
 
   if (dodge_clock < 0.75) {
     return;
+  }
+
+  if (acceleration != 0.0) {
+    decelerate();
   }
 
   int x_direction;
@@ -805,11 +811,17 @@ void Erwin::waitTimer() {
 }
 
 void Erwin::movement(float multiplier) {
-  if (moving_x == 0) {
+  if (moving_x == 0 && acceleration == 0) {
     return;
   }
 
-  direction = static_cast<Direction>(moving_x);
+  if (moving_x != 0) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
 
   float speed = default_speed * multiplier;
   float magnitude = speed * direction;
@@ -821,7 +833,7 @@ void Erwin::animationLogic() {
   Animation *next_anim;
   if (has_moved) {  
     bool using_tech2 = ai_goal == ErwinGoals::THIRD_PARTY;
-    float multiplier = 1.0 + (2 * using_tech2);
+    float multiplier = (1.0 + (2 * using_tech2)) * acceleration;
 
     float difference = 1.0 - (speed_multiplier * multiplier);
     float percentage = Clamp(1.0 + difference, 0.50, 10.0);

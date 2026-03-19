@@ -59,6 +59,9 @@ public:
   virtual void behavior() {};
   virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
 
+  void accelerate();
+  void decelerate();
+
   /* The process of taking damage is actually a very thorough procedure. 
    * It is a crucial aspect of any Combatant's functionality afterall.
    * Built in, it has multiple intercepts of which could be used to
@@ -148,6 +151,10 @@ public:
   float recovery = 1.0;
   float resilience = 1.0;
   int priority = 0;
+
+  float acceleration = 0.0;
+  float accel_rate = 5;
+  float decel_rate = 10;
 
   std::unique_ptr<CombatAction> action;
   Status status;

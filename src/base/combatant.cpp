@@ -83,6 +83,24 @@ float Combatant::distanceTo(Entity *entity) {
   return distance;
 }
 
+void Combatant::accelerate() {
+  if (acceleration == 1.0) {
+    return;
+  }
+
+  acceleration += (accel_rate * speed_multiplier) * Game::deltaTime();
+  acceleration = Clamp(acceleration, 0.0, 1.0);
+}
+
+void Combatant::decelerate() {
+  if (acceleration == 0.0) {
+    return;
+  }
+
+  acceleration -= (decel_rate * speed_multiplier) * Game::deltaTime();
+  acceleration = Clamp(acceleration, 0.0, 1.0);
+}
+
 void Combatant::takeDamage(DamageData &data) {
   if (state == CombatantState::DEAD) {
     return;
@@ -521,4 +539,9 @@ void Combatant::applyStaggerEffect(Rectangle &final) {
 void Combatant::drawDebug() {
   Entity::drawDebug();
   DrawRectangleLinesEx(hurtbox.rect, 1, RED);
+
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
+  const char *text = TextFormat("%01.02f", acceleration);
+  DrawTextEx(*font, text, position, size, -3, GREEN);
 }
