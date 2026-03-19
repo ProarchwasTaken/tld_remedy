@@ -263,6 +263,7 @@ void Erwin::assistInput() {
   bool heavy_input = Input::pressed(keybinds->heavy_assist, gamepad);
   if (heavy_input && heavyAssistCondition()) {
     ai_goal = ErwinGoals::THIRD_PARTY;
+    acceleration = 1.0;
 
     target = player->target;
     assert(target != NULL);

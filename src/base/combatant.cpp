@@ -141,6 +141,8 @@ void Combatant::takeDamage(DamageData &data) {
   kb_time = data.stun_time;
   kb_clock = 0.0;
 
+  acceleration = 0.0;
+
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
@@ -458,6 +460,7 @@ void Combatant::performAction(unique_ptr<CombatAction> &action) {
   this->action.swap(action);
   state = CombatantState::ACTION;
   old_action.reset();
+  acceleration = 0.0;
 } 
 
 void Combatant::cancelAction() {
