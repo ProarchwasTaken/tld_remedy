@@ -237,12 +237,14 @@ void StatusPanel::drawClass(Font *font, int txt_size, PartyMemberID id) {
 void StatusPanel::drawCombatLvl(Font *font, int txt_size, 
                                 Character *member)
 {
-  float offense = member->offense;
-  float defense = member->defense;
-  float intimid = member->intimid;
-  float persist = member->persist;
+  float stat_sum = member->offense;
+  stat_sum += member->defense;
+  stat_sum += member->intimid;
+  stat_sum += member->persist;
+  stat_sum += member->dexterity;
+  stat_sum += member->discipline;
 
-  float level = (offense + defense + intimid + persist) / 4;
+  float level = stat_sum / 6;
   const char *text = TextFormat("%00.02f", level);
 
   Vector2 position = Vector2Add(frame_position, {70, 60});
