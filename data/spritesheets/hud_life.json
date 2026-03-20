@@ -1,35 +1,23 @@
-{ 
-  "frames": [ 
+{
+  "frames": [
     {
       "filename": "life_frame",
-      "frame": {"x": 0, "y": 0, "w": 78, "h": 13}
+      "frame": {"x": 0, "y": 0, "w": 86, "h": 13}
     },
     {
-      "filename": "life_chunk",
-      "frame": {"x": 0, "y": 16, "w": 6, "h": 3}
-    },
-    {
-      "filename": "life_empty",
-      "frame": {"x": 7, "y": 16, "w": 6, "h": 3}
+      "filename": "life_gauge",
+      "frame": {"x": 0, "y": 16, "w": 82, "h": 11}
     },
     {
       "filename": "morale_frame",
-      "frame": {"x": 0, "y": 20, "w": 78, "h": 12}
+      "frame": {"x": 0, "y": 32, "w": 88, "h": 13}
     },
     {
-      "filename": "morale_bar",
-      "frame": {"x": 0, "y": 33, "w": 69, "h": 2}
-    },
-    {
-      "filename": "morale_empty",
-      "frame": {"x": 0, "y": 36, "w": 69, "h": 2}
-    },
-    {
-      "filename": "tenacity_segment",
-      "frame": {"x": 14, "y": 16, "w": 6, "h": 3}
+      "filename": "morale_gauge",
+      "frame": {"x": 0, "y": 48, "w": 85, "h": 11}
     }
   ],
   "meta": {
-    "size": {"w": 80, "h": 24}
+    "size": {"w": 96, "h": 64}
   }
 }
