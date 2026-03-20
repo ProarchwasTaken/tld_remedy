@@ -19,8 +19,9 @@ public:
   void init(bool hide_text = false) override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void logic() override;
+
+  float to_be_healed;
 private:
   PartyMember *afflicted;
-  float to_be_healed;
   float speed;
 };

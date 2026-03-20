@@ -13,6 +13,45 @@ public:
   void assign(PartyMember *user);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
+  void damageEventHandling(TookDamageCBT *event);
   void update();
+  void criticalFlash();
+
   void draw();
+  void shakeTimer();
+
+  void drawPortrait(Vector2 position);
+  void drawLife(Vector2 position);
+  void drawLifeGauge(Vector2 position);
+  void drawToBeHealed(Vector2 position);
+  void drawLifeText(Vector2 position);
+  void drawTenacityText(Vector2 position);
+  void drawGauge(int index, Vector2 position, Color color, 
+                 float percentage, float exponent = GAUGE_LIFE_EXP);
+
+  static SpriteAtlas atlas;
+  static SpriteAtlas status_atlas;
+  static SpriteAtlas portrait_atlas;
+
+  static float GAUGE_LIFE_EXP;
+private:
+  PartyMember *user = NULL;
+  Vector2 main_position;
+  bool has_mending;
+
+  enum {IDLE, SHAKE} state = IDLE;
+  float hit_timestamp = 0;
+
+  float shake_clock = 0.0;
+  float shake_time = 0.25;
+
+  Color life_color;
+  bool crit_flash = false;
+  float crit_clock = 0.0;
+  float crit_time = 0.10;
+
+  float dmg_life_clock = 1.0;
+  float dm_life_time = 0.50;
+  float prev_life;
+  float white_life;
 };

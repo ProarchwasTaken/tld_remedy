@@ -129,7 +129,7 @@ void CombatScene::initializePlayer() {
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
 
-  plr_hud = make_unique<LifeHud>((Vector2){34, 215});
+  plr_hud = make_unique<LifeHud>((Vector2){35, 215});
   plr_hud->assign(this->player);
 
   plr_cmd_hud = make_unique<PlayerCmdHud>((Vector2){350, 178});
@@ -151,7 +151,7 @@ void CombatScene::initializeCompanion() {
   assert(companion != nullptr);
   this->companion = companion.get();
 
-  com_hud = make_unique<LifeHud>((Vector2){154, 215});
+  com_hud = make_unique<LifeHud>((Vector2){162, 215});
   com_hud->assign(this->companion);
 
   assist_hud = make_unique<AssistCmdHud>((Vector2){274, 200});
