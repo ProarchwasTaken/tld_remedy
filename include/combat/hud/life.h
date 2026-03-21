@@ -16,6 +16,7 @@ public:
   void damageEventHandling(TookDamageCBT *event);
   void update();
   void criticalFlash();
+  void demoralizedFlash();
 
   void draw();
   void shakeTimer();
@@ -26,6 +27,11 @@ public:
   void drawToBeHealed(Vector2 position);
   void drawLifeText(Vector2 position);
   void drawTenacityText(Vector2 position);
+
+  void drawMorale(Vector2 position);
+  void drawMoraleGauge(Vector2 position);
+  void drawMoraleText(Vector2 position);
+
   void drawGauge(int index, Vector2 position, Color color, 
                  float percentage, float exponent = GAUGE_LIFE_EXP);
 
@@ -46,12 +52,24 @@ private:
   float shake_time = 0.25;
 
   Color life_color;
+  Color life_txt_color;
   bool crit_flash = false;
   float crit_clock = 0.0;
-  float crit_time = 0.10;
+  float crit_time = 0.20;
 
   float dmg_life_clock = 1.0;
-  float dm_life_time = 0.50;
+  float dmg_life_time = 0.50;
   float prev_life;
   float white_life;
+
+  Color morale_color;
+  Color morale_txt_color;
+  bool demo_flash = false;
+  float demo_clock = 0.0;
+  float demo_time = 0.25;
+
+  float dmg_morale_clock = 1.0;
+  float dmg_morale_time = 0.25;
+  float prev_morale;
+  float white_morale;
 };

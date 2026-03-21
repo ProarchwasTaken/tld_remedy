@@ -164,7 +164,7 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->life = 20;
       companion->max_life = 20;
 
-      companion->init_morale = 5;
+      companion->init_morale = 10;
       companion->max_morale = 20;
 
       companion->offense = 8;
