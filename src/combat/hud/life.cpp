@@ -231,6 +231,7 @@ void LifeHud::draw() {
   }
 
   drawPortrait(position);
+  drawStatusIcons(position);
   drawLife(position);
   drawMorale(position);
 }
@@ -254,6 +255,32 @@ void LifeHud::drawPortrait(Vector2 position) {
   tint.a = 255;
 
   DrawTextureRec(portrait_atlas.sheet, *sprite, position, tint);
+}
+
+void LifeHud::drawStatusIcons(Vector2 position) {
+  int count = user->status.size();
+  if (count == 0) {
+    return;
+  }
+
+  Vector2 base_position = Vector2Subtract(position, {19, 5});
+
+  for (int x = 0; x < count; x++) {
+    StatusEffect *effect = user->status.at(x).get();
+    StatusID id = effect->id;
+    Rectangle *sprite = getIconSprite(id);
+
+    bool odd = x % 2 != 0;
+
+    Vector2 offset = {10.0f * odd, 10.0f * x};
+    Vector2 position = Vector2Subtract(base_position, offset);
+    DrawTextureRec(status_atlas.sheet, *sprite, position, WHITE);
+  }
+}
+
+Rectangle *LifeHud::getIconSprite(StatusID id) {
+  int index = static_cast<int>(id);
+  return &status_atlas.sprites.at(index);
 }
 
 void LifeHud::drawLife(Vector2 position) {

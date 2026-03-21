@@ -22,6 +22,9 @@ public:
   void shakeTimer();
 
   void drawPortrait(Vector2 position);
+  void drawStatusIcons(Vector2 position);
+  Rectangle *getIconSprite(StatusID id);
+
   void drawLife(Vector2 position);
   void drawLifeGauge(Vector2 position);
   void drawToBeHealed(Vector2 position);
