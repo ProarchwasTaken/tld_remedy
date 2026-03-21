@@ -286,7 +286,7 @@ Rectangle *LifeHud::getIconSprite(StatusID id) {
 void LifeHud::drawLife(Vector2 position) {
   DrawTextureRec(atlas.sheet, atlas.sprites[0], position, WHITE);
   drawLifeGauge(position);
-  drawLifeText(position);
+  // drawLifeText(position);
 
   if (user->tenacity != 0.0) {
     drawTenacityText(position);
@@ -369,7 +369,7 @@ void LifeHud::drawMorale(Vector2 position) {
   DrawTextureRec(atlas.sheet, atlas.sprites[3], position, WHITE);
 
   drawMoraleGauge(position);
-  drawMoraleText(position);
+  // drawMoraleText(position);
 }
 
 void LifeHud::drawMoraleGauge(Vector2 position) {
