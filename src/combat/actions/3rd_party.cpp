@@ -74,6 +74,7 @@ void ThirdParty::windUp() {
   SpriteAnimation::play(user->animation, &anim_windup, false);
   user->sprite = &atlas->sprites[*user->animation->current];
 
+  user->acceleration = 1.0;
   user->movement(user->speed_multiplier * 3);
   user->rectExCorrection(user->bounding_box, user->hurtbox, hitbox);
 

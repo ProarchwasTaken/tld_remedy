@@ -298,17 +298,19 @@ void LifeHud::drawLifeGauge(Vector2 position) {
     drawToBeHealed(position);
   }
 
-  if (user->life != user->max_life && user->tenacity != 0) {
-    float life_total = user->life + user->exhaustion;
-    float percentage = (life_total + user->tenacity) / user->max_life;
+  if (user->exhaustion != 0) {
+    float life_total = user->life + user->tenacity;
+    float percentage = (life_total + user->exhaustion) / user->max_life;
     percentage = Clamp(percentage, 0.0, 1.0);
-    drawGauge(2, position, life_color, percentage);
+    drawGauge(1, position, Game::palette[2], percentage);
   }
 
-  if (user->exhaustion != 0) {
-    float percentage = (user->life + user->exhaustion) / user->max_life;
+  float overflow = 0;
+  if (user->tenacity != 0) {
+    float percentage = (user->life + user->tenacity) / user->max_life;
+    overflow = percentage - 1.0;
     percentage = Clamp(percentage, 0.0, 1.0);
-    drawGauge(1, position, Game::palette[29], percentage);
+    drawGauge(2, position, life_color, percentage);
   }
 
   float life_percentage = user->life / user->max_life;
@@ -319,6 +321,10 @@ void LifeHud::drawLifeGauge(Vector2 position) {
   }
 
   drawGauge(1, position, life_color, life_percentage);
+
+  if (overflow > 0) {
+    drawGauge(1, position, Game::palette[22], overflow);
+  }
 }
 
 void LifeHud::drawToBeHealed(Vector2 position) {
