@@ -147,8 +147,8 @@ void StatusPanel::drawPartyMemberInfo(Character *party_member) {
   drawMorale(med_font, med_size, party_member->init_morale, 
              party_member->max_morale);
 
-  drawClass(sm_font, sm_size, party_member->member_id);
-  drawCombatLvl(sm_font, sm_size, party_member);
+  // drawClass(sm_font, sm_size, party_member->member_id);
+  // drawCombatLvl(sm_font, sm_size, party_member);
 
   drawStats(sm_font, sm_size, party_member);
   drawStatus(sm_font, sm_size, party_member);
@@ -253,9 +253,9 @@ void StatusPanel::drawCombatLvl(Font *font, int txt_size,
 }
 
 void StatusPanel::drawStats(Font *font, int txt_size, Character *member) {
-  char stat[3];
+  char stat[5];
   std::strcpy(stat, TextFormat("%02i", member->offense));
-  Vector2 position = Vector2Add(frame_position, {62, 76});
+  Vector2 position = Vector2Add(frame_position, {62, 50});
   DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
 
   std::strcpy(stat, TextFormat("%02i", member->defense));
@@ -263,12 +263,30 @@ void StatusPanel::drawStats(Font *font, int txt_size, Character *member) {
   DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
 
   std::strcpy(stat, TextFormat("%02i", member->intimid));
-  position = Vector2Add(frame_position, {62, 89});
+  position = Vector2Add(frame_position, {62, 63});
   DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
 
   std::strcpy(stat, TextFormat("%02i", member->persist));
   position.x += 80;
   DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
+
+  std::strcpy(stat, TextFormat("%02i", member->dexterity));
+  position = Vector2Add(frame_position, {62, 76});
+  DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
+
+  std::strcpy(stat, TextFormat("%02i", member->discipline));
+  position.x += 80;
+  DrawTextEx(*font, stat, position, txt_size, -3, WHITE);
+
+  std::strcpy(stat, TextFormat("%01.00f%%", member->recovery * 100));
+  position = Vector2Add(frame_position, {75, 89});
+  position = TextUtils::alignRight(stat, position, *font, -3, 0);
+  DrawTextEx(*font, stat, position, txt_size, -3, Game::palette[51]);
+  
+  std::strcpy(stat, TextFormat("%01.00f%%", member->resilience * 100));
+  position = Vector2Add(frame_position, {155, 89});
+  position = TextUtils::alignRight(stat, position, *font, -3, 0);
+  DrawTextEx(*font, stat, position, txt_size, -3, Game::palette[51]);
 }
 
 void StatusPanel::drawStatus(Font *font, int txt_size, Character *member)
