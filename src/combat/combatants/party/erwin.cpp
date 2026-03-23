@@ -21,6 +21,7 @@
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
+#include "utils/collision.h"
 #include "utils/comparisons.h"
 #include "utils/input.h"
 #include "system/sprite_atlas.h"
@@ -825,9 +826,14 @@ void Erwin::movement(float multiplier) {
   }
 
   float speed = (default_speed * multiplier) * acceleration;
-  float magnitude = speed * direction;
+  float magnitude = speed * Game::deltaTime();
 
-  position.x += magnitude * Game::deltaTime();
+  if (Collision::checkX(this, magnitude, moving_x)) {
+    Collision::snapX(this, moving_x);
+  }
+  else {
+    position.x += magnitude * direction; 
+  }
 }
 
 void Erwin::animationLogic() {

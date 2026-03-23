@@ -20,6 +20,7 @@
 #include "data/damage.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "utils/collision.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -631,9 +632,14 @@ void Servant::movement() {
   }
 
   float speed = (default_speed * speed_multiplier) * acceleration;
-  float magnitude = speed * direction;
+  float magnitude = speed * Game::deltaTime();
 
-  position.x += magnitude * Game::deltaTime();
+  if (Collision::checkX(this, magnitude, moving_x)) {
+    Collision::snapX(this, moving_x);
+  }
+  else {
+    position.x += magnitude * direction; 
+  }
 }
 
 void Servant::useMovingAnimation() {
