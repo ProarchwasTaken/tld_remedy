@@ -135,6 +135,11 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
     damageHandling(dmg_event);
     return;
   }
+
+  if (from_itself && event->event_type == CombatantEVT::EVADED_ATTACK) {
+    auto *evade_event = static_cast<EvadedAttackCBT*>(event.get());
+    evadeHandling(evade_event);
+  }
 }
 
 void Erwin::warningHandling(WarningCBT *event) {
@@ -216,32 +221,53 @@ void Erwin::damageHandling(TookDamageCBT *event) {
   retaliation(event->assailant, retaliation_chance);
 }
 
-void Erwin::retaliation(Combatant *assailant, float chance) {
-  if (assailant == NULL || assailant == target) {
+void Erwin::evadeHandling(EvadedAttackCBT *event) {
+  assert(event->sender == this);
+
+  Combatant *assailant = event->assailant;
+  if (assailant == NULL) {
     return;
   }
 
+  assert(state == ACTION && action->id == ActionID::EVADE);
+  Evade *evade = static_cast<Evade*>(action.get());
+  assert(evade->evaded_attack);
+
+  PLOGD << "Detected that evasion had been successful.";
+  bool should_punish = retaliation(assailant, 0.5);
+
+  if (should_punish) {
+    decideAttack();
+  }
+}
+
+bool Erwin::retaliation(Combatant *assailant, float chance) {
+  if (assailant == NULL || assailant == target) {
+    return false;
+  }
+
   if (!assailant->targetable || team == assailant->team) {
-    return;
+    return false;
   }
 
   float distance = distanceTo(assailant);
   if (distance > contest_distance) {
-    return;
+    return false;
   }
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
-  if (percentage > chance) {
-    return;
+  if (percentage <= chance) {
+    target = assailant;
+    PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
+    << "retaliate against: '" << target->name << "' [ID: " << 
+      target->entity_id << "]";
+    return true;
   }
-
-  target = assailant;
-
-  PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
-  << "retaliate against: '" << target->name << "' [ID: " << 
-    target->entity_id << "]";
+  else {
+    return false;
+  }
 }
 
 float Erwin::chanceCalculation(WarningCBT *event, bool from_target)
@@ -459,13 +485,12 @@ void Erwin::decideAttack() {
   if (sufficent && percentage <= chance) {
     attackHP();
     morale -= 4;
-    attack_cooldown = 0.20;
   }
   else {
     attackMP();
-    attack_cooldown = 0.10;
   }
 
+  attack_cooldown = 0.25;
   cooldown_clock = 0.0;
 }
 

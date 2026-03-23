@@ -87,7 +87,7 @@ private:
   int moving_x = 0;
   bool has_moved = false;
 
-  float attack_distance = 28;
+  float attack_distance = 30;
   float contest_distance = 128;
 
   float cooldown_clock = 1.0;

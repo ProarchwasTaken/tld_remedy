@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -8,9 +9,11 @@
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/actions/evade.h"
 #include <plog/Log.h>
 
@@ -103,6 +106,22 @@ void Evade::intercept(DamageData &data) {
   CombatHandler::raise<CreateAfterImgCB>(
     CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
     user->bounding_box.position, user->direction, 0.25f, tint);
+  CombatantHandler::queue<EvadedAttackCBT>(user, 
+                                           CombatantEVT::EVADED_ATTACK,
+                                           data.assailant);
+
+  if (data.assailant == NULL) {
+    return;
+  }
+
+  float difference = user->position.x - data.assailant->position.x;
+  if (difference > 0) {
+    user->direction = LEFT;
+  }
+  else {
+    user->direction = RIGHT;
+  }
+
   PLOGI << "Interception complete.";
 }
 

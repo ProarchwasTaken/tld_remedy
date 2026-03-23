@@ -201,6 +201,7 @@ enum class CombatantEVT {
   MORALE_GAINED,
   EFFECT_GAINED,
   EFFECT_LOST,
-  WARNING
+  WARNING,
+  EVADED_ATTACK
 };
 
