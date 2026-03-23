@@ -384,7 +384,7 @@ void LifeHud::drawMoraleGauge(Vector2 position) {
   float exponent = std::logf(intended) / std::logf(init_percentage);
 
   if (dmg_morale_clock != 1.0) {
-    drawGauge(4, position, WHITE, white_morale);
+    drawGauge(4, position, WHITE, white_morale, exponent);
   }
 
   float morale_percentage = user->morale / user->max_morale;
