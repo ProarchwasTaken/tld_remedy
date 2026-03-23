@@ -75,7 +75,7 @@ void PartyMember::moraleShare(GainedMoraleCBT *event) {
     PLOGD << this->name <<  ": acknowledging Morale Gain event sent by: " 
       << sender->name << " [ID: " << sender->entity_id << "]";
 
-    float magnitude = event->morale_gained / 2;
+    float magnitude = event->morale_gained * 0.75;
     increaseMorale(magnitude, false);
     return;
   }

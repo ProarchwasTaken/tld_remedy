@@ -227,41 +227,10 @@ void ItemCmdHud::useItem() {
   Mary *mary = *player;
 
   float multiplier = 2 - mary->speed_multiplier;
-  float use_time;
+  float use_time = 0.5 * multiplier;
 
   assert(selected != NULL);
-  switch (*selected) {
-    case ItemID::I_BANDAGE: {
-      PLOGD << "Item Selected: Improvised Bandage.";
-      use_time = 0.5 * multiplier;
-      break;
-    }
-    case ItemID::M_SPLINT: {
-      PLOGD << "Item Selected: Makeshift Splint.";
-      use_time = 1.5 * multiplier;
-      break;
-    }
-    case ItemID::S_BANDAGE: {
-      PLOGD << "Item Selected: Sterilized Bandage.";
-      use_time = 1.0 * multiplier;
-      break;
-    }
-    case ItemID::S_WATER: {
-      PLOGD << "Item Selected: Sparkling Item.";
-      use_time = 1.0 * multiplier;
-      break;
-    }
-    case ItemID::P_KILLERS: {
-      PLOGD << "Item Selected: Painkillers.";
-      use_time = 0.5 * multiplier;
-      break;
-    }
-    default: {
-      assert(*selected != ItemID::NONE);
-      PLOGE << "Invalid Item!";
-      return;
-    }
-  }
+  assert(*selected != ItemID::NONE);
 
   PartyMember *target = *this->target;
   PLOGD << "Target Selected: '" << target->name << "'";

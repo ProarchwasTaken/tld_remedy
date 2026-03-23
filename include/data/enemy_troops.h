@@ -70,9 +70,9 @@ struct CDTroop6 : EnemyTroop {
     id = TroopID::CD_TROOP6;
     enemies = {
       {EnemyID::SERVANT, {64, 152}, LEFT},
-      {EnemyID::SERVANT, {192, 152}, LEFT},
+      {EnemyID::SERVANT, {256, 152}, LEFT},
       {EnemyID::SERVANT, {-180, 152}, RIGHT},
-      {EnemyID::SERVANT, {-308, 152}, RIGHT},
+      {EnemyID::SERVANT, {-372, 152}, RIGHT},
     };
   }
 };

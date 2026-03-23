@@ -124,7 +124,7 @@ private:
   bool has_moved = false;
 
   float preferred_plr_distance = 128;
-  float attack_distance = 28;
+  float attack_distance = 27;
   float contest_distance = 96;
 
   float cooldown_clock = 1.0;

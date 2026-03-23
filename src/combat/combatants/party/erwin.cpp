@@ -148,6 +148,10 @@ void Erwin::warningHandling(WarningCBT *event) {
     return;
   }
 
+  if (ai_goal == ErwinGoals::THIRD_PARTY) {
+    return;
+  }
+
   if (team == event->assailant->team) {
     return;
   }
@@ -217,8 +221,10 @@ void Erwin::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  float retaliation_chance = ai_behavior->damaged.retaliation_chance;
-  retaliation(event->assailant, retaliation_chance);
+  if (ai_goal != ErwinGoals::THIRD_PARTY) {
+    float retaliation_chance = ai_behavior->damaged.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance);
+  }
 }
 
 void Erwin::evadeHandling(EvadedAttackCBT *event) {
@@ -299,7 +305,7 @@ float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
     return 0.0;
   }
 
-  float chance = 0.20;
+  float chance = 0.40;
   if (from_target) {
     chance += 0.20;
   }
@@ -783,6 +789,12 @@ void Erwin::dodgingLogic() {
 
   if (dodge_clock < 0.50) {
     targetingLogic();
+  }
+
+  if (target->state == HIT_STUN) {
+    PLOGI << "Aborting dodging goal and returning to targeting.";
+    ai_goal = ErwinGoals::TARGETING;
+    return;
   }
 
   dodge_clock += Game::deltaTime() / dodge_time;
