@@ -168,20 +168,35 @@ void Erwin::warningHandling(WarningCBT *event) {
   PLOGI << "Acknowledging Warning sent by Entity [ID: " 
     << event->sender->entity_id << "]";
 
-  float dodge_chance = chanceCalculation(event, from_target, in_range);
+  float dodge_chance = chanceCalculation(event, from_target);
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
   setGoal(ErwinGoals::DODGING, dodge_chance);
   if (ai_goal != ErwinGoals::DODGING) {
     return;
   }
-
   PLOGI << "Decided to dodge the attack.";
-  dodge_time = event->time_until * 0.90;
-  dodge_clock = 0.0;
 
-  float retaliation_chance = ai_behavior->dodging.retaliation_chance;
-  retaliation(event->assailant, retaliation_chance);
+  float evade_chance = getEvadeChance(event, from_target, in_range);
+  PLOGI << "Chance to evade attack: " << evade_chance;
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float evade_percentage = range(Game::RNG);
+  attempt_evade = evade_percentage <= evade_chance;
+
+  if (attempt_evade) {
+    PLOGI << "Attempting to evade the attack.";
+    dodge_time = 0.01;
+    target = event->assailant;
+  }
+  else {
+    dodge_time = event->time_until * 0.90;
+
+    float retaliation_chance = ai_behavior->dodging.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance); 
+  }
+
+  dodge_clock = 0.0;
 
   if (target == NULL) {
     chooseTarget();
@@ -229,8 +244,7 @@ void Erwin::retaliation(Combatant *assailant, float chance) {
     target->entity_id << "]";
 }
 
-float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
-                               bool in_range)
+float Erwin::chanceCalculation(WarningCBT *event, bool from_target)
 {
   float range = event->hitbox.width;
   float distance = distanceTo(event->sender);
@@ -250,6 +264,26 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   PLOGD << "Multiplier: " << multiplier;
 
   return (time_bonus + range_bonus) * multiplier;
+}
+
+float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
+                            bool in_range)
+{
+  if (event->time_until <= 0.16) {
+    return 0.0;
+  }
+
+  float chance = 0.20;
+  if (from_target) {
+    chance += 0.20;
+  }
+
+  Rectangle *player_hurtbox = &player->hurtbox.rect;
+  if (in_range && CheckCollisionRecs(*player_hurtbox, event->hitbox)) {
+    chance += 0.30;
+  }
+
+  return chance;
 }
 
 void Erwin::assistInput() {
@@ -425,10 +459,14 @@ void Erwin::decideAttack() {
   if (sufficent && percentage <= chance) {
     attackHP();
     morale -= 4;
+    attack_cooldown = 0.20;
   }
   else {
     attackMP();
+    attack_cooldown = 0.10;
   }
+
+  cooldown_clock = 0.0;
 }
 
 void Erwin::attackMP() {
@@ -550,6 +588,10 @@ void Erwin::update() {
 }
 
 void Erwin::neutralLogic() {
+  if (cooldown_clock < 1.0) {
+    cooldown_clock += Game::deltaTime() / attack_cooldown;
+  }
+
   float old_x = position.x;
 
   switch (ai_goal) {
@@ -646,7 +688,12 @@ void Erwin::targetingLogic() {
     return;
   }
 
-  decideAttack();
+  if (cooldown_clock >= 1.0) {
+    decideAttack();
+  }
+  else {
+    return;
+  }
 
   float retreat_chance = ai_behavior->targeting.retreat_chance;
   setGoal(ErwinGoals::RETREATING, retreat_chance);
@@ -738,7 +785,12 @@ void Erwin::dodgingLogic() {
     return;
   }
 
-  ghoststep(x_direction);
+  if (attempt_evade) {
+    evade();
+  }
+  else {
+    ghoststep(x_direction); 
+  }
 
   float target_chance = ai_behavior->dodging.target_chance;
   setGoal(ErwinGoals::TARGETING, target_chance);

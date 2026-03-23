@@ -57,8 +57,9 @@ public:
   void warningHandling(WarningCBT *event);
   void damageHandling(TookDamageCBT *event);
   void retaliation(Combatant *assailant, float chance);
-  float chanceCalculation(WarningCBT *event, bool from_target,
-                          bool in_range);
+  float chanceCalculation(WarningCBT *event, bool from_target);
+  float getEvadeChance(WarningCBT *event, bool from_target, 
+                       bool in_range);
 
   void assistInput();
   bool lightAssistCondition();
@@ -122,12 +123,16 @@ private:
   bool has_moved = false;
 
   float preferred_plr_distance = 128;
-  float attack_distance = 30;
+  float attack_distance = 27;
   float contest_distance = 96;
+
+  float cooldown_clock = 1.0;
+  float attack_cooldown = 0.10;
 
   float retreat_time = 0.5;
   float retreat_clock = 0.0;
 
+  bool attempt_evade = false;
   float dodge_time = 0.0;
   float dodge_clock = 0.0;
 

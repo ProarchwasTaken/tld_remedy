@@ -345,6 +345,9 @@ void Servant::decideAttack() {
   else {
     attackMP();
   }
+
+  attack_cooldown = 1.0;
+  cooldown_clock = 0.0;
 }
 
 void Servant::attackMP() {
@@ -425,6 +428,10 @@ void Servant::update() {
 }
 
 void Servant::neutralLogic() {
+  if (cooldown_clock < 1.0) {
+    cooldown_clock += Game::deltaTime() / attack_cooldown;
+  }
+
   float old_x = position.x;
 
   switch (ai_goal) {
@@ -482,7 +489,12 @@ void Servant::targetingLogic() {
     return;
   }
 
-  decideAttack();
+  if (cooldown_clock >= 1.0) {
+    decideAttack();
+  }
+  else {
+    return;
+  }
 
   float retreat_chance = ai_behavior->targeting.retreat_chance;
   setGoal(ServantGoals::RETREATING, retreat_chance);
