@@ -55,8 +55,16 @@ void FieldMap::loadMap(Session &session, string map_name,
 
   UnloadTexture(base);
   base = LoadTexture(base_path.c_str());
-  parseMapData(session, map_name, json_path, spawn_name);
 
+  UnloadTexture(overlay);
+  string overlay_path = "graphics/maps/" + map_name + "o.png";
+  overlay_available = FileExists(overlay_path.c_str());
+  if (overlay_available) {
+    PLOGD << "Found overlay file.";
+    overlay = LoadTexture(overlay_path.c_str());
+  }
+
+  parseMapData(session, map_name, json_path, spawn_name);
   PLOGI << "Map: '" << map_name << "' has been loaded successfully."; 
 }
 
@@ -497,8 +505,14 @@ void FieldMap::setupCommonData(string map_name, int object_id,
   *count += 1;
 }
 
-void FieldMap::draw() {
+void FieldMap::drawMap() {
   DrawTexture(base, 0, 0, WHITE);
+}
+
+void FieldMap::drawOverlay() {
+  if (overlay_available) {
+    DrawTexture(overlay, 0, 0, WHITE);
+  }
 }
 
 void FieldMap::drawCollLines() {

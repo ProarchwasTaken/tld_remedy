@@ -857,7 +857,7 @@ void FieldScene::draw() {
 
   BeginMode2D(camera); 
   {
-    field->draw();
+    field->drawMap();
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
@@ -872,6 +872,8 @@ void FieldScene::draw() {
       field->drawCollLines();
     } 
     #endif // !NDEBUG
+
+    field->drawOverlay();
   }
   EndMode2D();
 

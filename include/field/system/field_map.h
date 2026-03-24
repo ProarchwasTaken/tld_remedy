@@ -49,11 +49,14 @@ public:
   void setupCommonData(std::string map_name, int object_id,
                        CommonData *begin, int *count, int limit);
 
-  void draw();
+  void drawMap();
+  void drawOverlay();
   void drawCollLines();
 
   static std::vector<Line> collision_lines;
   std::vector<std::unique_ptr<EntityData>> entity_queue;
 private:
   Texture base;
+  Texture overlay;
+  bool overlay_available = false;
 };

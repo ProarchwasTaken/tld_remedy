@@ -8,8 +8,18 @@
          "imageheight":224,
          "imagewidth":192,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_02o.png",
+         "imageheight":224,
+         "imagewidth":192,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":1,
+                 "id":9,
                  "name":"",
                  "polyline":[
                         {
@@ -32,32 +42,73 @@
                          "y":0
                         }, 
                         {
-                         "x":128,
+                         "x":0,
+                         "y":32
+                        }, 
+                        {
+                         "x":-48,
+                         "y":32
+                        }, 
+                        {
+                         "x":-48,
+                         "y":64
+                        }, 
+                        {
+                         "x":-56,
+                         "y":64
+                        }, 
+                        {
+                         "x":-56,
+                         "y":52
+                        }, 
+                        {
+                         "x":-104,
+                         "y":52
+                        }, 
+                        {
+                         "x":-104,
+                         "y":64
+                        }, 
+                        {
+                         "x":-144,
+                         "y":64
+                        }, 
+                        {
+                         "x":-144,
                          "y":0
                         }, 
                         {
-                         "x":128,
-                         "y":32
+                         "x":-112,
+                         "y":0
                         }, 
                         {
-                         "x":144,
-                         "y":32
+                         "x":-112,
+                         "y":-32
+                        },
+                    
+                        {
+                         "x":-104,
+                         "y":-32
                         }, 
                         {
-                         "x":144,
-                         "y":64
+                         "x":-104,
+                         "y":-24
                         }, 
                         {
-                         "x":128,
-                         "y":64
+                         "x":-56,
+                         "y":-24
                         }, 
                         {
-                         "x":128,
-                         "y":96
+                         "x":-56,
+                         "y":-32
                         }, 
                         {
-                         "x":0,
-                         "y":96
+                         "x":-16,
+                         "y":-32
+                        }, 
+                        {
+                         "x":-16,
+                         "y":0
                         }, 
                         {
                          "x":0,
@@ -67,8 +118,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":32,
-                 "y":96
+                 "x":176,
+                 "y":128
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -177,9 +228,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_01"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -220,8 +282,8 @@
                  "type":"Supplies",
                  "visible":true,
                  "width":0,
-                 "x":64,
-                 "y":176
+                 "x":48,
+                 "y":184
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -253,8 +315,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":9,
+ "nextlayerid":10,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "properties":[
         {
