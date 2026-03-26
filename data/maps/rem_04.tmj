@@ -8,8 +8,18 @@
          "imageheight":256,
          "imagewidth":256,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_04o.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":1,
+                 "id":12,
                  "name":"",
                  "polyline":[
                         {
@@ -45,6 +55,22 @@
                         }, 
                         {
                          "x":144,
+                         "y":208
+                        }, 
+                        {
+                         "x":52,
+                         "y":208
+                        }, 
+                        {
+                         "x":52,
+                         "y":192
+                        }, 
+                        {
+                         "x":12,
+                         "y":192
+                        }, 
+                        {
+                         "x":12,
                          "y":208
                         }, 
                         {
@@ -180,7 +206,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -201,9 +227,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_03"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -228,9 +265,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_05"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -246,7 +294,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -314,8 +362,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":11,
+ "nextlayerid":10,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "properties":[
         {

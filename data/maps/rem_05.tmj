@@ -8,8 +8,18 @@
          "imageheight":192,
          "imagewidth":576,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_05o.png",
+         "imageheight":192,
+         "imagewidth":576,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,71 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":2,
-                 "name":"",
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":240,
-                         "y":0
-                        }, 
-                        {
-                         "x":240,
-                         "y":16
-                        }, 
-                        {
-                         "x":256,
-                         "y":16
-                        }, 
-                        {
-                         "x":256,
-                         "y":48
-                        }, 
-                        {
-                         "x":240,
-                         "y":48
-                        }, 
-                        {
-                         "x":240,
-                         "y":64
-                        }, 
-                        {
-                         "x":160,
-                         "y":64
-                        }, 
-                        {
-                         "x":160,
-                         "y":80
-                        }, 
-                        {
-                         "x":128,
-                         "y":80
-                        }, 
-                        {
-                         "x":128,
-                         "y":64
-                        }, 
-                        {
-                         "x":0,
-                         "y":64
-                        }, 
-                        {
-                         "x":0,
-                         "y":0
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":304,
-                 "y":96
-                }, 
-                {
-                 "height":0,
-                 "id":7,
+                 "id":17,
                  "name":"",
                  "polyline":[
                         {
@@ -112,11 +58,23 @@
                          "y":0
                         }, 
                         {
-                         "x":256,
+                         "x":248,
                          "y":0
                         }, 
                         {
                          "x":256,
+                         "y":16
+                        }, 
+                        {
+                         "x":248,
+                         "y":32
+                        }, 
+                        {
+                         "x":256,
+                         "y":48
+                        }, 
+                        {
+                         "x":248,
                          "y":64
                         }, 
                         {
@@ -148,6 +106,82 @@
                  "visible":true,
                  "width":0,
                  "x":16,
+                 "y":96
+                }, 
+                {
+                 "height":0,
+                 "id":18,
+                 "name":"",
+                 "polyline":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":240,
+                         "y":0
+                        }, 
+                        {
+                         "x":240,
+                         "y":16
+                        }, 
+                        {
+                         "x":256,
+                         "y":16
+                        }, 
+                        {
+                         "x":256,
+                         "y":48
+                        }, 
+                        {
+                         "x":240,
+                         "y":48
+                        }, 
+                        {
+                         "x":240,
+                         "y":64
+                        }, 
+                        {
+                         "x":160,
+                         "y":64
+                        }, 
+                        {
+                         "x":160,
+                         "y":80
+                        }, 
+                        {
+                         "x":128,
+                         "y":80
+                        }, 
+                        {
+                         "x":128,
+                         "y":64
+                        }, 
+                        {
+                         "x":0,
+                         "y":64
+                        }, 
+                        {
+                         "x":8,
+                         "y":48
+                        }, 
+                        {
+                         "x":0,
+                         "y":32
+                        }, 
+                        {
+                         "x":8,
+                         "y":16
+                        }, 
+                        {
+                         "x":0,
+                         "y":0
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":304,
                  "y":96
                 }],
          "opacity":1,
@@ -353,9 +387,20 @@
                          "value":-1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_04"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -380,9 +425,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_06"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -407,9 +463,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_07"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -434,9 +501,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_08"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -461,9 +539,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_09"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -537,8 +626,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":17,
+ "nextlayerid":10,
+ "nextobjectid":19,
  "orientation":"orthogonal",
  "properties":[
         {
