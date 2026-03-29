@@ -34,11 +34,27 @@
          "objects":[
                 {
                  "height":0,
-                 "id":3,
+                 "id":14,
                  "name":"",
                  "polyline":[
                         {
                          "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":236,
+                         "y":0
+                        }, 
+                        {
+                         "x":236,
+                         "y":4
+                        }, 
+                        {
+                         "x":276,
+                         "y":4
+                        }, 
+                        {
+                         "x":276,
                          "y":0
                         }, 
                         {
@@ -190,7 +206,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -278,7 +294,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -355,7 +371,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":14,
+ "nextobjectid":15,
  "orientation":"orthogonal",
  "properties":[
         {

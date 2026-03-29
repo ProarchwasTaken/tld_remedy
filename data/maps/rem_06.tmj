@@ -8,8 +8,18 @@
          "imageheight":256,
          "imagewidth":256,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_06o.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":7,
+                 "id":8,
                  "name":"",
                  "polyline":[
                         {
@@ -33,79 +43,79 @@
                         }, 
                         {
                          "x":0,
-                         "y":-40
+                         "y":-16
                         }, 
                         {
-                         "x":64,
-                         "y":-40
+                         "x":-16,
+                         "y":-16
                         }, 
                         {
-                         "x":64,
-                         "y":-88
+                         "x":-16,
+                         "y":-56
                         }, 
                         {
-                         "x":0,
-                         "y":-88
+                         "x":48,
+                         "y":-56
                         }, 
                         {
-                         "x":0,
-                         "y":-128
+                         "x":48,
+                         "y":-100
                         }, 
                         {
-                         "x":8,
-                         "y":-128
+                         "x":-16,
+                         "y":-100
                         }, 
                         {
-                         "x":8,
-                         "y":-120
+                         "x":-16,
+                         "y":-144
                         }, 
                         {
-                         "x":56,
-                         "y":-120
+                         "x":-8,
+                         "y":-144
                         }, 
                         {
-                         "x":56,
-                         "y":-128
+                         "x":-8,
+                         "y":-132
                         }, 
                         {
-                         "x":192,
-                         "y":-128
+                         "x":40,
+                         "y":-132
                         }, 
                         {
-                         "x":192,
-                         "y":-104
-                        }, 
-                        {
-                         "x":176,
-                         "y":-104
+                         "x":40,
+                         "y":-144
                         }, 
                         {
                          "x":176,
-                         "y":-40
+                         "y":-144
                         }, 
                         {
-                         "x":192,
-                         "y":-40
+                         "x":176,
+                         "y":-100
                         }, 
                         {
-                         "x":192,
-                         "y":0
+                         "x":160,
+                         "y":-100
+                        }, 
+                        {
+                         "x":160,
+                         "y":-56
                         },
                     
                         {
-                         "x":48,
-                         "y":0
+                         "x":176,
+                         "y":-56
                         }, 
                         {
-                         "x":48,
-                         "y":16
+                         "x":176,
+                         "y":-16
                         }, 
                         {
-                         "x":16,
-                         "y":16
+                         "x":32,
+                         "y":-16
                         }, 
                         {
-                         "x":16,
+                         "x":32,
                          "y":0
                         }, 
                         {
@@ -116,8 +126,8 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":32,
-                 "y":224
+                 "x":48,
+                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -205,7 +215,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -226,9 +236,20 @@
                          "value":2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_05"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -244,7 +265,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":true,
+         "visible":false,
          "x":0,
          "y":0
         }, 
@@ -296,8 +317,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":8,
+ "nextlayerid":10,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "properties":[
         {
