@@ -8,8 +8,18 @@
          "imageheight":256,
          "imagewidth":256,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_07o.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":10,
+                 "id":17,
                  "name":"",
                  "polyline":[
                         {
@@ -37,14 +47,18 @@
                         }, 
                         {
                          "x":40,
-                         "y":72
+                         "y":68
                         }, 
                         {
                          "x":72,
-                         "y":104
+                         "y":100
                         }, 
                         {
-                         "x":48,
+                         "x":64,
+                         "y":116
+                        }, 
+                        {
+                         "x":64,
                          "y":128
                         }, 
                         {
@@ -80,18 +94,30 @@
                          "y":56
                         }, 
                         {
-                         "x":88,
-                         "y":56
+                         "x":100,
+                         "y":76
                         }, 
                         {
-                         "x":88,
-                         "y":0
-                        }, 
-                        {
-                         "x":48,
-                         "y":0
+                         "x":104,
+                         "y":88
                         },
                     
+                        {
+                         "x":72,
+                         "y":56
+                        }, 
+                        {
+                         "x":88,
+                         "y":56
+                        }, 
+                        {
+                         "x":88,
+                         "y":0
+                        }, 
+                        {
+                         "x":48,
+                         "y":0
+                        }, 
                         {
                          "x":48,
                          "y":-16
@@ -117,43 +143,7 @@
                 }, 
                 {
                  "height":0,
-                 "id":11,
-                 "name":"",
-                 "polyline":[
-                        {
-                         "x":0,
-                         "y":0
-                        }, 
-                        {
-                         "x":16,
-                         "y":-16
-                        }, 
-                        {
-                         "x":8,
-                         "y":-24
-                        }, 
-                        {
-                         "x":-8,
-                         "y":-32
-                        }, 
-                        {
-                         "x":-24.9130434782609,
-                         "y":-25.6521739130435
-                        }, 
-                        {
-                         "x":0,
-                         "y":0
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":120,
-                 "y":184
-                }, 
-                {
-                 "height":0,
-                 "id":13,
+                 "id":18,
                  "name":"",
                  "polyline":[
                         {
@@ -166,11 +156,11 @@
                         }, 
                         {
                          "x":48,
-                         "y":-24
+                         "y":-12
                         }, 
                         {
                          "x":0,
-                         "y":-24
+                         "y":-12
                         }, 
                         {
                          "x":0,
@@ -314,9 +304,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_05"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -341,9 +342,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_08"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -463,8 +475,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":17,
+ "nextlayerid":10,
+ "nextobjectid":19,
  "orientation":"orthogonal",
  "properties":[
         {
