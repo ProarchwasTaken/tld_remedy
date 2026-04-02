@@ -8,8 +8,6 @@
          "imageheight":192,
          "imagewidth":576,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -241,9 +239,20 @@
                          "value":1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_09"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -268,9 +277,20 @@
                          "value":-2
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_11"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
@@ -295,9 +315,20 @@
                          "value":-1
                         }, 
                         {
+                         "name":"flag",
+                         "propertytype":"GameFlag",
+                         "type":"int",
+                         "value":0
+                        }, 
+                        {
                          "name":"map_dest",
                          "type":"string",
                          "value":"rem_12"
+                        }, 
+                        {
+                         "name":"require_flag",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"spawn_dest",
