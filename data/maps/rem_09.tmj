@@ -22,7 +22,7 @@
          "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -34,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":8,
+                 "id":9,
                  "name":"",
                  "polyline":[
                         {
@@ -91,24 +91,24 @@
                          "y":172
                         }, 
                         {
-                         "x":77.9555555555556,
+                         "x":77,
                          "y":172
                         }, 
                         {
-                         "x":77.0625,
-                         "y":259.875
-                        }, 
-                        {
-                         "x":98.9375,
+                         "x":77,
                          "y":260
                         }, 
                         {
-                         "x":98.875,
+                         "x":99,
+                         "y":260
+                        }, 
+                        {
+                         "x":99,
                          "y":44
                         }, 
                         {
                          "x":16,
-                         "y":43.9375
+                         "y":44
                         }, 
                         {
                          "x":16,
@@ -239,7 +239,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -327,7 +327,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -368,7 +368,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":9,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "properties":[
         {
