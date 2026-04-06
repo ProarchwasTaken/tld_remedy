@@ -8,8 +8,18 @@
          "imageheight":256,
          "imagewidth":256,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_15o.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -24,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":6,
+                 "id":9,
                  "name":"",
                  "polyline":[
                         {
@@ -56,20 +66,20 @@
                          "y":-32
                         }, 
                         {
-                         "x":-113.090909090909,
-                         "y":-31.9090909090909
+                         "x":-113,
+                         "y":-32
                         }, 
                         {
-                         "x":-112.909090909091,
-                         "y":-103.636363636364
+                         "x":-113,
+                         "y":-62
                         }, 
                         {
-                         "x":-7.18181818181819,
-                         "y":-103.727272727273
+                         "x":-7,
+                         "y":-62
                         }, 
                         {
-                         "x":-6.90909090909091,
-                         "y":-15.9090909090909
+                         "x":-7,
+                         "y":-16
                         }, 
                         {
                          "x":0,
@@ -288,7 +298,7 @@
                  "visible":true,
                  "width":0,
                  "x":116,
-                 "y":204
+                 "y":211
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -308,8 +318,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
- "nextobjectid":9,
+ "nextlayerid":10,
+ "nextobjectid":10,
  "orientation":"orthogonal",
  "properties":[
         {
