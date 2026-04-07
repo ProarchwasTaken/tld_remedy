@@ -8,8 +8,6 @@
          "imageheight":256,
          "imagewidth":256,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
