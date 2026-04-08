@@ -47,7 +47,7 @@ void Mangled::init(bool hide_text) {
 }
 
 void Mangled::applyPenalty() {
-  PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
+  PLOGI << "Decreasing the afflicted's defense and recovery.";
   afflicted->defense -= defense_lost;
   afflicted->recovery -= recovery_lost;
   afflicted->resilience -= resilience_lost;

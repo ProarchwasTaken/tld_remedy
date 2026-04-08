@@ -108,7 +108,7 @@ void ItemsPanel::useItem() {
         return;
       }
 
-      float heal = std::ceilf(member->max_life * 0.35);
+      float heal = calculateHeal(member, 0.25);
       PLOGI << "Healing combatant by: " << heal << " Life";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
@@ -147,7 +147,7 @@ void ItemsPanel::useItem() {
         return;
       }
 
-      float heal = std::ceilf(member->max_life * 0.50);
+      float heal = calculateHeal(member, 0.5);
       PLOGI << "Healing combatant by: " << heal << " Life";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
@@ -167,6 +167,41 @@ void ItemsPanel::useItem() {
   session->item_count--;
   updateSelected();
   sfx->play("menu_item");
+}
+
+float ItemsPanel::calculateHeal(Character *member, float percentage) {
+  float max_life = member->max_life;
+  float recovery = member->recovery;
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID effect = member->status[x];
+
+    if (effect == StatusID::MANGLED) {
+      float resilience = member->resilience;
+      float dec_percentage = Lerp(0.15, 0.85, resilience - 0.20);
+      dec_percentage = Clamp(dec_percentage, 0.15, 0.85);
+      recovery = recovery * dec_percentage;
+      break;
+    }
+  }
+
+  float multiplier = recovery * recovery;
+  float result = (max_life * percentage) * multiplier;
+  PLOGD << "Base Heal Amount: " << result;
+
+  if (member->member_id != PartyMemberID::MARY) {
+    Character *mary = party.at(0);
+    float m_recovery = mary->recovery;
+    float m_percentage = (m_recovery * m_recovery) / 6;
+
+    float bonus = (max_life * m_percentage) * multiplier;
+    PLOGD << "Bonus to be applied: " << bonus;
+
+    result += bonus;
+  }
+
+  result = std::ceilf(result);
+  return result;
 }
 
 void ItemsPanel::openDialog(vector<string> &dialog) {

@@ -25,8 +25,9 @@ public:
   void updateSelected();
 
   void useItem();
+  float calculateHeal(Character *member, float percentage);
   void openDialog(std::vector<std::string> &dialog);
-  void openRejectDialog(Character *member);
+  void openRejectDialog(Character *member); 
   void openHealDialog(Character *member, float healed);
   void openSplintDialog(Character *member, StatusID effect);
 

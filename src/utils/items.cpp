@@ -59,24 +59,24 @@ string ItemUtils::getDescription(ItemID item) {
   switch (item) {
     case ItemID::I_BANDAGE: {
       return 
-      "Restores 35% of a combatant's\n"
-      "Life.\n"
-      "In Combat: Instead applies the\n"
-      "Mending status effect.";
+      "Restores a small percentage of\n"
+      "a party member's Life.\n"
+      "The amount healed is governed\n"
+      "by the combatant's Recovery.";
     }
     case ItemID::M_SPLINT: {
       return
       "Can fix Broken Arm,\n"
       "Crippled Leg, and Mangled.\n"
-      "In Combat: Also cures the\n"
-      "Despondent status ailment.";
+      "Also cures the Despondent status\n"
+      "ailment in combat.";
     }
     case ItemID::S_BANDAGE: {
       return
-      "Restores 50% of a combatant's\n"
-      "Life.\n"
-      "In Combat: Applies Mending\n"
-      "that heals at a faster rate.";
+      "Restores a large percentage of\n"
+      "a party member's Life.\n"
+      "The amount healed is governed\n"
+      "by the combatant's Recovery.";
     }
     case ItemID::S_WATER: {
       return 
