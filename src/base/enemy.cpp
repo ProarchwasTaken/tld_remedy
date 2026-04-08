@@ -42,6 +42,14 @@ void Enemy::takeDamage(DamageData &data) {
     combo = 0;
   }
 
+  if (data.damage_type == DamageType::LIFE) {
+    float percentage = combo / 20.0;
+    percentage = Clamp(percentage, 0.0, 1.0);
+
+    float modifier = 1.0 - (percentage * percentage);
+    data.def_mod = data.def_mod * modifier; 
+  }
+
   Combatant::takeDamage(data);
 
   if (data.assailant->team != CombatantTeam::PARTY) {
