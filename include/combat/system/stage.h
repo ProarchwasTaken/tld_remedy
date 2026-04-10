@@ -5,7 +5,7 @@
 
 class CombatStage {
 public:
-  void loadStage(std::string name);
+  void loadStage(std::string location);
   static void tintStage(Color tint);
 
   void update();

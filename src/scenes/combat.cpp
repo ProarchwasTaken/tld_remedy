@@ -59,7 +59,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
   menu_sfx = &Game::menu_sfx;
   menu_sfx->use();
 
-  stage.loadStage("debug");
+  stage.loadStage(session->location);
   initializeCombatants(id);
 
   this->reward = reward;
