@@ -1,17 +1,20 @@
 # Synopsis
-**True Human Tribulation: Remedy** is an Action Adventure game where the
-player must explore an map of maze like architecture, and defeat the boss
-at the end. All the while, they must try their best to avoid unnecessary 
-battles, and carefully manage their resources so they don't end up too 
-weak to cross the metaphorical "finish line".
+**True Human Tribulation III: Remedy** is an Action Adventure game that 
+has a slight focus on resource mangagement. The player must conserve their 
+limited resources the best they can, so they don't end up too weak to 
+cross the finish line. Either from playing skillfully in combat, or 
+avoiding it whenever possible, it's entirely up to you.
 
-The game is currently in it's early pre-alpha stages. So feedback, and 
-constructive criticism is very much appreciated. I'm currently focused on
-building the game's core mechanics and systems, while also refining what's
-built. Possible the most experimental phase of development as everything
-is subject to change.
+The game is currently in it's Alpha stages. Which means the core mechanics
+had been established and finalized. Nevertheless, feedback is still very 
+much appreciated, and since this is an Open-Source project, helpful 
+contributions are welcome as well.
+
 
 # Default Controls
+These are the default controls when you first open the game. In the 
+settings menu, (Which can be opened from the Title Screen and Camp 
+Menu) they can be remapped to your personal liking.
 
 ## Keyboard
 
@@ -30,8 +33,7 @@ is subject to change.
 * **C Key** - Heavy Assist
 
 * **Tab Key** - Pause
-* **Left Shift Key** - Use Item
-
+* **Left Shift Key** - Open Item Menu 
 
 ## Gamepad
 The controls detailed here are based on the SNES button layout, so they
@@ -52,7 +54,7 @@ may be different depending on what controller you use.
 * **R Button** - Heavy Assist
 
 * **Start Button** - Pause
-* **Select Button** - Use Item
+* **Select Button** - Open Item Menu
 
 
 # Credits and Contacts
@@ -87,6 +89,7 @@ that need to met in order for compilation to be successful.
 * Raylib v5.0 - Game Framework. Problems may occur on newer versions.
 * Nlohmann Json - Modern C++ Json Library.
 
+
 # Known Linux Issues
 This game can also be built and ran on Linux. As of now, the game has been
 confirmed to work perfectly fine on Fedora with minimum issues or 
@@ -98,3 +101,13 @@ drawn at all. Like it would just be a completely black screen. The bug
 only seems to occur during startup, and there has been no confirmed case
 of it happening during gameplay. The only known fix for this is to just
 keep closing and running the game until it works.
+
+
+# MacOS Warning
+I have no intentions to maintain an MacOS version of the game. Mostly 
+don't really have access to the proper MacOS envioroment to test of game 
+on, nor do I have motivation to set something like that up on my non-mac
+laptop.
+
+The game can be compiled for MacOS thanks to a recent contributor though,
+but don't be surprised if there are any issues.
