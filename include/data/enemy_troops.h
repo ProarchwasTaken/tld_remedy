@@ -77,6 +77,7 @@ struct CDTroop6 : EnemyTroop {
   }
 };
 
+#ifndef NDEBUG
 struct DBTroop1 : EnemyTroop {
   DBTroop1() {
     id = TroopID::DB_TROOP1;
@@ -104,3 +105,4 @@ struct DBTroop3 : EnemyTroop {
     };
   }
 };
+#endif // !NDEBUG
