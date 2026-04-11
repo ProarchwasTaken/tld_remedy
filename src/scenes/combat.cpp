@@ -657,8 +657,6 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
 {
   if (member == NULL) {
     PLOGD << "Combatant is assumed to be a dead companion.";
-    data->life = 1;
-
     assert(dead_companion != nullptr);
     assert(dead_companion->entity_type == EntityType::COMBATANT);
     assert(dead_companion.get() != player);
@@ -666,12 +664,13 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
     PLOGD << "Retrieving address to dead companion, and setting it's life"
       << " to 1.";
     member = static_cast<PartyMember*>(dead_companion.get());
-    member->life = 1;
+    data->life = 1;
   }
-
-  member->depleteInstant();
-  float life = std::ceilf(member->life); 
-  data->life = Clamp(life, 0, member->max_life);
+  else {
+    member->depleteInstant();
+    float life = std::ceilf(member->life); 
+    data->life = Clamp(life, 0, member->max_life); 
+  }
 
   StatusID status[STATUS_LIMIT] = {
     StatusID::NONE, 
