@@ -1,6 +1,6 @@
 # Synopsis
 **True Human Tribulation III: Remedy** is an Action Adventure game that 
-has a slight focus on resource mangagement. The player must conserve their 
+has a slight focus on resource management. The player must conserve their 
 limited resources the best they can, so they don't end up too weak to 
 cross the finish line. Either from playing skillfully in combat, or 
 avoiding it whenever possible, it's entirely up to you.
