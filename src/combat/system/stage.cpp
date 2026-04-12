@@ -9,9 +9,17 @@ Color CombatStage::tint = WHITE;
 bool CombatStage::tint_changed = false;
 
 
-void CombatStage::loadStage(string name) {
-  PLOGI << "Loading stage: '" << name << "'";
-  string directory = "graphics/stages/" + name;
+void CombatStage::loadStage(string location) {
+  string map_name;
+  if (location == "Cathedral F2" || location == "Cathedral F1") {
+    map_name = "cathedral";
+  } 
+  else {
+    map_name = "debug";
+  }
+
+  PLOGI << "Loading stage: '" << map_name << "'";
+  string directory = "graphics/stages/" + map_name;
   assert(DirectoryExists(directory.c_str()));
 
   string background_path = directory + "/background.png";

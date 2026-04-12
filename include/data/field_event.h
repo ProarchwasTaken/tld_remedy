@@ -12,6 +12,10 @@ struct LoadMapEvent : FieldEvent {
   std::string spawn_point;
 };
 
+struct InitCombatEvent : FieldEvent {
+  TroopID id = TroopID::INVALID;
+};
+
 struct InitCombatFEvent : FieldEvent {
   TroopID id;
   int reward = 0;
@@ -69,5 +73,10 @@ struct OpenDialogEvent : FieldEvent {
 
 struct StartSequenceEvent : FieldEvent {
   SequenceID sequence;
+};
+
+struct StartFSequenceEvent : FieldEvent {
+  SequenceID sequence;
+  FlagID flag = FlagID::NONE;
 };
 

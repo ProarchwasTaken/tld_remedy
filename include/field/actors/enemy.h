@@ -31,6 +31,7 @@ public:
   static int pursuing_enemy;
 private:
   int object_id;
+  TroopID troop_id;
 
   std::vector<Direction> routine;
   std::vector<Direction>::iterator current_direction;
@@ -38,9 +39,6 @@ private:
 
   float speed;
   float movement_speed = 128;
-
-  SpriteAtlas *emotes;
-  bool show_emote = false;
 
   RectEx sight;
   float sight_range = 96;

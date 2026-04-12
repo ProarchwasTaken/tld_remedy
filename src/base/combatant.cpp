@@ -83,6 +83,30 @@ float Combatant::distanceTo(Entity *entity) {
   return distance;
 }
 
+void Combatant::accelerate() {
+  if (acceleration == 1.0) {
+    return;
+  }
+
+  float modifier = 1.0 - (0.5 * critical_life);
+  float magnitude = (accel_rate * speed_multiplier) * modifier;
+
+  acceleration += magnitude * Game::deltaTime();
+  acceleration = Clamp(acceleration, 0.0, 1.0);
+}
+
+void Combatant::decelerate() {
+  if (acceleration == 0.0) {
+    return;
+  }
+
+  float modifier = 1.0 - (0.5 * critical_life);
+  float magnitude = (decel_rate * speed_multiplier) * modifier;
+
+  acceleration -= magnitude * Game::deltaTime();
+  acceleration = Clamp(acceleration, 0.0, 1.0);
+}
+
 void Combatant::takeDamage(DamageData &data) {
   if (state == CombatantState::DEAD) {
     return;
@@ -123,6 +147,8 @@ void Combatant::takeDamage(DamageData &data) {
   kb_time = data.stun_time;
   kb_clock = 0.0;
 
+  acceleration = 0.0;
+
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
@@ -146,15 +172,27 @@ float Combatant::damageCalculation(DamageData &data) {
 
   switch (data.calculation) {
     case DamageType::LIFE: {
-      if (atk_not_set) data.a_atk = &assailant->offense;
-      if (def_not_set) data.b_def = &defense;
+      if (atk_not_set) {
+        data.a_atk = &assailant->offense;
+      }
+
+      if (def_not_set) {
+        data.b_def = &defense;
+      }
+
       break;
     }
     case DamageType::MORALE: {
-      if (atk_not_set) data.a_atk = &assailant->intimid;
-      if (def_not_set) data.b_def = &persist; 
+      if (atk_not_set) {
+        data.a_atk = &assailant->intimid;
+      }
+
+      if (def_not_set) {
+        data.b_def = &persist; 
+      }
+
       break;
-    }
+    } 
   }
 
   float base_damage = data.base_damage;
@@ -428,6 +466,7 @@ void Combatant::performAction(unique_ptr<CombatAction> &action) {
   this->action.swap(action);
   state = CombatantState::ACTION;
   old_action.reset();
+  acceleration = 0.0;
 } 
 
 void Combatant::cancelAction() {
@@ -509,4 +548,9 @@ void Combatant::applyStaggerEffect(Rectangle &final) {
 void Combatant::drawDebug() {
   Entity::drawDebug();
   DrawRectangleLinesEx(hurtbox.rect, 1, RED);
+
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
+  const char *text = TextFormat("%01.02f", acceleration);
+  DrawTextEx(*font, text, position, size, -3, GREEN);
 }

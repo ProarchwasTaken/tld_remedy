@@ -39,7 +39,6 @@ private:
   static bool controllable;
   FieldKeybinds *keybinds;
 
-  const float default_speed = 56;
   int moving_x = 0;
   int moving_y = 0;
 

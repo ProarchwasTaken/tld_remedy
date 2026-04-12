@@ -113,6 +113,7 @@ private:
   PartyMember *companion = NULL;
   std::unique_ptr<LifeHud> com_hud;
   std::unique_ptr<AssistCmdHud> assist_hud;
+  std::unique_ptr<Entity> dead_companion = nullptr;
 
   std::unique_ptr<EnemyHud> enemy_hud;
   std::unique_ptr<ItemCmdHud> item_hud;

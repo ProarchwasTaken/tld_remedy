@@ -7,6 +7,7 @@
 #include <set>
 #include <utility>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/combatant.h"
@@ -19,6 +20,7 @@
 #include "data/damage.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
+#include "utils/collision.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
@@ -39,8 +41,10 @@ Servant::Servant(Vector2 position, Direction direction) :
   defense = 6;
   intimid = 6;
   persist = 6;
+  dexterity = 4;
+  discipline = 1;
 
-  resilience = 1.0;
+  resilience = 0.8;
   ai_behavior = make_unique<ServantAI>();
 
   bounding_box.scale = {80, 80};
@@ -341,6 +345,9 @@ void Servant::decideAttack() {
   else {
     attackMP();
   }
+
+  attack_cooldown = 1.0;
+  cooldown_clock = 0.0;
 }
 
 void Servant::attackMP() {
@@ -421,11 +428,16 @@ void Servant::update() {
 }
 
 void Servant::neutralLogic() {
+  if (cooldown_clock < 1.0) {
+    cooldown_clock += Game::deltaTime() / attack_cooldown;
+  }
+
   float old_x = position.x;
 
   switch (ai_goal) {
     case ServantGoals::IDLE: {
       moving_x = 0;
+      movement();
       break;
     }
     case ServantGoals::TARGETING: {
@@ -466,6 +478,7 @@ void Servant::targetingLogic() {
   }
 
   if (waiting) {
+    decelerate();
     waitTimer();
     return;
   }
@@ -476,7 +489,12 @@ void Servant::targetingLogic() {
     return;
   }
 
-  decideAttack();
+  if (cooldown_clock >= 1.0) {
+    decideAttack();
+  }
+  else {
+    return;
+  }
 
   float retreat_chance = ai_behavior->targeting.retreat_chance;
   setGoal(ServantGoals::RETREATING, retreat_chance);
@@ -549,6 +567,10 @@ void Servant::dodgingLogic() {
     return;
   }
 
+  if (acceleration != 0.0) {
+    decelerate();
+  }
+
   float difference = position.x - target->position.x;
   if (difference > 0) {
     direction = LEFT;
@@ -609,19 +631,31 @@ void Servant::waitTimer() {
 }
 
 void Servant::movement() {
-  if (moving_x == 0) {
+  if (moving_x == 0 && acceleration == 0) {
     return;
   }
 
-  direction = static_cast<Direction>(moving_x);
-  float speed = default_speed * speed_multiplier;
-  float magnitude = speed * direction;
+  if (moving_x != 0) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
 
-  position.x += magnitude * Game::deltaTime();
+  float speed = (default_speed * speed_multiplier) * acceleration;
+  float magnitude = speed * Game::deltaTime();
+
+  if (Collision::checkX(this, magnitude, moving_x)) {
+    Collision::snapX(this, moving_x);
+  }
+  else {
+    position.x += magnitude * direction; 
+  }
 }
 
 void Servant::useMovingAnimation() {
-  float difference = 1.0 - speed_multiplier;
+  float difference = 1.0 - (speed_multiplier * acceleration);
   float percentage = 1.0 + difference;
 
   anim_move.frame_duration = anim_move_speed * percentage;
@@ -653,7 +687,9 @@ void Servant::drawDebug() {
   Font *font = &Game::sm_font;
   int size = font->baseSize;
   const char *txt_goal = TextFormat("%i", static_cast<int>(ai_goal));
-  DrawTextEx(*font, txt_goal, position, size, -3, RED);
+
+  Vector2 txt_pos = Vector2Add(position, {0, 8});
+  DrawTextEx(*font, txt_goal, txt_pos, size, -3, RED);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();

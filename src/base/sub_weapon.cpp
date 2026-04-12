@@ -33,16 +33,26 @@ bool SubWeapon::lightTechCondition() {
     return false;
   }
 
-  bool using_mp = tech1->type == TechCostType::MORALE;
-  if (using_mp && user->morale >= tech1->cost) {
-    return true;
-  }
-  else if (!using_mp && user->life >= tech1->cost) {
-    return true;
-  }
-  else {
-    PLOGI << "Player does not meet conditions to use Light Tech.";
-    return false;
+  switch (tech1->type) {
+    case TechCostType::LIFE: {
+      if (user->life > 1) {
+        return true;
+      }
+      else {
+        PLOGI << "Player does not have enough Life!";
+        return false;
+      }
+    }
+    case TechCostType::MORALE: {
+      float cost = user->calculateMoraleCost(tech1->cost);
+      if (user->morale >= cost) {
+        return true;
+      }
+      else {
+        PLOGI << "Player does not have enough Morale!";
+        return false;
+      }
+    }
   }
 }
 
@@ -57,16 +67,26 @@ bool SubWeapon::heavyTechCondition() {
     return false;
   }
 
-  bool using_mp = tech2->type == TechCostType::MORALE;
-  if (using_mp && user->morale >= tech2->cost) {
-    return true;
-  }
-  else if (!using_mp && user->life >= tech2->cost) {
-    return true;
-  }
-  else {
-    PLOGI << "Player does not meet conditons to use Heavy Tech.";
-    return false;
+  switch (tech2->type) {
+    case TechCostType::LIFE: {
+      if (user->life > 1) {
+        return true;
+      }
+      else {
+        PLOGI << "Player does not have enough Life!";
+        return false;
+      }
+    }
+    case TechCostType::MORALE: {
+      float cost = user->calculateMoraleCost(tech2->cost);
+      if (user->morale >= cost) {
+        return true;
+      }
+      else {
+        PLOGI << "Player does not have enough Morale!";
+        return false;
+      }
+    }
   }
 }
 

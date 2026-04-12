@@ -46,8 +46,12 @@ Mary::Mary(Player *plr):
   defense = plr->defense;
   intimid = plr->intimid;
   persist = plr->persist;
+  dexterity = plr->dexterity;
+  discipline = plr->discipline;
 
-  resilience = 0.80;
+  recovery = plr->recovery;
+  resilience = plr->resilience;
+  accel_rate = 8;
 
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
@@ -255,7 +259,8 @@ void Mary::readActionBuffer() {
     }
     case MaryAction::GHOST_STEP: {
       if (life > 1) {
-        increaseExhaustion(gs_cost);
+        float cost = calculateLifeCost(gs_cost);
+        increaseExhaustion(cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
       }
 
@@ -363,7 +368,7 @@ void Mary::neutralLogic() {
   has_moved = old_x != position.x;
   if (has_moved) {
     next_anim = &anim_move;
-    float difference = 1.0 - speed_multiplier;
+    float difference = 1.0 - (speed_multiplier * acceleration);
     float percentage = 1.0 + difference;
     next_anim->frame_duration = anim_move_speed * percentage;
 
@@ -409,13 +414,19 @@ void Mary::targetLogic() {
 }
 
 void Mary::movement() {
-  if (!moving) {
+  if (!moving && acceleration == 0) {
     return;
   }
 
-  direction = static_cast<Direction>(moving_x);
+  if (moving) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
 
-  float speed = default_speed * speed_multiplier;
+  float speed = (default_speed * speed_multiplier) * acceleration;
   float magnitude = speed * Game::deltaTime();
 
   if (Collision::checkX(this, magnitude, direction)) {

@@ -4,7 +4,7 @@
  "layers":[
         {
          "id":2,
-         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/maps\/db_07.png",
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/db_07.png",
          "imageheight":224,
          "imagewidth":256,
          "name":"Map Image",
@@ -198,6 +198,54 @@
          "y":0
         }, 
         {
+         "color":"#ffff00",
+         "draworder":"topdown",
+         "id":7,
+         "name":"Pickups",
+         "objects":[
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":0
+                        }],
+                 "rotation":0,
+                 "type":"Item",
+                 "visible":true,
+                 "width":0,
+                 "x":176,
+                 "y":176
+                }, 
+                {
+                 "height":0,
+                 "id":10,
+                 "name":"Pickup",
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"count",
+                         "type":"int",
+                         "value":3
+                        }],
+                 "rotation":0,
+                 "type":"Item",
+                 "visible":true,
+                 "width":0,
+                 "x":80,
+                 "y":176
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "color":"#00ffff",
          "draworder":"topdown",
          "id":6,
@@ -221,8 +269,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":9,
+ "nextlayerid":8,
+ "nextobjectid":11,
  "orientation":"orthogonal",
  "properties":[
         {

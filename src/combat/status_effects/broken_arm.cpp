@@ -1,4 +1,6 @@
 #include <cmath>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
@@ -12,13 +14,21 @@ BrokenArm::BrokenArm(Combatant *afflicted) :
   name = "Broken Arm";
   persistent = true;
 
+  float percentage = Lerp(0.50, 1.0, afflicted->resilience);
+  PLOGD << "Percentage Reduction: " << 1.0 - percentage;
+
+  if (percentage >= 1.0) {
+    PLOGD << "Effect has been nullied due to the Afflicted's Resilience.";
+    return;
+  }
+
   float offense = afflicted->offense;
-  float dec_offense = std::floorf(offense * 0.90);
+  float dec_offense = std::floorf(offense * percentage);
   offense_lost = offense - dec_offense;
   PLOGD << "Offense to be lost: " << offense_lost;
 
   float intimid = afflicted->intimid;
-  float dec_intimid = std::floorf(intimid * 0.90);
+  float dec_intimid = std::floorf(intimid * percentage);
   intimid_lost = intimid - dec_intimid;
   PLOGD << "Intimidation to be lost: " << intimid_lost;
 }
@@ -39,7 +49,7 @@ void BrokenArm::init(bool hide_text) {
 }
 
 void BrokenArm::applyPenalty() {
-  PLOGI << "Decreasing afflicted's offense and intimidation by 10%";
+  PLOGI << "Decreasing afflicted's offense and intimidation.";
   afflicted->offense -= offense_lost;
   afflicted->intimid -= intimid_lost;
   negated = false;

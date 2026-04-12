@@ -10,7 +10,6 @@
 #include "data/field_event.h"
 #include "data/actor_event.h"
 #include "data/session.h"
-#include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "field/system/field_map.h"
 #include "field/system/camera.h"
@@ -22,6 +21,7 @@ class FieldScene : public Scene {
 public:
   FieldScene(SubWeaponID sub_weapon, CompanionID companion);
   FieldScene(Session *session_data);
+  FieldScene(std::string map_name);
   ~FieldScene();
 
   void setup();
@@ -44,6 +44,7 @@ public:
   void eventHandling(std::unique_ptr<FieldEvent> &event);
 
   void initSequence(SequenceID sequence_id);
+  void initSequence(SequenceID sequence_id, FlagID flag);
 
   void addStatusEffect(FieldEVT type, StatusID effect_id);
   void removeStatusEffect(FieldEVT type, StatusID effect_id);
@@ -64,7 +65,6 @@ public:
   #endif // !NDEBUG
 
   static SoundAtlas sfx;
-  static SpriteAtlas emotes;
 private:
   std::unique_ptr<Session> session;
   std::unique_ptr<FieldMap> field;

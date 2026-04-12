@@ -21,6 +21,7 @@
 #include "data/ai_behavior.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
+#include "utils/collision.h"
 #include "utils/comparisons.h"
 #include "utils/input.h"
 #include "system/sprite_atlas.h"
@@ -56,14 +57,18 @@ Erwin::Erwin(Companion *data, Mary *player):
   defense = data->defense;
   intimid = data->intimid;
   persist = data->persist;
+  dexterity = data->dexterity;
+  discipline = data->discipline;
 
-  resilience = 0.60;
+  recovery = data->recovery;
+  resilience = data->resilience;
+
   ai_behavior = make_unique<ErwinAI>();
 
-  tech1 = {"Provoke", TechCostType::MORALE, 8};
+  tech1 = {"Provoke", TechCostType::MORALE, 5.45};
   tech1.cooldown = 5.0;
 
-  tech2 = {"3rd Party", TechCostType::MORALE, 10};
+  tech2 = {"3rd Party", TechCostType::MORALE, 7.45};
   tech2.cooldown = 8.0;
 
   afflictPersistent(data->status);
@@ -130,11 +135,20 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
     damageHandling(dmg_event);
     return;
   }
+
+  if (from_itself && event->event_type == CombatantEVT::EVADED_ATTACK) {
+    auto *evade_event = static_cast<EvadedAttackCBT*>(event.get());
+    evadeHandling(evade_event);
+  }
 }
 
 void Erwin::warningHandling(WarningCBT *event) {
   assert(event->sender != this);
   if (ai_goal == ErwinGoals::DODGING) {
+    return;
+  }
+
+  if (ai_goal == ErwinGoals::THIRD_PARTY) {
     return;
   }
 
@@ -163,20 +177,35 @@ void Erwin::warningHandling(WarningCBT *event) {
   PLOGI << "Acknowledging Warning sent by Entity [ID: " 
     << event->sender->entity_id << "]";
 
-  float dodge_chance = chanceCalculation(event, from_target, in_range);
+  float dodge_chance = chanceCalculation(event, from_target);
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
   setGoal(ErwinGoals::DODGING, dodge_chance);
   if (ai_goal != ErwinGoals::DODGING) {
     return;
   }
-
   PLOGI << "Decided to dodge the attack.";
-  dodge_time = event->time_until * 0.90;
-  dodge_clock = 0.0;
 
-  float retaliation_chance = ai_behavior->dodging.retaliation_chance;
-  retaliation(event->assailant, retaliation_chance);
+  float evade_chance = getEvadeChance(event, from_target, in_range);
+  PLOGI << "Chance to evade attack: " << evade_chance;
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float evade_percentage = range(Game::RNG);
+  attempt_evade = evade_percentage <= evade_chance;
+
+  if (attempt_evade) {
+    PLOGI << "Attempting to evade the attack.";
+    dodge_time = 0.01;
+    target = event->assailant;
+  }
+  else {
+    dodge_time = event->time_until * 0.90;
+
+    float retaliation_chance = ai_behavior->dodging.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance); 
+  }
+
+  dodge_clock = 0.0;
 
   if (target == NULL) {
     chooseTarget();
@@ -192,40 +221,62 @@ void Erwin::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  float retaliation_chance = ai_behavior->damaged.retaliation_chance;
-  retaliation(event->assailant, retaliation_chance);
+  if (ai_goal != ErwinGoals::THIRD_PARTY) {
+    float retaliation_chance = ai_behavior->damaged.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance);
+  }
 }
 
-void Erwin::retaliation(Combatant *assailant, float chance) {
-  if (assailant == NULL || assailant == target) {
+void Erwin::evadeHandling(EvadedAttackCBT *event) {
+  assert(event->sender == this);
+
+  Combatant *assailant = event->assailant;
+  if (assailant == NULL) {
     return;
   }
 
+  assert(state == ACTION && action->id == ActionID::EVADE);
+  Evade *evade = static_cast<Evade*>(action.get());
+  assert(evade->evaded_attack);
+
+  PLOGD << "Detected that evasion had been successful.";
+  bool should_punish = retaliation(assailant, 0.5);
+
+  if (should_punish) {
+    decideAttack();
+  }
+}
+
+bool Erwin::retaliation(Combatant *assailant, float chance) {
+  if (assailant == NULL || assailant == target) {
+    return false;
+  }
+
   if (!assailant->targetable || team == assailant->team) {
-    return;
+    return false;
   }
 
   float distance = distanceTo(assailant);
   if (distance > contest_distance) {
-    return;
+    return false;
   }
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float percentage = range(Game::RNG);
 
-  if (percentage > chance) {
-    return;
+  if (percentage <= chance) {
+    target = assailant;
+    PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
+    << "retaliate against: '" << target->name << "' [ID: " << 
+      target->entity_id << "]";
+    return true;
   }
-
-  target = assailant;
-
-  PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
-  << "retaliate against: '" << target->name << "' [ID: " << 
-    target->entity_id << "]";
+  else {
+    return false;
+  }
 }
 
-float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
-                               bool in_range)
+float Erwin::chanceCalculation(WarningCBT *event, bool from_target)
 {
   float range = event->hitbox.width;
   float distance = distanceTo(event->sender);
@@ -247,6 +298,26 @@ float Erwin::chanceCalculation(WarningCBT *event, bool from_target,
   return (time_bonus + range_bonus) * multiplier;
 }
 
+float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
+                            bool in_range)
+{
+  if (event->time_until <= 0.16) {
+    return 0.0;
+  }
+
+  float chance = 0.40;
+  if (from_target) {
+    chance += 0.20;
+  }
+
+  Rectangle *player_hurtbox = &player->hurtbox.rect;
+  if (in_range && CheckCollisionRecs(*player_hurtbox, event->hitbox)) {
+    chance += 0.30;
+  }
+
+  return chance;
+}
+
 void Erwin::assistInput() {
   bool gamepad = IsGamepadAvailable(0);
   bool light_input = Input::pressed(keybinds->light_assist, gamepad);
@@ -259,6 +330,7 @@ void Erwin::assistInput() {
   bool heavy_input = Input::pressed(keybinds->heavy_assist, gamepad);
   if (heavy_input && heavyAssistCondition()) {
     ai_goal = ErwinGoals::THIRD_PARTY;
+    acceleration = 1.0;
 
     target = player->target;
     assert(target != NULL);
@@ -272,7 +344,10 @@ void Erwin::assistInput() {
 
 bool Erwin::lightAssistCondition() {
   bool off_cooldown = tech1.clock >= 1.0;
-  if (off_cooldown && !demoralized && morale >= tech1.cost) {
+  float cost = calculateMoraleCost(tech1.cost);
+  bool sufficent_morale = !demoralized && morale >= cost;
+
+  if (off_cooldown && sufficent_morale) {
     return true;
   }
   else {
@@ -283,7 +358,8 @@ bool Erwin::lightAssistCondition() {
 
 bool Erwin::heavyAssistCondition() {
   bool off_cooldown = tech2.clock >= 1.0;
-  bool sufficent_morale = !demoralized && morale >= tech2.cost;
+  bool cost = calculateMoraleCost(tech2.cost);
+  bool sufficent_morale = !demoralized && morale >= cost;
   bool valid = player->target != NULL && player->target->targetable;
 
   if (off_cooldown && sufficent_morale && valid) {
@@ -419,6 +495,9 @@ void Erwin::decideAttack() {
   else {
     attackMP();
   }
+
+  attack_cooldown = 0.25;
+  cooldown_clock = 0.0;
 }
 
 void Erwin::attackMP() {
@@ -452,7 +531,8 @@ void Erwin::attackHP() {
 }
 
 void Erwin::ghoststep(int direction_x) {
-  increaseExhaustion(5.5);
+  float cost = calculateLifeCost(5.5);
+  increaseExhaustion(cost);
 
   unique_ptr<CombatAction> action;
   action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
@@ -470,11 +550,12 @@ void Erwin::evade() {
 }
 
 void Erwin::provoke() {
-  if (morale < tech1.cost) {
+  float cost = calculateMoraleCost(tech1.cost);
+  if (morale < cost) {
     return;
   }
 
-  morale -= tech1.cost;
+  morale -= cost;
 
   unique_ptr<CombatAction> action;
   action = make_unique<Provoke>(this);
@@ -482,11 +563,12 @@ void Erwin::provoke() {
 }
 
 void Erwin::thirdparty() {
-  if (morale < tech2.cost) {
+  float cost = calculateMoraleCost(tech2.cost);
+  if (morale < cost) {
     return;
   }
 
-  morale -= tech2.cost;
+  morale -= cost;
 
   unique_ptr<CombatAction> action;
   action = make_unique<ThirdParty>(this);
@@ -537,11 +619,16 @@ void Erwin::update() {
 }
 
 void Erwin::neutralLogic() {
+  if (cooldown_clock < 1.0) {
+    cooldown_clock += Game::deltaTime() / attack_cooldown;
+  }
+
   float old_x = position.x;
 
   switch (ai_goal) {
     case ErwinGoals::IDLE: {
       moving_x = 0;
+      movement(speed_multiplier);
       break;
     }
     case ErwinGoals::LOOK_AT_PLR: {
@@ -621,6 +708,7 @@ void Erwin::targetingLogic() {
   }
 
   if (waiting) {
+    decelerate();
     waitTimer();
     return;
   }
@@ -631,7 +719,12 @@ void Erwin::targetingLogic() {
     return;
   }
 
-  decideAttack();
+  if (cooldown_clock >= 1.0) {
+    decideAttack();
+  }
+  else {
+    return;
+  }
 
   float retreat_chance = ai_behavior->targeting.retreat_chance;
   setGoal(ErwinGoals::RETREATING, retreat_chance);
@@ -698,10 +791,20 @@ void Erwin::dodgingLogic() {
     targetingLogic();
   }
 
+  if (target->state == HIT_STUN) {
+    PLOGI << "Aborting dodging goal and returning to targeting.";
+    ai_goal = ErwinGoals::TARGETING;
+    return;
+  }
+
   dodge_clock += Game::deltaTime() / dodge_time;
 
   if (dodge_clock < 0.75) {
     return;
+  }
+
+  if (acceleration != 0.0) {
+    decelerate();
   }
 
   int x_direction;
@@ -719,7 +822,12 @@ void Erwin::dodgingLogic() {
     return;
   }
 
-  ghoststep(x_direction);
+  if (attempt_evade) {
+    evade();
+  }
+  else {
+    ghoststep(x_direction); 
+  }
 
   float target_chance = ai_behavior->dodging.target_chance;
   setGoal(ErwinGoals::TARGETING, target_chance);
@@ -794,23 +902,34 @@ void Erwin::waitTimer() {
 }
 
 void Erwin::movement(float multiplier) {
-  if (moving_x == 0) {
+  if (moving_x == 0 && acceleration == 0) {
     return;
   }
 
-  direction = static_cast<Direction>(moving_x);
+  if (moving_x != 0) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
 
-  float speed = default_speed * multiplier;
-  float magnitude = speed * direction;
+  float speed = (default_speed * multiplier) * acceleration;
+  float magnitude = speed * Game::deltaTime();
 
-  position.x += magnitude * Game::deltaTime();
+  if (Collision::checkX(this, magnitude, moving_x)) {
+    Collision::snapX(this, moving_x);
+  }
+  else {
+    position.x += magnitude * direction; 
+  }
 }
 
 void Erwin::animationLogic() {
   Animation *next_anim;
   if (has_moved) {  
     bool using_tech2 = ai_goal == ErwinGoals::THIRD_PARTY;
-    float multiplier = 1.0 + (2 * using_tech2);
+    float multiplier = (1.0 + (2 * using_tech2)) * acceleration;
 
     float difference = 1.0 - (speed_multiplier * multiplier);
     float percentage = Clamp(1.0 + difference, 0.50, 10.0);

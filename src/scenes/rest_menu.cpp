@@ -57,16 +57,14 @@ RestMenuScene::~RestMenuScene() {
 }
 
 void RestMenuScene::loadBackground(string location) {
-  if (location == "Cathedral" || location == "Debug") {
-    background = LoadTexture("graphics/menu/backgrounds/cathedral.png");
-    bg_color = Game::palette[40];
-    bg_color.a = 0.0;
+  background = LoadTexture("graphics/menu/backgrounds/cathedral.png");
+  bg_color = Game::palette[40];
+  bg_color.a = 0.0;
 
-    char_color = Game::palette[42];
-    char_color.a = 0.0;
+  char_color = Game::palette[42];
+  char_color.a = 0.0;
 
-    black_bars.setTint(Game::palette[43]);
-  }
+  black_bars.setTint(Game::palette[43]);
 }
 
 void RestMenuScene::setupCharacters() {

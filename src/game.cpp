@@ -1,10 +1,9 @@
-#include <nlohmann/json_fwd.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 #include <cassert>
 #include <fstream>
-#include <ios>
 #include <chrono>
+#include <tuple>
 #include <random>
 #include <filesystem>
 #include <raylib.h>
@@ -30,7 +29,7 @@
 using std::make_unique, std::ofstream, std::ifstream, std::unique_ptr,
 std::filesystem::create_directory, std::chrono::system_clock, 
 std::string, std::mt19937_64, std::uniform_int_distribution,
-nlohmann::json, nlohmann::basic_json;
+nlohmann::json, nlohmann::basic_json, std::tuple;
 
 GameState Game::game_state = GameState::READY;
 bool Game::EXIT_GAME = false;
@@ -64,6 +63,19 @@ float Game::time_scale = 1.0;
 double Game::session_playtime = 0.0;
 bool Game::run_timer = false;
 
+Game::Game(int argc, char *argv[]) {
+  PLOGI << "Evaluating command line arguments.";
+
+  for (int x = 0; x < argc; x++) {
+    string arg = argv[x];
+
+    if (arg == "-m" && x + 1 != argc) {
+      quick_load = true;
+      ql_map = argv[x + 1];
+      PLOGI << "Quick loading map: " << ql_map;
+    }
+  }
+}
 
 void Game::init() {
   loadPersonal();
@@ -74,7 +86,6 @@ void Game::init() {
   SetTargetFPS(settings.framerate);
   SetTextLineSpacing(16);
 
-  HideCursor();
   setupCanvas();
 
   if (settings.fullscreen) {
@@ -93,7 +104,15 @@ void Game::init() {
   menu_sfx.use();
   bgm = make_unique<MusicPlayer>();
   noise = make_unique<NoiseEffect>();
-  scene = make_unique<TitleScene>();
+
+  if (!quick_load) {
+    scene = make_unique<TitleScene>();
+  }
+  else {
+    scene = make_unique<FieldScene>(ql_map);
+    run_timer = true;
+  }
+
   PLOGI << "Time Scale: " << time_scale;
   PLOGI << "Everything should be good to go!";
 }
@@ -702,7 +721,7 @@ void Game::openRestMenu(Session *data) {
   SKIP_FRAME = true;
 }
 
-void Game::initCombat(Session *session) {
+void Game::initCombat(Session *session, TroopID id) {
   PLOGI << "Battle Time!";
   assert(reserve == nullptr);
   bgm->stop();
@@ -712,8 +731,32 @@ void Game::initCombat(Session *session) {
  
   string location = session->location;
   basic_json pool = parsed_data.at(location);
-  PLOGI << "Selecting a random troop in pool: " << location; 
 
+  int reward;
+  if (id == TroopID::INVALID) {
+    PLOGI << "Selecting a random troop in pool: " << location; 
+    tuple<TroopID, int> troop = selectRandomTroop(pool);
+    std::tie(id, reward) = troop;
+  }
+  else {
+    PLOGI << "Getting reward assigned for Troop ID: " << 
+      static_cast<int>(id);
+    reward = getTroopReward(id, pool);
+  }
+
+  file.close();
+
+  reserve = make_unique<CombatScene>(session, id, reward);
+  flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
+
+  game_state = GameState::INIT_COMBAT;
+  SKIP_FRAME = true;
+}
+
+tuple<TroopID, int> Game::selectRandomTroop(json &pool) {
   int sum_of_weight = 0;
   for (basic_json troop : pool) {
     int id = troop.at("id");
@@ -725,17 +768,17 @@ void Game::initCombat(Session *session) {
 
   PLOGD << "Weight Sum: " << sum_of_weight;
   
-  uniform_int_distribution<int> range(0, sum_of_weight);
+  uniform_int_distribution<int> range(1, sum_of_weight);
   int random_num = range(RNG);
   PLOGD << "RNG Value: " << random_num;
 
-  TroopID troop_id;
+  TroopID troop_id = TroopID::INVALID;
   int reward;
   bool successful = false;
   for (basic_json troop : pool) {
     int weight = troop.at("weight");
 
-    if (random_num < weight) {
+    if (random_num <= weight) {
       int id = troop.at("id");
       troop_id = static_cast<TroopID>(id);
 
@@ -752,16 +795,21 @@ void Game::initCombat(Session *session) {
   }
 
   assert(successful);
-  file.close();
+  return {troop_id, reward};
+}
 
-  reserve = make_unique<CombatScene>(session, troop_id, reward);
-  flash_color = WHITE;
+int Game::getTroopReward(TroopID troop_id, nlohmann::json &pool) {
+  int id = static_cast<int>(troop_id);
+  for (basic_json troop : pool) {
+    if (troop.at("id") == id) {
+      int reward = troop.at("reward");
+      PLOGI << "Reward Found: " << reward;
+      return reward;
+    }
+  }
 
-  noise->setTint(WHITE);
-  noise->setAlpha(0.10);
-
-  game_state = GameState::INIT_COMBAT;
-  SKIP_FRAME = true;
+  PLOGE << "Failed to find reward associated with Troop ID: " << id;
+  return 0;
 }
 
 void Game::initCombat(Session *data, TroopID id, int reward) {

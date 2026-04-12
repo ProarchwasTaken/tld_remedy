@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstddef>
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -42,6 +43,14 @@ void Enemy::takeDamage(DamageData &data) {
     combo = 0;
   }
 
+  if (data.damage_type == DamageType::LIFE) {
+    float percentage = combo / 15.0;
+    percentage = Clamp(percentage, 0.0, 1.0);
+
+    float modifier = 1.0 - std::powf(percentage, 2);
+    data.def_mod = data.def_mod * modifier; 
+  }
+
   Combatant::takeDamage(data);
 
   if (data.assailant->team != CombatantTeam::PARTY) {
@@ -71,7 +80,7 @@ void Enemy::finalIntercept(float &damage, DamageData &data) {
 void Enemy::enterHitstun(DamageData &data) {
   assert(state != DEAD);
   if (state != HIT_STUN) {
-    stunned++;
+    stunned = Clamp(stunned + 1, 0, member_count);
   }
 
   if (data.stun_type != StunType::DEFENSIVE) {

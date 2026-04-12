@@ -110,7 +110,7 @@ string TechsPanel::getTechEntry() {
       string text =
         "--[DEFENSIVE ACTIONS]--\n\n"
 
-        "<Ghost Step> - HP Cost: 5.5\n"
+        "<Ghost Step> - HP Cost: Depends on Dexterity\n"
         "Input: 'DEFENSIVE' + 'LEFT' / 'RIGHT'\n"
         "\"You can't afford be to be reckless.\"\n\n"
 
@@ -127,7 +127,7 @@ string TechsPanel::getTechEntry() {
         "during the end lag of Ghost Step. Both of\n"
         "these acts are referred as Ghost Cancelling.\n\n"
 
-        "<Evade> - HP Cost: Varies\n"
+        "<Evade> - HP Cost: Depends on Dexterity\n"
         "Input: 'DEFENSIVE' + 'DOWN'\n"
         "\"Save your energy, and play the long game.\"\n\n"
 

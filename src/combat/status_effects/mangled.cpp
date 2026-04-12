@@ -1,4 +1,6 @@
 #include <cmath>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
@@ -12,13 +14,17 @@ Mangled::Mangled(Combatant *afflicted) :
   name = "Mangled";
   persistent = true;
 
+  float percentage = Lerp(0.15, 0.85, afflicted->resilience - 0.20);
+  percentage = Clamp(percentage, 0.15, 0.85);
+  PLOGD << "Percentage Reduction: " << 1.0 - percentage;
+
   float defense = afflicted->defense;
-  float dec_defense = std::floorf(defense * 0.50);
+  float dec_defense = std::floorf(defense * percentage);
   defense_lost = defense - dec_defense;
   PLOGD << "Defense to be lost: " << defense_lost;
 
   float recovery = afflicted->recovery;
-  float dec_recovery = recovery * 0.50;
+  float dec_recovery = recovery * percentage;
   recovery_lost = recovery - dec_recovery;
   PLOGD << "Recovery to be lost: " << recovery_lost;
 
@@ -41,7 +47,7 @@ void Mangled::init(bool hide_text) {
 }
 
 void Mangled::applyPenalty() {
-  PLOGI << "Decreasing the afflicted's defense and recovery by 50%";
+  PLOGI << "Decreasing the afflicted's defense and recovery.";
   afflicted->defense -= defense_lost;
   afflicted->recovery -= recovery_lost;
   afflicted->resilience -= resilience_lost;

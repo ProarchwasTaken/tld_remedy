@@ -14,6 +14,70 @@ struct EnemyTroop {
   std::vector<EnemyData> enemies;
 };
 
+struct CDTroop1 : EnemyTroop {
+  CDTroop1() {
+    id = TroopID::CD_TROOP1;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+    };
+  }
+};
+
+struct CDTroop2 : EnemyTroop {
+  CDTroop2() {
+    id = TroopID::CD_TROOP2;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {160, 152}, LEFT},
+    };
+  }
+};
+
+struct CDTroop3 : EnemyTroop {
+  CDTroop3() {
+    id = TroopID::CD_TROOP3;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+    };
+  }
+};
+
+struct CDTroop4 : EnemyTroop {
+  CDTroop4() {
+    id = TroopID::CD_TROOP4;
+    enemies = {
+      {EnemyID::SERVANT, {32, 152}, LEFT},
+      {EnemyID::SERVANT, {160, 152}, LEFT},
+      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+    };
+  }
+};
+
+struct CDTroop5 : EnemyTroop {
+  CDTroop5() {
+    id = TroopID::CD_TROOP5;
+    enemies = {
+      {EnemyID::SERVANT, {64, 152}, LEFT},
+      {EnemyID::SERVANT, {128, 152}, LEFT},
+      {EnemyID::SERVANT, {192, 152}, LEFT},
+    };
+  }
+};
+
+struct CDTroop6 : EnemyTroop {
+  CDTroop6() {
+    id = TroopID::CD_TROOP6;
+    enemies = {
+      {EnemyID::SERVANT, {64, 152}, LEFT},
+      {EnemyID::SERVANT, {256, 152}, LEFT},
+      {EnemyID::SERVANT, {-180, 152}, RIGHT},
+      {EnemyID::SERVANT, {-372, 152}, RIGHT},
+    };
+  }
+};
+
+#ifndef NDEBUG
 struct DBTroop1 : EnemyTroop {
   DBTroop1() {
     id = TroopID::DB_TROOP1;
@@ -41,24 +105,4 @@ struct DBTroop3 : EnemyTroop {
     };
   }
 };
-
-struct DBTroop4 : EnemyTroop {
-  DBTroop4()  {
-    id = TroopID::DB_TROOP4;
-    enemies = {
-      {EnemyID::SERVANT, {32, 152}, LEFT},
-      {EnemyID::SERVANT, {160, 152}, LEFT},
-    };
-  }
-};
-
-struct DBTroop5 : EnemyTroop {
-  DBTroop5() {
-    id = TroopID::DB_TROOP5;
-    enemies = {
-      {EnemyID::SERVANT, {32, 152}, LEFT},
-      {EnemyID::SERVANT, {160, 152}, LEFT},
-      {EnemyID::SERVANT, {-180, 152}, RIGHT},
-    };
-  }
-};
+#endif // !NDEBUG

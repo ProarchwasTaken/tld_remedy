@@ -47,6 +47,17 @@ enum class CompanionID {
   ERWIN
 };
 
+enum class FlagID {
+  NONE = -1,
+  CDF2_AFTER_INTRO,
+  CDF2_BEFORE_FIRST,
+  CDF2_AFTER_FIRST,
+  CDF2_REST_TALK,
+  CDF1_REST_TALK,
+  CDF1_KEY,
+  CD_ENTRANCE
+};
+
 enum class ItemID {
   NONE = -1,
   I_BANDAGE,
@@ -78,11 +89,17 @@ enum class EnemyID {
 
 enum class TroopID {
   INVALID = -1,
-  DB_TROOP1,
-  DB_TROOP2,
-  DB_TROOP3,
-  DB_TROOP4,
-  DB_TROOP5
+  CD_TROOP1,
+  CD_TROOP2,
+  CD_TROOP3,
+  CD_TROOP4,
+  CD_TROOP5,
+  CD_TROOP6,
+  #ifndef NDEBUG
+  DB_TROOP1 = 95,
+  DB_TROOP2 = 96,
+  DB_TROOP3 = 97,
+  #endif // !NDEBUG
 };
 
 enum class ActionID {
@@ -117,7 +134,9 @@ enum Direction {
 };
 
 enum class PickupType {
-  SUPPLIES
+  SUPPLIES,
+  ITEM,
+  FLAG,
 };
 
 enum class FieldEVT {
@@ -145,7 +164,8 @@ enum class FieldEVT {
   COM_ADD_EFFECT,
   COM_RM_EFFECT,
   OPEN_DIALOG,
-  START_SEQUENCE
+  START_SEQUENCE,
+  START_FLAG_SEQUENCE,
 };
 
 enum class ActorEVT {
@@ -155,12 +175,12 @@ enum class ActorEVT {
 };
 
 enum class SequenceID {
-  #ifndef NDEBUG
-  DB_01, 
-  #endif // !NDEBUG
-
   SAVE,
-  REST
+  REST,
+  REJECT,
+  #ifndef NDEBUG
+  DB_01 = 95, 
+  #endif // !NDEBUG
 };
 
 enum class CombatEVT {
@@ -181,6 +201,7 @@ enum class CombatantEVT {
   MORALE_GAINED,
   EFFECT_GAINED,
   EFFECT_LOST,
-  WARNING
+  WARNING,
+  EVADED_ATTACK
 };
 

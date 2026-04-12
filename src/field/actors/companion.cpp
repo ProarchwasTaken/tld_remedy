@@ -6,7 +6,6 @@
 #include <string>
 #include <plog/Log.h>
 #include "enums.h"
-#include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
@@ -21,8 +20,10 @@ CompanionActor::CompanionActor(CompanionID id, Vector2 position,
                                enum Direction direction):
 Actor("Companion", ActorType::COMPANION, position, direction)
 {
-  setupAtlas(id);
+  default_speed = 56.5;
+  movement_speed = default_speed;
 
+  setupAtlas(id);
   rectExCorrection(bounding_box, collis_box);
   
   atlas.use();
@@ -54,7 +55,7 @@ void CompanionActor::setupAtlas(CompanionID id) {
 
 void CompanionActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
   ActorEVT type = event->event_type;
-  if (type == ActorEVT::PLR_MOVING) {
+  if (follow_player && type == ActorEVT::PLR_MOVING) {
     PlayerActor *sender = static_cast<PlayerActor*>(event->sender);
     Vector2 position = sender->position;
     Direction direction = sender->direction;
@@ -67,7 +68,7 @@ void CompanionActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
 }
 
 void CompanionActor::update() {
-  moving = plr != NULL && plr->has_moved;
+  moving = shouldBeMoving();
   if (!moving) {
     sprite = getIdleSprite();
     return;
@@ -81,17 +82,15 @@ void CompanionActor::update() {
   }
 }
 
-void CompanionActor::pathfind() {
-  auto *first_point = &move_points.front();
-  
-  Vector2 target = first_point->first;
-  direction = first_point->second;
-
-  float speed = movement_speed * Game::deltaTime();
-  position = Vector2MoveTowards(position, target, speed);
-
-  if (Vector2Equals(position, target)) {
-    move_points.pop_front();
+bool CompanionActor::shouldBeMoving() {
+  if (follow_player && plr != NULL && plr->has_moved) {
+    return true;
+  }
+  else if (!follow_player && !move_points.empty()) {
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
@@ -144,20 +143,9 @@ void CompanionActor::draw() {
   assert(sprite != NULL);
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
-}
 
-void CompanionActor::drawDebug() {
-  Actor::drawDebug();
-
-  if (move_points.empty()) {
-    return;
-  }
-
-  auto *first_point = &move_points.front();
-  DrawLineV(position, first_point->first, YELLOW);
-
-  for (auto point : move_points) {
-    DrawCircleV(point.first, 2, YELLOW);
+  if (emote != NULL) {
+    drawEmote();
   }
 }
 

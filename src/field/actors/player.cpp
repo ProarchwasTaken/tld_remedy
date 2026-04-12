@@ -28,6 +28,9 @@ PlayerActor::PlayerActor(Vector2 position, enum Direction direction):
 Actor("Mary", ActorType::PLAYER, position, direction)
 {
   keybinds = &Game::settings.field_keybinds;
+  default_speed = 56;
+  movement_speed = default_speed;
+
   bounding_box.scale = {32, 32};
   bounding_box.offset = {-16, -28};
   collis_box.scale = {8, 16};
@@ -167,8 +170,13 @@ void PlayerActor::openMenuInput(bool gamepad) {
 void PlayerActor::update() {
   Vector2 old_position = position;
 
-  moveX();
-  moveY();
+  if (controllable) {
+    moveX();
+    moveY();
+  }
+  else if (!move_points.empty()) {
+    pathfind();
+  }
 
   has_moved = !Vector2Equals(old_position, position);
   if (has_moved) {
@@ -280,5 +288,9 @@ void PlayerActor::draw() {
   assert(sprite != NULL);
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
                  WHITE);
+
+  if (emote != NULL) {
+    drawEmote();
+  }
 }
 

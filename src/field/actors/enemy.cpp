@@ -25,6 +25,7 @@ EnemyActor::EnemyActor(EnemyActorData &data):
 Actor("Enemy", ActorType::ENEMY, data.position, *data.routine.begin())
 {
   object_id = data.object_id;
+  troop_id = data.troop_id;
 
   this->routine = data.routine;
   this->current_direction = this->routine.begin();
@@ -37,9 +38,6 @@ Actor("Enemy", ActorType::ENEMY, data.position, *data.routine.begin())
   rectExCorrection(bounding_box, collis_box);
   correctSightRect();
 
-  emotes = &FieldScene::emotes;
-  emotes->use();
-
   atlas.use();
   sprite = getIdleSprite();
 }
@@ -51,7 +49,6 @@ EnemyActor::~EnemyActor() {
 
   routine.clear();
   atlas.release();
-  emotes->release();
 }
 
 void EnemyActor::correctSightRect() {
@@ -91,9 +88,10 @@ void EnemyActor::update() {
     pursue();
   }
 
+  // Oh! It turns out past me had already thought of that.
   if (CheckCollisionRecs(collis_box.rect, plr->collis_box.rect)) {
     PLOGI << "Player has collided with enemy.";
-    FieldHandler::raise<FieldEvent>(FieldEVT::INIT_COMBAT);
+    FieldHandler::raise<InitCombatEvent>(FieldEVT::INIT_COMBAT, troop_id);
     direction = static_cast<Direction>(plr->direction * -1);
     awaiting_deletion = true;
   }
@@ -109,8 +107,8 @@ void EnemyActor::normalLogic() {
     PLOGI << "Player has entered the line of sight of EnemyActor [ID: " 
     << this->entity_id << "]";
     pursuing = true;
-    show_emote = true;
     pursuing_enemy = entity_id;
+    emote = &emotes.sprites[0];
 
     plr->setControllable(false);
 
@@ -184,8 +182,8 @@ bool EnemyActor::sightCheck() {
 }
 
 void EnemyActor::pursue() {
-  if (show_emote) {
-    show_emote = false;
+  if (emote != NULL) {
+    emote = NULL;
   }
 
   plr->direction = static_cast<Direction>(direction * -1);
@@ -205,10 +203,8 @@ void EnemyActor::draw() {
 
   DrawTexturePro(atlas.sheet, *sprite, dest, {0, 0}, 0, WHITE);
 
-  if (show_emote) {
-    Rectangle dest = {position.x, bounding_box.position.y, 16, 16};
-    Rectangle *emote = &emotes->sprites[0];
-    DrawTexturePro(emotes->sheet, *emote, dest, {8, 16}, 0, WHITE);
+  if (emote != NULL) {
+    drawEmote();
   }
 }
 

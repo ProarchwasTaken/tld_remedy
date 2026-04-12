@@ -43,7 +43,7 @@ void UseItem::applyItemEffect() {
   switch (item) {
     case ItemID::I_BANDAGE: {
       PLOGI << "Applying effect of item: Improvised Bandage.";
-      applyMending(0.35, 0.05);
+      applyMending(0.25, 0.05);
       break;
     }
     case ItemID::M_SPLINT: {

@@ -45,3 +45,7 @@ struct WarningCBT : CombatantEvent {
   Combatant *assailant = NULL;
   bool punishable = false;
 };
+
+struct EvadedAttackCBT : CombatantEvent {
+  Combatant *assailant = NULL;
+};

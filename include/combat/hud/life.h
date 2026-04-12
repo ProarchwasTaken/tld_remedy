@@ -1,77 +1,78 @@
 #pragma once
-#include <cstddef>
 #include <memory>
 #include <raylib.h>
-#include <string>
-#include "enums.h"
 #include "data/combatant_event.h"
 #include "base/party_member.h"
-#include "system/sprite_atlas.h"
 
 
-/* An hud element that's meant to display critical information about the 
- * PartyMember it's assigned to. That includes the PartyMember's Life,
- * active status effects, and Morale if they have any.*/
 class LifeHud {
 public:
   LifeHud(Vector2 position);
   ~LifeHud();
 
-  void assign(PartyMember *combatant);
+  void assign(PartyMember *user);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
   void damageEventHandling(TookDamageCBT *event);
-
   void update();
-  Color criticalFlash();
-  void decideLifeColor();
-  void decideMoraleColor();
+  void criticalFlash();
+  void demoralizedFlash();
 
   void draw();
   void shakeTimer();
 
-  void drawBustGraphic(Vector2 position);
+  void drawPortrait(Vector2 position);
   void drawStatusIcons(Vector2 position);
   Rectangle *getIconSprite(StatusID id);
 
-  void drawLife(Vector2 position, Font *font, int txt_size);
-  void drawLifeSegments(Vector2 position);
-  void drawLifeText(Vector2 position, Font *font, int size);
-  void drawTenacityText(Vector2 position, Font *font, int size);
+  void drawLife(Vector2 position);
+  void drawLifeGauge(Vector2 position);
+  void drawToBeHealed(Vector2 position);
+  void drawLifeText(Vector2 position);
+  void drawTenacityText(Vector2 position);
 
-
-  void drawMorale(Vector2 position, Font *font, int txt_size);
+  void drawMorale(Vector2 position);
   void drawMoraleGauge(Vector2 position);
-  void drawMoraleText(Vector2 position, Font *font, int size);
+  void drawMoraleText(Vector2 position);
 
-  Rectangle *segmentBlink(float interval);
+  void drawGauge(int index, Vector2 position, Color color, 
+                 float percentage, float exponent = GAUGE_LIFE_EXP);
 
   static SpriteAtlas atlas;
   static SpriteAtlas status_atlas;
   static SpriteAtlas portrait_atlas;
+
+  static float GAUGE_LIFE_EXP;
 private:
   PartyMember *user = NULL;
-
   Vector2 main_position;
-
-  Color life_color = WHITE;
-  std::string txt_life;
-  bool has_mending = false;
-
-  std::string txt_tenacity;
-
-  Color morale_color;
-  std::string txt_morale;
-
-  bool segment_blink = false;
-  float blink_clock = 0.0;
-
-  bool flashed = false;
-  float flash_clock = 0.0;
+  bool has_mending;
 
   enum {IDLE, SHAKE} state = IDLE;
   float hit_timestamp = 0;
 
   float shake_clock = 0.0;
   float shake_time = 0.25;
+
+  Color life_color;
+  Color life_txt_color;
+  bool crit_flash = false;
+  float crit_clock = 0.0;
+  float crit_time = 0.20;
+
+  float dmg_life_clock = 1.0;
+  float dmg_life_time = 0.50;
+  float prev_life;
+  float white_life;
+
+  Color morale_color;
+  Color morale_txt_color;
+  bool demo_flash = false;
+  float demo_clock = 0.0;
+  float demo_time = 0.25;
+
+  float dmg_morale_clock = 1.0;
+  float dmg_morale_time = 0.25;
+  float prev_morale;
+  float white_morale;
 };

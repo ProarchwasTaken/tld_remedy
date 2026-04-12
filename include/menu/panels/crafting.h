@@ -34,8 +34,6 @@ public:
                       Color color, int cost);
   void drawCursor(Vector2 position, Color color, bool blink);
 
-  std::string getShortenedName(ItemID id);
-  std::string getName(ItemID id);
   int getSupplyCost(ItemID id);
 private:
   Session *session;

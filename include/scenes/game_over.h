@@ -1,11 +1,14 @@
 #pragma once
 #include <string>
+#include <vector>
 #include "base/scene.h"
 
 
 class GameOverScene : public Scene {
 public:
   GameOverScene(std::string reason);
+
+  std::vector<std::string> getDialog();
   void startDialog();
   void startClosingDialog();
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -10,7 +11,8 @@
 #include "menu/panels/dialog.h"
 #include "scenes/game_over.h"
 
-using std::vector, std::string, std::make_unique;
+using std::vector, std::string, std::make_unique, 
+std::uniform_int_distribution;
 
 
 GameOverScene::GameOverScene(string reason) {
@@ -18,35 +20,73 @@ GameOverScene::GameOverScene(string reason) {
   this->reason = reason;
 }
 
-void GameOverScene::startDialog() {
-  vector<string> dialog = { 
-    "Mary had always been aware of how\n"
-    "insignificant he was in the grand\n"
-    "scheme of things.",
-    "After all, he was a human who came\n"
-    "from nothing, and would inevitably\n"
-    "return to it in death.",
-    "If there is someone who could defeat\n"
-    "the villain, it certainly isn't him.",
-    "And yet... he has lasted longer than\n"
-    "most.",
-    "Rather than submitting to his\n"
-    "circumstances, he chose to rise to\n"
-    "the occasion.",
-    "Instead of allowing himself to go\n"
-    "through the motions, he willingly\n"
-    "swam against the current.",
-    "The decision to trek the path of\n"
-    "thorns was entirely his own.",
-    "All for the chance at a better life.\n"
-    "If not for him... then maybe someone\n"
-    "else.",
-    "These are the core traits that\n"
-    "define a Martyr.",
-    "Although... It wouldn't hurt to strive\n"
-    "for more than that. Right, Mary?"
-  };
+vector<string> GameOverScene::getDialog() {
+  uniform_int_distribution<int> range(0, 1);
+  int num = range(Game::RNG);
 
+
+  switch (num) {
+    case 0: {
+      return {
+        "It all starts with the first victim.",
+        "While they may have stood no chance of\n"
+        "surviving what was ahead of them.",
+        "It's through their death that the\n"
+        "threat's existence becomes known.",
+        "And then the next person comes in line.",
+        "They make it a bit further than the\n"
+        "one before them, they fall, and the\n"
+        "cycle repeats.",
+        "The process continues until the threat\n"
+        "is neutralized.",
+        "With only the one at the end of the\n"
+        "chain being branded a Hero.",
+        "That is the path of thorns that must\n"
+        "be walked in order for true change to\n"
+        "occur.",
+        "The eternal oscillation between the\n"
+        "Dark Age, and the Golden Age is the\n"
+        "mechanism that runs this 'Reality'",
+        "Even so, the Chosen One is ultimately\n"
+        "just the one that succeeds in bringing\n"
+        "about change.",
+        "The door is always open. Why not try\n"
+        "your luck, and choose to be the one?"
+      };
+    }
+    default: {
+      return {
+        "Mary had always been aware of how\n"
+        "insignificant he was in the grand\n"
+        "scheme of things.",
+        "After all, he was a human who came\n"
+        "from nothing, and would inevitably\n"
+        "return to it in death.",
+        "If there is someone who could defeat\n"
+        "the villain, it certainly isn't him.",
+        "And yet, he has lasted longer than\n"
+        "most.",
+        "Rather than submitting to his\n"
+        "circumstances, he chose to rise to\n"
+        "the occasion.",
+        "Instead of allowing himself to go\n"
+        "through the motions, he willingly\n"
+        "swam against the current.",
+        "The decision to trek the path of\n"
+        "thorns was entirely his own.",
+        "All for the chance at a better life.\n"
+        "If not for him... then maybe someone\n"
+        "else.",
+        "If there is a title for people like\n"
+        "him, it wouldn't be \"Hero\".",
+        "Although... It wouldn't hurt to strive\n"
+        "for old dream of heroism... right?"};
+    }
+  }
+}
+
+void GameOverScene::startDialog() {
+  vector<string> dialog = getDialog();
   panel = make_unique<DialogPanel>((Vector2){16, 8}, dialog, true, 
                                    false, 1.5);
   panel_mode = true;
@@ -55,12 +95,14 @@ void GameOverScene::startDialog() {
 void GameOverScene::startClosingDialog() {
   vector<string> dialog = {
     "...",
-    "If that's your decision...",
-    "Just remember, Mary, time will always\n"
-    "keep moving forward; With or without\n"
-    "you.",
-    "You may rest now, but eventually,\n"
-    "you will have to get up."
+    "Just remember, Mary.",
+    "Without power, you can change nothing..\n",
+    "But what you can do is spark that\n"
+    "change.",
+    "Even if you won't be there to see it,\n"
+    "no action is without consequence.",
+    "So you better make it count when the\n"
+    "time comes, alright?"
   };
 
   panel = make_unique<DialogPanel>(Vector2{16, 8}, dialog, false, false,

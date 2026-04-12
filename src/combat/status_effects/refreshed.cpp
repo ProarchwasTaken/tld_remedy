@@ -1,9 +1,11 @@
+#include <cmath>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
 #include "base/party_member.h"
 #include "base/status_effect.h"
 #include "combat/status_effects/refreshed.h"
-#include <raymath.h>
 #include <plog/Log.h>
 
 
@@ -14,23 +16,30 @@ Refreshed::Refreshed(PartyMember *afflicted) :
   persistent = false;
   this->afflicted = afflicted;
 
+  float dexterity = afflicted->dexterity;
+  dex_gained = ceilf(dexterity * 0.20);
+
   float speed = afflicted->speed_multiplier;
   speed_gained = speed * 0.20;
 
   float recovery = afflicted->recovery;
   rec_gained = recovery * 0.20;
 
+  PLOGI << "Dexterity to be gained: " << dex_gained;
   PLOGI << "Speed to be gained: " << speed_gained;
   PLOGI << "Recovery to be gained: " << rec_gained;
 }
 
 void Refreshed::init(bool hide_text) {
-  PLOGI << "Increasing the afflicted's speed and recovery by 20%";
+  PLOGI << "Increasing the afflicted's dexterity, speed, and recovery "
+  << "by 20%";
+  afflicted->dexterity += dex_gained;
   afflicted->speed_multiplier += speed_gained;
   afflicted->recovery += rec_gained;
 
-  PLOGD << "Result: {SPD: " << afflicted->speed_multiplier << "| REC: " 
-  << afflicted->recovery << "}";
+  PLOGD << "Result: {DEX: " << afflicted->dexterity << ", SPD: " << 
+    afflicted->speed_multiplier << ", REC: " 
+    << afflicted->recovery << "}";
 
   StatusEffect::init(hide_text);
   afflicted->sfx.play("refreshed_gain");
@@ -39,6 +48,7 @@ void Refreshed::init(bool hide_text) {
 Refreshed::~Refreshed() {
   if (end) {
     PLOGI << "Undoing stat bonuses.";
+    afflicted->dexterity -= dex_gained;
     afflicted->speed_multiplier -= speed_gained;
     afflicted->recovery -= rec_gained;
     afflicted->sfx.play("refreshed_lost");

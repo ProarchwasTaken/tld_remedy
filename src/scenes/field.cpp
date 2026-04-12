@@ -17,7 +17,6 @@
 #include "data/actor_event.h"
 #include "data/session.h"
 #include "system/sound_atlas.h"
-#include "system/sprite_atlas.h"
 #include "utils/text.h"
 #include "menu/panels/dialog.h"
 #include "field/system/field_map.h"
@@ -31,6 +30,7 @@
 #include "field/entities/save_point.h"
 #include "field/sequences/save.h"
 #include "field/sequences/rest.h"
+#include "field/sequences/reject.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -41,7 +41,6 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 
 SoundAtlas FieldScene::sfx("field");
-SpriteAtlas FieldScene::emotes("entities", "emote_balloons");
 
 
 FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
@@ -62,6 +61,18 @@ FieldScene::FieldScene(Session *session_data) {
   session = make_unique<Session>();
   *session = *session_data;
   setup();  
+}
+
+FieldScene::FieldScene(string map_name) {
+  PLOGI << "Initializing the field scene with the map: " << map_name;
+  session = make_unique<Session>();
+  session->version = Game::session_version;
+  std::strcpy(session->map_name, map_name.c_str());
+
+  initPlayerData(SubWeaponID::KNIFE);
+  initCompanionData(CompanionID::ERWIN);
+
+  setup();
 }
 
 FieldScene::~FieldScene() {
@@ -113,7 +124,7 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->member_id = PartyMemberID::MARY;
   player->weapon_id = weapon_id;
 
-  player->life = 15;
+  player->life = 7;
   player->max_life = 15;
 
   player->init_morale = 10;
@@ -123,12 +134,18 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->defense = 4;
   player->intimid = 6;
   player->persist = 4;
+  player->dexterity = 5;
+  player->discipline = 6;
+
+  player->recovery = 1.0;
+  player->resilience = 0.8;
 
   switch (weapon_id) {
     case SubWeaponID::KNIFE: {
       PLOGI << "Applying Knife status bonuses.";
       player->offense += 2;
       player->intimid += 1;
+      player->dexterity += 1;
       break;
     }
   }
@@ -147,13 +164,18 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->life = 20;
       companion->max_life = 20;
 
-      companion->init_morale = 5;
+      companion->init_morale = 10;
       companion->max_morale = 20;
 
       companion->offense = 8;
       companion->defense = 6;
       companion->intimid = 7;
       companion->persist = 5;
+      companion->dexterity = 5;
+      companion->discipline = 7;
+
+      companion->recovery = 1.0;
+      companion->resilience = 0.70;
       break;
     }
   }
@@ -226,12 +248,12 @@ void FieldScene::setupEntities() {
       }
       case EntityType::MAP_TRANSITION: {
         MapTransData *trans_data = static_cast<MapTransData*>(data.get());
-        entity = make_unique<MapTransition>(*trans_data);
+        entity = make_unique<MapTransition>(session.get(), *trans_data);
         break;
       }
       case EntityType::PICKUP: {
         PickupData *pick_data = static_cast<PickupData*>(data.get());
-        entity = make_unique<Pickup>(*pick_data);
+        entity = make_unique<Pickup>(session.get(), *pick_data);
         break;
       }
       case EntityType::SAVE_POINT: {
@@ -320,6 +342,11 @@ void FieldScene::dialogHandling() {
   if (dialog->selected != NULL && sequence != nullptr) {
     sequence->dialogHandling(*dialog->selected);
   }
+
+  if (sequence == nullptr) {
+    PLOGD << "Detected that dialog was closed outside of a sequence.";
+    PlayerActor::setControllable(true);
+  }
 }
 
 void FieldScene::actorBehavior() {
@@ -350,6 +377,7 @@ void FieldScene::eventProcessing() {
     PLOGI << "Field Events raised: " << event_pool->size();
     for (auto &event : *event_pool) {
       eventHandling(event);
+      event.reset();
     }
 
     evt_handler.clear();
@@ -393,8 +421,9 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     }
     case FieldEVT::INIT_COMBAT: {
       PLOGD << "Event Detected: InitCombatEvent";
+      auto *event_data = static_cast<InitCombatEvent*>(event.get());
 
-      Game::initCombat(session.get());
+      Game::initCombat(session.get(), event_data->id);
       sfx.play("combat_init");
       break;
     }
@@ -539,6 +568,12 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       panel = make_unique<DialogPanel>(position, event_data->dialog, 
                                        event_data->end_prompt);
       panel_mode = true;
+
+      if (sequence == nullptr) {
+        PLOGD << "Detected that dialog was opened outside of a sequence.";
+        PlayerActor::setControllable(false);
+      }
+
       break;
     }
     case FieldEVT::START_SEQUENCE: {
@@ -547,6 +582,15 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       SequenceID sequence_id = event_data->sequence;
       initSequence(sequence_id);
       break;
+    }
+    case FieldEVT::START_FLAG_SEQUENCE: {
+      PLOGD << "Event detected: StartFSequenceEvent";
+      auto *event_data = static_cast<StartFSequenceEvent*>(event.get());
+
+      SequenceID sequence_id = event_data->sequence;
+      FlagID flag = event_data->flag;
+
+      initSequence(sequence_id, flag);
     }
   }
 }
@@ -570,6 +614,29 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     case SequenceID::REST: {
       sequence = make_unique<RestSequence>();
       break;
+    }
+    default: {
+      PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
+      " is either invalid, or requires an Flag ID!";
+    }
+  }
+
+  assert(sequence != nullptr);
+}
+
+void FieldScene::initSequence(SequenceID sequence_id, FlagID flag) {
+  if (sequence != nullptr) {
+    sequence.reset();
+  }
+
+  switch (sequence_id) {
+    case SequenceID::REJECT: {
+      sequence = make_unique<RejectSequence>(flag);
+      break;
+    }
+    default: {
+      PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
+      " is either invalid, or doesn't require an Flag ID!";
     }
   }
 
@@ -790,7 +857,7 @@ void FieldScene::draw() {
 
   BeginMode2D(camera); 
   {
-    field->draw();
+    field->drawMap();
 
     for (unique_ptr<Entity> &entity : entities) {
       entity->draw();
@@ -805,6 +872,8 @@ void FieldScene::draw() {
       field->drawCollLines();
     } 
     #endif // !NDEBUG
+
+    field->drawOverlay();
   }
   EndMode2D();
 
@@ -837,8 +906,13 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string location = TextFormat("Location: %s", session->map_name);
-  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y}, 
+  string map_name = TextFormat("Map: %s", session->map_name);
+  Vector2 map_pos = TextUtils::alignRight(map_name.c_str(), {base_x, y}, 
+                                          *font, -3, 0);
+  y += spacing;
+
+  string location = TextFormat("Location: %s", session->location);
+  Vector2 loc_pos = TextUtils::alignRight(location.c_str(), {base_x, y},
                                           *font, -3, 0);
   y += spacing;
 
@@ -851,6 +925,7 @@ void FieldScene::drawSessionInfo() {
   Vector2 time_pos = TextUtils::alignRight(time.c_str(), {base_x, y}, 
                                            *font, -3, 0);
   y += spacing;
+
 
   Player *player = &session->player;
   string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
@@ -887,6 +962,7 @@ void FieldScene::drawSessionInfo() {
                                           *font, -3, 0);
 
 
+  DrawTextEx(*font, map_name.c_str(), map_pos, text_size, -3, GREEN);
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);

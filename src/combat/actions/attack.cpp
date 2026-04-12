@@ -143,7 +143,7 @@ void Attack::inflictDamage(set<pair<float, Combatant*>> &hits) {
   Combatant *victim;
   if (hits.size() > 1) {
     auto closest = std::min_element(hits.begin(), hits.end(), 
-                                    Comparison::combatantDistance);
+                                    Comparison::combatantPriority);
     victim = closest->second;
   }
   else {

@@ -1,3 +1,5 @@
+#include <cassert>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -7,9 +9,11 @@
 #include "data/rect_ex.h"
 #include "data/damage.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/stage.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include "combat/actions/evade.h"
 #include <plog/Log.h>
 
@@ -31,6 +35,11 @@ Evade::Evade(PartyMember *user, SpriteAtlas &user_atlas, RectEx hitbox,
 }
 
 Evade::~Evade() {
+  if (!finished && phase != ActionPhase::WIND_UP) {
+    user->priority--;
+    assert(user->priority >= 0);
+  }
+
   bool user_cancel = !finished && user->state == CombatantState::ACTION;
   if (!user_cancel) {
     user->intangible = false;
@@ -38,7 +47,6 @@ Evade::~Evade() {
   }
 
   ActionID new_action_id = user->action->id;
-
   if (new_action_id != ActionID::GHOST_STEP) {
     user->intangible = false;
   }
@@ -53,8 +61,7 @@ void Evade::intercept(DamageData &data) {
 
   PLOGI << "Conditions have been met to intercept damage function";
   PLOGD << "Timing: " << act_time * state_clock;
-  data.b_def = &user->persist;
-  data.def_mod += 0.75;
+  data.b_def = &user->dexterity;
 
   float damage = Clamp(user->damageCalculation(data), 0, 9999);
   PLOGD << "Result: " << damage;
@@ -64,7 +71,7 @@ void Evade::intercept(DamageData &data) {
 
   float sleep_time;
 
-  if (user->important && state_clock <= 0.25) {
+  if (user->important && state_clock <= 0.10) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
     user->sprite = &user_atlas->sprites[sprite_set->id_perfect];
     user->depleteInstant();
@@ -99,6 +106,22 @@ void Evade::intercept(DamageData &data) {
   CombatHandler::raise<CreateAfterImgCB>(
     CombatEVT::CREATE_AFTERIMAGE, user_atlas, user->sprite,
     user->bounding_box.position, user->direction, 0.25f, tint);
+  CombatantHandler::queue<EvadedAttackCBT>(user, 
+                                           CombatantEVT::EVADED_ATTACK,
+                                           data.assailant);
+
+  if (data.assailant == NULL) {
+    return;
+  }
+
+  float difference = user->position.x - data.assailant->position.x;
+  if (difference > 0) {
+    user->direction = LEFT;
+  }
+  else {
+    user->direction = RIGHT;
+  }
+
   PLOGI << "Interception complete.";
 }
 
@@ -106,6 +129,7 @@ void Evade::windUp() {
   bool end_phase = state_clock >= 1.0;
   if (end_phase) {
     user->sprite = &user_atlas->sprites[sprite_set->id_active];
+    user->priority++;
     user->sfx.play("evade_ready");
   }
 }
@@ -137,6 +161,7 @@ void Evade::endLag() {
   bool end_phase = state_clock >= 1.0;
   if (end_phase) {
     user->intangible = false;
+    user->priority--;
   }
 }
 

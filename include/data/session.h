@@ -3,6 +3,7 @@
 
 #define STATUS_LIMIT 3
 #define ITEM_LIMIT 8
+#define FLAG_COUNT 8
 
 
 struct Character {
@@ -19,6 +20,11 @@ struct Character {
   int defense;
   int intimid;
   int persist;
+  int dexterity;
+  int discipline;
+
+  float recovery;
+  float resilience;
 
   int status_count = 0;
   int status_limit = STATUS_LIMIT;
@@ -40,28 +46,45 @@ struct CommonData {
   char map_name[16] = "";
 };
 
+struct GameFlag {
+  FlagID id = FlagID::NONE;
+  bool raised = false;
+};
+
 struct Session {
   unsigned int version;
   double playtime = 0.0;
-  int supplies = 0;
+  int supplies = 8;
 
-  char map_name[16] = "db_05";
+  char map_name[16] = "rem_01";
   char location[16] = "";
 
   Player player;
   Companion companion;
   
-  int item_count = 2;
+  int item_count = 3;
   int item_limit = ITEM_LIMIT;
   ItemID inventory[8] = {
     ItemID::I_BANDAGE,
     ItemID::M_SPLINT,
+    ItemID::S_BANDAGE,
     ItemID::NONE,
     ItemID::NONE,
     ItemID::NONE,
     ItemID::NONE,
     ItemID::NONE,
-    ItemID::NONE,
+  };
+
+  int flag_count = FLAG_COUNT;
+  GameFlag flags[8] {
+    {FlagID::CDF2_AFTER_INTRO, false},
+    {FlagID::CDF2_BEFORE_FIRST, false},
+    {FlagID::CDF2_AFTER_FIRST, false},
+    {FlagID::CDF2_REST_TALK, false},
+    {FlagID::CDF1_REST_TALK, false},
+    {FlagID::CDF1_KEY, false},
+    {FlagID::CD_ENTRANCE, false},
+    {FlagID::NONE, false},
   };
 
   int common_count = 0;
@@ -70,5 +93,5 @@ struct Session {
 
   int enemy_count = 0;
   int enemy_limit = 64;
-  CommonData enemy[64];
+  CommonData enemy[64]; 
 };

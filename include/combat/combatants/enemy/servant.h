@@ -90,6 +90,9 @@ private:
   float attack_distance = 28;
   float contest_distance = 128;
 
+  float cooldown_clock = 1.0;
+  float attack_cooldown = 0.35;
+
   float retreat_time = 0.5;
   float retreat_clock = 0.0;
 

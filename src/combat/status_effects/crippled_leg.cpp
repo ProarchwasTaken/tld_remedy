@@ -1,3 +1,6 @@
+#include <cmath>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/status_effect.h"
@@ -11,9 +14,23 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
   name = "Crippled Leg";
   persistent = true;
 
+  float percentage = Lerp(0.25, 1.0, afflicted->resilience);
+  PLOGD << "Percentage Reduction: " << 1.0 - percentage;
+
+  if (percentage >= 1.0) {
+    PLOGD << "Effect has been nullied due to the Afflicted's Resilience.";
+    return;
+  }
+
+  float dexterity = afflicted->dexterity;
+  float dec_dex = dexterity * percentage;
+  dex_lost = std::ceilf(dexterity - dec_dex);
+
   float speed = afflicted->speed_multiplier;
-  float dec_speed = speed * 0.85;
+  float dec_speed = speed * percentage;
   speed_lost = speed - dec_speed;
+
+  PLOGD << "Dexterity to be lost: " << dex_lost;
   PLOGD << "Speed to be lost: " << speed_lost;
 }
 
@@ -25,19 +42,22 @@ CrippledLeg::~CrippledLeg() {
 
 void CrippledLeg::init(bool hide_text) {
   applyPenalty();
-  PLOGD << "Result: " << afflicted->speed_multiplier;
+  PLOGD << "Result: {DEX: " << afflicted->dexterity << ", SPD: " << 
+    afflicted->speed_multiplier << "}";
 
   StatusEffect::init(hide_text);
 }
 
 void CrippledLeg::applyPenalty() {
-  PLOGI << "Decreasing afflicted's speed multiplier by 15%";
+  PLOGI << "Decreasing afflicted's dexterity and speed multiplier.";
+  afflicted->dexterity -= dex_lost;
   afflicted->speed_multiplier -= speed_lost;
   negated = false;
 }
 
 void CrippledLeg::negateEffect() {
   PLOGI << "Reversing stat penalties.";
+  afflicted->dexterity += dex_lost;
   afflicted->speed_multiplier += speed_lost;
   negated = true;
 }

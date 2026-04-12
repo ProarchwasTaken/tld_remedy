@@ -1,19 +1,58 @@
 {
-  "Debug": [
+  "Cathedral F2": [
+    {
+      "id": 0,
+      "weight": 40,
+      "reward": 5 
+    },
+    {
+      "id": 1,
+      "weight": 30,
+      "reward": 10 
+    },
     {
       "id": 2,
-      "weight": 60,
+      "weight": 30,
+      "reward": 10
+    }
+  ],
+  "Cathedral F1": [
+    {
+      "id": 0,
+      "weight": 10,
+      "reward": 5
+    },
+    {
+      "id": 1,
+      "weight": 30,
+      "reward": 10
+    },
+    {
+      "id": 2,
+      "weight": 30,
       "reward": 10
     },
     {
       "id": 3,
-      "weight": 50,
+      "weight": 30,
       "reward": 15
     },
     {
       "id": 4,
-      "weight": 25,
+      "weight": 0,
       "reward": 20
+    },
+    {
+      "id": 5,
+      "weight": 0,
+      "reward": 30 
     }
+  ],
+  "Debug": [
+    {
+      "id": 97,
+      "weight": 60,
+      "reward": 10
+    } 
   ]
 }

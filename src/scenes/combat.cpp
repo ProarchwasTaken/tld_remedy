@@ -21,6 +21,7 @@
 #include "data/combatant_event.h"
 #include "utils/input.h"
 #include "utils/text.h"
+#include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
 #include "menu/panels/dialog.h"
@@ -58,7 +59,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
   menu_sfx = &Game::menu_sfx;
   menu_sfx->use();
 
-  stage.loadStage("debug");
+  stage.loadStage(session->location);
   initializeCombatants(id);
 
   this->reward = reward;
@@ -95,6 +96,11 @@ CombatScene::~CombatScene() {
   toasts.reset();
 
   Entity::clear(entities);
+
+  if (dead_companion != nullptr) {
+    dead_companion.reset();
+  }
+
   menu_sfx->release();
 
   UnloadTexture(debug_overlay);
@@ -123,7 +129,7 @@ void CombatScene::initializePlayer() {
   auto player = make_unique<Mary>(&session->player);
   this->player = player.get();
 
-  plr_hud = make_unique<LifeHud>((Vector2){34, 215});
+  plr_hud = make_unique<LifeHud>((Vector2){35, 215});
   plr_hud->assign(this->player);
 
   plr_cmd_hud = make_unique<PlayerCmdHud>((Vector2){350, 178});
@@ -145,7 +151,7 @@ void CombatScene::initializeCompanion() {
   assert(companion != nullptr);
   this->companion = companion.get();
 
-  com_hud = make_unique<LifeHud>((Vector2){154, 215});
+  com_hud = make_unique<LifeHud>((Vector2){162, 215});
   com_hud->assign(this->companion);
 
   assist_hud = make_unique<AssistCmdHud>((Vector2){274, 200});
@@ -156,6 +162,25 @@ void CombatScene::initializeCompanion() {
 
 EnemyTroop CombatScene::getTroop(TroopID id) {
   switch (id) {
+    case TroopID::CD_TROOP1: {
+      return CDTroop1();
+    }
+    case TroopID::CD_TROOP2: {
+      return CDTroop2();
+    }
+    case TroopID::CD_TROOP3: {
+      return CDTroop3();
+    }
+    case TroopID::CD_TROOP4: {
+      return CDTroop4();
+    }
+    case TroopID::CD_TROOP5: {
+      return CDTroop5();
+    }
+    case TroopID::CD_TROOP6: {
+      return CDTroop6();
+    }
+    #ifndef NDEBUG
     case TroopID::DB_TROOP1: {
       return DBTroop1();
     }
@@ -165,12 +190,7 @@ EnemyTroop CombatScene::getTroop(TroopID id) {
     case TroopID::DB_TROOP3: {
       return DBTroop3();
     }
-    case TroopID::DB_TROOP4: {
-      return DBTroop4();
-    }
-    case TroopID::DB_TROOP5: {
-      return DBTroop5();
-    }
+    #endif // !NDEBUG
     default: {
       PLOGE << "Invalid Troop ID!";
       throw;
@@ -595,9 +615,14 @@ void CombatScene::deleteEntity(int entity_id) {
       plr_cmd_hud->assign(player);
     }
     else if (companion == entity.get()) {
+      companion->targetable = false;
       companion = NULL;
       com_hud->assign(companion);
       assist_hud->assign(companion);
+
+      dead_companion.swap(entity);
+      assert(entity == nullptr);
+      continue;
     }
 
     entity.reset();
@@ -612,6 +637,7 @@ void CombatScene::endCombatProcedure() {
   Companion *com_data = &session->companion;
 
   PLOGD << "Updating player attributes.";
+  assert(player != NULL);
   updatePartyAttr(player, plr_data);
 
   PLOGD << "Updating companion attributes.";
@@ -630,14 +656,21 @@ void CombatScene::endCombatProcedure() {
 void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 
 {
   if (member == NULL) {
-    PLOGD << "Combatant is assumed to be dead. Setting Life to 1.";
-    data->life = 1;
-    return;
-  }
+    PLOGD << "Combatant is assumed to be a dead companion.";
+    assert(dead_companion != nullptr);
+    assert(dead_companion->entity_type == EntityType::COMBATANT);
+    assert(dead_companion.get() != player);
 
-  member->depleteInstant();
-  float life = std::ceilf(member->life); 
-  data->life = Clamp(life, 0, member->max_life);
+    PLOGD << "Retrieving address to dead companion, and setting it's life"
+      << " to 1.";
+    member = static_cast<PartyMember*>(dead_companion.get());
+    data->life = 1;
+  }
+  else {
+    member->depleteInstant();
+    float life = std::ceilf(member->life); 
+    data->life = Clamp(life, 0, member->max_life); 
+  }
 
   StatusID status[STATUS_LIMIT] = {
     StatusID::NONE, 
@@ -658,6 +691,7 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
     }
   }
 
+  std::sort(status, status + 3, Comparison::effectAlgorithm);
   std::copy(status, status + 3, data->status);
 }
 
@@ -818,8 +852,8 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Life: %02.02f/%02.02f", member->life,
-                    member->max_life);
+  text = TextFormat("Life: %02.02f/%02.02f/%02.02f", member->life,
+                    member->max_life, member->exhaustion);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
@@ -834,10 +868,6 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Exhaustion: %02.02f", member->exhaustion);
-  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
-  position.y += spacing;
-
   text = TextFormat("Speed Multiplier: %01.02f", 
                     member->speed_multiplier);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
@@ -848,6 +878,10 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   position.y += spacing;
 
   text = TextFormat("Resilience: %01.02f", member->resilience);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  position.y += spacing;
+
+  text = TextFormat("Priority: %i", member->priority); 
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y = 228;
 

@@ -1,30 +1,36 @@
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <memory>
-#include <string>
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
-#include "enums.h"
 #include "game.h"
-#include "base/entity.h"
-#include "base/party_member.h"
-#include "base/status_effect.h"
 #include "data/combatant_event.h"
-#include "system/sprite_atlas.h"
+#include "base/combatant.h"
+#include "base/party_member.h"
+#include "utils/math.h"
 #include "utils/text.h"
+#include "combat/status_effects/mending.h"
 #include "combat/hud/life.h"
 #include <plog/Log.h>
 
-using std::string, std::unique_ptr;
+using std::unique_ptr;
 SpriteAtlas LifeHud::atlas("hud", "hud_life");
 SpriteAtlas LifeHud::status_atlas("hud", "status_icons");
 SpriteAtlas LifeHud::portrait_atlas("hud", "combat_portraits");
 
+float LifeHud::GAUGE_LIFE_EXP = std::logf(11.0 / 82) / std::logf(0.3);
+
 
 LifeHud::LifeHud(Vector2 position) {
   main_position = position;
+
+  life_color = Game::palette[32];
+  life_txt_color = Game::palette[34];
+
   morale_color = Game::palette[42];
+  morale_txt_color = Game::palette[43];
+
   atlas.use();
   status_atlas.use();
   portrait_atlas.use();
@@ -36,8 +42,8 @@ LifeHud::~LifeHud() {
   portrait_atlas.release();
 }
 
-void LifeHud::assign(PartyMember *combatant) {
-  user = combatant;
+void LifeHud::assign(PartyMember *user) {
+  this->user = user;
 
   if (user == NULL) {
     return;
@@ -45,6 +51,11 @@ void LifeHud::assign(PartyMember *combatant) {
 
   PLOGD << "Lifehud instance assigned to Combatant: '" 
     << user->name << "'";
+  prev_life = user->life / user->max_life;
+  white_life = prev_life;
+
+  prev_morale = user->morale / user->max_morale;
+  white_morale = prev_morale;
 }
 
 void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
@@ -94,18 +105,29 @@ void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 }
 
 void LifeHud::damageEventHandling(TookDamageCBT *event) {
-  PLOGD << "Initiating damage shake effect.";
+  if (event->damage_type == DamageType::LIFE) {
+    float life_lost = event->damage_taken;
+    prev_life = (user->life + life_lost) / user->max_life;
+    white_life = prev_life;
+    dmg_life_clock = 0.0;
+
+    shake_time = 0.25;
+  }
+  else {
+    float morale_lost = event->damage_taken;
+    prev_morale = (user->morale + morale_lost) / user->max_morale;
+    white_morale = prev_morale;
+    dmg_morale_clock = 0.0;
+
+    shake_time = 0.10;
+  }
+
   bool in_hitstun = event->resulting_state == HIT_STUN;
   if (in_hitstun && event->stun_type == StunType::STAGGER) {
     shake_time = 0.5;
   }
-  else if (event->damage_type == DamageType::LIFE) {
-    shake_time = 0.25;
-  }
-  else {
-    shake_time = 0.10;
-  }
 
+  PLOGD << "Initiating damage shake effect.";
   state = SHAKE;
   shake_clock = 0.0;
   hit_timestamp = GetTime();
@@ -114,59 +136,88 @@ void LifeHud::damageEventHandling(TookDamageCBT *event) {
 void LifeHud::update() {
   if (user == NULL) {
     return;
+  } 
+
+  if (dmg_life_clock != 1.0) {
+    dmg_life_clock += Game::deltaTime() / dmg_life_time;
+    dmg_life_clock = Clamp(dmg_life_clock, 0.0, 1.0); 
+
+    float life_percentage = user->life / user->max_life;
+    white_life = Math::smoothstep(prev_life, life_percentage, 
+                                  dmg_life_clock);
   }
 
-  decideLifeColor();
-  decideMoraleColor();
+  if (dmg_morale_clock != 1.0) {
+    dmg_morale_clock += Game::deltaTime() / dmg_morale_time ;
+    dmg_morale_clock = Clamp(dmg_morale_clock, 0.0, 1.0);
+
+    float morale_percentage = user->morale / user->max_morale;
+    white_morale = Math::smoothstep(prev_morale, morale_percentage, 
+                                    dmg_morale_clock);
+  }
+
+  if (user->critical_life) {
+    criticalFlash();
+  }
+  else {
+    life_color = Game::palette[32]; 
+    life_txt_color = Game::palette[34];
+  }
+
+  if (user->demoralized) {
+    demoralizedFlash();
+  }
+  else {
+    morale_color = Game::palette[42];
+    morale_txt_color = Game::palette[43];
+  }
 }
 
-void LifeHud::decideLifeColor() {
-  if (user->state == CombatantState::DEAD) {
+void LifeHud::criticalFlash() {
+  crit_clock += Game::deltaTime() / crit_time;
+
+  if (crit_clock < 1.0) {
+    return;
+  }
+
+  crit_flash = !crit_flash;
+  crit_clock = 0.0;
+
+  if (crit_flash) {
+    life_color = Game::palette[34];
+    life_txt_color = Game::palette[34];
+  } 
+  else {
     life_color = Game::palette[32];
-  }
-  else if (has_mending) {
-    life_color = Game::palette[14];
-  }
-  else if (user->critical_life) {
-    life_color = criticalFlash();
-  }
-  else {
-    life_color = WHITE;
+    life_txt_color = Game::palette[32];
   }
 }
 
-void LifeHud::decideMoraleColor() {
-  for (auto &effect : user->status) {
-    if (effect->id == StatusID::DESPONDENT) {
-      morale_color = criticalFlash();
-      return;
-    }
+void LifeHud::demoralizedFlash() {
+  demo_clock += Game::deltaTime() / demo_time;
+
+  if (demo_clock < 1.0) {
+    return;
   }
 
-  morale_color = Game::palette[42];
-}
+  demo_flash = !demo_flash;
+  demo_clock = 0.0;
 
-Color LifeHud::criticalFlash() {
-  flash_clock += Game::deltaTime() / 0.35;
-  if (flash_clock >= 1.0) {
-    flashed = !flashed;
-  }
-
-  if (flashed) {
-    return Game::palette[34];
+  if (demo_flash) {
+    morale_color = WHITE;
+    morale_txt_color = Game::palette[34];
   }
   else {
-    return Game::palette[33];
+    morale_color = Game::palette[34];
+    morale_txt_color = Game::palette[32];
   }
+
 }
 
 void LifeHud::draw() {
   if (user == NULL) {
     return;
   }
-
-  Font *font = &Game::sm_font;
-  int txt_size = font->baseSize;
 
   Vector2 position = main_position;
 
@@ -179,13 +230,10 @@ void LifeHud::draw() {
     shakeTimer();
   }
 
-  drawBustGraphic(position);
+  drawPortrait(position);
   drawStatusIcons(position);
-  drawLife(position, font, txt_size);
-
-  if (user->max_morale != 0) {
-    drawMorale(position, font, txt_size);
-  }
+  drawLife(position);
+  drawMorale(position);
 }
 
 void LifeHud::shakeTimer() {
@@ -198,11 +246,11 @@ void LifeHud::shakeTimer() {
   }
 }
 
-void LifeHud::drawBustGraphic(Vector2 position) {
+void LifeHud::drawPortrait(Vector2 position) {
   int id = static_cast<int>(user->id);
-  Rectangle *sprite = &portrait_atlas.sprites[id];
+  Rectangle *sprite = &portrait_atlas.sprites.at(id);
   
-  position = Vector2Subtract(position, {26, 41});
+  position = Vector2Subtract(position, {27, 41});
   Color tint = user->spriteTint();
   tint.a = 255;
 
@@ -215,7 +263,7 @@ void LifeHud::drawStatusIcons(Vector2 position) {
     return;
   }
 
-  Vector2 base_position = Vector2Subtract(position, {18, 5});
+  Vector2 base_position = Vector2Subtract(position, {19, 5});
 
   for (int x = 0; x < count; x++) {
     StatusEffect *effect = user->status.at(x).get();
@@ -235,135 +283,135 @@ Rectangle *LifeHud::getIconSprite(StatusID id) {
   return &status_atlas.sprites.at(index);
 }
 
-void LifeHud::drawLife(Vector2 position, Font *font, int txt_size) {
-  DrawTextureRec(atlas.sheet, atlas.sprites[0], position, 
-                 life_color);
-  drawLifeSegments(position);
-  drawLifeText(position, font, txt_size);
+void LifeHud::drawLife(Vector2 position) {
+  DrawTextureRec(atlas.sheet, atlas.sprites[0], position, WHITE);
+  drawLifeGauge(position);
+  // drawLifeText(position);
 
   if (user->tenacity != 0.0) {
-    drawTenacityText(position, font, txt_size);
+    drawTenacityText(position);
   }
 }
 
-void LifeHud::drawLifeSegments(Vector2 position) {
+void LifeHud::drawLifeGauge(Vector2 position) {
+  if (has_mending) {
+    drawToBeHealed(position);
+  }
+
+  if (user->exhaustion != 0) {
+    float life_total = user->life + user->tenacity;
+    float percentage = (life_total + user->exhaustion) / user->max_life;
+    percentage = Clamp(percentage, 0.0, 1.0);
+    drawGauge(1, position, Game::palette[2], percentage);
+  }
+
+  float overflow = 0;
+  if (user->tenacity != 0) {
+    float percentage = (user->life + user->tenacity) / user->max_life;
+    overflow = percentage - 1.0;
+    percentage = Clamp(percentage, 0.0, 1.0);
+    drawGauge(2, position, life_color, percentage);
+  }
+
   float life_percentage = user->life / user->max_life;
+  life_percentage = Clamp(life_percentage, 0.0, 1.0);
 
-  float combined = user->life + user->tenacity + user->exhaustion;
-  float with_exhaustion = combined / user->max_life;
-  float with_tenacity = (user->life + user->tenacity) / user->max_life;
-
-  int segments;
-  bool close_to_full = 1.0 - life_percentage <= 0.001;
-  if (close_to_full) {
-    segments = 10;
-  }
-  else {
-    segments = life_percentage * 10; 
+  if (dmg_life_clock != 1.0) {
+    drawGauge(1, position, WHITE, white_life);
   }
 
-  int ex_segments = with_exhaustion * 10;
-  int tp_segments = with_tenacity * 10;
+  drawGauge(1, position, life_color, life_percentage);
 
-  float leftover = (life_percentage * 10) - segments;
-
-  position = Vector2Add(position, {7, 2});
-
-  for (int x = 0; x < 10; x++) {
-    Rectangle *sprite;
-    Color color = life_color;
-
-    if (x < segments) {
-      sprite = &atlas.sprites[1];
-    }
-    else if (leftover != 0 && user->state != CombatantState::DEAD) {
-      float interval = (1.0 - leftover) * 0.5;
-      sprite = segmentBlink(interval);
-      leftover = 0;
-    }
-    else if (segments != tp_segments && x <= tp_segments) {
-      sprite = &atlas.sprites[6];
-    }
-    else if (segments != ex_segments && x <= ex_segments) {
-      sprite = &atlas.sprites[2];
-      color = Game::palette[29];
-    }
-    else {
-      sprite = &atlas.sprites[2];
-      color = Game::palette[32];
-    }
-
-    DrawTextureRec(atlas.sheet, *sprite, position, color);
-    position.x += 7;
+  if (overflow > 0) {
+    drawGauge(1, position, Game::palette[22], overflow);
   }
 }
 
-void LifeHud::drawLifeText(Vector2 position, Font *font, int size) {
-  txt_life = TextFormat("%02.00f/%02.00f", user->life, user->max_life);
+void LifeHud::drawToBeHealed(Vector2 position) {
+  Mending *mending = NULL;
+  for (auto &effect : user->status) {
+    if (effect->id == StatusID::MENDING) {
+      mending = static_cast<Mending*>(effect.get());
+      break;
+    }
+  }
 
-  position = Vector2Add(position, {78, 3});
-  position = TextUtils::alignRight(txt_life.c_str(), position, *font, -3, 
-                                   0);
+  if (mending == NULL) {
+    return;
+  }
 
-  DrawTextEx(*font, txt_life.c_str(), position, size, -3, life_color);
+  float life_total = user->life + user->exhaustion + user->tenacity;
+  float to_be_healed = mending->to_be_healed;
+
+  float percentage = (life_total + to_be_healed) / user->max_life;
+  percentage = Clamp(percentage, 0.0, 1.0);
+  drawGauge(1, position, Game::palette[2], percentage);
 }
 
-void LifeHud::drawTenacityText(Vector2 position, Font *font, int size) {
-  txt_tenacity = TextFormat("(+%01.02f)", user->tenacity);
-  position = Vector2Add(position, {78, 11});
-  position = TextUtils::alignRight(txt_tenacity.c_str(), position, *font, 
-                                   -3, 0);
+void LifeHud::drawLifeText(Vector2 position) {
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
 
+  const char *text = TextFormat("%02.00f/%02.00f", user->life, 
+                                user->max_life);
+  position = Vector2Add(position, {82, 4});
+  position = TextUtils::alignRight(text, position, *font, -3, 0);
+
+  DrawTextEx(*font, text, position, size, -3, life_txt_color);
+}
+
+void LifeHud::drawTenacityText(Vector2 position) {
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
   Color color = Game::palette[22];
-  DrawTextEx(*font, txt_tenacity.c_str(), position, size, -3, color);
+
+  const char *text = TextFormat("+%01.00f", user->tenacity);
+  position = Vector2Add(position, {82, 4});
+  DrawTextEx(*font, text, position, size, -3, color);
 }
 
-void LifeHud::drawMorale(Vector2 position, Font *font, int txt_size) {
-  Vector2 frame_position = Vector2Add(position, {14, -10});
-  DrawTextureRec(atlas.sheet, atlas.sprites[3], frame_position, 
-                 morale_color);
+void LifeHud::drawMorale(Vector2 position) {
+  position = Vector2Add(position, {10, -6});
+  DrawTextureRec(atlas.sheet, atlas.sprites[3], position, WHITE);
 
   drawMoraleGauge(position);
-  drawMoraleText(position, font, txt_size);
+  // drawMoraleText(position);
 }
 
 void LifeHud::drawMoraleGauge(Vector2 position) {
-  position = Vector2Add(position, {21, -2});
-  float morale_percentage = Clamp(user->morale / user->max_morale, 
-                                  0.0, 1.0);
+  float intended = 11.0 / 85;
+  float init_percentage = user->init_morale / user->max_morale;
+  float exponent = std::logf(intended) / std::logf(init_percentage);
 
-  Rectangle gauge = atlas.sprites[4];
-  gauge.width = gauge.width * morale_percentage;
+  if (dmg_morale_clock != 1.0) {
+    drawGauge(4, position, WHITE, white_morale, exponent);
+  }
 
-  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
-  DrawTextureRec(atlas.sheet, gauge, position, morale_color);
+  float morale_percentage = user->morale / user->max_morale;
+  morale_percentage = Clamp(morale_percentage, 0.0, 1.0);
+  drawGauge(4, position, morale_color, morale_percentage, exponent);
 }
 
-void LifeHud::drawMoraleText(Vector2 position, Font *font, int size) {
-  txt_morale = TextFormat("%02.02f", user->morale);
+void LifeHud::drawMoraleText(Vector2 position) {
+  Font *font = &Game::sm_font;
+  int size = font->baseSize;
 
-  position = Vector2Add(position, {92, -12});
-  position = TextUtils::alignRight(txt_morale.c_str(), position, *font, 
-                                   -3, 0);
+  const char *text = TextFormat("%01.02f", user->morale);
+  position = Vector2Add(position, {86, -4});
+  position = TextUtils::alignRight(text, position, *font, -3, 0);
 
-  DrawTextEx(*font, txt_morale.c_str(), position, size, -3, morale_color);
+  DrawTextEx(*font, text, position, size, -3, morale_txt_color);
 }
 
-Rectangle *LifeHud::segmentBlink(float interval) {
-  if (user->tenacity != 0) {
-    return &atlas.sprites[6];
-  }
+void LifeHud::drawGauge(int index, Vector2 position, Color color,
+                        float percentage, float exponent)
+{
+  Rectangle sprite = atlas.sprites[index];
+  float max_width = sprite.width;
+  position = Vector2Add(position, {1, 1});
 
-  blink_clock += Game::deltaTime() / interval;
-  if (blink_clock >= 1.0) {
-    segment_blink = !segment_blink;
-    blink_clock = 0.0;
-  }
+  percentage = std::pow(percentage, exponent);
 
-  if (segment_blink) {
-    return &atlas.sprites[1];
-  }
-  else {
-    return &atlas.sprites[2];
-  }
+  sprite.width = max_width * percentage;
+  DrawTextureRec(atlas.sheet, sprite, position, color);
 }

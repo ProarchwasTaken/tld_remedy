@@ -55,8 +55,16 @@ void FieldMap::loadMap(Session &session, string map_name,
 
   UnloadTexture(base);
   base = LoadTexture(base_path.c_str());
-  parseMapData(session, map_name, json_path, spawn_name);
 
+  UnloadTexture(overlay);
+  string overlay_path = "graphics/maps/" + map_name + "o.png";
+  overlay_available = FileExists(overlay_path.c_str());
+  if (overlay_available) {
+    PLOGD << "Found overlay file.";
+    overlay = LoadTexture(overlay_path.c_str());
+  }
+
+  parseMapData(session, map_name, json_path, spawn_name);
   PLOGI << "Map: '" << map_name << "' has been loaded successfully."; 
 }
 
@@ -266,6 +274,9 @@ void FieldMap::findMapTransitions(json &layer_objects) {
     string spawn_dest;
     Direction direction;
 
+    FlagID flag = FlagID::NONE;
+    bool require_flag = false;
+
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
       if (property_name == "map_dest") {
@@ -277,12 +288,24 @@ void FieldMap::findMapTransitions(json &layer_objects) {
       else if (property_name == "direction") {
         direction = static_cast<Direction>(property["value"]);
       }
+      else if (property_name == "require_flag") {
+        require_flag = property["value"];
+      }
+      else if (property_name == "flag") {
+        int id = property["value"];
+        flag = static_cast<FlagID>(id);
+      }
+    }
+
+    if (!require_flag) {
+      flag = FlagID::NONE;
     }
 
     MapTransData data = {MAP_TRANSITION, map_dest, spawn_dest, rect, 
-      direction};
+      direction, flag};
     PLOGD << "Trigger Data: {Map Destination: '" << map_dest <<
-      "' Spawnpoint: '" << spawn_dest << "' Direction: " << direction;
+      "', Spawnpoint: '" << spawn_dest << "', Direction: " << direction
+    << ", Flag Required: " << static_cast<int>(flag) << "}";
     entity_queue.push_back(make_unique<MapTransData>(data));
   }
 }
@@ -310,8 +333,11 @@ void FieldMap::findPickups(Session &session, string &map_name,
       letter = std::toupper(letter);
     }
 
+    // Thank goodness that past me has already thought of this.
     std::map<string, PickupType> type_table = {
-      {"SUPPLIES", PickupType::SUPPLIES}
+      {"SUPPLIES", PickupType::SUPPLIES},
+      {"ITEM", PickupType::ITEM},
+      {"FLAG", PickupType::FLAG}
     };
 
     auto result = type_table.find(pickup_class);
@@ -330,7 +356,7 @@ void FieldMap::findPickups(Session &session, string &map_name,
       }
     }
 
-    if (count == 0) {
+    if (count == 0 && pickup_type == PickupType::SUPPLIES) {
       continue;
     }
 
@@ -369,6 +395,8 @@ void FieldMap::findEnemies(Session &session, string &map_name,
 
     vector<Direction> routine;
     float speed;
+    TroopID troop;
+
     for (basic_json property : object["properties"]) {
       string property_name = property["name"];
       if (property_name == "routine") {
@@ -378,13 +406,17 @@ void FieldMap::findEnemies(Session &session, string &map_name,
       else if (property_name == "speed") {
         speed = property["value"];
       }
+      else if (property_name == "troop_id") {
+        int id = property["value"];
+        troop = static_cast<TroopID>(id);
+      }
     }
 
     assert(!routine.empty());
 
     PLOGD << "{X: " << x << ", Y: " << y << "}";
     EnemyActorData data = {ACTOR, ActorType::ENEMY, position, DOWN, 
-      object_id, routine, speed};
+      object_id, routine, speed, troop};
     entity_queue.push_back(make_unique<EnemyActorData>(data));
 
     if (active == 2) {
@@ -473,8 +505,14 @@ void FieldMap::setupCommonData(string map_name, int object_id,
   *count += 1;
 }
 
-void FieldMap::draw() {
+void FieldMap::drawMap() {
   DrawTexture(base, 0, 0, WHITE);
+}
+
+void FieldMap::drawOverlay() {
+  if (overlay_available) {
+    DrawTexture(overlay, 0, 0, WHITE);
+  }
 }
 
 void FieldMap::drawCollLines() {

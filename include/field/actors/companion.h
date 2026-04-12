@@ -1,6 +1,4 @@
 #pragma once
-#include <list>
-#include <utility>
 #include <memory>
 #include <raylib.h>
 #include "enums.h"
@@ -21,20 +19,17 @@ public:
   void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
 
   void update() override;
-  void pathfind();
+  bool shouldBeMoving();
   Rectangle *getIdleSprite();
   void moveAnimation();
 
   void draw() override;
-  void drawDebug() override;
 
   static SpriteAtlas atlas;
+  bool follow_player = true;
 private:
   PlayerActor *plr = NULL;
-
-  std::list<std::pair<Vector2, enum Direction>> move_points;
   bool moving = false;
-  float movement_speed = 56.5;
 
   Animation anim_down = {{0, 1, 2, 1}, 0.25};
   Animation anim_right = {{3, 4, 5, 4}, 0.25};

@@ -1,8 +1,10 @@
 #pragma once
-#include <raylib.h>
+#include <nlohmann/json_fwd.hpp>
 #include <memory>
 #include <random>
 #include <string>
+#include <tuple>
+#include <raylib.h>
 #include "enums.h"
 #include "base/scene.h"
 #include "data/session.h"
@@ -14,6 +16,7 @@
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
+#define PLATFORM_APPLE 2
 
 
 enum class GameState {
@@ -33,6 +36,7 @@ enum class GameState {
 
 class Game {
 public:
+  Game(int argc, char *argv[]);
   void init();
   void loadPersonal();
   void setupCanvas();
@@ -80,7 +84,9 @@ public:
 
   static void openCampMenu(Session *data);
   static void openRestMenu(Session *data);
-  static void initCombat(Session *data);
+  static void initCombat(Session *data, TroopID id = TroopID::INVALID);
+  static std::tuple<TroopID, int> selectRandomTroop(nlohmann::json &pool);
+  static int getTroopReward(TroopID troop_id, nlohmann::json &pool);
   static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
   static void gameover(std::string reason);
@@ -93,7 +99,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 7;
+  static constexpr unsigned int session_version = 13;
   static constexpr unsigned int personal_version = 4;
   static constexpr float TARGET_FPS = 60.0;
 
@@ -115,6 +121,9 @@ public:
   #else
   static constexpr bool devmode = false;
   #endif // !NDEBUG
+
+  bool quick_load = false;
+  std::string ql_map;
 private:
   static GameState game_state;
   static bool EXIT_GAME;
