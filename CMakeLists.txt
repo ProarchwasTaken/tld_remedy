@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 0.1.0
+VERSION 0.1.1
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)

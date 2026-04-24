@@ -335,6 +335,7 @@ void Mary::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
+      knockbackLogic();
       sprite = getStunSprite();
       break;
     }

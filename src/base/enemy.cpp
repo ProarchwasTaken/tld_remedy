@@ -83,10 +83,8 @@ void Enemy::enterHitstun(DamageData &data) {
     stunned = Clamp(stunned + 1, 0, member_count);
   }
 
-  if (data.stun_type != StunType::DEFENSIVE) {
-    combo++;
-    PLOGI << "Combo: " << combo;
-  }
+  combo++;
+  PLOGI << "Combo: " << combo;
 
   if (state == ACTION && counterToastCondition(data)) {
     PLOGD << "Starting combat toast: Counter";

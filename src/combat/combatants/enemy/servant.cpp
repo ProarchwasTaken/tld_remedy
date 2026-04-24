@@ -412,6 +412,7 @@ void Servant::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
+      knockbackLogic();
       sprite = getStunSprite();
       break;
     }
@@ -674,6 +675,7 @@ Rectangle *Servant::getStunSprite() {
 
 void Servant::draw() {
   assert(sprite != NULL);
+
   Rectangle final = *sprite;
   final.width = final.width * direction;
 
