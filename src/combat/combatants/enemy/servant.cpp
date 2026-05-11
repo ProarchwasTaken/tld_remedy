@@ -95,7 +95,7 @@ void Servant::warningHandling(WarningCBT *event) {
     return;
   }
 
-  if (team == event->assailant->team) {
+  if (event->assailant == NULL || team == event->assailant->team) {
     return;
   }
   

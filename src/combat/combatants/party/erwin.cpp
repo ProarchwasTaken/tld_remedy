@@ -144,19 +144,19 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
 void Erwin::warningHandling(WarningCBT *event) {
   assert(event->sender != this);
+  if (life <= 1) {
+    return;
+  }
+
+  if (event->assailant == NULL && team == event->assailant->team) {
+    return;
+  }
+
   if (ai_goal == ErwinGoals::DODGING) {
     return;
   }
 
   if (ai_goal == ErwinGoals::THIRD_PARTY) {
-    return;
-  }
-
-  if (team == event->assailant->team) {
-    return;
-  }
-
-  if (life <= 1) {
     return;
   }
 
