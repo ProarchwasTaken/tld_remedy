@@ -16,10 +16,13 @@ public:
   void update();
 
   void stunTimer();
+  void endTimer();
+  void highestComboDecay();
   void startComboToast();
 
   void draw();
   void drawComboCount(int value);
+  void drawTotalDamage();
 
   static SpriteAtlas atlas;
 private:
@@ -36,4 +39,11 @@ private:
 
   float hit_clock = 1.0;
   float hit_time = 0.10;
+
+  int highest_combo = 0;
+  float decay_clock = 0.0;
+  float decay_time = 3.0;
+
+  float damage_dealt = 0.0;
+  float damage_total = 0.0;
 };
