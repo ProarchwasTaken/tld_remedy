@@ -74,18 +74,10 @@
  ],
  "meta": {
   "app": "http://www.aseprite.org/",
-  "version": "1.3.16.1-x64",
+  "version": "1.3.17.2-x64",
   "image": "savepoint_entity.png",
   "format": "RGBA8888",
   "size": { "w": 256, "h": 32 },
-  "scale": "1",
-  "frameTags": [
-  ],
-  "layers": [
-   { "name": "Background", "opacity": 255, "blendMode": "normal" },
-   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
-  ],
-  "slices": [
-  ]
+  "scale": "1"
  }
 }
