@@ -5,7 +5,7 @@
 #include "base/combatant.h"
 #include "base/enemy.h"
 #include "data/animation.h"
-#include "data/ai_behavior.h"
+#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -20,8 +20,15 @@ enum class ServantGoals {
 };
 
 
-struct ServantAI : AIBehavior {
+struct ServantAI : AIParameters {
   ServantAI() {
+    attack_distance = 28;
+    contest_distance = 128;
+
+    attack_cooldown = 0.35;
+    retreat_time = 0.5;
+    wait_time = 0.20;
+
     contesting = {0.20, 0.10, 0.50, 0.40, 0.10, 0.25};
     targeting = {0.45, 0.10, 0.75};
     retreating = {0.75, 0.10, 0.50};
@@ -53,7 +60,7 @@ public:
   void targetingBehavior();
   void chooseTarget();
 
-  void setGoal(ServantGoals, float chance);
+  void setGoal(ServantGoals goal, float chance);
 
   void decideAttack();
   void attackMP();
@@ -78,7 +85,7 @@ public:
   void drawDebug() override;
 
   ServantGoals ai_goal = ServantGoals::IDLE;
-  std::unique_ptr<AIBehavior> ai_behavior; 
+  std::unique_ptr<AIParameters> ai; 
   float tick_clock = 0.0;
 
   static SpriteAtlas atlas;
@@ -86,22 +93,6 @@ private:
   const float default_speed = 60;
   int moving_x = 0;
   bool has_moved = false;
-
-  float attack_distance = 28;
-  float contest_distance = 128;
-
-  float cooldown_clock = 1.0;
-  float attack_cooldown = 0.35;
-
-  float retreat_time = 0.5;
-  float retreat_clock = 0.0;
-
-  float dodge_time = 0.0;
-  float dodge_clock = 0.0;
-
-  bool waiting = false;
-  float wait_time = 0.20;
-  float wait_clock = 0.0;
 
   float anim_move_speed = 0.226;
   Animation anim_move = {{1, 2, 3, 2}, anim_move_speed};

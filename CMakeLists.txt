@@ -67,7 +67,7 @@ set(HEADERS
 "include/data/damage.h"
 "include/data/enemy_troops.h"
 "include/data/technique.h"
-"include/data/ai_behavior.h"
+"include/data/ai_parameters.h"
 "include/utils/input.h"
 "include/utils/collision.h"
 "include/utils/text.h"
