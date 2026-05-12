@@ -52,7 +52,7 @@ struct ErwinAI : AIParameters {
  * behavior is designed to make sure the player doesn't get overwhelmed.
  * As such, they tend to be a lot more self-sufficent than other 
  * companions.*/
-class Erwin : public PartyMember, public ErwinAI {
+class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);
   ~Erwin();
