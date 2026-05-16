@@ -26,6 +26,7 @@ public:
   ~DiagnosePanel();
 
   void updateDisallowed();
+  void updateCureCosts();
 
   void update() override;
   void heightLerp();
@@ -46,6 +47,7 @@ public:
   float calculateHealCost(int segments);
   float mangledPenalty(Character *heal_target, float recovery);
 
+  float calculateCureCost(float base_cost);
   void cureEffect();
 
   void draw() override;
@@ -96,6 +98,10 @@ private:
   int heal_segments = 0;
   float to_be_healed = 0;
   float heal_cost = 0;
+
+  int cure_broken_cost = 0;
+  int cure_crippled_cost = 0;
+  int cure_mangled_cost = 0;
 
   Portrait portrait = Portrait({81, 54});
 
