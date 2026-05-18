@@ -65,7 +65,7 @@ void CraftingPanel::update() {
   }
   else { 
     blink_clock += Game::deltaTime();
-    itemSelection();
+    optionSelection();
   }
 }
 
@@ -122,21 +122,21 @@ void CraftingPanel::slotSelection() {
   }
 }
 
-void CraftingPanel::itemSelection() {
+void CraftingPanel::optionSelection() {
   bool gamepad = IsGamepadAvailable(0);
 
   if (Input::pressed(keybinds->down, gamepad)) {
-    MenuUtils::nextOption(craft_options, selected_option);
+    MenuUtils::nextOption(options, selected_option);
     blink_clock = 0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    MenuUtils::prevOption(craft_options, selected_option);
+    MenuUtils::prevOption(options, selected_option);
     blink_clock = 0;
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) { 
-    openCraftingDialog();
+    selectOption();
     blink_clock = 0;
     sfx->play("menu_select");
   }
@@ -147,10 +147,24 @@ void CraftingPanel::itemSelection() {
   }
 }
 
-void CraftingPanel::openCraftingDialog() {
+void CraftingPanel::selectOption() {
+  switch (*selected_option) {
+    case CraftOptions::RECYCLE_ITEM:
+    case CraftOptions::SWAP_ITEM: {
+      break;
+    }
+    default: {
+      ItemID item = static_cast<ItemID>(*selected_option);
+      openCraftingDialog(item);
+    }
+  }
+}
+
+void CraftingPanel::openCraftingDialog(ItemID item) {
   PLOGI << "Attempting to open crafting dialog.";
 
-  int item_cost = getSupplyCost(*selected_option);
+  int item_cost = getSupplyCost(item);
+  assert(item_cost != -1);
   PLOGD << "Item Cost: " << item_cost;
 
   if (session->supplies < item_cost) {
@@ -159,7 +173,7 @@ void CraftingPanel::openCraftingDialog() {
     return;
   }
 
-  string item_name = ItemUtils::getName(*selected_option);
+  string item_name = ItemUtils::getName(item);
   string text = TextFormat("Spend %i supplies to craft\n"
                            "%s?", item_cost, item_name.c_str());
 
@@ -172,8 +186,10 @@ void CraftingPanel::openCraftingDialog() {
 
 void CraftingPanel::craftItem() {
   PLOGI << "Crafting Item...";
-  ItemID item = *selected_option;
+  ItemID item = static_cast<ItemID>(*selected_option);
+
   int cost = getSupplyCost(item);
+  assert(cost != -1);
 
   session->supplies -= cost;
 
@@ -285,23 +301,42 @@ void CraftingPanel::drawOptions() {
 
   Vector2 position = {168, 68};
 
-  for (ItemID &option : craft_options) {
-    string name = ItemUtils::getName(option);
-    int item_cost = getSupplyCost(option);
-    Color color = WHITE;
-
-    if (session->supplies < item_cost) {
-      color = Game::palette[2];
+  for (CraftOptions &option : options) {
+    switch (option) {
+      case CraftOptions::RECYCLE_ITEM:
+      case CraftOptions::SWAP_ITEM: {
+        
+        break;
+      }
+      default: {
+        ItemID item = static_cast<ItemID>(option);
+        drawCraftOption(font, txt_size, position, item);
+      }
     }
 
     if (craft_mode && selected_option == &option) {
       drawCursor(position, WHITE, !panel_mode);
     }
-
-    DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
-    drawSupplyCost(font, txt_size, position, color, item_cost);
     position.y += 16;
   }
+}
+
+void CraftingPanel::drawCraftOption(Font *font, int txt_size, 
+                                    Vector2 position, ItemID item)
+{
+  string name = ItemUtils::getName(item);
+
+  int item_cost = getSupplyCost(item);
+  assert(item_cost != -1);
+
+  Color color = WHITE;
+
+  if (session->supplies < item_cost) {
+    color = Game::palette[2];
+  }
+
+  DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
+  drawSupplyCost(font, txt_size, position, color, item_cost);
 }
 
 void CraftingPanel::drawSupplyCost(Font *font, int txt_size, 
