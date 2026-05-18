@@ -83,19 +83,30 @@ void CraftingPanel::heightLerp() {
 void CraftingPanel::panelLogic() {
   panel->update();
 
-  if (!panel->terminate) {
+  if (panel->terminate) {
+    promptHandling();
+    panel.reset();
+    panel_mode = false;
+  }
+}
+
+void CraftingPanel::promptHandling() {
+  assert(panel->selected != NULL);
+  if (*panel->selected != PromptOptions::YES) {
     return;
   }
 
-  assert(panel->selected != NULL);
-  if (*panel->selected == PromptOptions::YES) {
+  assert(*selected_option != MOVE_ITEM);
+  if (*selected_option == RECYCLE_ITEM) {
+    recycleItem();
+  }
+  else {
     craftItem();
-    sfx->play("menu_craft");
-    craft_mode = false;
   }
 
-  panel.reset();
-  panel_mode = false;
+  selected_option = options.begin();
+  craft_mode = false;
+  sfx->play("menu_craft");
 }
 
 void CraftingPanel::slotSelection() {
@@ -141,6 +152,7 @@ void CraftingPanel::optionSelection() {
     sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
+    selected_option = options.begin();
     craft_mode = false;
     blink_clock = 0;
     sfx->play("menu_cancel");
@@ -149,8 +161,11 @@ void CraftingPanel::optionSelection() {
 
 void CraftingPanel::selectOption() {
   switch (*selected_option) {
-    case CraftOptions::RECYCLE_ITEM:
-    case CraftOptions::SWAP_ITEM: {
+    case CraftOptions::RECYCLE_ITEM: {
+      openRecycleDialog(*selected_slot);
+      break;
+    }
+    case CraftOptions::MOVE_ITEM: {
       break;
     }
     default: {
@@ -184,6 +199,28 @@ void CraftingPanel::openCraftingDialog(ItemID item) {
   panel_mode = true;
 }
 
+void CraftingPanel::openRecycleDialog(ItemID item) {
+  PLOGI << "Attempting to open recycle dialog.";
+  if (*selected_slot == ItemID::NONE) {
+    PLOGI << "You can't recycle an empty item slot!";
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  string item_name = ItemUtils::getName(*selected_slot);
+  int item_refund = getSupplyRefund(*selected_slot);
+
+  string text = TextFormat("Recycle %s to get\n"
+                           "%i supplies back?", 
+                           item_name.c_str(), item_refund);
+
+  vector<string> dialog = {text};
+  Vector2 position = {16, 183};
+
+  panel = make_unique<DialogPanel>(position, dialog, true);
+  panel_mode = true;
+}
+
 void CraftingPanel::craftItem() {
   PLOGI << "Crafting Item...";
   ItemID item = static_cast<ItemID>(*selected_option);
@@ -199,6 +236,21 @@ void CraftingPanel::craftItem() {
   }
 
   *selected_slot = item;
+
+  PLOGD << "Copying over changes to session inventory.";
+  std::copy(inventory.begin(), inventory.end(), session->inventory);
+}
+
+void CraftingPanel::recycleItem() {
+  PLOGI << "Recycling item...";
+
+  assert(*selected_slot != ItemID::NONE);
+  int refund = getSupplyRefund(*selected_slot);
+  session->supplies += refund;
+
+  *selected_slot = ItemID::NONE;
+  session->item_count--;
+  assert(session->item_count >= 0);
 
   PLOGD << "Copying over changes to session inventory.";
   std::copy(inventory.begin(), inventory.end(), session->inventory);
@@ -249,6 +301,18 @@ void CraftingPanel::drawSupplyCount() {
                                    *med_font, -2, 0);
   DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
              count_color);
+
+  if (*selected_slot == ItemID::NONE) {
+    return;
+  }
+
+  if (*selected_option == CraftOptions::RECYCLE_ITEM) {
+    int refund = getSupplyRefund(*selected_slot);
+    text = TextFormat("+%i", refund);
+    position = {96, 7};
+    DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
+               Game::palette[14]);
+  }
 }
 
 void CraftingPanel::drawHelpText() {
@@ -304,8 +368,8 @@ void CraftingPanel::drawOptions() {
   for (CraftOptions &option : options) {
     switch (option) {
       case CraftOptions::RECYCLE_ITEM:
-      case CraftOptions::SWAP_ITEM: {
-        
+      case CraftOptions::MOVE_ITEM: {
+        drawMiscOption(font, txt_size, position, option);
         break;
       }
       default: {
@@ -319,6 +383,33 @@ void CraftingPanel::drawOptions() {
     }
     position.y += 16;
   }
+}
+
+void CraftingPanel::drawMiscOption(Font *font, int txt_size, 
+                                   Vector2 position, CraftOptions option)
+{
+  string name;
+  switch (option) {
+    case RECYCLE_ITEM: {
+      name = "RECYCLE ITEM";
+      break;
+    }
+    case MOVE_ITEM: {
+      name = "MOVE ITEM";
+      break;
+    }
+    default: {
+
+    }
+  }
+
+  Color color = WHITE;
+  if (*selected_slot == ItemID::NONE) {
+    color = Game::palette[2];
+  }
+
+  assert(!name.empty());
+  DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
 }
 
 void CraftingPanel::drawCraftOption(Font *font, int txt_size, 
@@ -380,6 +471,29 @@ int CraftingPanel::getSupplyCost(ItemID id) {
     }
     case ItemID::P_KILLERS: {
       return 10;
+    }
+    default: {
+      return -1;
+    }
+  }
+}
+
+int CraftingPanel::getSupplyRefund(ItemID id) {
+  switch (id) {
+    case ItemID::I_BANDAGE: {
+      return 3;
+    }
+    case ItemID::M_SPLINT: {
+      return 5;
+    }
+    case ItemID::S_BANDAGE: {
+      return 6;
+    }
+    case ItemID::S_WATER: {
+      return 3;
+    }
+    case ItemID::P_KILLERS: {
+      return 2;
     }
     default: {
       return -1;

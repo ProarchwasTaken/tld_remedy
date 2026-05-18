@@ -16,7 +16,7 @@ enum CraftOptions {
   CRAFT_SWATER,
   CRAFT_PKILLERS,
   RECYCLE_ITEM,
-  SWAP_ITEM
+  MOVE_ITEM
 };
 
 
@@ -28,12 +28,16 @@ public:
   void update() override;
   void heightLerp();
   void panelLogic();
+  void promptHandling();
   void slotSelection();
   void optionSelection();
 
   void selectOption();
   void openCraftingDialog(ItemID item);
+  void openRecycleDialog(ItemID item);
+
   void craftItem();
+  void recycleItem();
 
   void draw() override;
   void drawSupplyCount();
@@ -51,6 +55,7 @@ public:
   void drawCursor(Vector2 position, Color color, bool blink);
 
   int getSupplyCost(ItemID id);
+  int getSupplyRefund(ItemID id);
 private:
   Session *session;
   MenuKeybinds *keybinds;
@@ -76,7 +81,7 @@ private:
     CRAFT_SWATER,
     CRAFT_PKILLERS,
     RECYCLE_ITEM,
-    SWAP_ITEM
+    MOVE_ITEM
   };
   std::array<CraftOptions, 7>::iterator selected_option = options.begin();
 

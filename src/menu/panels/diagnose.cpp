@@ -506,7 +506,7 @@ void DiagnosePanel::drawSupplyCount() {
 
   if (heal_segments != 0) {
     text = TextFormat("-%00.00f", heal_cost);
-    Vector2 position = {96, 7};
+    position = {96, 7};
     DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
                Game::palette[33]);
   }
