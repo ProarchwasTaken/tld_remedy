@@ -42,6 +42,7 @@ CraftingPanel::CraftingPanel(Session *session, SpriteAtlas *rest_atlas) {
   ItemID *session_inv = session->inventory;
   std::copy(session_inv, session_inv + ITEM_LIMIT, inventory.begin());
   selected_slot = inventory.begin();
+  swap_slot = inventory.begin();
   PLOGD << "CraftingPanel has been initialized.";
 }
 
@@ -55,18 +56,24 @@ void CraftingPanel::update() {
   if (state != PanelState::READY) {
     transitionLogic();
     heightLerp();
+    return;
   }
   else if (panel_mode) {
     panelLogic();
+    return;
   }
-  else if (!craft_mode) {
-    blink_clock += Game::deltaTime();
+
+  if (!craft_mode && !swap_mode) {
     slotSelection();
   }
+  else if (swap_mode) {
+    swapSlotSelection();
+  }
   else { 
-    blink_clock += Game::deltaTime();
     optionSelection();
   }
+
+  blink_clock += Game::deltaTime();
 }
 
 void CraftingPanel::heightLerp() {
@@ -133,6 +140,32 @@ void CraftingPanel::slotSelection() {
   }
 }
 
+void CraftingPanel::swapSlotSelection() {
+  bool gamepad = IsGamepadAvailable(0);
+
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(inventory, swap_slot);
+    blink_clock = 0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(inventory, swap_slot);
+    blink_clock = 0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    swapItemSlots();
+    blink_clock = 0;
+    sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    swap_slot = inventory.begin();
+    swap_mode = false;
+    blink_clock = 0;
+    sfx->play("menu_cancel");
+  }
+}
+
 void CraftingPanel::optionSelection() {
   bool gamepad = IsGamepadAvailable(0);
 
@@ -166,6 +199,7 @@ void CraftingPanel::selectOption() {
       break;
     }
     case CraftOptions::MOVE_ITEM: {
+      enterSwapMode();
       break;
     }
     default: {
@@ -221,6 +255,19 @@ void CraftingPanel::openRecycleDialog(ItemID item) {
   panel_mode = true;
 }
 
+void CraftingPanel::enterSwapMode() {
+  PLOGI << "Attempting to enter Swap Mode.";
+  if (*selected_slot != ItemID::NONE) {
+    swap_mode = true;
+    blink_clock = 0;
+    sfx->play("menu_select");
+  }
+  else {
+    PLOGI << "Can't enter swap mode with an empty slot!";
+    sfx->play("menu_cancel");
+  }
+}
+
 void CraftingPanel::craftItem() {
   PLOGI << "Crafting Item...";
   ItemID item = static_cast<ItemID>(*selected_option);
@@ -251,6 +298,29 @@ void CraftingPanel::recycleItem() {
   *selected_slot = ItemID::NONE;
   session->item_count--;
   assert(session->item_count >= 0);
+
+  PLOGD << "Copying over changes to session inventory.";
+  std::copy(inventory.begin(), inventory.end(), session->inventory);
+}
+
+void CraftingPanel::swapItemSlots() {
+  PLOGI << "Attempting to swap items slots.";
+  if (selected_slot == swap_slot) {
+    PLOGI << "Can't swap with the same slot!";
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  ItemID to_be_swapped = *swap_slot;
+  *swap_slot = *selected_slot;
+  *selected_slot = to_be_swapped;
+
+  selected_slot = swap_slot;
+  swap_slot = inventory.begin();
+  selected_option = options.begin();
+
+  craft_mode = false;
+  swap_mode = false;
 
   PLOGD << "Copying over changes to session inventory.";
   std::copy(inventory.begin(), inventory.end(), session->inventory);
@@ -323,8 +393,11 @@ void CraftingPanel::drawHelpText() {
   if (!craft_mode) {
     text = "Select an inventory slot.";
   }
-  else { 
-    text = "Select an item to craft.";
+  else if (!swap_mode) { 
+    text = "Select what you want to do.";
+  }
+  else {
+    text = "To which slot?";
   }
 
   Vector2 position = {158, 37};
@@ -346,12 +419,19 @@ void CraftingPanel::drawInventory() {
       color = Game::palette[33];
       cursor_color = Game::palette[33];
     }
+    else if (swap_mode && swap_slot == &item) {
+      color = Game::palette[22];
+      cursor_color = Game::palette[22];
+    }
     else if (item == ItemID::NONE) {
       color = Game::palette[2];
     }
 
     if (selected_slot == &item) {
       drawCursor(position, cursor_color, !craft_mode);
+    }
+    else if (swap_mode && swap_slot == &item) {
+      drawCursor(position, cursor_color, true); 
     }
 
     DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
@@ -379,7 +459,8 @@ void CraftingPanel::drawOptions() {
     }
 
     if (craft_mode && selected_option == &option) {
-      drawCursor(position, WHITE, !panel_mode);
+      bool should_blink = !panel_mode && !swap_mode;
+      drawCursor(position, WHITE, should_blink);
     }
     position.y += 16;
   }

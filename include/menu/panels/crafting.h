@@ -29,15 +29,19 @@ public:
   void heightLerp();
   void panelLogic();
   void promptHandling();
+
   void slotSelection();
   void optionSelection();
+  void swapSlotSelection();
 
   void selectOption();
   void openCraftingDialog(ItemID item);
   void openRecycleDialog(ItemID item);
+  void enterSwapMode();
 
   void craftItem();
   void recycleItem();
+  void swapItemSlots();
 
   void draw() override;
   void drawSupplyCount();
@@ -71,9 +75,11 @@ private:
 
   std::array<ItemID, 8> inventory;
   std::array<ItemID, 8>::iterator selected_slot;
+  std::array<ItemID, 8>::iterator swap_slot;
   float blink_clock = 0.0;
 
   bool craft_mode = false;
+  bool swap_mode = false;
   std::array<CraftOptions, 7> options = {
     CRAFT_IBANDAGE,
     CRAFT_MSPLINT,
