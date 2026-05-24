@@ -29,9 +29,12 @@ public:
   ~ItemsPanel();
 
   void updateSelected();
+  void resetSubSelected();
   void updateSubOptionDesc();
 
+  bool itemUsable(ItemID item);
   void useItem();
+
   float calculateHeal(Character *member, float percentage);
   void openDialog(std::vector<std::string> &dialog);
   void openRejectDialog(Character *member); 
@@ -98,6 +101,7 @@ private:
     ItemOptions::TOSS
   };
   std::array<ItemOptions, 3>::iterator sub_selected = NULL;
+  std::unordered_set<ItemOptions> sub_disallowed;
   constexpr static Vector2 sub_option_position = {128, 58};
 
 

@@ -93,6 +93,20 @@ void ItemsPanel::updateSelected() {
   selected = NULL;
 }
 
+void ItemsPanel::resetSubSelected() {
+  sub_disallowed.clear();
+
+  assert(selected != NULL);
+  if (!itemUsable(*selected)) {
+    PLOGI << "Detected that the selected item is unusable.";
+    sub_disallowed.emplace(ItemOptions::USE);
+    sub_selected = &sub_options.at(1);
+  }
+  else {
+    sub_selected = sub_options.begin();
+  }
+}
+
 void ItemsPanel::updateSubOptionDesc() {
   assert(sub_selected != NULL);
   switch (*sub_selected) {
@@ -108,6 +122,20 @@ void ItemsPanel::updateSubOptionDesc() {
     case ItemOptions::TOSS: {
       *description = "Discard the currently selected \n"
         "item.";
+    }
+  }
+}
+
+bool ItemsPanel::itemUsable(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE:
+    case ItemID::M_SPLINT:
+    case ItemID::S_BANDAGE: {
+      return true;
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return false;
     }
   }
 }
@@ -174,9 +202,6 @@ void ItemsPanel::useItem() {
     }
     default: {
       assert(item != ItemID::NONE);
-      vector<string> dialog = {"This item can only be used in combat!"};
-      openDialog(dialog);
-      sfx->play("menu_cancel");
       return;
     }
   }
@@ -390,6 +415,7 @@ void ItemsPanel::optionNavigation() {
   else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
   {
     option_state = SUB_OPTION;
+    resetSubSelected();
     updateSubOptionDesc();
     sfx->play("menu_select");
   }
@@ -403,12 +429,12 @@ void ItemsPanel::subOptionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
 
   if (Input::pressed(keybinds->down, gamepad)) {
-    MenuUtils::nextOption(sub_options, sub_selected);
+    MenuUtils::nextOption(sub_options, sub_selected, &sub_disallowed);
     updateSubOptionDesc();
     sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
-    MenuUtils::prevOption(sub_options, sub_selected);
+    MenuUtils::prevOption(sub_options, sub_selected, &sub_disallowed);
     updateSubOptionDesc();
     sfx->play("menu_navigate");
   }
@@ -428,12 +454,19 @@ void ItemsPanel::subOptionNavigation() {
 void ItemsPanel::selectSubOption() {
   switch (*sub_selected) {
     case ItemOptions::USE: {
-      *description = "Select a combatant to use item:\n"
-            "\"" + item_name + "\"";
-      *desc_color = Game::palette[22];
+      if (itemUsable(*selected)) {
+        *description = "Select a combatant to use item:\n"
+              "\"" + item_name + "\"";
+        *desc_color = Game::palette[22];
 
-      target = party.begin();
-      option_state = TARGET;
+        target = party.begin();
+        option_state = TARGET;
+      }
+      else {
+        PLOGI << "Selected item is unusable!";
+        sfx->play("menu_cancel");
+      }
+
       break;
     }
   }
@@ -595,13 +628,17 @@ void ItemsPanel::drawSubOptions() {
     Color color;
     Color txt_color;
 
-    if (sub_selected == &option) {
+    if (sub_disallowed.find(option) != sub_disallowed.end()) {
+      color = Game::palette[2];
+      txt_color = Game::palette[2];
+    }
+    else if (sub_selected == &option) {
       color = Game::palette[43];
       txt_color = WHITE;
     }
     else {
       color = Game::palette[40];
-      txt_color = Game::palette[43];
+      txt_color = Game::palette[42];
     }
 
     DrawTextureRec(camp_atlas->sheet, *sprite, position, color);
