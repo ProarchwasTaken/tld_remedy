@@ -34,10 +34,8 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   this->session = session;
   this->description = description;
-  description->clear();
-
   this->desc_color = desc_color;
-  *desc_color = Game::palette[22];
+  description->clear();
 
   this->keybinds = &Game::settings.menu_keybinds;
 
@@ -47,6 +45,8 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();
+
+  sub_selected = sub_options.begin();
 
   party = {&session->player, &session->companion};
   target = party.begin();
@@ -93,9 +93,27 @@ void ItemsPanel::updateSelected() {
   selected = NULL;
 }
 
+void ItemsPanel::updateSubOptionDesc() {
+  assert(sub_selected != NULL);
+  switch (*sub_selected) {
+    case ItemOptions::USE: {
+      *description = "Use the selected item.";
+      break;
+    }
+    case ItemOptions::SWAP: {
+      *description = "Swap the selected item with another\n"
+        "one.";
+      break;
+    }
+    case ItemOptions::TOSS: {
+      *description = "Discard the currently selected \n"
+        "item.";
+    }
+  }
+}
 
 void ItemsPanel::useItem() {
-  assert(target_mode);
+  assert(option_state = TARGET);
   assert(selected != NULL);
   ItemID item = *selected;
   Character *member = *target;
@@ -316,11 +334,19 @@ void ItemsPanel::update() {
     return;
   }
 
-  if (!target_mode) {
-    optionNavigation();
-  }
-  else {
-    targetNavigation();
+  switch (option_state) {
+    case OPTION: {
+      optionNavigation();
+      break;
+    }
+    case SUB_OPTION: {
+      subOptionNavigation();
+      break;
+    }
+    case TARGET: {
+      targetNavigation();
+      break;
+    }
   }
 
   blink_clock += Game::deltaTime();
@@ -363,15 +389,53 @@ void ItemsPanel::optionNavigation() {
   }
   else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
   {
-    *description = "Select a combatant to use item:\n"
-      "\"" + item_name + "\"";
-    target = party.begin();
+    option_state = SUB_OPTION;
+    updateSubOptionDesc();
     sfx->play("menu_select");
-    target_mode = true;
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
     sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::subOptionNavigation() {
+  bool gamepad = IsGamepadAvailable(0);
+
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(sub_options, sub_selected);
+    updateSubOptionDesc();
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(sub_options, sub_selected);
+    updateSubOptionDesc();
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectSubOption();
+    sfx->play("menu_select");
+    blink_clock = 0.0;
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    sub_selected = sub_options.begin();
+    option_state = OPTION;
+    description->clear();
+    sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::selectSubOption() {
+  switch (*sub_selected) {
+    case ItemOptions::USE: {
+      *description = "Select a combatant to use item:\n"
+            "\"" + item_name + "\"";
+      *desc_color = Game::palette[22];
+
+      target = party.begin();
+      option_state = TARGET;
+      break;
+    }
   }
 }
 
@@ -391,13 +455,18 @@ void ItemsPanel::targetNavigation() {
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     useItem();
-    target_mode = false;
+    option_state = OPTION;
+
     *description = "";
+    *desc_color = WHITE;
+
     sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
-    target_mode = false;
-    *description = "";
+    updateSubOptionDesc();
+    *desc_color = WHITE;
+
+    option_state = SUB_OPTION;
     sfx->play("menu_cancel");
   }
 }
@@ -409,16 +478,20 @@ void ItemsPanel::draw() {
   drawItemCount();
   drawOptions();
 
-  if (selected != NULL && state == PanelState::READY) {
-    drawItemInfo();
+  if (option_state != OPTION) {
+    drawSubOptions();
   }
 
-  if (target_mode) {
+  if (option_state == TARGET) {
     Character *party_member = *target;
     bool leader = party_member->member_id == PartyMemberID::MARY;
 
     Vector2 position = {213.0f + (104.0f * !leader), 148};
     reticle.draw(position, blink_clock);
+  }
+
+  if (selected != NULL && state == PanelState::READY) {
+    drawItemInfo();
   }
 
   if (panel_mode) {
@@ -503,7 +576,53 @@ void ItemsPanel::drawOptions() {
     }
 
     DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
-    multiplier += 1;
+    multiplier++;
+  }
+}
+
+void ItemsPanel::drawSubOptions() {
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  Rectangle *sprite = &camp_atlas->sprites[9];
+  int multiplier = 0;
+
+  for (ItemOptions &option : sub_options) {
+    string name = getSubOptionName(option);
+    Vector2 position = sub_option_position;
+    position.y += 16 * multiplier;
+
+    Color color;
+    Color txt_color;
+
+    if (sub_selected == &option) {
+      color = Game::palette[43];
+      txt_color = WHITE;
+    }
+    else {
+      color = Game::palette[40];
+      txt_color = Game::palette[43];
+    }
+
+    DrawTextureRec(camp_atlas->sheet, *sprite, position, color);
+    position = Vector2Add(position, {7, 1});
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, txt_color);
+    multiplier++;
+  }
+}
+
+string ItemsPanel::getSubOptionName(ItemOptions option) {
+  switch (option) {
+    case ItemOptions::USE: {
+      return "USE";
+    }
+    case ItemOptions::SWAP: {
+      return "SWAP";
+    }
+    case ItemOptions::TOSS: {
+      return "TOSS";
+    }
   }
 }
 
@@ -517,7 +636,7 @@ void ItemsPanel::drawCursor(Vector2 position) {
 
   Color color = WHITE;
 
-  if (!target_mode) {
+  if (option_state == OPTION) {
     float sin_a = std::sinf(blink_clock * 2.5);
     sin_a = (sin_a / 2) + 0.5;
     color.a = 255 * sin_a;
