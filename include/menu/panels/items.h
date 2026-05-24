@@ -34,15 +34,17 @@ public:
 
   bool itemUsable(ItemID item);
   void useItem();
+  void tossItem();
 
   float calculateHeal(Character *member, float percentage);
-  void openDialog(std::vector<std::string> &dialog);
+  void openDialog(std::vector<std::string> &dialog, bool prompt = false);
   void openRejectDialog(Character *member); 
   void openHealDialog(Character *member, float healed);
   void openSplintDialog(Character *member, StatusID effect);
 
   void update() override;
   void panelLogic();
+  void promptHandling();
   void heightLerp();
   void optionNavigation();
   void subOptionNavigation();

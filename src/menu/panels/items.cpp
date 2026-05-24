@@ -212,6 +212,14 @@ void ItemsPanel::useItem() {
   sfx->play("menu_item");
 }
 
+void ItemsPanel::tossItem() {
+  assert(*selected != ItemID::NONE);
+  *selected = ItemID::NONE;
+  session->item_count--;
+  updateSelected();
+  sfx->play("menu_craft");
+}
+
 float ItemsPanel::calculateHeal(Character *member, float percentage) {
   float max_life = member->max_life;
   float recovery = member->recovery;
@@ -247,9 +255,9 @@ float ItemsPanel::calculateHeal(Character *member, float percentage) {
   return result;
 }
 
-void ItemsPanel::openDialog(vector<string> &dialog) {
+void ItemsPanel::openDialog(vector<string> &dialog, bool prompt) {
   Vector2 position = {185, 187};
-  panel = make_unique<DialogPanel>(position, dialog);
+  panel = make_unique<DialogPanel>(position, dialog, prompt);
   panel_mode = true;
 }
 
@@ -381,9 +389,26 @@ void ItemsPanel::panelLogic() {
   assert(panel != nullptr == panel_mode);
   panel->update();
 
-  if (panel->terminate) {
-    panel.reset();
-    panel_mode = false;
+  if (!panel->terminate) {
+    return;
+  }
+
+  if (panel->selected != NULL) {
+    promptHandling();
+  }
+
+  panel.reset();
+  panel_mode = false;
+}
+
+void ItemsPanel::promptHandling() {
+  assert(*sub_selected == ItemOptions::TOSS);
+
+  if (*panel->selected == PromptOptions::YES) {
+    tossItem();
+    sub_selected = sub_options.begin();
+    option_state = OPTION;
+    description->clear();
   }
 }
 
@@ -452,6 +477,7 @@ void ItemsPanel::subOptionNavigation() {
 }
 
 void ItemsPanel::selectSubOption() {
+  assert(selected != NULL && *selected != ItemID::NONE);
   switch (*sub_selected) {
     case ItemOptions::USE: {
       if (itemUsable(*selected)) {
@@ -468,6 +494,13 @@ void ItemsPanel::selectSubOption() {
       }
 
       break;
+    }
+    case ItemOptions::TOSS: {
+      PLOGI << "Attempting to open Toss dialog.";
+      string item_name = ItemUtils::getName(*selected);
+      const char *text = TextFormat("Discard '%s'?", item_name.c_str());
+      vector<string> dialog = {text};
+      openDialog(dialog, true);
     }
   }
 }
