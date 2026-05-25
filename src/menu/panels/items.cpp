@@ -83,6 +83,7 @@ void ItemsPanel::updateSelected() {
 
     if (*item != ItemID::NONE) {
       selected = options.begin() + index;
+      swap_selected = selected;
       item_name = ItemUtils::getName(*selected);
       PLOGD << "Selected set to: " << static_cast<int>(*item);
       return;
@@ -98,13 +99,24 @@ void ItemsPanel::resetSubSelected() {
 
   assert(selected != NULL);
   if (!itemUsable(*selected)) {
-    PLOGI << "Detected that the selected item is unusable.";
+    PLOGD << "Detected that the selected item is unusable.";
     sub_disallowed.emplace(ItemOptions::USE);
-    sub_selected = &sub_options.at(1);
   }
-  else {
-    sub_selected = sub_options.begin();
+
+  if (session->item_count <= 1) {
+    PLOGD << "Detected that the player has one or no items.";
+    sub_disallowed.emplace(ItemOptions::SWAP);
   }
+
+  sub_selected = NULL;
+  for (ItemOptions &option : sub_options) {
+    if (sub_disallowed.find(option) == sub_disallowed.end()) {
+      sub_selected = &option;
+      break;
+    }
+  }
+
+  assert(sub_selected != NULL);
 }
 
 void ItemsPanel::updateSubOptionDesc() {
@@ -210,6 +222,21 @@ void ItemsPanel::useItem() {
   session->item_count--;
   updateSelected();
   sfx->play("menu_item");
+}
+
+void ItemsPanel::swapItems() {
+  assert(selected != NULL && swap_selected != NULL);
+
+  if (swap_selected == selected) {
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  ItemID temp = *selected;
+  *selected = *swap_selected;
+  *swap_selected = temp;
+
+  selected = swap_selected;
 }
 
 void ItemsPanel::tossItem() {
@@ -380,6 +407,10 @@ void ItemsPanel::update() {
       targetNavigation();
       break;
     }
+    case SWAP: {
+      swapNavigation();
+      break;
+    }
   }
 
   blink_clock += Game::deltaTime();
@@ -427,15 +458,15 @@ void ItemsPanel::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
-    sfx->play("menu_navigate");
     item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (selected != NULL && Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected, &disallowed);
-    sfx->play("menu_navigate");
     item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
   {
@@ -446,6 +477,38 @@ void ItemsPanel::optionNavigation() {
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
+    sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::swapNavigation() {
+  assert(swap_selected != NULL);
+
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(options, swap_selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(options, swap_selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    swapItems();
+    option_state = OPTION;
+
+    description->clear();
+    *desc_color = WHITE;
+
+    sfx->play("menu_select"); 
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    option_state = SUB_OPTION;
+
+    updateSubOptionDesc();
+    *desc_color = WHITE;
     sfx->play("menu_cancel");
   }
 }
@@ -465,8 +528,8 @@ void ItemsPanel::subOptionNavigation() {
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     selectSubOption();
-    sfx->play("menu_select");
     blink_clock = 0.0;
+    sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     sub_selected = sub_options.begin();
@@ -495,10 +558,21 @@ void ItemsPanel::selectSubOption() {
 
       break;
     }
+    case ItemOptions::SWAP: {
+      PLOGI << "Entering swap mode.";
+      assert(session->item_count > 1);
+
+      *description = "Select another item to swap\n"
+        "\"" + item_name + "\" with.";
+      *desc_color = Game::palette[22];
+
+      option_state = SWAP;
+      break;
+    }
     case ItemOptions::TOSS: {
       PLOGI << "Attempting to open Toss dialog.";
       string item_name = ItemUtils::getName(*selected);
-      const char *text = TextFormat("Discard '%s'?", item_name.c_str());
+      const char *text = TextFormat("Discard \"%s\"?", item_name.c_str());
       vector<string> dialog = {text};
       openDialog(dialog, true);
     }
@@ -511,19 +585,19 @@ void ItemsPanel::targetNavigation() {
 
   if (Input::pressed(keybinds->right, gamepad)) {
     MenuUtils::nextOption(party, target);
-    sfx->play("menu_navigate");
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->left, gamepad)) {
     MenuUtils::prevOption(party, target);
-    sfx->play("menu_navigate");
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     useItem();
     option_state = OPTION;
 
-    *description = "";
+    description->clear();
     *desc_color = WHITE;
 
     sfx->play("menu_select");
@@ -631,13 +705,19 @@ void ItemsPanel::drawOptions() {
     DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
     if (item == selected) {
-      drawCursor(position);
+      drawCursor(position, option_state == OPTION);
+    }
+    else if (option_state == SWAP && item == swap_selected) {
+      drawCursor(position, true);
     }
 
     position = Vector2Add(position, {6, 1});
 
-    Color color = WHITE;
-    if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
+    Color color = WHITE; 
+    if (option_state != OPTION && item == selected) {
+      color = Game::palette[22];
+    }
+    else if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
       color = Game::palette[2];
     }
 
@@ -696,7 +776,7 @@ string ItemsPanel::getSubOptionName(ItemOptions option) {
   }
 }
 
-void ItemsPanel::drawCursor(Vector2 position) {
+void ItemsPanel::drawCursor(Vector2 position, bool blink) {
   if (state != PanelState::READY) {
     return;
   }
@@ -706,10 +786,13 @@ void ItemsPanel::drawCursor(Vector2 position) {
 
   Color color = WHITE;
 
-  if (option_state == OPTION) {
+  if (blink) {
     float sin_a = std::sinf(blink_clock * 2.5);
     sin_a = (sin_a / 2) + 0.5;
     color.a = 255 * sin_a;
+  }
+  else {
+    color = Game::palette[22];
   }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);

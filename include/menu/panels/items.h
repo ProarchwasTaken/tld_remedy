@@ -34,6 +34,7 @@ public:
 
   bool itemUsable(ItemID item);
   void useItem();
+  void swapItems();
   void tossItem();
 
   float calculateHeal(Character *member, float percentage);
@@ -46,7 +47,9 @@ public:
   void panelLogic();
   void promptHandling();
   void heightLerp();
+
   void optionNavigation();
+  void swapNavigation();
   void subOptionNavigation();
   void selectSubOption();
   void targetNavigation();
@@ -58,7 +61,7 @@ public:
   void drawSubOptions();
   std::string getSubOptionName(ItemOptions option);
 
-  void drawCursor(Vector2 position);
+  void drawCursor(Vector2 position, bool blink);
 
   void drawItemInfo();
   void drawItemName(Font *font, int txt_size);
@@ -83,10 +86,11 @@ private:
   float frame_height = 0;
   float percentage = 0;
   constexpr static Vector2 frame_position = {217, 42};
-  enum {OPTION, SUB_OPTION, TARGET} option_state = OPTION;
+  enum {OPTION, SUB_OPTION, TARGET, SWAP} option_state = OPTION;
 
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
+  std::array<ItemID, 8>::iterator swap_selected = NULL;
   std::unordered_set<ItemID> disallowed = {ItemID::NONE};
   constexpr static Vector2 option_position = {41, 58};
 
