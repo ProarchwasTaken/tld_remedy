@@ -82,10 +82,10 @@ private:
   bool swap_mode = false;
   std::array<CraftOptions, 7> options = {
     CRAFT_IBANDAGE,
-    CRAFT_MSPLINT,
     CRAFT_SBANDAGE,
-    CRAFT_SWATER,
+    CRAFT_MSPLINT,
     CRAFT_PKILLERS,
+    CRAFT_SWATER,
     RECYCLE_ITEM,
     MOVE_ITEM
   };

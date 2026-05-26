@@ -542,10 +542,10 @@ int CraftingPanel::getSupplyCost(ItemID id) {
       return 15;
     }
     case ItemID::M_SPLINT: {
-      return 25;
+      return 30;
     }
     case ItemID::S_BANDAGE: {
-      return 30;
+      return 25;
     }
     case ItemID::S_WATER: {
       return 15;
@@ -565,10 +565,10 @@ int CraftingPanel::getSupplyRefund(ItemID id) {
       return 3;
     }
     case ItemID::M_SPLINT: {
-      return 5;
+      return 6;
     }
     case ItemID::S_BANDAGE: {
-      return 6;
+      return 5;
     }
     case ItemID::S_WATER: {
       return 3;
