@@ -65,6 +65,7 @@ enum class ItemID {
   S_BANDAGE,
   S_WATER,
   P_KILLERS,
+  FA_KIT
 };
 
 enum class CombatantTeam {

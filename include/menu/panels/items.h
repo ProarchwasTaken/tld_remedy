@@ -40,7 +40,10 @@ public:
   float calculateHeal(Character *member, float percentage);
   void openDialog(std::vector<std::string> &dialog, bool prompt = false);
   void openRejectDialog(Character *member); 
+  void openPartyRejectDialog(Character *companion);
   void openHealDialog(Character *member, float healed);
+  void openMedkitDialog(Character *mary, Character *companion, 
+                        float healed);
   void openSplintDialog(Character *member, StatusID effect);
 
   void update() override;

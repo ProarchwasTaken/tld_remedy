@@ -23,6 +23,9 @@ string ItemUtils::getName(ItemID item) {
     case ItemID::P_KILLERS: {
       return "Painkillers";
     }
+    case ItemID::FA_KIT: {
+      return "First Aid Kit";
+    }
     default: {
       return "";
     }
@@ -48,6 +51,9 @@ string ItemUtils::getShortened(ItemID item) {
     }
     case ItemID::P_KILLERS: {
       return "P.Killers";
+    }
+    case ItemID::FA_KIT: {
+      return "F.A.Kit";
     }
     default: {
       return "N / A";
@@ -90,6 +96,13 @@ string ItemUtils::getDescription(ItemID item) {
       "by 20%, and negates the effects\n"
       "of certain status ailments.\n"
       "Effect also grants Tenacity.";
+    }
+    case ItemID::FA_KIT: {
+      return 
+      "Restores 6 Life of each Party\n"
+      "Member. Mary's recovery has no\n"
+      "negative effect over how much\n"
+      "Life this item restores.";
     }
     default: {
       assert(item != ItemID::NONE);

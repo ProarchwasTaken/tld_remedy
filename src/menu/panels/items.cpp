@@ -142,7 +142,8 @@ bool ItemsPanel::itemUsable(ItemID item) {
   switch (item) {
     case ItemID::I_BANDAGE:
     case ItemID::M_SPLINT:
-    case ItemID::S_BANDAGE: {
+    case ItemID::S_BANDAGE:
+    case ItemID::FA_KIT: {
       return true;
     }
     default: {
@@ -206,10 +207,31 @@ void ItemsPanel::useItem() {
       }
 
       float heal = calculateHeal(member, 0.5);
-      PLOGI << "Healing combatant by: " << heal << " Life";
+      PLOGI << "Healing combatant by: " << heal << " Life.";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
       openHealDialog(member, heal);
+      break;
+    }
+    case ItemID::FA_KIT: {
+      Character *mary = *party.begin();
+      Character *companion = party.at(1);
+
+      float m_max_life = mary->max_life;
+      float c_max_life = companion->max_life;
+
+      if (mary->life == m_max_life && companion->life == c_max_life) {
+        openPartyRejectDialog(companion);
+        return;
+      }
+
+      float recovery = Clamp(mary->recovery, 0.0, 2.0);
+      float heal = std::ceilf(6 * recovery);
+      PLOGI << "Healing party by: " << heal << " Life.";
+
+      mary->life = Clamp(mary->life + heal, 0.0, m_max_life);
+      companion->life = Clamp(companion->life + heal, 0.0, c_max_life);
+      openMedkitDialog(mary, companion, heal);
       break;
     }
     default: {
@@ -299,6 +321,19 @@ void ItemsPanel::openRejectDialog(Character *member) {
   sfx->play("menu_cancel");
 }
 
+void ItemsPanel::openPartyRejectDialog(Character *companion) {
+  assert(companion->member_id != PartyMemberID::MARY);
+  char c_name[9];
+  std::strcpy(c_name, companion->name);
+
+  const char *text = TextFormat("Both Mary and %s are already\n"
+                                "in perfect condition.", c_name);
+  vector<string> dialog = {text};
+
+  openDialog(dialog);
+  sfx->play("menu_cancel");
+}
+
 void ItemsPanel::openHealDialog(Character *member, float healed) {
   char name[9];
   std::strcpy(name, member->name);
@@ -333,6 +368,36 @@ void ItemsPanel::openHealDialog(Character *member, float healed) {
     ;
     dialog.push_back(text);
   }
+
+  openDialog(dialog);
+}
+
+void ItemsPanel::openMedkitDialog(Character *mary, Character *companion,
+                                  float healed)
+{
+  char c_name[9];
+  std::strcpy(c_name, companion->name);
+
+  vector<string> dialog;
+  string text = TextFormat("Mary attempts to use a medkit to heal\n"
+                           "both himself and %s.", c_name);
+  dialog.push_back(text);
+  text.clear();
+
+  if (mary->life < mary->max_life) {
+    text = TextFormat("Mary recovers %00.00f Life.\n", healed);
+  }
+  else {
+    text = TextFormat("Mary's Life was maxed out.\n");
+  }
+
+  if (companion->life < companion->max_life) {
+    text = text + TextFormat("%s recovers %00.00f Life.", c_name, healed);
+  }
+  else {
+    text = text + TextFormat("%s's Life was maxed out.", c_name, healed);
+  }
+  dialog.push_back(text);
 
   openDialog(dialog);
 }
@@ -543,6 +608,13 @@ void ItemsPanel::selectSubOption() {
   assert(selected != NULL && *selected != ItemID::NONE);
   switch (*sub_selected) {
     case ItemOptions::USE: {
+      if (*selected == ItemID::FA_KIT) {
+        useItem();
+        option_state = OPTION;
+        description->clear();
+        break;
+      }
+
       if (itemUsable(*selected)) {
         *description = "Select a combatant to use item:\n"
               "\"" + item_name + "\"";
@@ -820,7 +892,8 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
   string type;
   switch (*selected) {
     case ItemID::I_BANDAGE:
-    case ItemID::S_BANDAGE: {
+    case ItemID::S_BANDAGE:
+    case ItemID::FA_KIT: {
       type = "Restorative Item";
       break;
     }
@@ -852,7 +925,8 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
   switch (*selected) {
     case ItemID::I_BANDAGE:
     case ItemID::M_SPLINT: 
-    case ItemID::S_BANDAGE: {
+    case ItemID::S_BANDAGE: 
+    case ItemID::FA_KIT: {
       usable = "Always";
       break;
     }
