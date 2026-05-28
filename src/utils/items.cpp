@@ -101,8 +101,8 @@ string ItemUtils::getDescription(ItemID item) {
       return 
       "Restores 6 Life of each Party\n"
       "Member. Mary's recovery has no\n"
-      "negative effect over how much\n"
-      "Life this item restores.";
+      "negative influence over how much\n"
+      "Life this item recovers.";
     }
     default: {
       assert(item != ItemID::NONE);
