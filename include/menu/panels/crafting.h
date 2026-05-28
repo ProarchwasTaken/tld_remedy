@@ -15,6 +15,7 @@ enum CraftOptions {
   CRAFT_SBANDAGE,
   CRAFT_SWATER,
   CRAFT_PKILLERS,
+  CRAFT_FAKIT,
   RECYCLE_ITEM,
   MOVE_ITEM
 };
@@ -80,16 +81,17 @@ private:
 
   bool craft_mode = false;
   bool swap_mode = false;
-  std::array<CraftOptions, 7> options = {
+  std::array<CraftOptions, 8> options = {
     CRAFT_IBANDAGE,
     CRAFT_SBANDAGE,
+    CRAFT_FAKIT,
     CRAFT_MSPLINT,
     CRAFT_PKILLERS,
     CRAFT_SWATER,
     RECYCLE_ITEM,
     MOVE_ITEM
   };
-  std::array<CraftOptions, 7>::iterator selected_option = options.begin();
+  std::array<CraftOptions, 8>::iterator selected_option = options.begin();
 
   std::unique_ptr<DialogPanel> panel;
   bool panel_mode = false;

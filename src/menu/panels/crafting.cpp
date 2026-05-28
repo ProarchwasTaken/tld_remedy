@@ -539,19 +539,22 @@ void CraftingPanel::drawCursor(Vector2 position, Color color, bool blink)
 int CraftingPanel::getSupplyCost(ItemID id) {
   switch (id) {
     case ItemID::I_BANDAGE: {
-      return 15;
+      return 10;
     }
     case ItemID::M_SPLINT: {
       return 30;
     }
     case ItemID::S_BANDAGE: {
-      return 25;
+      return 20;
     }
     case ItemID::S_WATER: {
       return 15;
     }
     case ItemID::P_KILLERS: {
-      return 10;
+      return 15;
+    }
+    case ItemID::FA_KIT: {
+      return 25;
     }
     default: {
       return -1;
@@ -562,7 +565,7 @@ int CraftingPanel::getSupplyCost(ItemID id) {
 int CraftingPanel::getSupplyRefund(ItemID id) {
   switch (id) {
     case ItemID::I_BANDAGE: {
-      return 3;
+      return 2;
     }
     case ItemID::M_SPLINT: {
       return 6;
@@ -574,7 +577,10 @@ int CraftingPanel::getSupplyRefund(ItemID id) {
       return 3;
     }
     case ItemID::P_KILLERS: {
-      return 2;
+      return 3;
+    }
+    case ItemID::FA_KIT: {
+      return 4;
     }
     default: {
       return -1;
