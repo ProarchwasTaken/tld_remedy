@@ -414,6 +414,12 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       Game::openCampMenu(session.get());
       break;
     }
+    case FieldEVT::OPEN_MENU_SC: {
+      PLOGD << "Event Detected: OpenMenuSCEvent";
+      auto *event_data = static_cast<OpenMenuSCEvent*>(event.get());
+      Game::openCampMenu(session.get(), &event_data->shortcut);
+      break;
+    }
     case FieldEVT::OPEN_REST: {
       PLOGD << "Event Detected: OpenRestMenuEvent";
       Game::openRestMenu(session.get());

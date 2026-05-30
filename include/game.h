@@ -4,6 +4,7 @@
 #include <random>
 #include <string>
 #include <tuple>
+#include <cstddef>
 #include <raylib.h>
 #include "enums.h"
 #include "base/scene.h"
@@ -13,6 +14,7 @@
 #include "system/sound_atlas.h"
 #include "system/music_player.h"
 #include "system/noise_effect.h"
+#include "scenes/camp_menu.h"
 
 #define PLATFORM_WINDOWS 0
 #define PLATFORM_LINUX 1
@@ -82,7 +84,8 @@ public:
 
   static void loadTitleScreen();
 
-  static void openCampMenu(Session *data);
+  static void openCampMenu(Session *data, 
+                           CampMenuOption *shortcut = NULL);
   static void openRestMenu(Session *data);
   static void initCombat(Session *data, TroopID id = TroopID::INVALID);
   static std::tuple<TroopID, int> selectRandomTroop(nlohmann::json &pool);
@@ -100,7 +103,7 @@ public:
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr unsigned int session_version = 13;
-  static constexpr unsigned int personal_version = 4;
+  static constexpr unsigned int personal_version = 5;
   static constexpr float TARGET_FPS = 60.0;
 
   static Settings settings;

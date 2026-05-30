@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "enums.h"
+#include "scenes/camp_menu.h"
 
 struct FieldEvent {
   FieldEVT event_type;
@@ -10,6 +11,10 @@ struct FieldEvent {
 struct LoadMapEvent : FieldEvent {
   std::string map_name;
   std::string spawn_point;
+};
+
+struct OpenMenuSCEvent : FieldEvent {
+  CampMenuOption shortcut;
 };
 
 struct InitCombatEvent : FieldEvent {

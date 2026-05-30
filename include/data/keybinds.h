@@ -29,6 +29,8 @@ struct FieldKeybinds {
 
   KeyBind interact = {KEY_Z, GAMEPAD_BUTTON_RIGHT_FACE_DOWN};
   KeyBind open_menu = {KEY_X, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT};
+  KeyBind sc_items = {KEY_A, GAMEPAD_BUTTON_RIGHT_FACE_LEFT};
+  KeyBind sc_status = {KEY_S, GAMEPAD_BUTTON_RIGHT_FACE_UP};
 
   bool operator!=(const FieldKeybinds &keybinds) {
     return this->move_right != keybinds.move_right ||
@@ -36,7 +38,9 @@ struct FieldKeybinds {
     this->move_down != keybinds.move_down ||
     this->move_up != keybinds.move_up ||
     this->interact != keybinds.interact ||
-    this->open_menu != keybinds.open_menu;
+    this->open_menu != keybinds.open_menu ||
+    this->sc_items != keybinds.sc_items ||
+    this->sc_status != keybinds.sc_status;
   }
 };
 

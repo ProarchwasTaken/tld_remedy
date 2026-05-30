@@ -22,6 +22,8 @@ Menu) they can be remapped to your personal liking.
 * **Arrow Keys** - Movement
 * **Z Key** - Interact
 * **X Key** - Open Menu
+* **A Key** - Items Shortcut
+* **S Key** - Status Shortcut
 
 ### Combat 
 * **Arrow Keys** - Movement
@@ -43,6 +45,8 @@ may be different depending on what controller you use.
 * **D-Pad** - Movement
 * **A Button** - Interact
 * **B Button** - Open Menu
+* **X Button** - Items Shortcut
+* **Y Button** - Status Shortcut
 
 ### Combat 
 * **D-Pad** - Movement

@@ -7,11 +7,13 @@
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/field_event.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/collision.h"
 #include "utils/animation.h"
+#include "scenes/camp_menu.h"
 #include "field/system/actor_handler.h"
 #include "field/system/field_handler.h"
 #include "field/entities/pickup.h"
@@ -164,6 +166,16 @@ void PlayerActor::openMenuInput(bool gamepad) {
   if (Input::pressed(keybinds->open_menu, gamepad)) {
     PLOGI << "Opening Camp Menu.";
     FieldHandler::raise<FieldEvent>(FieldEVT::OPEN_MENU);
+  }
+  else if (Input::pressed(keybinds->sc_items, gamepad)) {
+    PLOGI << "Attempting to use Item Menu shortcut.";
+    FieldHandler::raise<OpenMenuSCEvent>(FieldEVT::OPEN_MENU_SC, 
+                                         CampMenuOption::ITEMS);
+  }
+  else if (Input::pressed(keybinds->sc_status, gamepad)) {
+    PLOGI << "Attempting to use Status Menu shortcut.";
+    FieldHandler::raise<OpenMenuSCEvent>(FieldEVT::OPEN_MENU_SC,
+                                         CampMenuOption::STATUS);
   }
 }
 

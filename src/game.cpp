@@ -697,10 +697,10 @@ void Game::loadTitleScreen() {
   run_timer = false;
 }
 
-void Game::openCampMenu(Session *data) {
+void Game::openCampMenu(Session *data, CampMenuOption *shortcut) {
   assert(reserve == nullptr);
 
-  reserve = make_unique<CampMenuScene>(data);
+  reserve = make_unique<CampMenuScene>(data, shortcut);
   flash_color = WHITE;
   flash_color.a = 0;
 

@@ -49,8 +49,6 @@ void RemapPanel::updateDisallowed() {
   switch (*current_category) {
     case InputCategory::FIELD: {
       disallowed = {
-        RemapOption::INPUT_X,
-        RemapOption::INPUT_Y,
         RemapOption::INPUT_L,
         RemapOption::INPUT_R,
         RemapOption::INPUT_START,
@@ -99,6 +97,12 @@ KeyBind *RemapPanel::retrieveFieldKeybind(RemapOption option) {
     }
     case RemapOption::INPUT_B: {
       return &keybinds->open_menu;
+    }
+    case RemapOption::INPUT_X: {
+      return &keybinds->sc_items;
+    }
+    case RemapOption::INPUT_Y: {
+      return &keybinds->sc_status;
     }
     default: {
       return NULL;
@@ -462,6 +466,12 @@ string RemapPanel::getFieldKeybindName(RemapOption option) {
     }
     case RemapOption::INPUT_B: {
       return "Open Menu";
+    }
+    case RemapOption::INPUT_X: {
+      return "Items Shortcut";
+    }
+    case RemapOption::INPUT_Y: {
+      return "Status Shortcut";
     }
     default: {
       return "N / A";
