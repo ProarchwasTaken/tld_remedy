@@ -171,6 +171,9 @@ void UseItem::applyRefreshed() {
 
   unique_ptr<StatusEffect> effect = make_unique<Refreshed>(target);
   target->afflictStatus(effect);
+
+  float value = target->init_morale / 2;
+  target->increaseMorale(value, true);
 }
 
 void UseItem::applyEndurance() {

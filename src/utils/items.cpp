@@ -88,6 +88,7 @@ string ItemUtils::getDescription(ItemID item) {
       return 
       "Boosts a combatant's Dexterity,\n"
       "Speed, and Recovery by 20%.\n"
+      "Restores Morale upon use.\n"
       "Effect lasts for 20 seconds.";
     }
     case ItemID::P_KILLERS: {
