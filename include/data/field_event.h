@@ -76,6 +76,13 @@ struct OpenDialogEvent : FieldEvent {
   bool end_prompt = false;
 };
 
+struct OpenDialogEventEx : FieldEvent {
+  std::string name;
+  std::string title;
+  std::vector<std::string> dialog;
+  bool end_prompt = false;
+};
+
 struct StartSequenceEvent : FieldEvent {
   SequenceID sequence;
 };

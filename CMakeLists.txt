@@ -247,10 +247,12 @@ if(${BUILD_DEV})
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
   "include/field/sequences/db_01.h"
+  "include/field/sequences/db_02.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
   "src/field/sequences/db_01.cpp"
+  "src/field/sequences/db_02.cpp"
   )
 endif()
 

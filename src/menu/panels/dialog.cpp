@@ -10,6 +10,7 @@
 #include "base/panel.h"
 #include "utils/input.h"
 #include "utils/menu.h"
+#include "utils/text.h"
 #include "menu/panels/dialog.h"
 #include <plog/Log.h>
 
@@ -25,6 +26,50 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
   text_position = Vector2Add(position, {2, 1});
 
   texture = LoadTexture("graphics/menu/frames/dialog1.png");
+  frame_height = texture.height;
+  visible = visible_frame;
+
+  menu_atlas = &Game::menu_atlas;
+  menu_atlas->use();
+
+  sfx = &Game::menu_sfx;
+  sfx->use();
+
+  keybinds = &Game::settings.menu_keybinds;
+
+  this->dialog = dialog;
+  current_line = this->dialog.begin();
+  current_char = current_line->begin();
+
+  if (end_prompt) {
+    selected = prompt_options.begin();
+  }
+
+  if (auto_time >= 0) {
+    this->auto_time = auto_time;
+    auto_mode = true;
+  }
+}
+
+DialogPanel::DialogPanel(Vector2 position, string name, string title,
+                         vector<string> dialog, bool end_prompt,
+                         bool visible_frame, float auto_time)
+{
+  id = PanelID::DIALOG;
+  alternative = true;
+  main_position = position;
+
+  this->name = name;
+  name_position = Vector2Add(position, {2, 1});
+
+  this->title = title;
+  title_position = Vector2Add(position, {227, 1});
+  title_position = TextUtils::alignRight(title.c_str(), title_position, 
+                                         Game::med_font, -2, 0);
+
+  text_position = Vector2Add(position, {2, 14});
+
+  texture = LoadTexture("graphics/menu/frames/dialog2.png");
   frame_height = texture.height;
   visible = visible_frame;
 
@@ -213,17 +258,36 @@ void DialogPanel::draw() {
     DrawTextureRec(texture, source, main_position, WHITE);
   }
 
+  if (alternative) {
+    drawName();
+  }
+
   if (state != PanelState::READY) {
     return;
   }
 
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
+
   DrawTextEx(*font, buffer.c_str(), text_position, txt_size, -2, WHITE);
 
   if (selected != NULL && dialog_state == DialogState::END_OF_DIALOG) {
     drawOptions();
   }
+}
+
+void DialogPanel::drawName() {
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  Color title_color = Game::palette[40];
+  if (title == "Martyr") {
+    title_color = {3, 3, 3, 255};
+  }
+
+  DrawTextEx(*font, name.c_str(), name_position, txt_size, -2, WHITE);
+  DrawTextEx(*font, title.c_str(), title_position, txt_size, -2, 
+             title_color);
 }
 
 void DialogPanel::drawOptions() {

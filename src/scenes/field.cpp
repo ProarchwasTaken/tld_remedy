@@ -35,6 +35,7 @@
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
 #include "field/sequences/db_01.h"
+#include "field/sequences/db_02.h"
 #endif // !NDEBUG
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
@@ -582,6 +583,26 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
 
       break;
     }
+    case FieldEVT::OPEN_DIALOG_EX: {
+      PLOGD << "Event detected: OpenDialogEventEx";
+      auto *event_data = static_cast<OpenDialogEventEx*>(event.get());
+      Vector2 position = {97, 170};
+
+      string name = event_data->name;
+      string title = event_data->title;
+      bool end_prompt = event_data->end_prompt;
+
+      panel = make_unique<DialogPanel>(position, name, title, 
+                                       event_data->dialog, end_prompt);
+      panel_mode = true;
+
+      if (sequence == nullptr) {
+        PLOGD << "Detected that dialog was opened outside of a sequence.";
+        PlayerActor::setControllable(false);
+      }
+
+      break;
+    }
     case FieldEVT::START_SEQUENCE: {
       PLOGD << "Event detected: StartSequenceEvent";
       auto *event_data = static_cast<StartSequenceEvent*>(event.get());
@@ -608,10 +629,14 @@ void FieldScene::initSequence(SequenceID sequence_id) {
 
   switch (sequence_id) { 
     #ifndef NDEBUG
-    case SequenceID::DB_01:{
+    case SequenceID::DB_01: {
       sequence = make_unique<DBSequence01>();
       break;
     } 
+    case SequenceID::DB_02: {
+      sequence = make_unique<DBSequence02>();
+      break;
+    }
     #endif // !NDEBUG
     case SequenceID::SAVE: {
       sequence = make_unique<SaveSequence>();

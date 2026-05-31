@@ -166,6 +166,7 @@ enum class FieldEVT {
   COM_ADD_EFFECT,
   COM_RM_EFFECT,
   OPEN_DIALOG,
+  OPEN_DIALOG_EX,
   START_SEQUENCE,
   START_FLAG_SEQUENCE,
 };
@@ -182,6 +183,7 @@ enum class SequenceID {
   REJECT,
   #ifndef NDEBUG
   DB_01 = 95, 
+  DB_02 = 96,
   #endif // !NDEBUG
 };
 

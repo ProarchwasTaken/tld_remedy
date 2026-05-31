@@ -27,6 +27,9 @@ public:
   DialogPanel(Vector2 position, std::vector<std::string> dialog, 
               bool end_prompt = false, bool visible_frame = true,
               float auto_time = -1);
+  DialogPanel(Vector2 position, std::string name, std::string title,
+              std::vector<std::string> dialog, bool end_prompt,
+              bool visible_frame = true, float auto_time = -1);
   ~DialogPanel();
 
   void update() override;
@@ -39,6 +42,7 @@ public:
   void autoConfirm();
 
   void draw() override;
+  void drawName();
   void drawOptions();
   void drawCursor(Vector2 position);
 
@@ -65,6 +69,13 @@ private:
   std::vector<std::string>::iterator current_line;
   std::string::iterator current_char;
   std::string buffer;
+
+  bool alternative = false;
+  std::string name;
+  Vector2 name_position;
+
+  std::string title;
+  Vector2 title_position;
 
   float text_speed = 0.025;
   float text_clock = 0.0;
