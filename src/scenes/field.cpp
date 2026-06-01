@@ -270,6 +270,8 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
 
   if (!entities.empty()) {
     Entity::clear(entities);
+    player_actor = NULL;
+    companion_actor = NULL;
   }
 
   field->loadMap(*session, map_name, spawn_name);
