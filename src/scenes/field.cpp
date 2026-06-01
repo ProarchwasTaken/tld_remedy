@@ -188,11 +188,13 @@ void FieldScene::onSceneReturn(SceneID from) {
   assert(from != scene_id);
   PLOGD << "Running functions for when the game returns to this scene.";
   updatePartySpeed();
+  updateInjury(session->player);
+  updateInjury(session->companion);
 }
 
 void FieldScene::updatePartySpeed() {
-  assert(player != NULL);
-  assert(companion != NULL);
+  assert(player_actor != NULL);
+  assert(companion_actor != NULL);
   float speed_penalty = 0;
 
   for (int x = 0; x < STATUS_LIMIT; x++) {
@@ -212,8 +214,53 @@ void FieldScene::updatePartySpeed() {
   float party_speed = 1.0 - speed_penalty;
   PLOGI << "Party Speed: " << party_speed;
 
-  player->movement_speed = player->default_speed * party_speed;
-  companion->movement_speed = companion->default_speed * party_speed;
+  player_actor->movement_speed = player_actor->default_speed * party_speed;
+  companion_actor->movement_speed = companion_actor->default_speed * party_speed;
+}
+
+void FieldScene::updateInjury(Character &party_member) {
+  float life = party_member.life;
+  float max_life = party_member.max_life;
+
+  int injury = 0;
+  float percentage = life / max_life;
+
+  if (percentage < 0.90) {
+    injury += 1;
+  }
+
+  if (percentage < 0.60) {
+    injury += 1;
+  }
+
+  if (percentage < 0.30) {
+    injury += 2;
+  }
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID effect = party_member.status[x];
+
+    switch (effect) {
+      case StatusID::BROKEN_ARM: {
+        injury += 1;
+        break;
+      }
+      case StatusID::CRIPPLED_LEG: {
+        injury += 2;
+        break;
+      }
+      case StatusID::MANGLED: {
+        injury += 3;
+        break;
+      }
+      default: {
+        continue;
+      }
+    }
+  }
+
+  PLOGI << party_member.name << " Injury: " << injury;
+  party_member.injury = injury;
 }
 
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
@@ -229,7 +276,9 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   setupEntities();
   updatePartySpeed();
 
-  camera.target = player->position;
+  updateInjury(session->player);
+  updateInjury(session->companion);
+  camera.target = player_actor->position;
 
   std::strcpy(session->map_name, map_name.c_str());
   map_ready = true;
@@ -247,14 +296,14 @@ void FieldScene::setupActor(ActorData *data) {
   switch (data->actor_type) {
     case ActorType::PLAYER: {
       entity = make_unique<PlayerActor>(position, direction);
-      player = static_cast<PlayerActor*>(entity.get());
+      player_actor = static_cast<PlayerActor*>(entity.get());
       break;
     }
     case ActorType::COMPANION: {
       CompanionID id = session->companion.companion_id;
 
       entity = make_unique<CompanionActor>(id, position, direction);
-      companion = static_cast<CompanionActor*>(entity.get());
+      companion_actor = static_cast<CompanionActor*>(entity.get());
       break;
     }
     case ActorType::ENEMY: {
@@ -331,7 +380,7 @@ void FieldScene::update() {
       entity->update();
     }
 
-    camera.follow(player);
+    camera.follow(player_actor);
     eventProcessing();
   }
 
@@ -992,8 +1041,23 @@ void FieldScene::drawSessionInfo() {
                                            *font, -3, 0);
   y += spacing;
 
+  Character *player = &session->player;
+  string plr_inj = TextFormat("%s Injury: %i", player->name, 
+                              player->injury);
+  Vector2 pinj_pos = TextUtils::alignRight(plr_inj.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
+  y += spacing;
+
+  Character *companion = &session->companion;
+  string com_inj = TextFormat("%s Injury: %i", companion->name, 
+                              companion->injury);
+  Vector2 cinj_pos = TextUtils::alignRight(com_inj.c_str(), {base_x, y}, 
+                                           *font, -3, 0);
+  y += spacing;
+
   string common = TextFormat("Common Count: %i / %i", 
-                             session->common_count, session->common_limit);
+                             session->common_count, 
+                             session->common_limit);
   Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
                                              *font, -3, 0);
   y += spacing;
@@ -1013,6 +1077,8 @@ void FieldScene::drawSessionInfo() {
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, plr_inj.c_str(), pinj_pos, text_size, -3, GREEN);
+  DrawTextEx(*font, com_inj.c_str(), cinj_pos, text_size, -3, GREEN);
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, enemy.c_str(), enemy_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);

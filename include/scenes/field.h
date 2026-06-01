@@ -32,6 +32,7 @@ public:
   void initCompanionData(CompanionID companion_id);
   void onSceneReturn(SceneID from);
   void updatePartySpeed();
+  void updateInjury(Character &party_member);
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupEntities();
@@ -80,8 +81,8 @@ private:
   ActorHandler actor_handler;
 
   FieldCamera camera;
-  PlayerActor *player = NULL;
-  CompanionActor *companion = NULL;
+  PlayerActor *player_actor = NULL;
+  CompanionActor *companion_actor = NULL;
 
   LoadMapEvent next_map;
   bool map_ready = false;

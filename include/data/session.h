@@ -9,6 +9,7 @@
 struct Character {
   char name[9];
   PartyMemberID member_id;
+  int injury = 0;
 
   float life;
   float max_life;
