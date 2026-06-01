@@ -212,10 +212,10 @@ void PlayerActor::moveX() {
   }
   direction = static_cast<Direction>(moving_x);
 
-  float speed = default_speed;
+  float speed = movement_speed;
   if (moving_y != 0) {
     float speed_root = std::sqrt(2);
-    speed = Normalize(default_speed, 0, speed_root);
+    speed = Normalize(movement_speed, 0, speed_root);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -234,9 +234,9 @@ void PlayerActor::moveY() {
   }
   direction = static_cast<Direction>(moving_y * 2);
 
-  float speed = default_speed;
+  float speed = movement_speed;
   if (moving_x != 0) {
-    speed = Normalize(default_speed, 0, 1.45);
+    speed = Normalize(movement_speed, 0, 1.45);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -290,6 +290,10 @@ void PlayerActor::moveAnimation() {
       break;
     }
   }
+
+  float difference = 1.0 - (movement_speed / default_speed);
+  float percentage = 1.0 + difference;
+  next_anim->frame_duration = anim_move_speed * percentage;
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];

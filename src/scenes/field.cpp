@@ -184,6 +184,38 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
   PLOGI << "Initialized data for: " << companion->name;
 }
 
+void FieldScene::onSceneReturn(SceneID from) {
+  assert(from != scene_id);
+  PLOGD << "Running functions for when the game returns to this scene.";
+  updatePartySpeed();
+}
+
+void FieldScene::updatePartySpeed() {
+  assert(player != NULL);
+  assert(companion != NULL);
+  float speed_penalty = 0;
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID p_effect = session->player.status[x];
+    StatusID c_effect = session->companion.status[x];
+
+    if (p_effect == StatusID::CRIPPLED_LEG) {
+      speed_penalty += 0.10;
+    }
+
+    if (c_effect == StatusID::CRIPPLED_LEG) {
+      speed_penalty += 0.10;
+    }
+  }
+
+  PLOGD << "Speed Penalty: -%" << speed_penalty * 100;
+  float party_speed = 1.0 - speed_penalty;
+  PLOGI << "Party Speed: " << party_speed;
+
+  player->movement_speed = player->default_speed * party_speed;
+  companion->movement_speed = companion->default_speed * party_speed;
+}
+
 void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
   PLOGI << "Running map load procedure";
   float start_time = GetTime();
@@ -195,9 +227,9 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name) {
 
   field->loadMap(*session, map_name, spawn_name);
   setupEntities();
+  updatePartySpeed();
 
-  camera_target = Actor::getActor(ActorType::PLAYER);
-  camera.target = camera_target->position;
+  camera.target = player->position;
 
   std::strcpy(session->map_name, map_name.c_str());
   map_ready = true;
@@ -215,11 +247,14 @@ void FieldScene::setupActor(ActorData *data) {
   switch (data->actor_type) {
     case ActorType::PLAYER: {
       entity = make_unique<PlayerActor>(position, direction);
+      player = static_cast<PlayerActor*>(entity.get());
       break;
     }
     case ActorType::COMPANION: {
       CompanionID id = session->companion.companion_id;
+
       entity = make_unique<CompanionActor>(id, position, direction);
+      companion = static_cast<CompanionActor*>(entity.get());
       break;
     }
     case ActorType::ENEMY: {
@@ -296,7 +331,7 @@ void FieldScene::update() {
       entity->update();
     }
 
-    camera.follow(camera_target);
+    camera.follow(player);
     eventProcessing();
   }
 
@@ -957,24 +992,6 @@ void FieldScene::drawSessionInfo() {
                                            *font, -3, 0);
   y += spacing;
 
-
-  Player *player = &session->player;
-  string plr_hp = TextFormat("%s Life: %02.00f / %02.00f", player->name, 
-                             player->life, player->max_life);
-  Vector2 php_pos = TextUtils::alignRight(plr_hp.c_str(), {base_x, y}, 
-                                          *font, -3, 0);
-  y += spacing;
-
-
-
-  Companion *companion = &session->companion;
-  string com_hp = TextFormat("%s Life: %02.00f / %02.00f", 
-                             companion->name, companion->life,
-                             companion->max_life);
-  Vector2 chp_pos = TextUtils::alignRight(com_hp.c_str(), {base_x, y}, 
-                                          *font, -3, 0);
-  y += spacing;
-
   string common = TextFormat("Common Count: %i / %i", 
                              session->common_count, session->common_limit);
   Vector2 common_pos = TextUtils::alignRight(common.c_str(), {base_x, y}, 
@@ -992,13 +1009,10 @@ void FieldScene::drawSessionInfo() {
   Vector2 per_pos = TextUtils::alignRight(pursue.c_str(), {base_x, y}, 
                                           *font, -3, 0);
 
-
   DrawTextEx(*font, map_name.c_str(), map_pos, text_size, -3, GREEN);
   DrawTextEx(*font, location.c_str(), loc_pos, text_size, -3, GREEN);
   DrawTextEx(*font, supplies.c_str(), sup_pos, text_size, -3, GREEN);
   DrawTextEx(*font, time.c_str(), time_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, plr_hp.c_str(), php_pos, text_size, -3, GREEN);
-  DrawTextEx(*font, com_hp.c_str(), chp_pos, text_size, -3, GREEN);
   DrawTextEx(*font, common.c_str(), common_pos, text_size, -3, GREEN);
   DrawTextEx(*font, enemy.c_str(), enemy_pos, text_size, -3, GREEN);
   DrawTextEx(*font, pursue.c_str(), per_pos, text_size, -3, GREEN);

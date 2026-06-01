@@ -496,11 +496,14 @@ void Game::gameoverProcedure() {
 
 void Game::returnFieldProcedure() {
   PLOGI << "Switching back to the Field scene";
+  SceneID from = scene->scene_id;
   scene.reset();
-
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
+  FieldScene *field = static_cast<FieldScene*>(scene.get());
+  field->onSceneReturn(from);
+
   Game::fadein(0.5);
   SKIP_FRAME = true;
 }

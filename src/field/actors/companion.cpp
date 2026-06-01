@@ -135,6 +135,10 @@ void CompanionActor::moveAnimation() {
     }
   }
 
+  float difference = 1.0 - (movement_speed / default_speed);
+  float percentage = 1.0 + difference;
+  next_anim->frame_duration = anim_move_speed * percentage;
+
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];
 }

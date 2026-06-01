@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <memory>
@@ -15,6 +16,8 @@
 #include "field/system/camera.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
+#include "field/actors/player.h"
+#include "field/actors/companion.h"
 
 
 class FieldScene : public Scene {
@@ -26,7 +29,9 @@ public:
 
   void setup();
   void initPlayerData(SubWeaponID weapon_id);
-  void initCompanionData(CompanionID companion_id); 
+  void initCompanionData(CompanionID companion_id);
+  void onSceneReturn(SceneID from);
+  void updatePartySpeed();
   void mapLoadProcedure(std::string map_name, 
                         std::string *spawn_name = NULL);
   void setupEntities();
@@ -75,7 +80,8 @@ private:
   ActorHandler actor_handler;
 
   FieldCamera camera;
-  Entity *camera_target;
+  PlayerActor *player = NULL;
+  CompanionActor *companion = NULL;
 
   LoadMapEvent next_map;
   bool map_ready = false;
