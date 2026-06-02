@@ -20,21 +20,67 @@
 #include "field/actors/companion.h"
 
 
+/* The main scene of the entire game. It's importance is not to be 
+ * underestimated as it is a scene that must always exist in order for 
+ * other scenes to function. (ie: CombatScene, CampMenuScene, and the
+ * RestMenuScene) 
+ *
+ * So instead of being cleared from memory when the game loads a new 
+ * scene, the FieldScene will be placed in "reserve" or "shelfed" until 
+ * the game eventually returns to it. This is to make sure that important
+ * data like the player's session wouldn't become lost, and to also 
+ * presevere minor stuff like the player's position on the map. 
+ *
+ * It also ensures that important data owned by the FieldScene would 
+ * still be usable by other scenes. Provided that they are given pointer
+ * to that data in the first place
+ *
+ * The FieldScene would only be cleared from memory when it's existence
+ * is no longer needed. (IE: When the player wins, returns to the 
+ * TitleScene, or gets a Game Over.)*/
 class FieldScene : public Scene {
 public:
+  /* For when the player start a new game. Entirely new Session data
+   * will be initialized, and the scene will be poised to load the
+   * first map.*/
   FieldScene(SubWeaponID sub_weapon, CompanionID companion);
+
+  /* For when the player loads an existing game. Basically takes 
+   * existing session data that is stored enternally, and continues
+   * where that session had left off.*/
   FieldScene(Session *session_data);
+
+  /* For directly load a map from startup. Purely meant for debug 
+   * purposes as this constructor can only be ran through the
+   * use of command-line arguments.*/
   FieldScene(std::string map_name);
   ~FieldScene();
 
-  void setup();
   void initPlayerData(SubWeaponID weapon_id);
   void initCompanionData(CompanionID companion_id);
+
+  /* Only meant to ran on the scene's initialization. Basically
+   * does some stuff to make sure the scene is ready to go. Y'know,
+   * stuff like loading the map, setting up the debug command system,
+   * loading the scene's sound effects and music.*/
+  void setup(std::string starting_map);
+
+  /* Called when the game returns to this scene after it was placed in
+   * reserve. Useful for updating stuff that are not exactly important
+   * enough to be updated every single frame, but not so inconsequencial
+   * as to only be called once.*/
   void onSceneReturn(SceneID from);
   void updatePartySpeed();
   void updateInjury(Character &party_member);
+
+  /* The root function for loading the game's maps, and initializing the 
+   * entities for the map as well. Works hand in hand with FieldMap to
+   * make it all possible.*/
   void mapLoadProcedure(std::string map_name, 
-                        std::string *spawn_name = NULL);
+                        std::string *spawn_name = NULL, 
+                        bool map_history = true);
+  void clearMapHistory();
+
   void setupEntities();
   void setupActor(ActorData *data);
 
