@@ -70,6 +70,7 @@ public:
    * enough to be updated every single frame, but not so inconsequencial
    * as to only be called once.*/
   void onSceneReturn(SceneID from);
+  void deathsaveProcedure();
   void updatePartySpeed();
   void updateInjury(Character &party_member);
 

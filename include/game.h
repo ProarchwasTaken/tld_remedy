@@ -29,6 +29,7 @@ enum class GameState {
   OPEN_RESTMENU,
   INIT_COMBAT,
   RETURN_TO_FIELD,
+  DEATH_SAVE,
   GAME_OVER,
   FADING_OUT,
   FADING_IN,
@@ -62,6 +63,7 @@ public:
   void openCampMenuProcedure();
   void openRestMenuProcedure();
   void initCombatProcedure();
+  void deathsaveProcedure();
   void gameoverProcedure();
   void returnFieldProcedure();
   void sleepProcedure();
@@ -92,6 +94,7 @@ public:
   static int getTroopReward(TroopID troop_id, nlohmann::json &pool);
   static void initCombat(Session *data, TroopID id, int reward);
   static void returnToField();
+  static void deathsave();
   static void gameover(std::string reason);
 
   static void fadeout(float seconds);
@@ -102,7 +105,7 @@ public:
   static void exitGame();
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 15;
+  static constexpr unsigned int session_version = 16;
   static constexpr unsigned int personal_version = 5;
   static constexpr float TARGET_FPS = 60.0;
 

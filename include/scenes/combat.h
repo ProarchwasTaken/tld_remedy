@@ -109,6 +109,7 @@ private:
   Mary *player = NULL;
   std::unique_ptr<LifeHud> plr_hud;
   std::unique_ptr<PlayerCmdHud> plr_cmd_hud;
+  std::unique_ptr<Entity> dead_player = nullptr;
 
   PartyMember *companion = NULL;
   std::unique_ptr<LifeHud> com_hud;

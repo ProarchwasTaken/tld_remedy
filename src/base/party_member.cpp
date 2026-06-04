@@ -25,8 +25,8 @@
 #include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
-using std::string, std::set, std::uniform_int_distribution, 
-std::unique_ptr, std::make_unique;
+using std::string, std::set, std::uniform_int_distribution,
+std::uniform_real_distribution, std::unique_ptr, std::make_unique;
 int PartyMember::member_count = 0;
 
 
@@ -449,8 +449,69 @@ void PartyMember::tintFlash() {
 void PartyMember::death() {
   Combatant::death();
 
-  if (important) {
-    PLOGI << "An important PartyMember has died!";
-    Game::gameover(name + " has died...");
+  if (!important) {
+    return;
+  }
+
+  PLOGI << "An important PartyMember has died!";
+
+  if (deathSavingThrow()) {
+    Game::deathsave();
+  }
+  else {
+    Game::gameover(name + " has died...");  
+  }
+}
+
+bool PartyMember::deathSavingThrow() {
+  assert(important);
+  float save_chance = 0.20 + resilience;
+  PLOGD << "Base Chance: " << save_chance;
+
+  int persistent = 0;
+  for (auto &effect : status) {
+    if (effect->type != StatusType::NEGATIVE) {
+      continue;
+    }
+
+    if (effect->isPersistent()) {
+      persistent++;
+    }
+
+    switch (effect->id) {
+      case StatusID::BROKEN_ARM: 
+      case StatusID::CRIPPLED_LEG: {
+        save_chance -= 0.10;
+        break;
+      }
+      case StatusID::BLEEDING:
+      case StatusID::DESPONDENT: {
+        save_chance -= 0.15;
+        break;
+      }
+      case StatusID::MANGLED: 
+      case StatusID::VULNERABLE:{
+        save_chance -= 0.20;
+        break;
+      }
+      default: {
+        assert(effect->id != StatusID::NONE);
+      }
+    }
+  }
+
+  if (persistent >= 2) {
+    save_chance = save_chance / persistent;
+  }
+
+  PLOGD << "Final result after penalties: " << save_chance;
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float roll = range(Game::RNG);
+
+  if (roll <= save_chance) {
+    return true;
+  }
+  else {
+    return false;
   }
 }

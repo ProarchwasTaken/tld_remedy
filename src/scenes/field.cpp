@@ -18,6 +18,7 @@
 #include "data/session.h"
 #include "system/sound_atlas.h"
 #include "utils/text.h"
+#include "utils/flag.h"
 #include "menu/panels/dialog.h"
 #include "field/system/field_map.h"
 #include "field/system/field_handler.h"
@@ -189,6 +190,41 @@ void FieldScene::onSceneReturn(SceneID from) {
   updatePartySpeed();
   updateInjury(session->player);
   updateInjury(session->companion);
+
+  if (Flag::check(session.get(), FlagID::DEATH_SAVE)) {
+    assert(from == SceneID::COMBAT);
+    deathsaveProcedure();
+  }
+}
+
+void FieldScene::deathsaveProcedure() {
+  PLOGI << "Running death save procedure.";
+
+  string current_map = session->map_name;
+  PLOGD << "Current Map: '" << current_map << "'";
+  string previous_map = session->prev_map1;
+  PLOGD << "Previous Map: '" << previous_map << "'";
+  string oldest_map = session->prev_map2;
+  PLOGD << "Oldest Map: '" << oldest_map << "'";
+
+  string next_map;
+  if (!oldest_map.empty() && oldest_map != current_map) {
+    next_map = oldest_map;
+  }
+  else if (!previous_map.empty()){
+    next_map = previous_map;
+  }
+  else {
+    next_map = current_map;
+    assert(!next_map.empty());
+  }
+
+  PLOGI << "Map Selected: '" << next_map << "'";
+  mapLoadProcedure(next_map, NULL, false);
+  clearMapHistory();
+
+  PlayerActor::setControllable(true);
+  Flag::set(session.get(), FlagID::DEATH_SAVE, false);
 }
 
 void FieldScene::updatePartySpeed() {

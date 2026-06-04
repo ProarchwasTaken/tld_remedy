@@ -49,6 +49,9 @@ enum class CompanionID {
 
 enum class FlagID {
   NONE = -1,
+  DEATH_SAVE,
+  DS_SEQ_FIRST,
+  DS_SEQ_LAST,
   CDF2_AFTER_INTRO,
   CDF2_BEFORE_FIRST,
   CDF2_AFTER_FIRST,
@@ -120,7 +123,7 @@ enum class StatusID {
   CRIPPLED_LEG,
   MANGLED,
   BLEEDING, 
-  FEAR,
+  VULNERABLE,
   DESPONDENT,
   MENDING,
   REFRESHED,

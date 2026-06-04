@@ -3,7 +3,7 @@
 
 #define STATUS_LIMIT 3
 #define ITEM_LIMIT 8
-#define FLAG_COUNT 8
+#define FLAG_COUNT 10
 
 
 struct Character {
@@ -79,7 +79,10 @@ struct Session {
   };
 
   int flag_count = FLAG_COUNT;
-  GameFlag flags[8] {
+  GameFlag flags[FLAG_COUNT] {
+    {FlagID::DEATH_SAVE, false},
+    {FlagID::DS_SEQ_FIRST, false},
+    {FlagID::DS_SEQ_LAST, false},
     {FlagID::CDF2_AFTER_INTRO, false},
     {FlagID::CDF2_BEFORE_FIRST, false},
     {FlagID::CDF2_AFTER_FIRST, false},
@@ -87,7 +90,6 @@ struct Session {
     {FlagID::CDF1_REST_TALK, false},
     {FlagID::CDF1_KEY, false},
     {FlagID::CD_ENTRANCE, false},
-    {FlagID::NONE, false},
   };
 
   int common_count = 0;

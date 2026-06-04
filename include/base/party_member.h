@@ -55,6 +55,7 @@ public:
 
   void tintFlash();
   void death() override;
+  bool deathSavingThrow();
 
   PartyMemberID id;
   bool important = false;
