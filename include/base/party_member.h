@@ -56,6 +56,8 @@ public:
   void tintFlash();
   void death() override;
   bool deathSavingThrow();
+  bool lastOneAlive();
+  float applySavePenalties(float base_chance);
 
   PartyMemberID id;
   bool important = false;

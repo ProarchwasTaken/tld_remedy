@@ -465,9 +465,48 @@ void PartyMember::death() {
 
 bool PartyMember::deathSavingThrow() {
   assert(important);
+  if (lastOneAlive()) {
+    return false;
+  }
+
   float save_chance = 0.20 + resilience;
   PLOGD << "Base Chance: " << save_chance;
 
+  save_chance = applySavePenalties(save_chance);
+  PLOGD << "Final result after penalties: " << save_chance;
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float roll = range(Game::RNG);
+
+  if (roll <= save_chance) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool PartyMember::lastOneAlive() {
+  if (member_count == 1) {
+    return true;
+  }
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant == this || team != combatant->team) {
+      continue;
+    }
+
+    if (combatant->state != DEAD) {
+      PLOGD << combatant->name << "is still alive.";
+      return false;
+    }
+  }
+
+  PLOGD << name << " is the only PartyMember alive.";
+  return true;
+}
+
+float PartyMember::applySavePenalties(float chance) {
   int persistent = 0;
   for (auto &effect : status) {
     if (effect->type != StatusType::NEGATIVE) {
@@ -481,17 +520,17 @@ bool PartyMember::deathSavingThrow() {
     switch (effect->id) {
       case StatusID::BROKEN_ARM: 
       case StatusID::CRIPPLED_LEG: {
-        save_chance -= 0.10;
+        chance -= 0.10;
         break;
       }
       case StatusID::BLEEDING:
       case StatusID::DESPONDENT: {
-        save_chance -= 0.15;
+        chance -= 0.15;
         break;
       }
       case StatusID::MANGLED: 
       case StatusID::VULNERABLE:{
-        save_chance -= 0.20;
+        chance -= 0.20;
         break;
       }
       default: {
@@ -501,17 +540,9 @@ bool PartyMember::deathSavingThrow() {
   }
 
   if (persistent >= 2) {
-    save_chance = save_chance / persistent;
+    chance = chance / persistent;
   }
 
-  PLOGD << "Final result after penalties: " << save_chance;
-  uniform_real_distribution<float> range(0.0, 1.0);
-  float roll = range(Game::RNG);
-
-  if (roll <= save_chance) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  return chance;
 }
+

@@ -177,7 +177,7 @@ private:
   float stun_clock = 0.0;
 
   float knockback = 0;
-  Direction kb_direction;
+  Direction kb_direction = LEFT;
   float kb_time = 0;
   float kb_clock = 0;
 

@@ -833,7 +833,10 @@ void CombatScene::debugKeybinds() {
     float magnitude = companion->life * threshold;
     companion->increaseTenacity(magnitude, threshold);
   }
-  else if (IsKeyPressed(KEY_F7)) {
+  else if (companion != NULL && IsKeyPressed(KEY_F7)) {
+    companion->death();
+  }
+  else if (IsKeyPressed(KEY_F8)) {
     end_combat = true;
   }
 }
