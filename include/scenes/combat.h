@@ -38,7 +38,7 @@ enum class CombatState {
 
 class CombatScene : public Scene {
 public:
-  CombatScene(Session *session, TroopID id, int reward);
+  CombatScene(Session *session, TroopID id, int reward, bool for_glory);
   ~CombatScene();
 
   void initializeCombatants(TroopID id);

@@ -73,6 +73,8 @@ public:
 
   Technique tech1;
   Technique tech2;
+
+  static bool for_glory;
 protected:
   bool enabled = true;
 private:

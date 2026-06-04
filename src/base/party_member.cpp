@@ -27,7 +27,9 @@
 
 using std::string, std::set, std::uniform_int_distribution,
 std::uniform_real_distribution, std::unique_ptr, std::make_unique;
+
 int PartyMember::member_count = 0;
+bool PartyMember::for_glory = false;
 
 
 PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position,
@@ -465,7 +467,7 @@ void PartyMember::death() {
 
 bool PartyMember::deathSavingThrow() {
   assert(important);
-  if (lastOneAlive()) {
+  if (for_glory || lastOneAlive()) {
     return false;
   }
 

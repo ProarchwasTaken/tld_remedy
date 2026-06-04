@@ -783,7 +783,7 @@ void Game::initCombat(Session *session, TroopID id) {
 
   file.close();
 
-  reserve = make_unique<CombatScene>(session, id, reward);
+  reserve = make_unique<CombatScene>(session, id, reward, false);
   flash_color = WHITE;
 
   noise->setTint(WHITE);
@@ -853,7 +853,7 @@ void Game::initCombat(Session *data, TroopID id, int reward) {
   PLOGI << "Battle Time! (Forced Style!)";
   assert(reserve == nullptr);
 
-  reserve = make_unique<CombatScene>(data, id, reward);
+  reserve = make_unique<CombatScene>(data, id, reward, true);
   flash_color = WHITE;
 
   noise->setTint(WHITE);
@@ -880,7 +880,7 @@ void Game::deathsave() {
 
   flash_color = BLACK;
   flash_color.a = 0.0;
-  bgm->stop();
+  bgm->fade(0.0, 1.0);
 
   game_state = GameState::DEATH_SAVE;
 }

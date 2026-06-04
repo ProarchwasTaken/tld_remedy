@@ -48,7 +48,8 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
 
-CombatScene::CombatScene(Session *session, TroopID id, int reward) {
+CombatScene::CombatScene(Session *session, TroopID id, int reward, 
+                         bool for_glory) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
   float start_time = GetTime();
@@ -62,6 +63,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
 
   stage.loadStage(session->location);
   initializeCombatants(id);
+  PartyMember::for_glory = for_glory;
 
   this->reward = reward;
 
