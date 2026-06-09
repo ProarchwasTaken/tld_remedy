@@ -89,6 +89,7 @@ public:
 
   void panelLogic();
   void panelTermination();
+  void sequenceLogic();
   void dialogHandling();
 
   void actorBehavior();

@@ -12,7 +12,9 @@ public:
   virtual ~FieldSequence();
 
   virtual void update() = 0;
-  virtual void dialogHandling(PromptOptions selected) {};
+  virtual void dialogHandling(PromptOptions selected) {}
+
+  virtual void draw() {}
 
   std::string name;
   SequenceID id;

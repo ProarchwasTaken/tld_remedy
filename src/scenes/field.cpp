@@ -32,6 +32,7 @@
 #include "field/sequences/save.h"
 #include "field/sequences/rest.h"
 #include "field/sequences/reject.h"
+#include "field/sequences/incap.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -223,8 +224,8 @@ void FieldScene::deathsaveProcedure() {
   mapLoadProcedure(next_map, NULL, false);
   clearMapHistory();
 
-  PlayerActor::setControllable(true);
   Flag::set(session.get(), FlagID::DEATH_SAVE, false);
+  initSequence(SequenceID::INCAP);
 }
 
 void FieldScene::updatePartySpeed() {
@@ -442,15 +443,9 @@ void FieldScene::update() {
     return;
   }
 
-  if (sequence == nullptr) {
-    return;
-  }
-
-  sequence->update();
-
-  if (sequence->end_sequence) {
-    sequence.reset();
-  }
+  if (sequence != nullptr) {
+    sequenceLogic();
+  } 
 }
 
 void FieldScene::panelLogic() {
@@ -471,6 +466,15 @@ void FieldScene::panelTermination() {
 
   panel.reset();
   panel_mode = false;
+}
+
+void FieldScene::sequenceLogic() {
+  assert(sequence != nullptr);
+  sequence->update();
+
+  if (sequence->end_sequence) {
+    sequence.reset();
+  }
 }
 
 void FieldScene::dialogHandling() {
@@ -783,6 +787,10 @@ void FieldScene::initSequence(SequenceID sequence_id) {
       sequence = make_unique<RestSequence>();
       break;
     }
+    case SequenceID::INCAP: {
+      sequence = make_unique<IncapSequence>(session.get());
+      break;
+    }
     default: {
       PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
       " is either invalid, or requires an Flag ID!";
@@ -1049,6 +1057,10 @@ void FieldScene::draw() {
 
   if (panel_mode) {
     panel->draw();
+  }
+
+  if (sequence != nullptr) {
+    sequence->draw();
   }
 
   #ifndef NDEBUG

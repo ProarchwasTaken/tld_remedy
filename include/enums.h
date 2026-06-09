@@ -184,6 +184,7 @@ enum class SequenceID {
   SAVE,
   REST,
   REJECT,
+  INCAP,
   #ifndef NDEBUG
   DB_01 = 95, 
   DB_02 = 96,
