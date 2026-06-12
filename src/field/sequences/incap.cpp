@@ -1,3 +1,6 @@
+#include <random>
+#include <string>
+#include <array>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -9,6 +12,8 @@
 #include "field/sequences/incap.h"
 #include <plog/Log.h>
 
+using std::uniform_int_distribution, std::string, std::array;
+
 
 IncapSequence::IncapSequence(Session *session) : 
   FieldSequence("Incapacitated Sequence", SequenceID::INCAP)
@@ -16,7 +21,13 @@ IncapSequence::IncapSequence(Session *session) :
   Companion *companion = &session->companion;
   setupIncapTexture(companion->companion_id);
 
+  text = getIncapMessage();
+  text_color = Game::palette[2];
+  text_color.a = 0;
+
   PlayerActor::setControllable(false);
+  Game::noise->setTint(Game::palette[2]);
+  Game::noise->setAlpha(0.15);
   Game::bgm->stop();
 }
 
@@ -35,6 +46,25 @@ void IncapSequence::setupIncapTexture(CompanionID id) {
   position = {383.0f - texture.width, 207.0f - texture.height};
   tint = WHITE;
   tint.a = 0;
+}
+
+string IncapSequence::getIncapMessage() {
+  array<string, 8> message_pool = {
+    "Everything hurts.",
+    "Mom... Dad...",
+    "I can't move.",
+    "So much red...",
+    "I don't want to die..",
+    "Something is broken.",
+    "So... tired..",
+    "Losing consciousness.."
+  };
+
+  uniform_int_distribution<int> range(0, 7);
+  int index = range(Game::RNG);
+
+  string selected = message_pool.at(index);
+  return selected;
 }
 
 void IncapSequence::update() {
@@ -59,11 +89,19 @@ void IncapSequence::update() {
       break;
     }
     case 2: {
+      text_color.a = Lerp(0, 255, seq_clock);
+
       if (seq_clock == 1.0) {
         PLOGD << "Hiding everything.";
+        Game::noise->setTint(WHITE);
+        Game::noise->setAlpha(0);
+
         tint.a = 0;
+        text_color.a = 0;
+
         seq_clock = 0;
-        seq_time = 2.0;
+        seq_time = 3.0;
+
         order++;
       }
       break;
@@ -84,4 +122,8 @@ void IncapSequence::update() {
 void IncapSequence::draw() {
   ClearBackground(BLACK);
   DrawTextureV(texture, position, tint);
+
+  Font *font = &Game::sm_font;
+  int text_size = font->baseSize;
+  DrawTextEx(*font, text.c_str(), {16, 16}, text_size, 0, text_color);
 }

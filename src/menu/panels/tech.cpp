@@ -160,7 +160,7 @@ string TechsPanel::getTechEntry() {
 
         "Mary automatically dodges most attacks at the\n"
         "cost of losing Morale. The amount lost is\n"
-        "dependent on the victims's Persistence vs.\n"
+        "dependent on the victim's Persistence vs.\n"
         "the assailant's Intimidation.\n\n"
 
         "If Mary's Morale ends up below 0, he will\n"
@@ -222,7 +222,7 @@ string TechsPanel::getTechEntry() {
 
         "Erwin automatically dodges most attacks at\n"
         "the cost of losing Morale. The amount lost is\n"
-        "dependent on the victims's Persistence vs.\n"
+        "dependent on the victim's Persistence vs.\n"
         "the assailant's Intimidation.\n\n"
 
         "If Erwin's Morale ends up below 0, he will\n"

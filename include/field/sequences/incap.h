@@ -13,6 +13,7 @@ public:
   ~IncapSequence();
 
   void setupIncapTexture(CompanionID id);
+  std::string getIncapMessage();
 
   void update() override;
   void draw() override;
@@ -20,6 +21,9 @@ private:
   Texture texture;
   Vector2 position;
   Color tint;
+
+  std::string text;
+  Color text_color;
 
   float seq_clock = 0.0;
   float seq_time = 3.0;
