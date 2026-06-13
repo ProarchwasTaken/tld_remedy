@@ -1,6 +1,7 @@
 #include <random>
 #include <string>
 #include <array>
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -25,6 +26,9 @@ IncapSequence::IncapSequence(Session *session) :
   text_color = Game::palette[2];
   text_color.a = 0;
 
+  applySupplyPenalty(session);
+  applyCompanionDamage(&session->companion);
+
   PlayerActor::setControllable(false);
   Game::noise->setTint(Game::palette[2]);
   Game::noise->setAlpha(0.15);
@@ -33,6 +37,44 @@ IncapSequence::IncapSequence(Session *session) :
 
 IncapSequence::~IncapSequence() {
   UnloadTexture(texture);
+}
+
+void IncapSequence::applySupplyPenalty(Session *session) {
+  float m_recovery = session->player.recovery;
+  float m_modifier = 0.85 - m_recovery;
+  PLOGD << "Mary REC Modifier: " << m_modifier;
+
+  float c_recovery = session->companion.recovery;
+  float c_modifier = 0.90 - c_recovery;
+  PLOGD << "Companion REC Modifier: " << c_modifier;
+
+  float percentage = 0.50 + m_modifier + c_modifier;
+  percentage = Clamp(percentage, 0.0, 1.0);
+  PLOGD << "Final Penalty: " << percentage * 100 << "%";
+
+  float penalty = session->supplies * percentage;
+  penalty = std::ceilf(penalty);
+  PLOGI << "Lost " << penalty << " Supplies.";
+
+  session->supplies -= penalty;
+  if (session->supplies < 0) {
+    session->supplies = 0;
+  }
+}
+
+void IncapSequence::applyCompanionDamage(Companion *companion) {
+  float max_life = companion->max_life;
+  float resilience = companion->resilience;
+
+  float percentage = Clamp(1.0 - resilience, 0.0, 1.0);
+  PLOGD << "Percentage: " << percentage * 100 << "%";
+
+  float damage = max_life * percentage;
+  PLOGI << "Damage taken: " << damage;
+
+  companion->life = Clamp(companion->life - damage, 1.0, max_life);
+  companion->life = std::floorf(companion->life);
+  PLOGI << "Resulting Life: " << companion->life;
 }
 
 void IncapSequence::setupIncapTexture(CompanionID id) {
@@ -49,18 +91,16 @@ void IncapSequence::setupIncapTexture(CompanionID id) {
 }
 
 string IncapSequence::getIncapMessage() {
-  array<string, 8> message_pool = {
+  array<string, 6> message_pool = {
     "Everything hurts.",
-    "Mom... Dad...",
     "I can't move.",
     "So much red...",
     "I don't want to die..",
-    "Something is broken.",
     "So... tired..",
     "Losing consciousness.."
   };
 
-  uniform_int_distribution<int> range(0, 7);
+  uniform_int_distribution<int> range(0, 5);
   int index = range(Game::RNG);
 
   string selected = message_pool.at(index);

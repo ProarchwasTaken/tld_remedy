@@ -12,6 +12,9 @@ public:
   IncapSequence(Session *session);
   ~IncapSequence();
 
+  void applySupplyPenalty(Session *session);
+  void applyCompanionDamage(Companion *companion);
+
   void setupIncapTexture(CompanionID id);
   std::string getIncapMessage();
 
