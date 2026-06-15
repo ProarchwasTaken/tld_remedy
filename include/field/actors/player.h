@@ -25,7 +25,7 @@ public:
   void update() override;
   void moveX();
   void moveY();
-  Rectangle *getIdleSprite();
+  void setIdleSprite();
   void moveAnimation();
 
   void draw() override;

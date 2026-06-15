@@ -41,7 +41,7 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   rectExCorrection(bounding_box, collis_box);
   atlas.use();
 
-  sprite = getIdleSprite();
+  setIdleSprite();
 }
 
 PlayerActor::~PlayerActor() {
@@ -197,7 +197,7 @@ void PlayerActor::update() {
     rectExCorrection(bounding_box, collis_box);
   }
   else {
-    sprite = getIdleSprite();
+    setIdleSprite();
   }
 
   if (move_clock >= 1.0) {
@@ -250,28 +250,38 @@ void PlayerActor::moveY() {
   position.y += magnitude * moving_y;
 }
 
-Rectangle *PlayerActor::getIdleSprite() {
-  animation = NULL;
+void PlayerActor::setIdleSprite() {
+  if (lock_sprite) {
+    return;
+  }
 
+  animation = NULL;
   switch (direction) {
     case DOWN: {
-      return &atlas.sprites[1];
+      sprite = &atlas.sprites[1];
+      break;
     }
     case RIGHT: {
-      return &atlas.sprites[4];
+      sprite = &atlas.sprites[4];
+      break;
     }
     case UP: {
-      return &atlas.sprites[7];
+      sprite = &atlas.sprites[7];
+      break;
     }
     case LEFT: {
-      return &atlas.sprites[10];
+      sprite = &atlas.sprites[10];
+      break;
     }
   }
 }
 
 void PlayerActor::moveAnimation() {
-  Animation *next_anim;
+  if (lock_sprite) {
+    return;
+  }
 
+  Animation *next_anim;
   switch (direction) {  
     case DOWN: {
       next_anim = &anim_down;

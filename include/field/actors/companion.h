@@ -20,7 +20,7 @@ public:
 
   void update() override;
   bool shouldBeMoving();
-  Rectangle *getIdleSprite();
+  void setIdleSprite();
   void moveAnimation();
 
   void draw() override;

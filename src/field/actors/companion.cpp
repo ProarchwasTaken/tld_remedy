@@ -27,7 +27,7 @@ Actor("Companion", ActorType::COMPANION, position, direction)
   rectExCorrection(bounding_box, collis_box);
   
   atlas.use();
-  sprite = getIdleSprite();
+  setIdleSprite();
 }
 
 CompanionActor::~CompanionActor() {
@@ -70,7 +70,7 @@ void CompanionActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
 void CompanionActor::update() {
   moving = shouldBeMoving();
   if (!moving) {
-    sprite = getIdleSprite();
+    setIdleSprite();
     return;
   }
 
@@ -94,28 +94,38 @@ bool CompanionActor::shouldBeMoving() {
   }
 }
 
-Rectangle *CompanionActor::getIdleSprite() {
-  animation = NULL;
+void CompanionActor::setIdleSprite() {
+  if (lock_sprite) {
+    return;
+  }
 
+  animation = NULL;
   switch (direction) {
     case DOWN: {
-      return &atlas.sprites[1];
+      sprite = &atlas.sprites[1];
+      return;
     }
     case RIGHT: {
-      return &atlas.sprites[4];
+      sprite = &atlas.sprites[4];
+      return;
     }
     case UP: {
-      return &atlas.sprites[7];
+      sprite = &atlas.sprites[7];
+      return;
     }
     case LEFT: {
-      return &atlas.sprites[10];
+      sprite = &atlas.sprites[10];
+      return;
     }
   }
 }
 
 void CompanionActor::moveAnimation() {
-  Animation *next_anim;
+  if (lock_sprite) {
+    return;
+  }
 
+  Animation *next_anim;
   switch (direction) {  
     case DOWN: {
       next_anim = &anim_down;
