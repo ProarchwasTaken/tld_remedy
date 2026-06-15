@@ -81,8 +81,8 @@ struct Session {
   int flag_count = FLAG_COUNT;
   GameFlag flags[FLAG_COUNT] {
     {FlagID::DEATH_SAVE, false},
-    {FlagID::DS_SEQ_FIRST, false},
-    {FlagID::DS_SEQ_LAST, false},
+    {FlagID::DS_SEQ_MILD, false},
+    {FlagID::DS_SEQ_SEVERE, false},
     {FlagID::CDF2_AFTER_INTRO, false},
     {FlagID::CDF2_BEFORE_FIRST, false},
     {FlagID::CDF2_AFTER_FIRST, false},

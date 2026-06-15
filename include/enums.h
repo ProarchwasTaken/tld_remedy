@@ -50,8 +50,8 @@ enum class CompanionID {
 enum class FlagID {
   NONE = -1,
   DEATH_SAVE,
-  DS_SEQ_FIRST,
-  DS_SEQ_LAST,
+  DS_SEQ_MILD,
+  DS_SEQ_SEVERE,
   CDF2_AFTER_INTRO,
   CDF2_BEFORE_FIRST,
   CDF2_AFTER_FIRST,
@@ -185,6 +185,8 @@ enum class SequenceID {
   REST,
   REJECT,
   INCAP,
+  DS_ERWIN_MILD,
+  DS_ERWIN_SEVERE,
   #ifndef NDEBUG
   DB_01 = 95, 
   DB_02 = 96,

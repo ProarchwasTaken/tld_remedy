@@ -6,7 +6,6 @@
 #include "data/session.h"
 
 
-
 class IncapSequence : public FieldSequence {
 public:
   IncapSequence(Session *session);
@@ -18,6 +17,8 @@ public:
   void setupIncapTexture(CompanionID id);
   std::string getIncapMessage();
 
+  void followUpSequence();
+
   void update() override;
   void draw() override;
 private:
@@ -27,6 +28,7 @@ private:
 
   std::string text;
   Color text_color;
+  CompanionID companion_id;
 
   float seq_clock = 0.0;
   float seq_time = 3.0;

@@ -8,8 +8,10 @@
 #include "game.h"
 #include "base/field_sequence.h"
 #include "data/session.h"
+#include "data/field_event.h"
 #include "scenes/field.h"
 #include "field/actors/player.h"
+#include "field/system/field_handler.h"
 #include "field/sequences/incap.h"
 #include <plog/Log.h>
 
@@ -27,6 +29,8 @@ IncapSequence::IncapSequence(Session *session) :
   text_color.a = 0;
 
   applySupplyPenalty(session);
+
+  companion_id = session->companion.companion_id;
   applyCompanionDamage(&session->companion);
 
   PlayerActor::setControllable(false);
@@ -148,12 +152,20 @@ void IncapSequence::update() {
     }
     case 3: {
       if (seq_clock == 1.0) {
-        // Temporary
-        PLOGD << "Ending sequence.";
-        PlayerActor::setControllable(true);
-        Game::bgm->play();
-        end_sequence = true;
+        followUpSequence();
+        order++;
       }
+      break;
+    }
+  }
+}
+
+void IncapSequence::followUpSequence() {
+  PLOGI << "Attempting to trigger follow up sequence.";
+  switch (companion_id) {
+    case CompanionID::ERWIN: {
+      FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
+                                              SequenceID::DS_ERWIN_MILD);
       break;
     }
   }
