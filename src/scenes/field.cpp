@@ -33,6 +33,7 @@
 #include "field/sequences/rest.h"
 #include "field/sequences/reject.h"
 #include "field/sequences/incap.h"
+#include "field/sequences/ds_erwin_mild.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -711,37 +712,13 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::OPEN_DIALOG: {
       PLOGD << "Event detected: OpenDialogEvent";
       auto *event_data = static_cast<OpenDialogEvent*>(event.get());
-      Vector2 position = {97, 183};
-
-      panel = make_unique<DialogPanel>(position, event_data->dialog, 
-                                       event_data->end_prompt);
-      panel_mode = true;
-
-      if (sequence == nullptr) {
-        PLOGD << "Detected that dialog was opened outside of a sequence.";
-        PlayerActor::setControllable(false);
-      }
-
+      openDialog(event_data);
       break;
     }
     case FieldEVT::OPEN_DIALOG_EX: {
       PLOGD << "Event detected: OpenDialogEventEx";
       auto *event_data = static_cast<OpenDialogEventEx*>(event.get());
-      Vector2 position = {97, 170};
-
-      string name = event_data->name;
-      string title = event_data->title;
-      bool end_prompt = event_data->end_prompt;
-
-      panel = make_unique<DialogPanel>(position, name, title, 
-                                       event_data->dialog, end_prompt);
-      panel_mode = true;
-
-      if (sequence == nullptr) {
-        PLOGD << "Detected that dialog was opened outside of a sequence.";
-        PlayerActor::setControllable(false);
-      }
-
+      openDialogEx(event_data);
       break;
     }
     case FieldEVT::START_SEQUENCE: {
@@ -791,6 +768,10 @@ void FieldScene::initSequence(SequenceID sequence_id) {
       sequence = make_unique<IncapSequence>(session.get());
       break;
     }
+    case SequenceID::DS_ERWIN_MILD: {
+      sequence = make_unique<DSErwinMild>();
+      break;
+    }
     default: {
       PLOGE << "Sequence [ID: " << static_cast<int>(sequence_id) <<
       " is either invalid, or requires an Flag ID!";
@@ -817,6 +798,48 @@ void FieldScene::initSequence(SequenceID sequence_id, FlagID flag) {
   }
 
   assert(sequence != nullptr);
+}
+
+void FieldScene::openDialog(OpenDialogEvent *event) {
+  Vector2 position = {97, 183};
+  bool end_prompt = event->end_prompt;
+  bool visible_frame = event->visible_frame;
+  bool open_instant = event->open_instant;
+  bool close_instant = event->close_instant;
+  float auto_time = event->auto_time;
+
+  panel = make_unique<DialogPanel>(position, event->dialog, end_prompt,
+                                   visible_frame, open_instant,
+                                   close_instant, auto_time);
+  panel_mode = true;
+
+  if (sequence == nullptr) {
+    PLOGD << "Detected that dialog was opened outside of a sequence.";
+    PlayerActor::setControllable(false);
+  }
+}
+
+void FieldScene::openDialogEx(OpenDialogEventEx *event) {
+  Vector2 position = {97, 170};
+
+  string name = event->name;
+  string title = event->title;
+  bool end_prompt = event->end_prompt;
+  bool visible_frame = event->visible_frame;
+  bool open_instant = event->open_instant;
+  bool close_instant = event->close_instant;
+  float auto_time = event->auto_time;
+
+  panel = make_unique<DialogPanel>(position, name, title, event->dialog, 
+                                   end_prompt, visible_frame, 
+                                   open_instant, close_instant, 
+                                   auto_time);
+  panel_mode = true;
+
+  if (sequence == nullptr) {
+    PLOGD << "Detected that dialog was opened outside of a sequence.";
+    PlayerActor::setControllable(false);
+  }
 }
 
 void FieldScene::addStatusEffect(FieldEVT type, StatusID effect_id) {

@@ -88,7 +88,7 @@ vector<string> GameOverScene::getDialog() {
 void GameOverScene::startDialog() {
   vector<string> dialog = getDialog();
   panel = make_unique<DialogPanel>((Vector2){16, 8}, dialog, true, 
-                                   false, 1.5);
+                                   false, false, false, 1.5);
   panel_mode = true;
 }
 
@@ -106,7 +106,7 @@ void GameOverScene::startClosingDialog() {
   };
 
   panel = make_unique<DialogPanel>(Vector2{16, 8}, dialog, false, false,
-                                   1.5);
+                                   false, false, 1.5);
   panel_mode = true;
 }
 

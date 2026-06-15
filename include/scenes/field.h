@@ -100,6 +100,9 @@ public:
   void initSequence(SequenceID sequence_id);
   void initSequence(SequenceID sequence_id, FlagID flag);
 
+  void openDialog(OpenDialogEvent *event);
+  void openDialogEx(OpenDialogEventEx *event);
+
   void addStatusEffect(FieldEVT type, StatusID effect_id);
   void removeStatusEffect(FieldEVT type, StatusID effect_id);
 
