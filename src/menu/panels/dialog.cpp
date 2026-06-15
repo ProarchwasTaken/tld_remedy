@@ -119,7 +119,7 @@ void DialogPanel::update() {
     menuNavigation(gamepad);
   }
 
-  if (auto_mode && dialog_state == DialogState::END_OF_LINE) {
+  if (shouldAutoConfirm()) {
     autoConfirm();
   }
 
