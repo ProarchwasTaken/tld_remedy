@@ -28,7 +28,9 @@ private:
 
   std::string text;
   Color text_color;
+
   CompanionID companion_id;
+  int player_injury;
 
   float seq_clock = 0.0;
   float seq_time = 3.0;

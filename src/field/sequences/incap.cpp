@@ -28,9 +28,10 @@ IncapSequence::IncapSequence(Session *session) :
   text_color = Game::palette[2];
   text_color.a = 0;
 
-  applySupplyPenalty(session);
-
+  player_injury = session->player.injury;
   companion_id = session->companion.companion_id;
+
+  applySupplyPenalty(session);
   applyCompanionDamage(&session->companion);
 
   PlayerActor::setControllable(false);
@@ -162,10 +163,22 @@ void IncapSequence::update() {
 
 void IncapSequence::followUpSequence() {
   PLOGI << "Attempting to trigger follow up sequence.";
+  bool mild_injury = player_injury < 7;
+
   switch (companion_id) {
     case CompanionID::ERWIN: {
-      FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
-                                              SequenceID::DS_ERWIN_MILD);
+      FieldEVT event_id = FieldEVT::START_SEQUENCE;
+      SequenceID sequence_id;
+      if (mild_injury) {
+        PLOGD << "Raising an event for the mild injury sequence.";
+        sequence_id = SequenceID::DS_ERWIN_MILD;
+      }
+      else {
+        PLOGD << "Raising an event for the severe injury sequence.";
+        sequence_id = SequenceID::DS_ERWIN_SEVERE;
+      }
+
+      FieldHandler::raise<StartSequenceEvent>(event_id, sequence_id);
       break;
     }
   }
