@@ -34,6 +34,7 @@
 #include "field/sequences/reject.h"
 #include "field/sequences/incap.h"
 #include "field/sequences/ds_erwin_mild.h"
+#include "field/sequences/ds_erwin_severe.h"
 #include "scenes/field.h"
 #ifndef NDEBUG
 #include "field/system/field_commands.h"
@@ -770,6 +771,10 @@ void FieldScene::initSequence(SequenceID sequence_id) {
     }
     case SequenceID::DS_ERWIN_MILD: {
       sequence = make_unique<DSErwinMild>();
+      break;
+    }
+    case SequenceID::DS_ERWIN_SEVERE: {
+      sequence = make_unique<DSErwinSevere>();
       break;
     }
     default: {

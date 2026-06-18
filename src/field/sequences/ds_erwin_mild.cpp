@@ -19,7 +19,7 @@ using std::string, std::vector;
 
 
 DSErwinMild::DSErwinMild() : 
-  FieldSequence("Death Save - Erwin Sequence", SequenceID::DS_ERWIN_MILD)
+  FieldSequence("DS Erwin Mild", SequenceID::DS_ERWIN_MILD)
 {
   Actor *ptr = Actor::getActor(ActorType::PLAYER);
   player = static_cast<PlayerActor*>(ptr);
