@@ -9,6 +9,7 @@
 #include "base/field_sequence.h"
 #include "data/session.h"
 #include "data/field_event.h"
+#include "utils/flag.h"
 #include "scenes/field.h"
 #include "field/actors/player.h"
 #include "field/system/field_handler.h"
@@ -21,18 +22,16 @@ using std::uniform_int_distribution, std::string, std::array;
 IncapSequence::IncapSequence(Session *session) : 
   FieldSequence("Incapacitated Sequence", SequenceID::INCAP)
 {
+  this->session = session;
   Companion *companion = &session->companion;
   setupIncapTexture(companion->companion_id);
+
+  applySupplyPenalty(session);
+  applyCompanionDamage(&session->companion);
 
   text = getIncapMessage();
   text_color = Game::palette[2];
   text_color.a = 0;
-
-  player_injury = session->player.injury;
-  companion_id = session->companion.companion_id;
-
-  applySupplyPenalty(session);
-  applyCompanionDamage(&session->companion);
 
   PlayerActor::setControllable(false);
   Game::noise->setTint(Game::palette[2]);
@@ -163,25 +162,41 @@ void IncapSequence::update() {
 
 void IncapSequence::followUpSequence() {
   PLOGI << "Attempting to trigger follow up sequence.";
-  bool mild_injury = player_injury < 7;
+  bool mild_injury = session->player.injury < 7;
+  FieldEVT event_id = FieldEVT::START_SEQUENCE;
+  SequenceID sequence_id;
 
-  switch (companion_id) {
+  switch (session->companion.companion_id) {
     case CompanionID::ERWIN: {
-      FieldEVT event_id = FieldEVT::START_SEQUENCE;
-      SequenceID sequence_id;
-      if (mild_injury) {
+      if (mild_injury && !Flag::check(session, FlagID::DS_SEQ_MILD)) {
         PLOGD << "Raising an event for the mild injury sequence.";
         sequence_id = SequenceID::DS_ERWIN_MILD;
+        Flag::set(session, FlagID::DS_SEQ_MILD, true);
       }
-      else {
+      else if (!Flag::check(session, FlagID::DS_SEQ_SEVERE)){
         PLOGD << "Raising an event for the severe injury sequence.";
         sequence_id = SequenceID::DS_ERWIN_SEVERE;
+        Flag::set(session, FlagID::DS_SEQ_SEVERE, true);
+      }
+      else {
+        PLOGW << "Sequence trigger blocked by Game Flags!";
+        endSequence();
+        return;
       }
 
-      FieldHandler::raise<StartSequenceEvent>(event_id, sequence_id);
       break;
     }
   }
+
+  FieldHandler::raise<StartSequenceEvent>(event_id, sequence_id);
+}
+
+void IncapSequence::endSequence() {
+  PLOGI << "Ending sequence.";
+  PlayerActor::setControllable(true);
+  Game::bgm->play();
+  Game::fadein(1.0);
+  end_sequence = true;
 }
 
 void IncapSequence::draw() {
