@@ -911,6 +911,7 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
     }
     default: {
       assert(*selected != ItemID::NONE);
+      type = "Junk Item";
     }
   }
 
@@ -937,6 +938,7 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
     }
     default: {
       assert(*selected != ItemID::NONE);
+      usable = "Never";
     }
   }
 
@@ -956,6 +958,10 @@ void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
 void ItemsPanel::drawItemPortrait() {
   assert(*selected != ItemID::NONE);
   int id = static_cast<int>(*selected);
+  if (id >= 6) {
+    id = 6;
+  }
+
   Rectangle *sprite = &portraits.sprites.at(id);
   Vector2 position = Vector2Add(frame_position, {5, 5});
 

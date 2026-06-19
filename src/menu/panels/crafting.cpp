@@ -582,6 +582,18 @@ int CraftingPanel::getSupplyRefund(ItemID id) {
     case ItemID::FA_KIT: {
       return 4;
     }
+    case ItemID::J_BOOK: {
+      return 6;
+    }
+    case ItemID::J_BROOM: {
+      return 8;
+    }
+    case ItemID::J_SHIRT: {
+      return 10;
+    }
+    case ItemID::J_PANTS: {
+      return 10;
+    }
     default: {
       return -1;
     }
