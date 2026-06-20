@@ -63,7 +63,8 @@ private:
     ItemID::J_BOOK,
     ItemID::J_BROOM,
     ItemID::J_SHIRT,
-    ItemID::J_PANTS
+    ItemID::J_PANTS,
+    ItemID::J_TPAPER
   };
 
   Vector2 target_position;

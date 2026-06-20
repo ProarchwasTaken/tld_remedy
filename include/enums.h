@@ -72,7 +72,8 @@ enum class ItemID {
   J_BOOK,
   J_BROOM,
   J_SHIRT,
-  J_PANTS
+  J_PANTS,
+  J_TPAPER,
 };
 
 enum class CombatantTeam {

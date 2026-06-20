@@ -724,7 +724,7 @@
                  "visible":true,
                  "width":0,
                  "x":128,
-                 "y":480
+                 "y":456
                 }, 
                 {
                  "height":0,
@@ -748,7 +748,7 @@
                  "visible":true,
                  "width":0,
                  "x":128,
-                 "y":464
+                 "y":440
                 }, 
                 {
                  "height":0,
@@ -845,7 +845,7 @@
                         {
                          "name":"count",
                          "type":"int",
-                         "value":1
+                         "value":9
                         }],
                  "rotation":0,
                  "type":"Item",

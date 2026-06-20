@@ -38,6 +38,9 @@ string ItemUtils::getName(ItemID item) {
     case ItemID::J_PANTS: {
       return "Gothic Pants";
     }
+    case ItemID::J_TPAPER: {
+      return "Toilet Paper.";
+    }
     default: {
       return "";
     }
@@ -78,6 +81,9 @@ string ItemUtils::getShortened(ItemID item) {
     }
     case ItemID::J_PANTS: {
       return "G.Pants";
+    }
+    case ItemID::J_TPAPER: {
+      return "T.Paper";
     }
     default: {
       return "N / A";
@@ -156,6 +162,13 @@ string ItemUtils::getDescription(ItemID item) {
       "but now is definitely not the time.\n"
       "Maybe later.\n"
       "Only useful for recycling.";
+    }
+    case ItemID::J_TPAPER: {
+      return 
+      "Possibly the most valuable object\n"
+      "one could find around here.\n"
+      "Useful for recycling and among\n"
+      "other things.";
     }
     default: {
       assert(item != ItemID::NONE);

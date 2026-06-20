@@ -123,14 +123,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":-2
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":192,
-                 "y":176
+                 "x":128,
+                 "y":120
                 }, 
                 {
                  "height":0,
@@ -147,14 +147,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":-2
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":192,
-                 "y":192
+                 "x":144,
+                 "y":120
                 }, 
                 {
                  "height":0,
@@ -251,10 +251,10 @@
                         {
                          "name":"count",
                          "type":"int",
-                         "value":4
+                         "value":10
                         }],
                  "rotation":0,
-                 "type":"Supplies",
+                 "type":"Item",
                  "visible":true,
                  "width":0,
                  "x":48,
