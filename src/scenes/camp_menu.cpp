@@ -436,8 +436,8 @@ string CampMenuScene::getDescription(CampMenuOption option) {
   switch (option) {
     case CampMenuOption::ITEMS: {
       return 
-      "Use items the party has obtained over the\n"
-      "course of this session.";
+      "Use or discard any items that the party\n"
+      "has obtained.";
     }
     case CampMenuOption::TECHS: {
       return 
