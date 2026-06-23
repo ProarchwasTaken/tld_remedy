@@ -86,6 +86,10 @@ void Game::init() {
   SetTargetFPS(settings.framerate);
   SetTextLineSpacing(16);
 
+  Image icon = LoadImage("graphics/icon.png");
+  SetWindowIcon(icon);
+  UnloadImage(icon);
+
   setupCanvas();
 
   if (settings.fullscreen) {
