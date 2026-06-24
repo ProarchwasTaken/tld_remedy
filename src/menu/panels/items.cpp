@@ -789,7 +789,7 @@ void ItemsPanel::drawOptions() {
     if (option_state != OPTION && item == selected) {
       color = Game::palette[22];
     }
-    else if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
+    else if (!itemUsable(*item)) {
       color = Game::palette[2];
     }
 
