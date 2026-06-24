@@ -123,7 +123,10 @@ void UseItem::applyMedkitMending(PartyMember *member, float heal,
     }
   }
 
-  assert(mending != NULL);
+  if (mending == NULL) {
+    return;
+  }
+
   float recovery = Clamp(user->recovery, 1.0, 2.0);
   heal = heal * recovery;
 
