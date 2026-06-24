@@ -10,6 +10,7 @@
 #include "base/panel.h"
 #include "utils/input.h"
 #include "utils/menu.h"
+#include "utils/text.h"
 #include "menu/panels/dialog.h"
 #include <plog/Log.h>
 
@@ -18,27 +19,63 @@ using std::string, std::vector;
 
 DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
                          bool end_prompt, bool visible_frame, 
+                         bool open_instant, bool close_instant, 
                          float auto_time) 
 {
   id = PanelID::DIALOG;
   main_position = position;
   text_position = Vector2Add(position, {2, 1});
 
-  texture = LoadTexture("graphics/menu/frames/dialog1.png");
-  frame_height = texture.height;
-  visible = visible_frame;
-
-  menu_atlas = &Game::menu_atlas;
-  menu_atlas->use();
-
-  sfx = &Game::menu_sfx;
-  sfx->use();
-
-  keybinds = &Game::settings.menu_keybinds;
-
   this->dialog = dialog;
+  setup("dialog1.png", visible_frame, end_prompt, open_instant, 
+        close_instant, auto_time);
+}
+
+DialogPanel::DialogPanel(Vector2 position, string name, string title,
+                         vector<string> dialog, bool end_prompt, 
+                         bool visible_frame, bool open_instant, 
+                         bool close_instant, float auto_time)
+{
+  id = PanelID::DIALOG;
+  alternative = true;
+  main_position = position;
+  text_position = Vector2Add(position, {2, 14});
+
+  this->name = name;
+  name_position = Vector2Add(position, {2, 1});
+
+  this->title = title;
+  title_position = Vector2Add(position, {227, 1});
+  title_position = TextUtils::alignRight(title.c_str(), title_position, 
+                                         Game::med_font, -2, 0);
+  this->dialog = dialog;
+  setup("dialog2.png", visible_frame, end_prompt, open_instant, 
+        close_instant, auto_time);
+}
+
+DialogPanel::~DialogPanel() {
+  menu_atlas->release();
+  sfx->release();
+  UnloadTexture(texture);
+}
+
+void DialogPanel::setup(string file_name, bool visible_frame, 
+                        bool end_prompt, bool open_instant, 
+                        bool close_instant, float auto_time) 
+{
+  string path = "graphics/menu/frames/" + file_name;
+  texture = LoadTexture(path.c_str());
+  frame_height = texture.height;
+
   current_line = this->dialog.begin();
   current_char = current_line->begin();
+
+  visible = visible_frame;
+  close_instantly = close_instant;
+
+  if (open_instant) {
+    state = PanelState::READY;
+  }
 
   if (end_prompt) {
     selected = prompt_options.begin();
@@ -48,12 +85,14 @@ DialogPanel::DialogPanel(Vector2 position, vector<string> dialog,
     this->auto_time = auto_time;
     auto_mode = true;
   }
-}
 
-DialogPanel::~DialogPanel() {
-  menu_atlas->release();
-  sfx->release();
-  UnloadTexture(texture);
+  menu_atlas = &Game::menu_atlas;
+  menu_atlas->use();
+
+  sfx = &Game::menu_sfx;
+  sfx->use();
+
+  keybinds = &Game::settings.menu_keybinds;
 }
 
 void DialogPanel::update() {
@@ -80,14 +119,13 @@ void DialogPanel::update() {
     menuNavigation(gamepad);
   }
 
-  if (auto_mode && dialog_state == DialogState::END_OF_LINE) {
+  if (shouldAutoConfirm()) {
     autoConfirm();
   }
 
   if (Input::pressed(keybinds->confirm, gamepad)) {
     confirm();
   }
-
 }
 
 void DialogPanel::menuNavigation(bool gamepad) {
@@ -176,6 +214,10 @@ void DialogPanel::confirm() {
     case DialogState::END_OF_DIALOG: {
       PLOGI << "Ending Dialog.";
       state = PanelState::CLOSING;
+      if (close_instantly) {
+        terminate = true;
+        return;
+      }
 
       if (selected != NULL) {
         sfx->play("menu_select");
@@ -189,21 +231,58 @@ void DialogPanel::confirm() {
   }
 }
 
+bool DialogPanel::shouldAutoConfirm() {
+  if (!auto_mode) {
+    return false;
+  }
+
+  switch (dialog_state) {
+    case DialogState::SCROLLING: {
+      return false;
+    }
+    case DialogState::END_OF_DIALOG: {
+      bool end_prompt = selected != NULL;
+      if (end_prompt) {
+        return false;
+      }
+      else {
+        return true;
+      }
+    }
+    case DialogState::END_OF_LINE: {
+      return true;
+    }
+  }
+};
+
 void DialogPanel::autoConfirm() {
   assert(auto_time >= 0);
-  assert(dialog_state == DialogState::END_OF_LINE);
+  assert(dialog_state != DialogState::SCROLLING);
 
   auto_clock += Game::deltaTime() / auto_time;
-  if (auto_clock > 1.0) {
+  if (auto_clock < 1.0) {
+    return;
+  }
+
+  if (dialog_state == DialogState::END_OF_LINE) {
+    PLOGI << "Automatically moving on to the next line.";
     current_line++;
 
     if (current_line != dialog.end()) {
       current_char = current_line->begin();
       buffer.clear();
     }
-
-    auto_clock = 0.0;
   }
+  else {
+    PLOGI << "Ending Dialog automatically.";
+    state = PanelState::CLOSING;
+    if (close_instantly) {
+      terminate = true;
+      return;
+    } 
+  }
+
+  auto_clock = 0.0;
 }
 
 void DialogPanel::draw() {
@@ -213,17 +292,36 @@ void DialogPanel::draw() {
     DrawTextureRec(texture, source, main_position, WHITE);
   }
 
+  if (alternative) {
+    drawName();
+  }
+
   if (state != PanelState::READY) {
     return;
   }
 
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
+
   DrawTextEx(*font, buffer.c_str(), text_position, txt_size, -2, WHITE);
 
   if (selected != NULL && dialog_state == DialogState::END_OF_DIALOG) {
     drawOptions();
   }
+}
+
+void DialogPanel::drawName() {
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  Color title_color = Game::palette[40];
+  if (title == "Martyr") {
+    title_color = {3, 3, 3, 255};
+  }
+
+  DrawTextEx(*font, name.c_str(), name_position, txt_size, -2, WHITE);
+  DrawTextEx(*font, title.c_str(), title_position, txt_size, -2, 
+             title_color);
 }
 
 void DialogPanel::drawOptions() {

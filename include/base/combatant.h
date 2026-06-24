@@ -33,7 +33,6 @@ enum class DamageType {
 
 enum class StunType {
   NORMAL,
-  DEFENSIVE,
   STAGGER
 };
 
@@ -68,6 +67,9 @@ public:
    * modify the given damage data, execute special code, or cancel the
    * function all together.*/
   virtual void takeDamage(DamageData &data);
+
+  bool preDamageInterception(DamageData &data);
+  float damageProcedure(DamageData &data);
   float damageCalculation(DamageData &data);
 
   bool useTenacity(float damage, DamageType type);
@@ -91,9 +93,12 @@ public:
 
   virtual void enterHitstun(DamageData &data);
   void stunLogic();
-  void applyKnockback(float clock, float minimum = 0.0);
   void stunTintLerp();
   virtual void exitHitstun();
+
+  void setKnockback(float velocity, float seconds, Direction direction);
+  void knockbackLogic();
+  void applyKnockback(float clock, float minimum = 0.0);
 
   virtual void death();
   float deathClock() {return death_clock;}
@@ -172,7 +177,7 @@ private:
   float stun_clock = 0.0;
 
   float knockback = 0;
-  Direction kb_direction;
+  Direction kb_direction = LEFT;
   float kb_time = 0;
   float kb_clock = 0;
 

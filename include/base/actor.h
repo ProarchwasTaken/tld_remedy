@@ -46,12 +46,12 @@ public:
   ActorType actor_type;
   Direction direction;
   RectEx collis_box;
+  bool lock_sprite = false;
 
   static SpriteAtlas emotes;
   Rectangle *emote = NULL;
 
-  std::list<MovePoint> move_points;
-
   float default_speed;
   float movement_speed = -1;
+  std::list<MovePoint> move_points;
 };

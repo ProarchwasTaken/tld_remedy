@@ -6,7 +6,7 @@
 #include "data/session.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
-#include "data/ai_behavior.h"
+#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
@@ -30,8 +30,15 @@ enum class ErwinGoals {
 
 /* The parameters that govern how Erwin will behave. Depending on the
  * gamestate, these variables may change.*/
-struct ErwinAI : AIBehavior {
+struct ErwinAI : AIParameters {
   ErwinAI() {
+    attack_distance = 27;
+    contest_distance = 96;
+    
+    attack_cooldown = 0.10;
+    retreat_time = 0.5;
+    wait_time = 0.20;
+
     contesting = {0.40, 0.10, 0.40, 0.40, 0.10, 0.25};
     targeting = {0.25, 0.10, 0.75};
     retreating = {0.50, 0.10, 0.50};
@@ -110,7 +117,7 @@ public:
   Rectangle *getStunSprite();
 
   ErwinGoals ai_goal = ErwinGoals::IDLE;
-  std::unique_ptr<AIBehavior> ai_behavior; 
+  std::unique_ptr<AIParameters> ai; 
   float tick_clock = 0.0;
 
   Mary *player;
@@ -122,24 +129,9 @@ private:
   const float default_speed = 68;
   int moving_x = 0;
   bool has_moved = false;
+  bool attempt_evade = false;
 
   float preferred_plr_distance = 128;
-  float attack_distance = 27;
-  float contest_distance = 96;
-
-  float cooldown_clock = 1.0;
-  float attack_cooldown = 0.10;
-
-  float retreat_time = 0.5;
-  float retreat_clock = 0.0;
-
-  bool attempt_evade = false;
-  float dodge_time = 0.0;
-  float dodge_clock = 0.0;
-
-  bool waiting = false;
-  float wait_time = 0.20;
-  float wait_clock = 0.0;
 
   Animation anim_idle = {{0, 1}, 2.0};
   Animation anim_crit = {{2, 3}, 1.0};

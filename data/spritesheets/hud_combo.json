@@ -7,9 +7,13 @@
     {
       "filename": "stun_bar",
       "frame": {"x": 1, "y": 14, "w": 69, "h": 1}
+    },
+    {
+      "filename": "text_dmg",
+      "frame": {"x": 0, "y": 16, "w": 34, "h": 8}
     }
   ],
   "meta": {
-    "size": {"w": 72, "h": 16}
+    "size": {"w": 72, "h": 32}
   }
 }

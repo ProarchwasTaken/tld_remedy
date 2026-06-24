@@ -116,6 +116,30 @@ void Combatant::takeDamage(DamageData &data) {
   << "taken damage from: '" << data.assailant->name << "' [ID: " <<
   data.assailant->entity_id << "]";
 
+  if (preDamageInterception(data)) {
+    PLOGD << "Procedure has been intercepted. Canceling function.";
+    return;
+  }
+
+  float damage_sustained = damageProcedure(data);
+  setKnockback(data.knockback, data.stun_time, data.assailant->direction);
+  acceleration = 0.0;
+
+  if (state != DEAD && data.stun_time != 0) {
+    enterHitstun(data);
+  }
+
+  PLOGD << "Proceeding to queue TookDamage event.";
+  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
+                                         damage_sustained, 
+                                         data.damage_type, state,
+                                         data.stun_time, data.stun_type,
+                                         data.assailant);
+
+  PLOGI << "Damage procedure has reached it's conclusion.";
+}
+
+bool Combatant::preDamageInterception(DamageData &data) {
   if (!status.empty()) {
     for (auto &status_effect : status) {
       status_effect->intercept(data);
@@ -126,11 +150,10 @@ void Combatant::takeDamage(DamageData &data) {
     action->intercept(data);
   }
 
-  if (data.intercepted) {
-    PLOGD << "Procedure has been intercepted. Canceling function.";
-    return;
-  }
+  return data.intercepted;
+}
 
+float Combatant::damageProcedure(DamageData &data) {
   float damage = Clamp(damageCalculation(data), 0, 9999);
   PLOGD << "Damage Calculation: " << damage;
 
@@ -141,25 +164,7 @@ void Combatant::takeDamage(DamageData &data) {
 
   finalIntercept(damage, data);
   applyDamage(damage, data);
-
-  knockback = data.knockback;
-  kb_direction = data.assailant->direction;
-  kb_time = data.stun_time;
-  kb_clock = 0.0;
-
-  acceleration = 0.0;
-
-  if (state != DEAD && data.stun_time != 0) {
-    enterHitstun(data);
-  }
-
-  PLOGD << "Proceeding to queue TookDamage event.";
-  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
-                                         damage, data.damage_type, state,
-                                         data.stun_time, data.stun_type,
-                                         data.assailant);
-
-  PLOGI << "Damage procedure has reached it's conclusion.";
+  return damage;
 }
 
 float Combatant::damageCalculation(DamageData &data) {
@@ -310,21 +315,9 @@ void Combatant::increaseMorale(float magnitude, bool mp_share) {
 
 void Combatant::enterHitstun(DamageData &data) {
   assert(state != CombatantState::DEAD);
-  stun_type = data.stun_type;
-
-  float multiplier;
-  switch (stun_type) {
-    case StunType::NORMAL: {
-      multiplier = 1.0;
-      break;
-    }
-    case StunType::DEFENSIVE: {
-      multiplier = 0.80;
-      break;
-    }
-    case StunType::STAGGER: {
-      multiplier = 1.50;
-    }
+  float multiplier = 1.0;
+  if (data.stun_type == StunType::STAGGER) {
+    multiplier = 1.50;
   }
 
   stun_time = data.stun_time * multiplier;
@@ -354,33 +347,11 @@ void Combatant::stunLogic() {
   stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
 
-  if (knockback != 0 && kb_time != 0) {
-    kb_clock += Game::deltaTime() / kb_time;
-    kb_clock = Clamp(kb_clock, 0.0, 1.0);
-    applyKnockback(kb_clock);
-  }
-
   stunTintLerp();
 
   if (stun_clock == 1.0) {
     exitHitstun();
   }
-}
-
-void Combatant::applyKnockback(float clock, float minimum) {
-  float percentage = Clamp(1.0 - clock, minimum, 1.0);
-  float magnitude = (knockback * percentage) * Game::deltaTime();
-
-  if (state != DEAD && Collision::checkX(this, magnitude, kb_direction)) {
-    Collision::snapX(this, kb_direction);
-    stun_clock = Clamp(stun_clock, 0.75, 1.0);
-  }
-  else {
-    position.x += magnitude * kb_direction; 
-  }
-
-  direction = static_cast<Direction>(kb_direction * -1);
-  rectExCorrection(bounding_box, hurtbox);
 }
 
 void Combatant::stunTintLerp() {
@@ -401,6 +372,42 @@ void Combatant::exitHitstun() {
   stun_clock = 0.0;
   stun_time = 0;
   knockback = 0;
+}
+
+void Combatant::setKnockback(float velocity, float seconds, 
+                             Direction direction)
+{
+  knockback = velocity;
+  kb_direction = direction;
+  kb_time = seconds;
+  kb_clock = 0.0;
+}
+
+void Combatant::knockbackLogic() {
+  if (kb_clock == 1.0 || knockback == 0 || kb_time == 0) {
+    return;
+  }
+
+  kb_clock += Game::deltaTime() / kb_time;
+  kb_clock = Clamp(kb_clock, 0.0, 1.0);
+
+  applyKnockback(kb_clock);
+}
+
+void Combatant::applyKnockback(float clock, float minimum) {
+  float percentage = Clamp(1.0 - clock, minimum, 1.0);
+  float magnitude = (knockback * percentage) * Game::deltaTime();
+
+  if (state != DEAD && Collision::checkX(this, magnitude, kb_direction)) {
+    Collision::snapX(this, kb_direction);
+    stun_clock = Clamp(stun_clock, 0.75, 1.0);
+  }
+  else {
+    position.x += magnitude * kb_direction; 
+  }
+
+  direction = static_cast<Direction>(kb_direction * -1);
+  rectExCorrection(bounding_box, hurtbox);
 }
 
 void Combatant::death() {

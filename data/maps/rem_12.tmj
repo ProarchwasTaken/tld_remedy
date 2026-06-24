@@ -523,7 +523,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -661,7 +661,7 @@
                          "name":"flag",
                          "propertytype":"GameFlag",
                          "type":"int",
-                         "value":5
+                         "value":8
                         }, 
                         {
                          "name":"map_dest",
@@ -687,7 +687,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 

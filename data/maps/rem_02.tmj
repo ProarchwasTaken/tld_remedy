@@ -154,7 +154,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":112,
+                 "x":96,
                  "y":144
                 }, 
                 {
@@ -178,7 +178,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":96,
+                 "x":80,
                  "y":144
                 }, 
                 {
@@ -276,10 +276,10 @@
                         {
                          "name":"count",
                          "type":"int",
-                         "value":5
+                         "value":7
                         }],
                  "rotation":0,
-                 "type":"Supplies",
+                 "type":"Item",
                  "visible":true,
                  "width":0,
                  "x":48,

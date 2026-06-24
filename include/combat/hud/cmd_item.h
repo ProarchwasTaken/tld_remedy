@@ -20,7 +20,8 @@ public:
   void assign(Mary *&player, PartyMember *&companion, Session *session);
 
   void enable();
-  void updateSelected();
+  bool updateSelected();
+  int countUsableItems();
 
   void disable();
 
@@ -57,7 +58,14 @@ private:
 
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
-  std::unordered_set<ItemID> disallowed = {ItemID::NONE};
+  std::unordered_set<ItemID> disallowed = {
+    ItemID::NONE,
+    ItemID::J_BOOK,
+    ItemID::J_BROOM,
+    ItemID::J_SHIRT,
+    ItemID::J_PANTS,
+    ItemID::J_TPAPER
+  };
 
   Vector2 target_position;
   Color target_color;

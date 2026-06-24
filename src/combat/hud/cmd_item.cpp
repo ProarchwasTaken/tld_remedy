@@ -11,6 +11,7 @@
 #include "base/party_member.h"
 #include "utils/input.h"
 #include "utils/text.h"
+#include "utils/items.h"
 #include "utils/menu.h"
 #include "scenes/combat.h"
 #include "combat/hud/cmd_item.h"
@@ -69,14 +70,18 @@ void ItemCmdHud::enable() {
     return;
   }
 
-  mary->setEnabled(false);
-
   std::copy(session->inventory, session->inventory + 8, options.begin());
-  updateSelected();
+  bool success = updateSelected();
+  if (!success) {
+    mary->sfx.play("action_denied");
+    return;
+  }
 
+  mary->setEnabled(false);
   target = party.begin();
   
-  main_position.y = base_y - (11 * session->item_count);
+  int usable_items = countUsableItems();
+  main_position.y = base_y - (11 * usable_items);
   opt_switch_clock = 0;
 
   atlas->use();
@@ -87,20 +92,40 @@ void ItemCmdHud::enable() {
   PLOGI << "Enabled Item Command Hud.";
 }
 
-void ItemCmdHud::updateSelected() {
+bool ItemCmdHud::updateSelected() {
   selected = NULL;
 
   for (int index = 0; index < session->item_limit; index++) {
     ItemID item = options.at(index);
 
-    if (item != ItemID::NONE) {
+    if (disallowed.find(item) == disallowed.end()) {
       selected = options.begin() + index;
       PLOGD << "Selected set to: " << static_cast<int>(item);
-      break;
+      return true;
     }
   }
 
-  assert(selected != NULL);
+  PLOGW << "Found no usable items!";
+  return false;
+}
+
+int ItemCmdHud::countUsableItems() {
+  int count = session->item_count;
+  for (int index = 0; index < session->item_limit; index++) {
+    ItemID item = options.at(index);
+
+    if (item == ItemID::NONE) {
+      continue;
+    }
+
+    bool unusable = disallowed.find(item) != disallowed.end();
+    if (unusable) {
+      count--;
+    }
+  }
+
+  assert(count >= 0);
+  return count;
 }
 
 void ItemCmdHud::disable() {
@@ -186,6 +211,10 @@ void ItemCmdHud::selectOption() {
 }
 
 bool ItemCmdHud::enterTargetMode() {
+  if (*selected == ItemID::FA_KIT) {
+    return false;
+  }
+
   if (*companion == NULL) {
     return false;
   }
@@ -281,7 +310,7 @@ void ItemCmdHud::drawOptions(Font *font, int txt_size) {
 
   for (int index = 0; index < session->item_limit; index++) {
     ItemID *item = &options.at(index);
-    if (*item == ItemID::NONE) {
+    if (disallowed.find(*item) != disallowed.end()) {
       continue;
     }
 
@@ -300,32 +329,7 @@ void ItemCmdHud::drawOptions(Font *font, int txt_size) {
 void ItemCmdHud::drawOptionText(ItemID item, Vector2 position, 
                                 Font *font, int txt_size) 
 {
-  string name;
-  switch (item) {
-    case ItemID::I_BANDAGE: {
-      name = "I.Bandage";
-      break;
-    }
-    case ItemID::M_SPLINT: {
-      name = "M.Splint";
-      break;
-    }
-    case ItemID::S_BANDAGE: {
-      name = "S.Bandage";
-      break;
-    }
-    case ItemID::S_WATER: {
-      name = "S.Water";
-      break;
-    }
-    case ItemID::P_KILLERS: {
-      name = "P.Killers";
-      break;
-    }
-    default: {
-      assert(item != ItemID::NONE);
-    }
-  }
+  string name = ItemUtils::getShortened(item);
 
   position = Vector2Add(position, {59, 1});
   position = TextUtils::alignRight(name.c_str(), position, *font, -3, 0);

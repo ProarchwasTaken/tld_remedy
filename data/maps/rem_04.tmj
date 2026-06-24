@@ -123,14 +123,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":1
+                         "value":2
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
                  "x":128,
-                 "y":192
+                 "y":112
                 }, 
                 {
                  "height":0,
@@ -147,14 +147,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":1
+                         "value":2
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":112,
-                 "y":192
+                 "x":128,
+                 "y":96
                 }, 
                 {
                  "height":0,
@@ -206,7 +206,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 

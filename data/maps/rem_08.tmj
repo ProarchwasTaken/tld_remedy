@@ -229,14 +229,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":-2
+                         "value":1
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":48,
-                 "y":128
+                 "x":80,
+                 "y":112
                 }, 
                 {
                  "height":0,
@@ -253,14 +253,14 @@
                         {
                          "name":"direction",
                          "type":"int",
-                         "value":-2
+                         "value":1
                         }],
                  "rotation":0,
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":48,
-                 "y":144
+                 "x":64,
+                 "y":112
                 }, 
                 {
                  "height":0,

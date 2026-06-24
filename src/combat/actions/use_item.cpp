@@ -1,8 +1,11 @@
 #include <cassert>
 #include <memory>
 #include <cstddef>
+#include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "game.h"
+#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "base/status_effect.h"
 #include "base/party_member.h"
@@ -43,7 +46,7 @@ void UseItem::applyItemEffect() {
   switch (item) {
     case ItemID::I_BANDAGE: {
       PLOGI << "Applying effect of item: Improvised Bandage.";
-      applyMending(0.25, 0.05);
+      applyMending(target, 0.25, 0.05);
       break;
     }
     case ItemID::M_SPLINT: {
@@ -53,7 +56,7 @@ void UseItem::applyItemEffect() {
     }
     case ItemID::S_BANDAGE: {
       PLOGI << "Applying effect of item: Sterilized Bandage.";
-      applyMending(0.50, 0.10);
+      applyMending(target, 0.50, 0.10);
       break;
     }
     case ItemID::S_WATER: {
@@ -66,20 +69,34 @@ void UseItem::applyItemEffect() {
       applyEndurance();
       break;
     }
+    case ItemID::FA_KIT: {
+      PLOGI << "Applying effect of item: First Aid Kit.";
+      for (Combatant *combatant : Combatant::existing_combatants) {
+        if (combatant->state == CombatantState::DEAD) {
+          return;
+        }
+
+        if (combatant->team == CombatantTeam::PARTY) {
+          PartyMember *member = static_cast<PartyMember*>(combatant);
+          applyMedkitMending(member, 6, 0.05);
+        }
+      }
+    }
     default: {
       PLOGE << "Invalid Item!!";
     }
   }
 }
 
-void UseItem::applyMending(float percentage, float speed) {
-  if (target->life == target->max_life) {
+void UseItem::applyMending(PartyMember *member, float percentage, 
+                           float speed) {
+  if (member->life == member->max_life) {
     PLOGI << "Target is already at full Life!";
     user->sfx.play("mending_loss");
     return;
   }
 
-  for (auto &effect : target->status) {
+  for (auto &effect : member->status) {
     if (effect->id == StatusID::MENDING) {
       Mending *mending = static_cast<Mending*>(effect.get());
       mending->refresh(percentage, speed);
@@ -87,10 +104,36 @@ void UseItem::applyMending(float percentage, float speed) {
     }
   }
 
-  unique_ptr<StatusEffect> effect = make_unique<Mending>(target, 
+  unique_ptr<StatusEffect> effect = make_unique<Mending>(member, 
                                                          percentage,
                                                          speed);
-  target->afflictStatus(effect);
+  member->afflictStatus(effect);
+}
+
+void UseItem::applyMedkitMending(PartyMember *member, float heal, 
+                                 float speed)
+{
+  applyMending(member, 0.05, speed);
+
+  Mending *mending = NULL;
+  for (auto &effect : member->status) {
+    if (effect->id == StatusID::MENDING) {
+      mending = static_cast<Mending*>(effect.get());
+      break;
+    }
+  }
+
+  if (mending == NULL) {
+    return;
+  }
+
+  float recovery = Clamp(user->recovery, 1.0, 2.0);
+  heal = heal * recovery;
+
+  if (heal > mending->to_be_healed) {
+    PLOGI << "Overridding the original value with: " << heal;
+    mending->to_be_healed = heal;
+  }
 }
 
 void UseItem::applySplint() {
@@ -131,6 +174,9 @@ void UseItem::applyRefreshed() {
 
   unique_ptr<StatusEffect> effect = make_unique<Refreshed>(target);
   target->afflictStatus(effect);
+
+  float value = target->init_morale / 2;
+  target->increaseMorale(value, true);
 }
 
 void UseItem::applyEndurance() {

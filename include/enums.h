@@ -49,6 +49,9 @@ enum class CompanionID {
 
 enum class FlagID {
   NONE = -1,
+  DEATH_SAVE,
+  DS_SEQ_MILD,
+  DS_SEQ_SEVERE,
   CDF2_AFTER_INTRO,
   CDF2_BEFORE_FIRST,
   CDF2_AFTER_FIRST,
@@ -65,6 +68,12 @@ enum class ItemID {
   S_BANDAGE,
   S_WATER,
   P_KILLERS,
+  FA_KIT,
+  J_BOOK,
+  J_BROOM,
+  J_SHIRT,
+  J_PANTS,
+  J_TPAPER,
 };
 
 enum class CombatantTeam {
@@ -119,7 +128,7 @@ enum class StatusID {
   CRIPPLED_LEG,
   MANGLED,
   BLEEDING, 
-  FEAR,
+  VULNERABLE,
   DESPONDENT,
   MENDING,
   REFRESHED,
@@ -143,6 +152,7 @@ enum class FieldEVT {
   LOAD_MAP,
   SAVE_SESSION,
   OPEN_MENU,
+  OPEN_MENU_SC,
   OPEN_REST,
   INIT_COMBAT,
   INIT_COMBAT_FORCED,
@@ -164,6 +174,7 @@ enum class FieldEVT {
   COM_ADD_EFFECT,
   COM_RM_EFFECT,
   OPEN_DIALOG,
+  OPEN_DIALOG_EX,
   START_SEQUENCE,
   START_FLAG_SEQUENCE,
 };
@@ -178,8 +189,12 @@ enum class SequenceID {
   SAVE,
   REST,
   REJECT,
+  INCAP,
+  DS_ERWIN_MILD,
+  DS_ERWIN_SEVERE,
   #ifndef NDEBUG
   DB_01 = 95, 
+  DB_02 = 96,
   #endif // !NDEBUG
 };
 

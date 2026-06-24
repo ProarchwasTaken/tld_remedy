@@ -21,7 +21,7 @@ enum class CampMenuOption {
 
 class CampMenuScene : public Scene {
 public:
-  CampMenuScene(Session *session);
+  CampMenuScene(Session *session, CampMenuOption *start = NULL);
   ~CampMenuScene();
 
   void update() override;
@@ -81,6 +81,8 @@ private:
     CLOSING_PANEL,
   } state = OPENING;
   bool end_session = false;
+
+  bool quick_start = false;
 
   float state_clock = 0.0;
   float state_time = 0.8;

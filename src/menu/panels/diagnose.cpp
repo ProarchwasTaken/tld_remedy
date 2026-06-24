@@ -41,6 +41,7 @@ DiagnosePanel::DiagnosePanel(Session *session, SpriteAtlas *rest_atlas) {
   current_member = party.begin();
   supplies = &session->supplies;
   updateDisallowed();
+  updateCureCosts();
   PLOGD << "DiagnosePanel has been initialized.";
 }
 
@@ -67,6 +68,19 @@ void DiagnosePanel::updateDisallowed() {
   }
 
   PLOGD << "Updated disallowed options.";
+}
+
+void DiagnosePanel::updateCureCosts() {
+  PLOGD << "Updating Ailment Cure costs.";
+
+  cure_broken_cost = calculateCureCost(10);
+  PLOGD << "Broken Arm: " << cure_broken_cost;
+
+  cure_crippled_cost = calculateCureCost(15);
+  PLOGD << "Crippled Leg: " << cure_crippled_cost;
+
+  cure_mangled_cost = calculateCureCost(20);
+  PLOGD << "Mangled: " << cure_mangled_cost;
 }
 
 void DiagnosePanel::update() {
@@ -134,7 +148,9 @@ void DiagnosePanel::menuNavigation() {
   if (Input::pressed(keybind->right, gamepad)) {
     MenuUtils::nextOption(party, current_member);
     selected = options.begin();
+
     updateDisallowed();
+    updateCureCosts();
 
     portrait.fade_clock = 0.0;
     blink_clock = 0.0;
@@ -143,7 +159,9 @@ void DiagnosePanel::menuNavigation() {
   else if (Input::pressed(keybind->left, gamepad)) {
     MenuUtils::prevOption(party, current_member);
     selected = options.begin();
+
     updateDisallowed();
+    updateCureCosts();
 
     portrait.fade_clock = 0.0;
     blink_clock = 0.0;
@@ -257,6 +275,7 @@ void DiagnosePanel::healModeInput() {
     PLOGI << "Canceling heal mode.";
     heal_mode = false;
     heal_segments = 0;
+    heal_cost = 0;
     sfx->play("menu_cancel");
   }
 }
@@ -269,10 +288,11 @@ void DiagnosePanel::incHealSegments(float life, float max_life) {
     return;
   }
 
-  int resulting_supply_cost = (heal_segments + 1) * 2;
+  int resulting_supply_cost = calculateHealCost(heal_segments + 1);
   if (*supplies >= resulting_supply_cost) {
     heal_segments++;
     to_be_healed = calculateToBeHealed(life, max_life);
+    heal_cost = resulting_supply_cost;
   }
   else {
     sfx->play("menu_cancel");
@@ -283,6 +303,7 @@ void DiagnosePanel::decHealSegments(float life, float max_life) {
   if (heal_segments != 0) {
     heal_segments--;
     to_be_healed = calculateToBeHealed(life, max_life);
+    heal_cost = calculateHealCost(heal_segments);
   }
   else {
     sfx->play("menu_cancel");
@@ -294,10 +315,9 @@ void DiagnosePanel::openHealDialog() {
   Character *party_member = *current_member;
   string name = party_member->name;
 
-  int cost = heal_segments * 2;
-  const char *text = TextFormat("Spend %i supplies to heal %s\n"
+  const char *text = TextFormat("Spend %00.00f supplies to heal %s\n"
                                 "for %00.00f Life?",
-                                cost, name.c_str(), to_be_healed);
+                                heal_cost, name.c_str(), to_be_healed);
 
   vector<string> dialog = {text};
   Vector2 position = {16, 183};
@@ -310,15 +330,15 @@ void DiagnosePanel::applyHeal() {
   Character *party_member = *current_member;
   float *life = &party_member->life;
   float max_life = party_member->max_life;
-  int cost = heal_segments * 2;
 
   PLOGI << "Healing " << party_member->name << " for " << to_be_healed <<
     "Life";
   *life = Clamp(*life + to_be_healed, 0, max_life);
-  *supplies -= cost;
+  *supplies -= heal_cost;
 
   heal_mode = false;
   heal_segments = 0;
+  heal_cost = 0;
   sfx->play("menu_item");
 }
 
@@ -341,6 +361,76 @@ float DiagnosePanel::calculateToBeHealed(float life, float max_life) {
   return to_be_healed;
 }
 
+float DiagnosePanel::calculateHealCost(int segments) {
+  if (segments == 0) {
+    return 0;
+  }
+
+  Character *heal_target = *current_member;
+  float recovery = heal_target->recovery;
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID effect = heal_target->status[x];
+
+    if (effect == StatusID::MANGLED) {
+      recovery = mangledPenalty(heal_target, recovery);
+      break;
+    }
+  }
+
+  float percentage = pow(2.0 - recovery, 2);
+  float unit_cost = 2 * percentage;
+
+  float modifier = 1.0;
+  if (heal_target->member_id != PartyMemberID::MARY) {
+    Character *mary = party.front();
+    float m_recovery = mary->recovery;
+    
+    modifier = 1.0 - ((m_recovery * m_recovery) / 6);
+  }
+
+  float result = std::ceilf(unit_cost * modifier * segments); 
+  return result;
+}
+
+float DiagnosePanel::mangledPenalty(Character *heal_target, 
+                                    float recovery) 
+{
+  float resilience = heal_target->resilience;
+  float dec_percentage = Lerp(0.15, 0.85, resilience - 0.20);
+
+  dec_percentage = Clamp(dec_percentage, 0.15, 0.85);
+  recovery = recovery * dec_percentage;
+
+  return recovery;
+}
+
+float DiagnosePanel::calculateCureCost(float base_cost) {
+  Character *cure_target = *current_member;
+  float recovery = cure_target->recovery;
+
+  for (int x = 0; x < STATUS_LIMIT; x++) {
+    StatusID effect = cure_target->status[x];
+
+    if (effect == StatusID::MANGLED) {
+      recovery = mangledPenalty(cure_target, recovery);
+      break;
+    }
+  }
+
+  float percentage = 2 - recovery;
+  float modifier = 1.0;
+  if (cure_target->member_id != PartyMemberID::MARY) {
+    Character *mary = party.front();
+    float m_recovery = mary->recovery;
+    
+    modifier = 1.0 - ((m_recovery * m_recovery) / 6);
+  }
+
+  float result = std::ceilf(base_cost * percentage * modifier);
+  return result;
+}
+
 void DiagnosePanel::cureEffect() {
   assert(*selected != DiagnoseOptions::LIFE);
   Character *party_member = *current_member;
@@ -360,6 +450,8 @@ void DiagnosePanel::cureEffect() {
   assert(party_member->status_count >= 0);
 
   updateDisallowed();
+  updateCureCosts();
+
   MenuUtils::prevOption(options, selected, &disallowed);
   sfx->play("menu_item");
 }
@@ -413,9 +505,8 @@ void DiagnosePanel::drawSupplyCount() {
              count_color);
 
   if (heal_segments != 0) {
-    int cost = heal_segments * 2;
-    text = TextFormat("-%i", cost);
-    Vector2 position = {96, 7};
+    text = TextFormat("-%00.00f", heal_cost);
+    position = {96, 7};
     DrawTextEx(*med_font, text.c_str(), position, med_size, -2, 
                Game::palette[33]);
   }
@@ -648,13 +739,13 @@ string DiagnosePanel::getStatusDesc(StatusID id) {
 int DiagnosePanel::getSupplyCost(StatusID id) {
   switch (id) {
     case StatusID::BROKEN_ARM: {
-      return 10;
+      return cure_broken_cost;
     }
     case StatusID::CRIPPLED_LEG: {
-      return 15;
+      return cure_crippled_cost;
     }
     case StatusID::MANGLED: {
-      return 20;
+      return cure_mangled_cost;
     }
     default: {
       return -1;

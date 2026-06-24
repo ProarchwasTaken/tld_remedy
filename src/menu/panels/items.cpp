@@ -34,10 +34,8 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   this->session = session;
   this->description = description;
-  description->clear();
-
   this->desc_color = desc_color;
-  *desc_color = Game::palette[22];
+  description->clear();
 
   this->keybinds = &Game::settings.menu_keybinds;
 
@@ -47,6 +45,8 @@ ItemsPanel::ItemsPanel(Session *session, string *description,
 
   std::copy(session->inventory, session->inventory + 8, options.begin());
   updateSelected();
+
+  sub_selected = sub_options.begin();
 
   party = {&session->player, &session->companion};
   target = party.begin();
@@ -83,6 +83,7 @@ void ItemsPanel::updateSelected() {
 
     if (*item != ItemID::NONE) {
       selected = options.begin() + index;
+      swap_selected = selected;
       item_name = ItemUtils::getName(*selected);
       PLOGD << "Selected set to: " << static_cast<int>(*item);
       return;
@@ -93,9 +94,67 @@ void ItemsPanel::updateSelected() {
   selected = NULL;
 }
 
+void ItemsPanel::resetSubSelected() {
+  sub_disallowed.clear();
+
+  assert(selected != NULL);
+  if (!itemUsable(*selected)) {
+    PLOGD << "Detected that the selected item is unusable.";
+    sub_disallowed.emplace(ItemOptions::USE);
+  }
+
+  if (session->item_count <= 1) {
+    PLOGD << "Detected that the player has one or no items.";
+    sub_disallowed.emplace(ItemOptions::SWAP);
+  }
+
+  sub_selected = NULL;
+  for (ItemOptions &option : sub_options) {
+    if (sub_disallowed.find(option) == sub_disallowed.end()) {
+      sub_selected = &option;
+      break;
+    }
+  }
+
+  assert(sub_selected != NULL);
+}
+
+void ItemsPanel::updateSubOptionDesc() {
+  assert(sub_selected != NULL);
+  switch (*sub_selected) {
+    case ItemOptions::USE: {
+      *description = "Use the selected item.";
+      break;
+    }
+    case ItemOptions::SWAP: {
+      *description = "Swap the selected item with another\n"
+        "one.";
+      break;
+    }
+    case ItemOptions::TOSS: {
+      *description = "Discard the currently selected \n"
+        "item.";
+    }
+  }
+}
+
+bool ItemsPanel::itemUsable(ItemID item) {
+  switch (item) {
+    case ItemID::I_BANDAGE:
+    case ItemID::M_SPLINT:
+    case ItemID::S_BANDAGE:
+    case ItemID::FA_KIT: {
+      return true;
+    }
+    default: {
+      assert(item != ItemID::NONE);
+      return false;
+    }
+  }
+}
 
 void ItemsPanel::useItem() {
-  assert(target_mode);
+  assert(option_state = TARGET);
   assert(selected != NULL);
   ItemID item = *selected;
   Character *member = *target;
@@ -148,17 +207,35 @@ void ItemsPanel::useItem() {
       }
 
       float heal = calculateHeal(member, 0.5);
-      PLOGI << "Healing combatant by: " << heal << " Life";
+      PLOGI << "Healing combatant by: " << heal << " Life.";
 
       member->life = Clamp(member->life + heal, 0, member->max_life);
       openHealDialog(member, heal);
       break;
     }
+    case ItemID::FA_KIT: {
+      Character *mary = *party.begin();
+      Character *companion = party.at(1);
+
+      float m_max_life = mary->max_life;
+      float c_max_life = companion->max_life;
+
+      if (mary->life == m_max_life && companion->life == c_max_life) {
+        openPartyRejectDialog(companion);
+        return;
+      }
+
+      float recovery = Clamp(mary->recovery, 0.0, 2.0);
+      float heal = std::ceilf(6 * recovery);
+      PLOGI << "Healing party by: " << heal << " Life.";
+
+      mary->life = Clamp(mary->life + heal, 0.0, m_max_life);
+      companion->life = Clamp(companion->life + heal, 0.0, c_max_life);
+      openMedkitDialog(mary, companion, heal);
+      break;
+    }
     default: {
       assert(item != ItemID::NONE);
-      vector<string> dialog = {"This item can only be used in combat!"};
-      openDialog(dialog);
-      sfx->play("menu_cancel");
       return;
     }
   }
@@ -167,6 +244,29 @@ void ItemsPanel::useItem() {
   session->item_count--;
   updateSelected();
   sfx->play("menu_item");
+}
+
+void ItemsPanel::swapItems() {
+  assert(selected != NULL && swap_selected != NULL);
+
+  if (swap_selected == selected) {
+    sfx->play("menu_cancel");
+    return;
+  }
+
+  ItemID temp = *selected;
+  *selected = *swap_selected;
+  *swap_selected = temp;
+
+  selected = swap_selected;
+}
+
+void ItemsPanel::tossItem() {
+  assert(*selected != ItemID::NONE);
+  *selected = ItemID::NONE;
+  session->item_count--;
+  updateSelected();
+  sfx->play("menu_craft");
 }
 
 float ItemsPanel::calculateHeal(Character *member, float percentage) {
@@ -204,9 +304,9 @@ float ItemsPanel::calculateHeal(Character *member, float percentage) {
   return result;
 }
 
-void ItemsPanel::openDialog(vector<string> &dialog) {
+void ItemsPanel::openDialog(vector<string> &dialog, bool prompt) {
   Vector2 position = {185, 187};
-  panel = make_unique<DialogPanel>(position, dialog);
+  panel = make_unique<DialogPanel>(position, dialog, prompt);
   panel_mode = true;
 }
 
@@ -215,6 +315,19 @@ void ItemsPanel::openRejectDialog(Character *member) {
   std::strcpy(name, member->name);
 
   const char *text = TextFormat("%s seems to be just fine.", name);
+  vector<string> dialog = {text};
+
+  openDialog(dialog);
+  sfx->play("menu_cancel");
+}
+
+void ItemsPanel::openPartyRejectDialog(Character *companion) {
+  assert(companion->member_id != PartyMemberID::MARY);
+  char c_name[9];
+  std::strcpy(c_name, companion->name);
+
+  const char *text = TextFormat("Both Mary and %s are already\n"
+                                "in perfect condition.", c_name);
   vector<string> dialog = {text};
 
   openDialog(dialog);
@@ -255,6 +368,36 @@ void ItemsPanel::openHealDialog(Character *member, float healed) {
     ;
     dialog.push_back(text);
   }
+
+  openDialog(dialog);
+}
+
+void ItemsPanel::openMedkitDialog(Character *mary, Character *companion,
+                                  float healed)
+{
+  char c_name[9];
+  std::strcpy(c_name, companion->name);
+
+  vector<string> dialog;
+  string text = TextFormat("Mary attempts to use a medkit to heal\n"
+                           "both himself and %s.", c_name);
+  dialog.push_back(text);
+  text.clear();
+
+  if (mary->life < mary->max_life) {
+    text = TextFormat("Mary recovers %00.00f Life.\n", healed);
+  }
+  else {
+    text = TextFormat("Mary's Life was maxed out.\n");
+  }
+
+  if (companion->life < companion->max_life) {
+    text = text + TextFormat("%s recovers %00.00f Life.", c_name, healed);
+  }
+  else {
+    text = text + TextFormat("%s's Life was maxed out.", c_name, healed);
+  }
+  dialog.push_back(text);
 
   openDialog(dialog);
 }
@@ -316,11 +459,23 @@ void ItemsPanel::update() {
     return;
   }
 
-  if (!target_mode) {
-    optionNavigation();
-  }
-  else {
-    targetNavigation();
+  switch (option_state) {
+    case OPTION: {
+      optionNavigation();
+      break;
+    }
+    case SUB_OPTION: {
+      subOptionNavigation();
+      break;
+    }
+    case TARGET: {
+      targetNavigation();
+      break;
+    }
+    case SWAP: {
+      swapNavigation();
+      break;
+    }
   }
 
   blink_clock += Game::deltaTime();
@@ -330,9 +485,26 @@ void ItemsPanel::panelLogic() {
   assert(panel != nullptr == panel_mode);
   panel->update();
 
-  if (panel->terminate) {
-    panel.reset();
-    panel_mode = false;
+  if (!panel->terminate) {
+    return;
+  }
+
+  if (panel->selected != NULL) {
+    promptHandling();
+  }
+
+  panel.reset();
+  panel_mode = false;
+}
+
+void ItemsPanel::promptHandling() {
+  assert(*sub_selected == ItemOptions::TOSS);
+
+  if (*panel->selected == PromptOptions::YES) {
+    tossItem();
+    sub_selected = sub_options.begin();
+    option_state = OPTION;
+    description->clear();
   }
 }
 
@@ -351,27 +523,131 @@ void ItemsPanel::optionNavigation() {
   bool gamepad = IsGamepadAvailable(0);
   if (selected != NULL && Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected, &disallowed);
-    sfx->play("menu_navigate");
     item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (selected != NULL && Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected, &disallowed);
-    sfx->play("menu_navigate");
     item_name = ItemUtils::getName(*selected);
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (selected != NULL && Input::pressed(keybinds->confirm, gamepad)) 
   {
-    *description = "Select a combatant to use item:\n"
-      "\"" + item_name + "\"";
-    target = party.begin();
+    option_state = SUB_OPTION;
+    resetSubSelected();
+    updateSubOptionDesc();
     sfx->play("menu_select");
-    target_mode = true;
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
     state = PanelState::CLOSING;
     sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::swapNavigation() {
+  assert(swap_selected != NULL);
+
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(options, swap_selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(options, swap_selected, &disallowed);
+    blink_clock = 0.0;
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    swapItems();
+    option_state = OPTION;
+
+    description->clear();
+    *desc_color = WHITE;
+
+    sfx->play("menu_select"); 
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    option_state = SUB_OPTION;
+
+    updateSubOptionDesc();
+    *desc_color = WHITE;
+    sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::subOptionNavigation() {
+  bool gamepad = IsGamepadAvailable(0);
+
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(sub_options, sub_selected, &sub_disallowed);
+    updateSubOptionDesc();
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(sub_options, sub_selected, &sub_disallowed);
+    updateSubOptionDesc();
+    sfx->play("menu_navigate");
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    selectSubOption();
+    blink_clock = 0.0;
+    sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    sub_selected = sub_options.begin();
+    option_state = OPTION;
+    description->clear();
+    sfx->play("menu_cancel");
+  }
+}
+
+void ItemsPanel::selectSubOption() {
+  assert(selected != NULL && *selected != ItemID::NONE);
+  switch (*sub_selected) {
+    case ItemOptions::USE: {
+      if (*selected == ItemID::FA_KIT) {
+        useItem();
+        option_state = OPTION;
+        description->clear();
+        break;
+      }
+
+      if (itemUsable(*selected)) {
+        *description = "Select a combatant to use item:\n"
+              "\"" + item_name + "\"";
+        *desc_color = Game::palette[22];
+
+        target = party.begin();
+        option_state = TARGET;
+      }
+      else {
+        PLOGI << "Selected item is unusable!";
+        sfx->play("menu_cancel");
+      }
+
+      break;
+    }
+    case ItemOptions::SWAP: {
+      PLOGI << "Entering swap mode.";
+      assert(session->item_count > 1);
+
+      *description = "Select another item to swap\n"
+        "\"" + item_name + "\" with.";
+      *desc_color = Game::palette[22];
+
+      option_state = SWAP;
+      break;
+    }
+    case ItemOptions::TOSS: {
+      PLOGI << "Attempting to open Toss dialog.";
+      string item_name = ItemUtils::getName(*selected);
+      const char *text = TextFormat("Discard \"%s\"?", item_name.c_str());
+      vector<string> dialog = {text};
+      openDialog(dialog, true);
+    }
   }
 }
 
@@ -381,23 +657,28 @@ void ItemsPanel::targetNavigation() {
 
   if (Input::pressed(keybinds->right, gamepad)) {
     MenuUtils::nextOption(party, target);
-    sfx->play("menu_navigate");
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->left, gamepad)) {
     MenuUtils::prevOption(party, target);
-    sfx->play("menu_navigate");
     blink_clock = 0.0;
+    sfx->play("menu_navigate");
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     useItem();
-    target_mode = false;
-    *description = "";
+    option_state = OPTION;
+
+    description->clear();
+    *desc_color = WHITE;
+
     sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
-    target_mode = false;
-    *description = "";
+    updateSubOptionDesc();
+    *desc_color = WHITE;
+
+    option_state = SUB_OPTION;
     sfx->play("menu_cancel");
   }
 }
@@ -409,16 +690,20 @@ void ItemsPanel::draw() {
   drawItemCount();
   drawOptions();
 
-  if (selected != NULL && state == PanelState::READY) {
-    drawItemInfo();
+  if (option_state != OPTION) {
+    drawSubOptions();
   }
 
-  if (target_mode) {
+  if (option_state == TARGET) {
     Character *party_member = *target;
     bool leader = party_member->member_id == PartyMemberID::MARY;
 
     Vector2 position = {213.0f + (104.0f * !leader), 148};
     reticle.draw(position, blink_clock);
+  }
+
+  if (selected != NULL && state == PanelState::READY) {
+    drawItemInfo();
   }
 
   if (panel_mode) {
@@ -492,22 +777,78 @@ void ItemsPanel::drawOptions() {
     DrawTextureRec(camp_atlas->sheet, sprite, position, WHITE);
 
     if (item == selected) {
-      drawCursor(position);
+      drawCursor(position, option_state == OPTION);
+    }
+    else if (option_state == SWAP && item == swap_selected) {
+      drawCursor(position, true);
     }
 
     position = Vector2Add(position, {6, 1});
 
-    Color color = WHITE;
-    if (*item == ItemID::S_WATER || *item == ItemID::P_KILLERS) {
+    Color color = WHITE; 
+    if (option_state != OPTION && item == selected) {
+      color = Game::palette[22];
+    }
+    else if (!itemUsable(*item)) {
       color = Game::palette[2];
     }
 
     DrawTextEx(*font, name.c_str(), position, txt_size, -2, color);
-    multiplier += 1;
+    multiplier++;
   }
 }
 
-void ItemsPanel::drawCursor(Vector2 position) {
+void ItemsPanel::drawSubOptions() {
+  Font *font = &Game::med_font;
+  int txt_size = font->baseSize;
+
+  Rectangle *sprite = &camp_atlas->sprites[9];
+  int multiplier = 0;
+
+  for (ItemOptions &option : sub_options) {
+    string name = getSubOptionName(option);
+    Vector2 position = sub_option_position;
+    position.y += 16 * multiplier;
+
+    Color color;
+    Color txt_color;
+
+    if (sub_disallowed.find(option) != sub_disallowed.end()) {
+      color = Game::palette[2];
+      txt_color = Game::palette[2];
+    }
+    else if (sub_selected == &option) {
+      color = Game::palette[43];
+      txt_color = WHITE;
+    }
+    else {
+      color = Game::palette[40];
+      txt_color = Game::palette[42];
+    }
+
+    DrawTextureRec(camp_atlas->sheet, *sprite, position, color);
+    position = Vector2Add(position, {7, 1});
+
+    DrawTextEx(*font, name.c_str(), position, txt_size, -2, txt_color);
+    multiplier++;
+  }
+}
+
+string ItemsPanel::getSubOptionName(ItemOptions option) {
+  switch (option) {
+    case ItemOptions::USE: {
+      return "USE";
+    }
+    case ItemOptions::SWAP: {
+      return "SWAP";
+    }
+    case ItemOptions::TOSS: {
+      return "TOSS";
+    }
+  }
+}
+
+void ItemsPanel::drawCursor(Vector2 position, bool blink) {
   if (state != PanelState::READY) {
     return;
   }
@@ -517,10 +858,13 @@ void ItemsPanel::drawCursor(Vector2 position) {
 
   Color color = WHITE;
 
-  if (!target_mode) {
+  if (blink) {
     float sin_a = std::sinf(blink_clock * 2.5);
     sin_a = (sin_a / 2) + 0.5;
     color.a = 255 * sin_a;
+  }
+  else {
+    color = Game::palette[22];
   }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
@@ -548,7 +892,8 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
   string type;
   switch (*selected) {
     case ItemID::I_BANDAGE:
-    case ItemID::S_BANDAGE: {
+    case ItemID::S_BANDAGE:
+    case ItemID::FA_KIT: {
       type = "Restorative Item";
       break;
     }
@@ -566,6 +911,7 @@ void ItemsPanel::drawItemType(Font *font, int txt_size) {
     }
     default: {
       assert(*selected != ItemID::NONE);
+      type = "Junk Item";
     }
   }
 
@@ -580,7 +926,8 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
   switch (*selected) {
     case ItemID::I_BANDAGE:
     case ItemID::M_SPLINT: 
-    case ItemID::S_BANDAGE: {
+    case ItemID::S_BANDAGE: 
+    case ItemID::FA_KIT: {
       usable = "Always";
       break;
     }
@@ -591,6 +938,7 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
     }
     default: {
       assert(*selected != ItemID::NONE);
+      usable = "Never";
     }
   }
 
@@ -610,6 +958,10 @@ void ItemsPanel::drawItemDesc(Font *font, int txt_size) {
 void ItemsPanel::drawItemPortrait() {
   assert(*selected != ItemID::NONE);
   int id = static_cast<int>(*selected);
+  if (id >= 6) {
+    id = 6;
+  }
+
   Rectangle *sprite = &portraits.sprites.at(id);
   Vector2 position = Vector2Add(frame_position, {5, 5});
 

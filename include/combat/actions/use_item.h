@@ -13,7 +13,8 @@ public:
   ~UseItem();
 
   void applyItemEffect();
-  void applyMending(float percentage, float speed);
+  void applyMending(PartyMember *member, float percentage, float speed);
+  void applyMedkitMending(PartyMember *member, float heal, float speed);
   void applySplint();
   void applyRefreshed();
   void applyEndurance();

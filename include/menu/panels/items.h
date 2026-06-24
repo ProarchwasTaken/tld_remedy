@@ -16,6 +16,12 @@
 #include "menu/hud/reticle.h"
 
 
+enum class ItemOptions {
+  USE,
+  SWAP,
+  TOSS
+};
+
 class ItemsPanel : public Panel {
 public:
   ItemsPanel(Session *session, std::string *description, 
@@ -23,25 +29,42 @@ public:
   ~ItemsPanel();
 
   void updateSelected();
+  void resetSubSelected();
+  void updateSubOptionDesc();
 
+  bool itemUsable(ItemID item);
   void useItem();
+  void swapItems();
+  void tossItem();
+
   float calculateHeal(Character *member, float percentage);
-  void openDialog(std::vector<std::string> &dialog);
+  void openDialog(std::vector<std::string> &dialog, bool prompt = false);
   void openRejectDialog(Character *member); 
+  void openPartyRejectDialog(Character *companion);
   void openHealDialog(Character *member, float healed);
+  void openMedkitDialog(Character *mary, Character *companion, 
+                        float healed);
   void openSplintDialog(Character *member, StatusID effect);
 
   void update() override;
   void panelLogic();
+  void promptHandling();
   void heightLerp();
+
   void optionNavigation();
+  void swapNavigation();
+  void subOptionNavigation();
+  void selectSubOption();
   void targetNavigation();
 
   void draw() override;
   void drawItemCount();
 
   void drawOptions();
-  void drawCursor(Vector2 position);
+  void drawSubOptions();
+  std::string getSubOptionName(ItemOptions option);
+
+  void drawCursor(Vector2 position, bool blink);
 
   void drawItemInfo();
   void drawItemName(Font *font, int txt_size);
@@ -66,18 +89,30 @@ private:
   float frame_height = 0;
   float percentage = 0;
   constexpr static Vector2 frame_position = {217, 42};
+  enum {OPTION, SUB_OPTION, TARGET, SWAP} option_state = OPTION;
 
   std::array<ItemID, 8> options;
   std::array<ItemID, 8>::iterator selected = NULL;
+  std::array<ItemID, 8>::iterator swap_selected = NULL;
   std::unordered_set<ItemID> disallowed = {ItemID::NONE};
   constexpr static Vector2 option_position = {41, 58};
+
   std::string item_name;
   float blink_clock = 0.0;
 
-  bool target_mode = false;
   std::array<Character*, 2> party;
   std::array<Character*, 2>::iterator target;
   TargetReticle reticle;
+
+  std::array<ItemOptions, 3> sub_options = {
+    ItemOptions::USE,
+    ItemOptions::SWAP,
+    ItemOptions::TOSS
+  };
+  std::array<ItemOptions, 3>::iterator sub_selected = NULL;
+  std::unordered_set<ItemOptions> sub_disallowed;
+  constexpr static Vector2 sub_option_position = {128, 58};
+
 
   constexpr static Vector2 count_position = {107, 42};
 

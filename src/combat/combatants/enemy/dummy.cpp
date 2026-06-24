@@ -64,6 +64,7 @@ void Dummy::update() {
     }
     case CombatantState::HIT_STUN: {
       stunLogic();
+      knockbackLogic();
       sprite = &atlas.sprites[1];
       break;
     }

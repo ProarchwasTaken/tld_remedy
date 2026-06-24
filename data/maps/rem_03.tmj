@@ -105,7 +105,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":272,
+                 "x":256,
                  "y":128
                 }, 
                 {
@@ -129,7 +129,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":272,
+                 "x":256,
                  "y":112
                 }, 
                 {
@@ -313,7 +313,7 @@
                  "type":"basic",
                  "visible":true,
                  "width":0,
-                 "x":272,
+                 "x":256,
                  "y":112
                 }],
          "opacity":1,

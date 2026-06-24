@@ -55,6 +55,9 @@ public:
 
   void tintFlash();
   void death() override;
+  bool deathSavingThrow();
+  bool lastOneAlive();
+  float applySavePenalties(float base_chance);
 
   PartyMemberID id;
   bool important = false;
@@ -70,6 +73,8 @@ public:
 
   Technique tech1;
   Technique tech2;
+
+  static bool for_glory;
 protected:
   bool enabled = true;
 private:

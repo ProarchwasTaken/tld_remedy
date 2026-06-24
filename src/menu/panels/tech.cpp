@@ -108,6 +108,19 @@ string TechsPanel::getTechEntry() {
     case PartyMemberID::MARY: {
       Player *player = static_cast<Player*>(party_member);
       string text =
+        "--[COMBATANT SUMMARY]--\n"
+        "Mary has to play a very active role to make\n"
+        "sure he and his companion survive unscathed.\n"
+        "Having to guide his allies towards achieving\n"
+        "their shared goal, the role of Leader is\n"
+        "something that requires a great deal of\n"
+        "diligence. Because the moment he falters is\n"
+        "where everything falls apart.\n\n" 
+
+        "--[WEAPON TECHNIQUES]--\n\n" +
+
+        weaponTechInfo(player->weapon_id) +
+
         "--[DEFENSIVE ACTIONS]--\n\n"
 
         "<Ghost Step> - HP Cost: Depends on Dexterity\n"
@@ -160,17 +173,26 @@ string TechsPanel::getTechEntry() {
 
         "Mary automatically dodges most attacks at the\n"
         "cost of losing Morale. The amount lost is\n"
-        "dependent on the victims's Persistence vs.\n"
+        "dependent on the victim's Persistence vs.\n"
         "the assailant's Intimidation.\n\n"
 
         "If Mary's Morale ends up below 0, he will\n"
         "become Despondent. During which,\n"
         "Auto-Evade becomes much easier to bypass.\n\n"
       ;
-      return weaponTechInfo(player->weapon_id) + text;
+      return text;
     }
     case PartyMemberID::ERWIN: {
       string text = 
+        "--[COMBATANT SUMMARY]--\n"
+
+        "Erwin's overall gameplan is focused around\n"
+        "relieving pressure rather than inflicting\n"
+        "damage. He prefers to target enemies that\n"
+        "Mary isn't already targeting,\n\n"
+
+        "--[ASSISTS]--\n\n"
+
         "<Provoke> - MP Cost: 8 | CD: 5s\n"
         "\"Buying us a little more time. I trust that you\n"
         "can make every second count.\"\n\n"
@@ -189,22 +211,12 @@ string TechsPanel::getTechEntry() {
         "Erwin runs to the enemy that Mary was\n"
         "targeting at the time of when the Assist was\n"
         "called. Once within range, Erwin will perform\n"
-        "a dropkick that inflicts a hight amount of\n"
+        "a dropkick that inflicts a high amount of\n"
         "knockback if it hits. Obviously, this Assist\n"
         "cannot be called if Mary isn't targeting\n"
         "anybody.\n\n"
 
         "--[PASSIVES]--\n\n"
-
-        "<Maverick>\n"
-        "\"Working together by working separately\"\n\n"
-
-        "Erwin's overall gameplan is focused around\n"
-        "relieving pressure rather than inflicting\n"
-        "damage; preferring to target enemies that\n"
-        "Mary isn't already targeting. In exchange\n"
-        "for higher self-sufficiency, the cooldowns\n"
-        "for Erwin's Assists take longer finish.\n\n"
 
         "<Humanity>\n"
         "\"May your spirit always shine through.\"\n\n"
@@ -222,7 +234,7 @@ string TechsPanel::getTechEntry() {
 
         "Erwin automatically dodges most attacks at\n"
         "the cost of losing Morale. The amount lost is\n"
-        "dependent on the victims's Persistence vs.\n"
+        "dependent on the victim's Persistence vs.\n"
         "the assailant's Intimidation.\n\n"
 
         "If Erwin's Morale ends up below 0, he will\n"

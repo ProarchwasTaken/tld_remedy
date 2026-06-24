@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "enums.h"
+#include "scenes/camp_menu.h"
 
 struct FieldEvent {
   FieldEVT event_type;
@@ -10,6 +11,10 @@ struct FieldEvent {
 struct LoadMapEvent : FieldEvent {
   std::string map_name;
   std::string spawn_point;
+};
+
+struct OpenMenuSCEvent : FieldEvent {
+  CampMenuOption shortcut;
 };
 
 struct InitCombatEvent : FieldEvent {
@@ -69,6 +74,21 @@ struct RemoveEffectEvent : FieldEvent {
 struct OpenDialogEvent : FieldEvent {
   std::vector<std::string> dialog;
   bool end_prompt = false;
+  bool visible_frame = true;
+  bool open_instant = false;
+  bool close_instant = false;
+  float auto_time = -1;
+};
+
+struct OpenDialogEventEx : FieldEvent {
+  std::string name;
+  std::string title;
+  std::vector<std::string> dialog;
+  bool end_prompt = false;
+  bool visible_frame = true;
+  bool open_instant = false;
+  bool close_instant = false;
+  float auto_time = -1;
 };
 
 struct StartSequenceEvent : FieldEvent {

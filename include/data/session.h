@@ -3,12 +3,13 @@
 
 #define STATUS_LIMIT 3
 #define ITEM_LIMIT 8
-#define FLAG_COUNT 8
+#define FLAG_COUNT 10
 
 
 struct Character {
   char name[9];
   PartyMemberID member_id;
+  int injury = 0;
 
   float life;
   float max_life;
@@ -56,7 +57,9 @@ struct Session {
   double playtime = 0.0;
   int supplies = 8;
 
-  char map_name[16] = "rem_01";
+  char map_name[16] = "";
+  char prev_map1[16] = "";
+  char prev_map2[16] = "";
   char location[16] = "";
 
   Player player;
@@ -76,7 +79,10 @@ struct Session {
   };
 
   int flag_count = FLAG_COUNT;
-  GameFlag flags[8] {
+  GameFlag flags[FLAG_COUNT] {
+    {FlagID::DEATH_SAVE, false},
+    {FlagID::DS_SEQ_MILD, false},
+    {FlagID::DS_SEQ_SEVERE, false},
     {FlagID::CDF2_AFTER_INTRO, false},
     {FlagID::CDF2_BEFORE_FIRST, false},
     {FlagID::CDF2_AFTER_FIRST, false},
@@ -84,7 +90,6 @@ struct Session {
     {FlagID::CDF1_REST_TALK, false},
     {FlagID::CDF1_KEY, false},
     {FlagID::CD_ENTRANCE, false},
-    {FlagID::NONE, false},
   };
 
   int common_count = 0;

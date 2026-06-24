@@ -25,9 +25,11 @@
 #include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
-using std::string, std::set, std::uniform_int_distribution, 
-std::unique_ptr, std::make_unique;
+using std::string, std::set, std::uniform_int_distribution,
+std::uniform_real_distribution, std::unique_ptr, std::make_unique;
+
 int PartyMember::member_count = 0;
+bool PartyMember::for_glory = false;
 
 
 PartyMember::PartyMember(string name, PartyMemberID id, Vector2 position,
@@ -449,8 +451,100 @@ void PartyMember::tintFlash() {
 void PartyMember::death() {
   Combatant::death();
 
-  if (important) {
-    PLOGI << "An important PartyMember has died!";
-    Game::gameover(name + " has died...");
+  if (!important) {
+    return;
+  }
+
+  PLOGI << "An important PartyMember has died!";
+
+  if (deathSavingThrow()) {
+    Game::deathsave();
+  }
+  else {
+    Game::gameover(name + " has died...");  
   }
 }
+
+bool PartyMember::deathSavingThrow() {
+  assert(important);
+  if (for_glory || lastOneAlive()) {
+    return false;
+  }
+
+  float save_chance = 0.20 + resilience;
+  PLOGD << "Base Chance: " << save_chance;
+
+  save_chance = applySavePenalties(save_chance);
+  PLOGD << "Final result after penalties: " << save_chance;
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float roll = range(Game::RNG);
+
+  if (roll <= save_chance) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool PartyMember::lastOneAlive() {
+  if (member_count == 1) {
+    return true;
+  }
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant == this || team != combatant->team) {
+      continue;
+    }
+
+    if (combatant->state != DEAD) {
+      PLOGD << combatant->name << "is still alive.";
+      return false;
+    }
+  }
+
+  PLOGD << name << " is the only PartyMember alive.";
+  return true;
+}
+
+float PartyMember::applySavePenalties(float chance) {
+  int persistent = 0;
+  for (auto &effect : status) {
+    if (effect->type != StatusType::NEGATIVE) {
+      continue;
+    }
+
+    if (effect->isPersistent()) {
+      persistent++;
+    }
+
+    switch (effect->id) {
+      case StatusID::BROKEN_ARM: 
+      case StatusID::CRIPPLED_LEG: {
+        chance -= 0.10;
+        break;
+      }
+      case StatusID::BLEEDING:
+      case StatusID::DESPONDENT: {
+        chance -= 0.15;
+        break;
+      }
+      case StatusID::MANGLED: 
+      case StatusID::VULNERABLE:{
+        chance -= 0.20;
+        break;
+      }
+      default: {
+        assert(effect->id != StatusID::NONE);
+      }
+    }
+  }
+
+  if (persistent >= 2) {
+    chance = chance / persistent;
+  }
+
+  return chance;
+}
+

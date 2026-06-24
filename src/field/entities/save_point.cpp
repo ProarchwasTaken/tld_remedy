@@ -56,7 +56,8 @@ void SavePoint::update() {
   sprite = &atlas.sprites[*animation->current];
 
   if (rest_point) {
-    *alt_sprite = atlas.sprites[*animation->current + 4];
+    int index = *animation->current + 4;
+    alt_sprite = &atlas.sprites[index];
   }
 
   bool inside = CheckCollisionPointRec(plr->position, bounding_box.rect);

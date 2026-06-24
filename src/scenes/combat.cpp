@@ -21,6 +21,7 @@
 #include "data/combatant_event.h"
 #include "utils/input.h"
 #include "utils/text.h"
+#include "utils/flag.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "scenes/field.h"
@@ -47,7 +48,8 @@ using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
 
-CombatScene::CombatScene(Session *session, TroopID id, int reward) {
+CombatScene::CombatScene(Session *session, TroopID id, int reward, 
+                         bool for_glory) {
   PLOGI << "Loading the combat scene.";
   assert(session != NULL);
   float start_time = GetTime();
@@ -61,6 +63,7 @@ CombatScene::CombatScene(Session *session, TroopID id, int reward) {
 
   stage.loadStage(session->location);
   initializeCombatants(id);
+  PartyMember::for_glory = for_glory;
 
   this->reward = reward;
 
@@ -96,6 +99,10 @@ CombatScene::~CombatScene() {
   toasts.reset();
 
   Entity::clear(entities);
+
+  if (dead_player != nullptr) {
+    dead_player.reset();
+  }
 
   if (dead_companion != nullptr) {
     dead_companion.reset();
@@ -604,19 +611,27 @@ void CombatScene::deleteEntity(int entity_id) {
       temporary.push_back(std::move(temp_entity));
       continue;
     }
+
     PLOGD << "Found Entity [ID: " << entity_id << "]";
 
     // Remove this Later!
     if (dummy == entity.get()) dummy = NULL;
 
     if (player == entity.get()) {
+      player->targetable = false;
       player = NULL;
+
       plr_hud->assign(player);
       plr_cmd_hud->assign(player);
+
+      dead_player.swap(entity);
+      assert(entity == nullptr);
+      continue;
     }
     else if (companion == entity.get()) {
       companion->targetable = false;
       companion = NULL;
+
       com_hud->assign(companion);
       assist_hud->assign(companion);
 
@@ -636,9 +651,24 @@ void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
   Companion *com_data = &session->companion;
 
+  if (player == NULL){
+    PLOGI << "Detected that the player is dead.";
+    player = static_cast<Mary*>(dead_player.get());
+
+    PLOGI << "Assuming that a death save was triggered instead of a" <<
+      "game over.";
+
+    Flag::set(session, FlagID::DEATH_SAVE, true);
+    state = CombatState::LOSE;
+  }
+
   PLOGD << "Updating player attributes.";
-  assert(player != NULL);
   updatePartyAttr(player, plr_data);
+
+  if (companion == NULL) {
+    PLOGD << "Detected that the companion is dead.";
+    companion = static_cast<PartyMember*>(dead_companion.get());
+  }
 
   PLOGD << "Updating companion attributes.";
   updatePartyAttr(companion, com_data);
@@ -655,22 +685,10 @@ void CombatScene::endCombatProcedure() {
 
 void CombatScene::updatePartyAttr(PartyMember *member, Character *data) 
 {
-  if (member == NULL) {
-    PLOGD << "Combatant is assumed to be a dead companion.";
-    assert(dead_companion != nullptr);
-    assert(dead_companion->entity_type == EntityType::COMBATANT);
-    assert(dead_companion.get() != player);
-
-    PLOGD << "Retrieving address to dead companion, and setting it's life"
-      << " to 1.";
-    member = static_cast<PartyMember*>(dead_companion.get());
-    data->life = 1;
-  }
-  else {
-    member->depleteInstant();
-    float life = std::ceilf(member->life); 
-    data->life = Clamp(life, 0, member->max_life); 
-  }
+  assert(member != NULL);
+  member->depleteInstant();
+  float life = std::ceilf(member->life); 
+  data->life = Clamp(life, 1, member->max_life); 
 
   StatusID status[STATUS_LIMIT] = {
     StatusID::NONE, 
@@ -817,7 +835,10 @@ void CombatScene::debugKeybinds() {
     float magnitude = companion->life * threshold;
     companion->increaseTenacity(magnitude, threshold);
   }
-  else if (IsKeyPressed(KEY_F7)) {
+  else if (companion != NULL && IsKeyPressed(KEY_F7)) {
+    companion->death();
+  }
+  else if (IsKeyPressed(KEY_F8)) {
     end_combat = true;
   }
 }

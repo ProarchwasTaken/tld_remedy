@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -25,11 +26,20 @@ using std::string, std::make_unique;
 SpriteAtlas CampMenuScene::atlas("menu", "camp_menu");
 
 
-CampMenuScene::CampMenuScene(Session *session) {
+CampMenuScene::CampMenuScene(Session *session, CampMenuOption *start) {
   PLOGI << "Loading the Camp Menu Scene.";
   this->scene_id = SceneID::CAMP_MENU;
   this->keybinds = &Game::settings.menu_keybinds;
   this->session = session;
+
+  if (start != NULL) {
+    PLOGI << "Initating Camp Menu in quick start mode.";
+    selected = std::find(options.begin(), options.end(), *start);
+    assert(selected != options.end());
+
+    quick_start = true;
+    opt_switch_clock = 1.0;
+  }
 
   plr_hud.assign(&session->player, &state_clock);
   com_hud.assign(&session->companion, &state_clock);
@@ -95,9 +105,17 @@ void CampMenuScene::openingLogic() {
   state_clock += Game::deltaTime() / state_time;
   state_clock = Clamp(state_clock, 0.0, 1.0);
 
-  if (state_clock == 1.0) {
+  if (state_clock < 1.0) {
+    return;
+  }
+
+  if (quick_start) {
+    selectOption();
+    panel_clock = 1.0;
+  }
+  else {
     state = READY;
-    sfx->play("menu_navigate");
+    sfx->play("menu_navigate"); 
   }
 }
 
@@ -115,10 +133,13 @@ void CampMenuScene::openingPanel() {
   panel_clock += Game::deltaTime() / panel_time;
   panel_clock = Clamp(panel_clock, 0.0, 1.0);
 
-  if (panel_clock == 1.0) {
-    panel_mode = true;
-    state = READY;
+  if (panel_clock < 1.0) {
+    return;
   }
+
+  panel_mode = true;
+  state = READY;
+  quick_start = false;
 }
 
 void CampMenuScene::closingPanel() {
@@ -139,7 +160,7 @@ void CampMenuScene::normalLogic() {
   if (!panel_mode) {
     optionNavigation();
     optionTimer();
-    return;;
+    return;
   }
 
   assert(panel != nullptr);
@@ -415,8 +436,8 @@ string CampMenuScene::getDescription(CampMenuOption option) {
   switch (option) {
     case CampMenuOption::ITEMS: {
       return 
-      "Use items the party has obtained over the\n"
-      "course of this session.";
+      "Use or discard any items that the party\n"
+      "has obtained.";
     }
     case CampMenuOption::TECHS: {
       return 
@@ -468,6 +489,10 @@ void CampMenuScene::drawOptions() {
       sprite = &atlas.sprites[0];
     }
 
+    if (quick_start && option != *selected) {
+      tint.a = 0;
+    }
+
     DrawTextureRec(atlas.sheet, *sprite, position, tint);
 
     position = Vector2Add(position, {6, 1});
@@ -494,6 +519,11 @@ void CampMenuScene::baseOptionLerp(Vector2 &base_position,
 
 void CampMenuScene::selectedOptionLerp(Vector2 &position) {
   position.x += 16 * opt_switch_clock;
+
+  if (quick_start) {
+    position.y = option_position.y;
+    return;
+  }
 
   if (state == OPENING_PANEL || state == CLOSING_PANEL) {
     float start_y = position.y;

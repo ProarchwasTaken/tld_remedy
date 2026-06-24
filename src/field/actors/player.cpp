@@ -7,11 +7,13 @@
 #include "game.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/field_event.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "utils/input.h"
 #include "utils/collision.h"
 #include "utils/animation.h"
+#include "scenes/camp_menu.h"
 #include "field/system/actor_handler.h"
 #include "field/system/field_handler.h"
 #include "field/entities/pickup.h"
@@ -39,7 +41,7 @@ Actor("Mary", ActorType::PLAYER, position, direction)
   rectExCorrection(bounding_box, collis_box);
   atlas.use();
 
-  sprite = getIdleSprite();
+  setIdleSprite();
 }
 
 PlayerActor::~PlayerActor() {
@@ -165,6 +167,16 @@ void PlayerActor::openMenuInput(bool gamepad) {
     PLOGI << "Opening Camp Menu.";
     FieldHandler::raise<FieldEvent>(FieldEVT::OPEN_MENU);
   }
+  else if (Input::pressed(keybinds->sc_items, gamepad)) {
+    PLOGI << "Attempting to use Item Menu shortcut.";
+    FieldHandler::raise<OpenMenuSCEvent>(FieldEVT::OPEN_MENU_SC, 
+                                         CampMenuOption::ITEMS);
+  }
+  else if (Input::pressed(keybinds->sc_status, gamepad)) {
+    PLOGI << "Attempting to use Status Menu shortcut.";
+    FieldHandler::raise<OpenMenuSCEvent>(FieldEVT::OPEN_MENU_SC,
+                                         CampMenuOption::STATUS);
+  }
 }
 
 void PlayerActor::update() {
@@ -185,7 +197,7 @@ void PlayerActor::update() {
     rectExCorrection(bounding_box, collis_box);
   }
   else {
-    sprite = getIdleSprite();
+    setIdleSprite();
   }
 
   if (move_clock >= 1.0) {
@@ -200,10 +212,10 @@ void PlayerActor::moveX() {
   }
   direction = static_cast<Direction>(moving_x);
 
-  float speed = default_speed;
+  float speed = movement_speed;
   if (moving_y != 0) {
     float speed_root = std::sqrt(2);
-    speed = Normalize(default_speed, 0, speed_root);
+    speed = Normalize(movement_speed, 0, speed_root);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -222,9 +234,9 @@ void PlayerActor::moveY() {
   }
   direction = static_cast<Direction>(moving_y * 2);
 
-  float speed = default_speed;
+  float speed = movement_speed;
   if (moving_x != 0) {
-    speed = Normalize(default_speed, 0, 1.45);
+    speed = Normalize(movement_speed, 0, 1.45);
   }
 
   float magnitude = speed * Game::deltaTime();
@@ -238,28 +250,38 @@ void PlayerActor::moveY() {
   position.y += magnitude * moving_y;
 }
 
-Rectangle *PlayerActor::getIdleSprite() {
-  animation = NULL;
+void PlayerActor::setIdleSprite() {
+  if (lock_sprite) {
+    return;
+  }
 
+  animation = NULL;
   switch (direction) {
     case DOWN: {
-      return &atlas.sprites[1];
+      sprite = &atlas.sprites[1];
+      break;
     }
     case RIGHT: {
-      return &atlas.sprites[4];
+      sprite = &atlas.sprites[4];
+      break;
     }
     case UP: {
-      return &atlas.sprites[7];
+      sprite = &atlas.sprites[7];
+      break;
     }
     case LEFT: {
-      return &atlas.sprites[10];
+      sprite = &atlas.sprites[10];
+      break;
     }
   }
 }
 
 void PlayerActor::moveAnimation() {
-  Animation *next_anim;
+  if (lock_sprite) {
+    return;
+  }
 
+  Animation *next_anim;
   switch (direction) {  
     case DOWN: {
       next_anim = &anim_down;
@@ -278,6 +300,10 @@ void PlayerActor::moveAnimation() {
       break;
     }
   }
+
+  float difference = 1.0 - (movement_speed / default_speed);
+  float percentage = 1.0 + difference;
+  next_anim->frame_duration = anim_move_speed * percentage;
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];

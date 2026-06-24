@@ -86,6 +86,10 @@ void Game::init() {
   SetTargetFPS(settings.framerate);
   SetTextLineSpacing(16);
 
+  Image icon = LoadImage("graphics/icon.png");
+  SetWindowIcon(icon);
+  UnloadImage(icon);
+
   setupCanvas();
 
   if (settings.fullscreen) {
@@ -297,6 +301,11 @@ void Game::gameLogic() {
       initCombatProcedure();
       break;
     }
+    case GameState::DEATH_SAVE: {
+      deathsaveProcedure();
+      scene->update();
+      break;
+    }
     case GameState::GAME_OVER: {
       gameoverProcedure();
       scene->update();
@@ -457,6 +466,30 @@ void Game::initCombatProcedure() {
   }
 }
 
+void Game::deathsaveProcedure() {
+  static float clock = 0.0;
+  static float sequence_time = 4.0;
+
+  clock += GetFrameTime() / sequence_time;
+  clock = Clamp(clock, 0.0, 1.0);
+
+  float percentage = Clamp(clock / 0.125, 0.0, 1.0);
+  flash_color.a = Lerp(0, 255, percentage);
+
+  if (clock == 1.0) {
+    PLOGI << "Sequence complete.";
+    clock = 0.0;
+
+    PLOGI << "Moving on to the endCombatProcedure.";
+    assert(scene->scene_id == SceneID::COMBAT);
+    CombatScene *combat = static_cast<CombatScene*>(scene.get());
+    combat->endCombatProcedure();
+
+    noise->setAlpha(0.0);
+    noise->setTint(WHITE);
+  }
+}
+
 void Game::gameoverProcedure() {
   static float clock = 0.0;
   static float sequence_time = 3.42;
@@ -496,11 +529,15 @@ void Game::gameoverProcedure() {
 
 void Game::returnFieldProcedure() {
   PLOGI << "Switching back to the Field scene";
+  SceneID from = scene->scene_id;
   scene.reset();
-
   scene.swap(reserve);
 
   assert(scene != nullptr && scene->scene_id == SceneID::FIELD);
+  FieldScene *field = static_cast<FieldScene*>(scene.get());
+  field->onSceneReturn(from);
+  flash_color.a = 0;
+
   Game::fadein(0.5);
   SKIP_FRAME = true;
 }
@@ -575,6 +612,10 @@ void Game::fadein(float seconds) {
 
 void Game::sleep(float seconds) {
   if (game_state == GameState::GAME_OVER) {
+    return;
+  }
+
+  if (game_state == GameState::DEATH_SAVE) {
     return;
   }
 
@@ -697,10 +738,10 @@ void Game::loadTitleScreen() {
   run_timer = false;
 }
 
-void Game::openCampMenu(Session *data) {
+void Game::openCampMenu(Session *data, CampMenuOption *shortcut) {
   assert(reserve == nullptr);
 
-  reserve = make_unique<CampMenuScene>(data);
+  reserve = make_unique<CampMenuScene>(data, shortcut);
   flash_color = WHITE;
   flash_color.a = 0;
 
@@ -746,7 +787,7 @@ void Game::initCombat(Session *session, TroopID id) {
 
   file.close();
 
-  reserve = make_unique<CombatScene>(session, id, reward);
+  reserve = make_unique<CombatScene>(session, id, reward, false);
   flash_color = WHITE;
 
   noise->setTint(WHITE);
@@ -816,7 +857,7 @@ void Game::initCombat(Session *data, TroopID id, int reward) {
   PLOGI << "Battle Time! (Forced Style!)";
   assert(reserve == nullptr);
 
-  reserve = make_unique<CombatScene>(data, id, reward);
+  reserve = make_unique<CombatScene>(data, id, reward, true);
   flash_color = WHITE;
 
   noise->setTint(WHITE);
@@ -833,8 +874,19 @@ void Game::returnToField() {
 
   PLOGI << "Preparing to return to the Field scene..";
   assert(reserve != nullptr);
+  assert(reserve->scene_id == SceneID::FIELD);
 
   game_state = GameState::RETURN_TO_FIELD;
+}
+
+void Game::deathsave() {
+  PLOGI << "YOU LOSE! But there's still hope...";
+
+  flash_color = BLACK;
+  flash_color.a = 0.0;
+  bgm->fade(0.0, 1.0);
+
+  game_state = GameState::DEATH_SAVE;
 }
 
 void Game::gameover(string reason) {

@@ -15,6 +15,10 @@
     {
       "name": "combat_init",
       "filename": "field/combat_init.mp3"
+    },
+    {
+      "name": "incapacitated",
+      "filename": "field/incapacitated.mp3"
     }
   ]
 }

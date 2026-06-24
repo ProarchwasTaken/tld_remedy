@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_COMPILER clang++)
 
 project("remedy" 
-VERSION 0.1.0
+VERSION 0.1.1
 HOMEPAGE_URL "https://github.com/ProarchwasTaken/tld_remedy"
 LANGUAGES CXX)
 option(BUILD_DEV "Build the game for development purposes." OFF)
@@ -67,7 +67,7 @@ set(HEADERS
 "include/data/damage.h"
 "include/data/enemy_troops.h"
 "include/data/technique.h"
-"include/data/ai_behavior.h"
+"include/data/ai_parameters.h"
 "include/utils/input.h"
 "include/utils/collision.h"
 "include/utils/text.h"
@@ -111,6 +111,9 @@ set(HEADERS
 "include/field/sequences/save.h"
 "include/field/sequences/rest.h"
 "include/field/sequences/reject.h"
+"include/field/sequences/incap.h"
+"include/field/sequences/ds_erwin_mild.h"
+"include/field/sequences/ds_erwin_severe.h"
 "include/scenes/combat.h"
 "include/combat/system/stage.h"
 "include/combat/system/camera.h"
@@ -204,6 +207,9 @@ set(SOURCE
 "src/field/sequences/save.cpp"
 "src/field/sequences/rest.cpp"
 "src/field/sequences/reject.cpp"
+"src/field/sequences/incap.cpp"
+"src/field/sequences/ds_erwin_mild.cpp"
+"src/field/sequences/ds_erwin_severe.cpp"
 "src/scenes/combat.cpp"
 "src/combat/system/stage.cpp"
 "src/combat/system/camera.cpp"
@@ -247,10 +253,12 @@ if(${BUILD_DEV})
   list(APPEND HEADERS
   "include/field/system/field_commands.h"
   "include/field/sequences/db_01.h"
+  "include/field/sequences/db_02.h"
   )
   list(APPEND SOURCE
   "src/field/system/field_commands.cpp"
   "src/field/sequences/db_01.cpp"
+  "src/field/sequences/db_02.cpp"
   )
 endif()
 
