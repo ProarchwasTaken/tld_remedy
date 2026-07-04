@@ -654,6 +654,8 @@ void CombatScene::endCombatProcedure() {
   if (player == NULL){
     PLOGI << "Detected that the player is dead.";
     player = static_cast<Mary*>(dead_player.get());
+    // I keep forgetting to account for Exhaustion.
+    player->exhaustion = 0;
 
     PLOGI << "Assuming that a death save was triggered instead of a" <<
       "game over.";
@@ -668,6 +670,7 @@ void CombatScene::endCombatProcedure() {
   if (companion == NULL) {
     PLOGD << "Detected that the companion is dead.";
     companion = static_cast<PartyMember*>(dead_companion.get());
+    companion->exhaustion = 0;
   }
 
   PLOGD << "Updating companion attributes.";
