@@ -28,12 +28,12 @@ public:
   void drawLife(Vector2 position);
   void drawLifeGauge(Vector2 position);
   void drawToBeHealed(Vector2 position);
-  void drawLifeText(Vector2 position);
-  void drawTenacityText(Vector2 position);
 
   void drawMorale(Vector2 position);
   void drawMoraleGauge(Vector2 position);
-  void drawMoraleText(Vector2 position);
+
+  void drawTenacity(Vector2 position);
+  void drawTenacityGauge(Vector2 position);
 
   void drawGauge(int index, Vector2 position, Color color, 
                  float percentage, float exponent = GAUGE_LIFE_EXP);

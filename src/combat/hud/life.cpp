@@ -9,7 +9,6 @@
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "utils/math.h"
-#include "utils/text.h"
 #include "combat/status_effects/mending.h"
 #include "combat/hud/life.h"
 #include <plog/Log.h>
@@ -233,7 +232,14 @@ void LifeHud::draw() {
   drawPortrait(position);
   drawStatusIcons(position);
   drawLife(position);
-  drawMorale(position);
+
+  if (user->max_morale > 0) {
+    drawMorale(position);
+  }
+
+  if (user->tp_threshold > 0) {
+    drawTenacity(position);
+  }
 }
 
 void LifeHud::shakeTimer() {
@@ -286,11 +292,6 @@ Rectangle *LifeHud::getIconSprite(StatusID id) {
 void LifeHud::drawLife(Vector2 position) {
   DrawTextureRec(atlas.sheet, atlas.sprites[0], position, WHITE);
   drawLifeGauge(position);
-  // drawLifeText(position);
-
-  if (user->tenacity != 0.0) {
-    drawTenacityText(position);
-  }
 }
 
 void LifeHud::drawLifeGauge(Vector2 position) {
@@ -299,19 +300,11 @@ void LifeHud::drawLifeGauge(Vector2 position) {
   }
 
   if (user->exhaustion != 0) {
-    float life_total = user->life + user->tenacity;
-    float percentage = (life_total + user->exhaustion) / user->max_life;
+    float total = user->life + user->exhaustion;
+    float percentage = total / user->max_life;
     percentage = Clamp(percentage, 0.0, 1.0);
     drawGauge(1, position, Game::palette[2], percentage);
-  }
-
-  float overflow = 0;
-  if (user->tenacity != 0) {
-    float percentage = (user->life + user->tenacity) / user->max_life;
-    overflow = percentage - 1.0;
-    percentage = Clamp(percentage, 0.0, 1.0);
-    drawGauge(2, position, life_color, percentage);
-  }
+  } 
 
   float life_percentage = user->life / user->max_life;
   life_percentage = Clamp(life_percentage, 0.0, 1.0);
@@ -321,10 +314,6 @@ void LifeHud::drawLifeGauge(Vector2 position) {
   }
 
   drawGauge(1, position, life_color, life_percentage);
-
-  if (overflow > 0) {
-    drawGauge(1, position, Game::palette[22], overflow);
-  }
 }
 
 void LifeHud::drawToBeHealed(Vector2 position) {
@@ -348,34 +337,11 @@ void LifeHud::drawToBeHealed(Vector2 position) {
   drawGauge(1, position, Game::palette[2], percentage);
 }
 
-void LifeHud::drawLifeText(Vector2 position) {
-  Font *font = &Game::sm_font;
-  int size = font->baseSize;
-
-  const char *text = TextFormat("%02.00f/%02.00f", user->life, 
-                                user->max_life);
-  position = Vector2Add(position, {82, 4});
-  position = TextUtils::alignRight(text, position, *font, -3, 0);
-
-  DrawTextEx(*font, text, position, size, -3, life_txt_color);
-}
-
-void LifeHud::drawTenacityText(Vector2 position) {
-  Font *font = &Game::sm_font;
-  int size = font->baseSize;
-  Color color = Game::palette[22];
-
-  const char *text = TextFormat("+%01.00f", user->tenacity);
-  position = Vector2Add(position, {82, 4});
-  DrawTextEx(*font, text, position, size, -3, color);
-}
-
 void LifeHud::drawMorale(Vector2 position) {
   position = Vector2Add(position, {10, -6});
   DrawTextureRec(atlas.sheet, atlas.sprites[3], position, WHITE);
 
   drawMoraleGauge(position);
-  // drawMoraleText(position);
 }
 
 void LifeHud::drawMoraleGauge(Vector2 position) {
@@ -392,15 +358,18 @@ void LifeHud::drawMoraleGauge(Vector2 position) {
   drawGauge(4, position, morale_color, morale_percentage, exponent);
 }
 
-void LifeHud::drawMoraleText(Vector2 position) {
-  Font *font = &Game::sm_font;
-  int size = font->baseSize;
+void LifeHud::drawTenacity(Vector2 position) {
+  position = Vector2Add(position, {12, 7});
+  DrawTextureRec(atlas.sheet, atlas.sprites[5], position, WHITE);
 
-  const char *text = TextFormat("%01.02f", user->morale);
-  position = Vector2Add(position, {86, -4});
-  position = TextUtils::alignRight(text, position, *font, -3, 0);
+  drawTenacityGauge(position);
+}
 
-  DrawTextEx(*font, text, position, size, -3, morale_txt_color);
+void LifeHud::drawTenacityGauge(Vector2 position) {
+  position.x -= 1;
+  float max_tenacity = user->max_life * user->tp_threshold;
+  float percentage = user->tenacity / max_tenacity;
+  drawGauge(6, position, Game::palette[22], percentage, 1.0);
 }
 
 void LifeHud::drawGauge(int index, Vector2 position, Color color,
@@ -410,7 +379,9 @@ void LifeHud::drawGauge(int index, Vector2 position, Color color,
   float max_width = sprite.width;
   position = Vector2Add(position, {1, 1});
 
-  percentage = std::pow(percentage, exponent);
+  if (exponent != 1.0) {
+    percentage = std::pow(percentage, exponent);
+  }
 
   sprite.width = max_width * percentage;
   DrawTextureRec(atlas.sheet, sprite, position, color);

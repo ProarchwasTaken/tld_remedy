@@ -830,12 +830,12 @@ void CombatScene::debugKeybinds() {
   }
   else if (player != NULL && IsKeyPressed(KEY_F5)) {
     float threshold = 0.5;
-    float magnitude = player->life * threshold;
+    float magnitude = player->max_life * threshold;
     player->increaseTenacity(magnitude, threshold);
   }
   else if (companion != NULL && IsKeyPressed(KEY_F6)) {
     float threshold = 0.5;
-    float magnitude = companion->life * threshold;
+    float magnitude = companion->max_life * threshold;
     companion->increaseTenacity(magnitude, threshold);
   }
   else if (companion != NULL && IsKeyPressed(KEY_F7)) {
