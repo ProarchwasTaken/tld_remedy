@@ -413,10 +413,12 @@ void CombatScene::winProcedure() {
   assert(player != NULL);
   player->depleteInstant();
   player->clearNonPersistant();
+  player->entropy = 0;
 
   if (companion != NULL) {
     companion->depleteInstant();
     companion->clearNonPersistant();
+    companion->entropy = 0;
   }
 
   vector<string> dialog;
@@ -690,6 +692,7 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
 {
   assert(member != NULL);
   member->depleteInstant();
+
   float life = std::ceilf(member->life); 
   data->life = Clamp(life, 1, member->max_life); 
 
@@ -838,10 +841,18 @@ void CombatScene::debugKeybinds() {
     float magnitude = companion->max_life * threshold;
     companion->increaseTenacity(magnitude, threshold);
   }
-  else if (companion != NULL && IsKeyPressed(KEY_F7)) {
+  else if (player != NULL && IsKeyPressed(KEY_F7)) {
+    float magnitude = player->max_life * 0.20;
+    player->increaseEntropy(magnitude);
+  }
+  else if (companion != NULL && IsKeyPressed(KEY_F8)) {
+    float magnitude = companion->max_life * 0.20;
+    companion->increaseEntropy(magnitude);
+  }
+  else if (companion != NULL && IsKeyPressed(KEY_F9)) {
     companion->death();
   }
-  else if (IsKeyPressed(KEY_F8)) {
+  else if (IsKeyPressed(KEY_F10)) {
     end_combat = true;
   }
 }
@@ -852,7 +863,7 @@ void CombatScene::drawDebugInfo() {
   
   drawPartyStats(player, {6, 4}, font, text_size);
   if (companion != NULL) {
-    drawPartyStats(companion, {128, 4}, font, text_size);
+    drawPartyStats(companion, {144, 4}, font, text_size);
   }
 
   drawDebugCombo(font, text_size);
@@ -876,8 +887,9 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Life: %02.02f/%02.02f/%02.02f", member->life,
-                    member->max_life, member->exhaustion);
+  text = TextFormat("Life: %02.02f/%02.02f/%02.02f/%02.02f", member->life,
+                    member->max_life, member->exhaustion, 
+                    member->entropy);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 

@@ -615,8 +615,7 @@ void Erwin::update() {
     }
   }
 
-  statusLogic();
-  techniqueCooldown();
+  endLogic();
 }
 
 void Erwin::neutralLogic() {

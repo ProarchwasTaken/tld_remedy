@@ -548,3 +548,7 @@ float PartyMember::applySavePenalties(float chance) {
   return chance;
 }
 
+void PartyMember::endLogic() {
+  Combatant::endLogic();
+  techniqueCooldown();
+}

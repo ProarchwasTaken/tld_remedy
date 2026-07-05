@@ -59,6 +59,8 @@ public:
   bool lastOneAlive();
   float applySavePenalties(float base_chance);
 
+  void endLogic() override;
+
   PartyMemberID id;
   bool important = false;
   bool demoralized = false;

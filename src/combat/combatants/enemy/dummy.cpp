@@ -75,7 +75,7 @@ void Dummy::update() {
     }
   }
 
-  statusLogic();
+  endLogic();
 }
 
 void Dummy::draw() {

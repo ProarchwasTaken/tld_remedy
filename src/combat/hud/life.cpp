@@ -306,12 +306,17 @@ void LifeHud::drawLifeGauge(Vector2 position) {
     drawGauge(1, position, Game::palette[2], percentage);
   } 
 
-  float life_percentage = user->life / user->max_life;
-  life_percentage = Clamp(life_percentage, 0.0, 1.0);
-
   if (dmg_life_clock != 1.0) {
     drawGauge(1, position, WHITE, white_life);
   }
+
+  if (user->entropy > 0) {
+    float percentage = user->life / user->max_life;
+    drawGauge(1, position, Game::palette[37], percentage);
+  }
+
+  float life_percentage = (user->life - user->entropy) / user->max_life;
+  life_percentage = Clamp(life_percentage, 0.0, 1.0);
 
   drawGauge(1, position, life_color, life_percentage);
 }

@@ -287,6 +287,52 @@ void Combatant::increaseLife(float magnitude) {
   }
 }
 
+void Combatant::increaseEntropy(float magnitude) {
+  float crit  = max_life * 0.3001;
+  float flipped = 1.0 - resilience;
+
+  float hard_cap = (max_life - crit) * (0.40 + flipped);
+  PLOGD << "Hard Cap: " << hard_cap;
+
+  float additive = 0;
+  if (life - hard_cap < crit) {
+    PLOGD << "Oncoming Entropy risks putting Combatant in Critical Life";
+    additive = life - hard_cap - crit;
+    PLOGD << "Additive: " << additive;
+  }
+
+  float soft_cap = (hard_cap - entropy) + additive;
+  PLOGD << "Soft Cap: " << soft_cap;
+
+  if (soft_cap < 0) {
+    PLOGI << "No entropy has been added.";
+    return;
+  }
+
+  magnitude = Clamp(magnitude, 0.0, soft_cap);
+  entropy = Clamp(entropy + magnitude, 0.0, max_life);
+  PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
+    "] Entropy has been increased by: " << magnitude;
+}
+
+void Combatant::lifeDecay() {
+  float percentage = entropy / max_life;
+  float magnitude = percentage / (resilience * 2);
+  magnitude = Clamp(magnitude, 0.20, 10);
+  magnitude *= Game::deltaTime();
+
+  if (entropy < magnitude) {
+    magnitude = entropy;
+  }
+
+  if (life <= 1) {
+    return;
+  } 
+
+  entropy = Clamp(entropy - magnitude, 0.0, life - 1);
+  life = Clamp(life - magnitude, 1, max_life);
+}
+
 void Combatant::damageTenacity(float magnitude) {
   tenacity = tenacity - magnitude;
 
@@ -541,6 +587,14 @@ void Combatant::removeErasedStatus() {
 
   status.clear();
   temporary.swap(status);
+}
+
+void Combatant::endLogic() {
+  if (entropy != 0) {
+    lifeDecay();
+  }
+
+  statusLogic();
 }
 
 void Combatant::applyStaggerEffect(Rectangle &final) {

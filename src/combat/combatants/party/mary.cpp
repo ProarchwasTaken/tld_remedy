@@ -353,12 +353,7 @@ void Mary::update() {
     }
   }
 
-  statusLogic();
-  targetLogic();
-
-  if (buffer != MaryAction::NONE) {
-    bufferTimer();
-  }
+  endLogic();
 }
 
 void Mary::neutralLogic() {
@@ -383,6 +378,40 @@ void Mary::neutralLogic() {
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];
+}
+
+void Mary::movement() {
+  if (!moving && acceleration == 0) {
+    return;
+  }
+
+  if (moving) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
+
+  float speed = (default_speed * speed_multiplier) * acceleration;
+  float magnitude = speed * Game::deltaTime();
+
+  if (Collision::checkX(this, magnitude, direction)) {
+    Collision::snapX(this, direction);
+  }
+  else {
+    position.x += magnitude * direction;
+  }
+}
+
+void Mary::endLogic() {
+  targetLogic();
+
+  if (buffer != MaryAction::NONE) {
+    bufferTimer();
+  }
+
+  PartyMember::endLogic();
 }
 
 void Mary::bufferTimer() {
@@ -411,30 +440,6 @@ void Mary::targetLogic() {
     PLOGI << "Target: '" << target->name << "' [ID: " << 
       target->entity_id << "] is outside the player's range.";
     target = NULL;
-  }
-}
-
-void Mary::movement() {
-  if (!moving && acceleration == 0) {
-    return;
-  }
-
-  if (moving) {
-    direction = static_cast<Direction>(moving_x);
-    accelerate();
-  }
-  else {
-    decelerate();
-  }
-
-  float speed = (default_speed * speed_multiplier) * acceleration;
-  float magnitude = speed * Game::deltaTime();
-
-  if (Collision::checkX(this, magnitude, direction)) {
-    Collision::snapX(this, direction);
-  }
-  else {
-    position.x += magnitude * direction;
   }
 }
 

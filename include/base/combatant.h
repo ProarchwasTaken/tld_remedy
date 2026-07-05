@@ -81,6 +81,9 @@ public:
   virtual void damageLife(float magnitude);
   virtual void increaseLife(float magnitude);
 
+  void increaseEntropy(float magnitude);
+  void lifeDecay();
+
   void damageTenacity(float magnitude);
   void increaseTenacity(float magnitude, float threshold);
 
@@ -123,6 +126,10 @@ public:
   void statusLogic();
   void removeErasedStatus();
 
+  /* For code that should only be ran at absolute END of a combatant's
+   * update cycle.*/
+  virtual void endLogic();
+
   void applyStaggerEffect(Rectangle &final);
   virtual void drawDebug() override;
 
@@ -137,6 +144,7 @@ public:
 
   float life; 
   float max_life;
+  float entropy = 0;
 
   float tenacity = 0.0;
   float tp_threshold = 0.0;

@@ -425,7 +425,7 @@ void Servant::update() {
     }
   }
 
-  statusLogic();
+  endLogic();
 }
 
 void Servant::neutralLogic() {

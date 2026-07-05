@@ -50,8 +50,10 @@ public:
 
   void update() override;
   void neutralLogic();
-  void bufferTimer();
   void movement();
+
+  void endLogic() override;
+  void bufferTimer();
   void targetLogic();
 
   Animation *getIdleAnim();
