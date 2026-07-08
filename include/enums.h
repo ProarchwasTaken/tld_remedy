@@ -44,7 +44,8 @@ enum class SubWeaponID {
 };
 
 enum class CompanionID {
-  ERWIN
+  ERWIN,
+  XANDER,
 };
 
 enum class FlagID {
@@ -84,6 +85,7 @@ enum class CombatantTeam {
 enum class PartyMemberID {
   MARY,
   ERWIN,
+  XANDER,
 };
 
 enum class TechCostType {

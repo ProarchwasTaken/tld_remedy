@@ -69,6 +69,12 @@ void StatusPanel::updateDescription() {
         "throught the wringer multiple times before.";
       break;
     }
+    case PartyMemberID::XANDER: {
+      *description =
+        "A washed-up ancient dragon who is a\n"
+        "couple hundred years past his prime.";
+      break;
+    }
   }
 }
 
@@ -147,9 +153,6 @@ void StatusPanel::drawPartyMemberInfo(Character *party_member) {
   drawMorale(med_font, med_size, party_member->init_morale, 
              party_member->max_morale);
 
-  // drawClass(sm_font, sm_size, party_member->member_id);
-  // drawCombatLvl(sm_font, sm_size, party_member);
-
   drawStats(sm_font, sm_size, party_member);
   drawStatus(sm_font, sm_size, party_member);
 }
@@ -170,7 +173,11 @@ void StatusPanel::drawTitle(Font *font, int txt_size, PartyMemberID id) {
       break;
     }
     case PartyMemberID::ERWIN: {
-      title = "Lost Vagabond";
+      title = "Vagabond";
+      break;
+    }
+    case PartyMemberID::XANDER: {
+      title = "Disgraced";
       break;
     }
   }
@@ -217,39 +224,6 @@ void StatusPanel::drawMorale(Font *font, int txt_size, float initial,
   position = TextUtils::alignRight(morale, position, *font, -2, 0);
 
   DrawTextEx(*font, morale, position, txt_size, -2, color);
-}
-
-void StatusPanel::drawClass(Font *font, int txt_size, PartyMemberID id) {
-  string text;
-  switch (id) {
-    case PartyMemberID::MARY: 
-    case PartyMemberID::ERWIN: {
-      text = "HUMAN - MID TIER";
-      break;
-    }
-  }
-
-  Vector2 position = Vector2Add(frame_position, {41, 48});
-  Color color = Game::palette[51];
-  DrawTextEx(*font, text.c_str(), position, txt_size, -3, color);
-}
-
-void StatusPanel::drawCombatLvl(Font *font, int txt_size, 
-                                Character *member)
-{
-  float stat_sum = member->offense;
-  stat_sum += member->defense;
-  stat_sum += member->intimid;
-  stat_sum += member->persist;
-  stat_sum += member->dexterity;
-  stat_sum += member->discipline;
-
-  float level = stat_sum / 6;
-  const char *text = TextFormat("%00.02f", level);
-
-  Vector2 position = Vector2Add(frame_position, {70, 60});
-  Color color = Game::palette[22];
-  DrawTextEx(*font, text, position, txt_size, -3, color); 
 }
 
 void StatusPanel::drawStats(Font *font, int txt_size, Character *member) {

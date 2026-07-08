@@ -161,6 +161,28 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->resilience = 0.70;
       break;
     }
+    case CompanionID::XANDER: {
+      std::strcpy(companion->name, "Xander");
+      companion->member_id = PartyMemberID::XANDER;
+      companion->companion_id = companion_id;
+
+      companion->life = 25;
+      companion->max_life = 25;
+
+      companion->init_morale = 0;
+      companion->max_morale = 0;
+
+      companion->offense = 10;
+      companion->defense = 8;
+      companion->intimid = 6;
+      companion->persist = 8;
+      companion->dexterity = 3;
+      companion->discipline = 2;
+
+      companion->recovery = 0.75;
+      companion->resilience = 0.90;
+      break;
+    }
   }
 
   PLOGI << "Initialized data for: " << companion->name;

@@ -68,6 +68,10 @@ void TechsPanel::updateStyleText() {
       style_text = "Weapon Techniques";
       break;
     }
+    case PartyMemberID::XANDER: {
+      style_text = "Animalistic";
+      break;
+    }
   }
 
   Font *font = &Game::med_font;
@@ -239,8 +243,104 @@ string TechsPanel::getTechEntry() {
 
         "If Erwin's Morale ends up below 0, he will\n"
         "become Despondent. During which,\n"
-        "Auto-Evade becomes much easier to bypass.\n\n"
+        "Auto-Evade becomes much easier to bypass."
       ;
+      return text;
+    }
+    case PartyMemberID::XANDER: {
+      string text = 
+        "--[COMBATANT SUMMARY]--\n"
+
+        "Xander plays the self-proclaimed role of\n"
+        "protector to Mary. As a dragon, he is capable\n"
+        "of great feats of strength and durability,\n"
+        "but he is prone to getting worn down through\n"
+        "persistent effort.\n\n"
+        
+        "The years have not been kind to him. His body\n"
+        "is becoming increasingly hard to sustain by\n"
+        "the day. Make sure to provide help when he\n"
+        "needs it.\n\n"
+
+        "--[ASSISTS]--\n\n"
+
+        "<Tail Whip> - HP Cost: 8 | CD: 5s\n"
+        "\"Watch your tone.\"\n\n"
+
+        "Xander will move in front of Mary and\n"
+        "proceed to lash his tail with an incredible\n"
+        "amount of force. This attack is capable of\n"
+        "hitting multiple enemies at once, and it's\n"
+        "damage also scales with Xander's Dexterity.\n\n"
+
+        "If Xander is already in front of Mary, and\n"
+        "is a considerable distance away at the time\n"
+        "the assist was called, he will instead\n"
+        "perform the attack in Mary's direction.\n\n"
+
+        "<Steel Wall> - HP Cost: N/A | CD: 5s\n"
+        "\"Get behind me...\"\n\n"
+
+        "Xander will take on a defensive stance for\n"
+        "half a second. While in this stance, Xander's\n"
+        "assist cooldowns will be frozen and any\n"
+        "damage he takes will be reduced by 50%.\n\n"
+
+        "Xander also gains full Stun Immunity to\n"
+        "all attacks.\n\n"
+
+        "The stance timer resets every time Xander\n"
+        "take damage, and it will be frozen for as\n"
+        "long as Mary remains close to him.\n\n"
+
+        "If Xander were to have no Tenacity. The\n"
+        "stance will be broken the next time he\n"
+        "take damage. The same applies to Critical\n"
+        "Life as well.\n\n"
+
+        "<Meteor> - HP Cost: 8 | CD: 10s\n"
+        "\"Kneel.\"\n\n"
+
+        "Xander will clasp his hands together, and\n"
+        "and raise them over his head before.\n"
+        "striking down. Very strong in terms of damage\n"
+        "and stun time.\n\n"
+
+        "This assist is only accessible while\n"
+        "Steel Wall is active, with it temporarily\n"
+        "replacing Tail Whip after one second.\n\n"
+
+
+        "--[PASSIVES]--\n\n"
+
+        "<Draconic>\n"
+        "\"Old habits die hard.\"\n\n"
+
+        "Xander does not possess Morale, nor can\n"
+        "he become Despondent either. Instead, any\n"
+        "Morale damage he sustains will increase\n"
+        "his Entropy; Which drains his life overtime.\n\n"
+
+        "As a trade off, Xander has an innate stun\n"
+        "immunity to all Morale attacks. This effect\n"
+        "will cease to function if Xander gets\n"
+        "staggered, or he's already in hit stun.\n\n"
+
+        "<Protective>\n"
+        "\"Please remain close...\"\n\n"
+
+        "Xander possesses Natural Tenacity;\n"
+        "a secondary HP resource that absorbs a\n"
+        "percentage of any Life damage he sustains.\n"
+        "It will regenerate on its own if Xander\n"
+        "doesn't take any damage for a certain\n"
+        "period of time.\n\n"
+
+        "For as long as Xander has Tenacity, most\n"
+        "Single-Target attacks will prioritize him\n"
+        "over Mary. No matter what.\n"
+      ;
+
       return text;
     }
   }
