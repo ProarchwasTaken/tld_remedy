@@ -102,6 +102,29 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
       "knife, inflicting more damage to all enemies\n"
       "who got pierced by the initial attack.\n\n";
     }
+    case SubWeaponID::BAT: {
+      return
+      "<Swing> - MP Cost: 6\n"
+      "\"One decisive blow, and the battles over.\"\n\n"
+
+      "Mary wind back his baseball bat, and swings\n"
+      "as hard as he can. The attack is great in\n"
+      "power, but slow in terms of speed. During the\n"
+      "action's windup, Mary can freely change the\n"
+      "direction he's currently facing.\n\n"
+
+      "<Hail Mary> - MP Cost: 6\n"
+      "\"When there's love, there's hope...\n"
+      "but a little luck wouldn't hurt.\n\n"
+
+      "Mary tosses a baseball into the air. On it's\n"
+      "own, the projectile wouldn't inflict any\n"
+      "damage if it were to hit an enemy. Rather,\n"
+      "if Mary hits the baseball on it's way down\n"
+      "with Swing, the projectile will be launched\n"
+      "forward; Inflicting damage that scales with\n"
+      "Mary's Offense and Dexterity.\n\n";
+    }
   }
 }
 

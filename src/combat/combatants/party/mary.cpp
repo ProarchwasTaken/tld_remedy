@@ -17,6 +17,7 @@
 #include "utils/collision.h"
 #include "combat/system/evt_handler.h"
 #include "combat/sub_weapons/knife.h"
+#include "combat/sub_weapons/bat.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -91,6 +92,10 @@ void Mary::assignSubWeapon(SubWeaponID id) {
   switch (id) {
     case SubWeaponID::KNIFE: {
       sub_weapon = make_unique<Knife>(this);
+      break;
+    }
+    case SubWeaponID::BAT: {
+      sub_weapon = make_unique<Bat>(this);
       break;
     }
   }

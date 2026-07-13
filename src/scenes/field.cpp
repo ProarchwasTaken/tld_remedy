@@ -73,7 +73,7 @@ FieldScene::FieldScene(string map_name) {
   session = make_unique<Session>();
   session->version = Game::session_version;
 
-  initPlayerData(SubWeaponID::KNIFE);
+  initPlayerData(SubWeaponID::BAT);
   initCompanionData(CompanionID::ERWIN);
 
   setup(map_name);
@@ -125,10 +125,22 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
 
   switch (weapon_id) {
     case SubWeaponID::KNIFE: {
-      PLOGI << "Applying Knife status bonuses.";
+      PLOGI << "Applying Knife status changes.";
       player->offense += 2;
       player->intimid += 1;
       player->dexterity += 1;
+      break;
+    }
+    case SubWeaponID::BAT: {
+      PLOGI << "Applying Bat status changes.";
+      player->init_morale = 6;
+      player->max_morale -= 10;
+
+      player->offense += 3;
+      player->intimid += 2;
+      player->discipline -= 2;
+
+      player->recovery -= 0.25;
       break;
     }
   }

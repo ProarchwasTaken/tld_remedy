@@ -40,7 +40,8 @@ enum class ActorType {
 };
 
 enum class SubWeaponID {
-  KNIFE
+  KNIFE,
+  BAT
 };
 
 enum class CompanionID {
