@@ -61,8 +61,8 @@ Mary::Mary(Player *plr):
   buffer_lifetime = buffer_lifetime * quotient;
   PLOGD << "Buffer Lifetime: " << buffer_lifetime;
 
-  bounding_box.scale = {64, 64};
-  bounding_box.offset = {-32, -64};
+  bounding_box.scale = {80, 80};
+  bounding_box.offset = {-40, -80};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
   rectExCorrection(bounding_box, hurtbox);
