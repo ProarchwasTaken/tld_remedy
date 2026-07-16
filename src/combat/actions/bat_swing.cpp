@@ -5,13 +5,17 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
+#include "data/damage.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "combat/combatants/party/mary.h"
+#include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
+#include "combat/system/stage.h"
 #include "combat/actions/bat_swing.h"
 #include <plog/Log.h>
 
@@ -45,6 +49,75 @@ BatSwing::BatSwing(Mary *user) :
 
 BatSwing::~BatSwing() {
   user->animation = NULL;
+}
+
+void BatSwing::intercept(DamageData &data) {
+  bool valid = data.hitbox != NULL && data.assailant != NULL;
+  if (!valid || phase != ActionPhase::WIND_UP) {
+    CombatAction::intercept(data);
+    return;
+  }
+
+  bool way_too_early = state_clock < 0.5;
+  if (way_too_early && !CheckCollisionRecs(hitbox.rect, *data.hitbox)) {
+    return;
+  }
+
+  bool too_early = state_clock < 0.7;
+  if (too_early) {
+    PLOGI << "Conditions have been met for a Flawed Clash.";
+    flawedClash(data);
+    return;
+  }
+
+  PLOGI << "Conditions have been met for a clash.";
+  normalClash(data);
+}
+
+void BatSwing::flawedClash(DamageData &data) {
+  data.intercepted = true;
+  float stun_time = data.stun_time * 0.5;
+  StunType stun_type = StunType::STAGGER;
+  float knockback = data.knockback * 2;
+
+  float damage = Clamp(user->damageCalculation(data), 0, 9999);
+  user->increaseEntropy(damage / 2);
+
+  user->enterHitstun(data.stun_time, data.stun_type, Game::palette[37]);
+  user->setKnockback(data.knockback, data.stun_time, 
+                     data.assailant->direction);
+
+  user->sprite = &atlas->sprites[41];
+  Game::sleep(0.25);
+} 
+
+void BatSwing::normalClash(DamageData &data) {
+  PLOGI << "Refunding Morale...";
+  float refund = user->calculateMoraleCost(user->tech1.cost);
+  user->increaseMorale(refund, true);
+
+  Combatant *assailant = data.assailant;
+  float a_knockback = data.knockback / 2;
+  assailant->enterHitstun(data.stun_time, StunType::NORMAL, WHITE);
+  assailant->setKnockback(a_knockback, data.stun_time, user->direction);
+
+  end_time = data.stun_time * 2;
+  float m_knockback = data.knockback * 2;
+  user->setKnockback(m_knockback, end_time, assailant->direction);
+  user->sprite = &atlas->sprites[44];
+
+  CombatStage::tintStage(Game::palette[2]);
+  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+  CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 56.0f);
+
+  phase = ActionPhase::ACTIVE;
+  state_clock = 0.999999;
+  clashed = true;
+  attack_connected = true;
+  data.intercepted = true;
+
+  Combatant::sfx.play("technical");
+  Game::sleep(0.75);
 }
 
 void BatSwing::sendWarning() {
@@ -158,6 +231,10 @@ void BatSwing::inflictDamage(vector<pair<float, Combatant*>> &hits) {
 }
 
 void BatSwing::endLag() {
+  if (clashed) {
+    user->applyKnockback(state_clock);
+  }
+
   SpriteAnimation::play(user->animation, &anim_end, false);
   user->sprite = &atlas->sprites[*user->animation->current];
 }

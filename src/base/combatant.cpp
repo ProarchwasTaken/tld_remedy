@@ -108,7 +108,7 @@ void Combatant::decelerate() {
 }
 
 void Combatant::takeDamage(DamageData &data) {
-  assert(data.assailant == this);
+  assert(data.assailant != this);
   if (state == CombatantState::DEAD) {
     return;
   }

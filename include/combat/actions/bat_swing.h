@@ -15,6 +15,10 @@ public:
   BatSwing(Mary *user);
   ~BatSwing();
 
+  void intercept(DamageData &data) override;
+  void flawedClash(DamageData &data);
+  void normalClash(DamageData &data);
+
   void updateHitboxOffset();
   void sendWarning();
 
@@ -35,6 +39,7 @@ private:
 
   const int attack_weight = 2;
   bool attack_connected = false;
+  bool clashed = false;
 
   SpriteAtlas *atlas;
   Animation anim_windup = {{38, 39, 40}, 0.2};
