@@ -141,6 +141,8 @@ void Attack::inflictDamage(set<pair<float, Combatant*>> &hits) {
   assert(!hits.empty());
 
   Combatant *victim;
+  data.hitbox = &hitbox.rect;
+
   if (hits.size() > 1) {
     auto closest = std::min_element(hits.begin(), hits.end(), 
                                     Comparison::combatantPriority);
@@ -152,7 +154,6 @@ void Attack::inflictDamage(set<pair<float, Combatant*>> &hits) {
   PLOGD << "Victim selected: '" << victim->name << "' [ID: " << 
     victim->entity_id << "]";
 
-  data.hitbox = &hitbox.rect;
   victim->takeDamage(data);
 
   end_time = 0.1;

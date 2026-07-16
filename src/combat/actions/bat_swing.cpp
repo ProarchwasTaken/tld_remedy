@@ -141,6 +141,10 @@ void BatSwing::inflictDamage(vector<pair<float, Combatant*>> &hits) {
     Combatant *victim = hit.second;
     victim->takeDamage(data);
 
+    if (user->state == HIT_STUN) {
+      return;
+    }
+
     weight = weight - victim->priority;
     PLOGD << "Victim Priority: " << victim->priority;
     PLOGD << "Attack Weight has been lowered to: " << weight; 

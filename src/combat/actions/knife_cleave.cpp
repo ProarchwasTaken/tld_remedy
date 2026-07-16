@@ -159,6 +159,10 @@ void KnifeCleave::inflictDamage(set<pair<float, Combatant*>> &hits) {
   data.hitbox = &hitbox.rect;
   victim->takeDamage(data);
 
+  if (user->state == HIT_STUN) {
+    return;
+  }
+
   end_time = 0.125;
   updateAnimFrameDuration();
   attack_connected = true;

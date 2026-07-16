@@ -94,7 +94,21 @@ public:
   virtual void damageMorale(float magnitude);
   virtual void increaseMorale(float magnitude, bool mp_share = true);
 
+  /* Hit Stun is a state that most combatants will enter upon taking
+   * damage. In such a state, they will be unable to do anything the
+   * stun ends.*/
   virtual void enterHitstun(DamageData &data);
+
+  /* This overload forces a combatant to enter hit stun outside the
+   * context of taking damage. The combatant's current action will not be
+   * cleared from memory when this function is called. 
+   *
+   * This is to reduce the risk of clearing an action from memory while 
+   * it is still running it's logic. Which may result in a seqfault. 
+   * Nevertheless,this possibility must always be accounted for when 
+   * running this function.*/
+  virtual void enterHitstun(float seconds, StunType type, Color tint);
+
   void stunLogic();
   void stunTintLerp();
   virtual void exitHitstun();

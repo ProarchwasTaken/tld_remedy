@@ -21,6 +21,7 @@ public:
   void finalIntercept(float &damage, DamageData &data) override;
 
   void enterHitstun(DamageData &data) override;
+  void enterHitstun(float seconds, StunType type, Color tint) override;
   bool counterToastCondition(DamageData &data);
   void exitHitstun() override;
 

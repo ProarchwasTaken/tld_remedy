@@ -108,6 +108,7 @@ void Combatant::decelerate() {
 }
 
 void Combatant::takeDamage(DamageData &data) {
+  assert(data.assailant == this);
   if (state == CombatantState::DEAD) {
     return;
   }
@@ -392,6 +393,17 @@ void Combatant::enterHitstun(DamageData &data) {
 
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
   " has entered hitstun for: " << stun_time << " seconds.";
+}
+
+void Combatant::enterHitstun(float seconds, StunType type, Color tint) {
+  stun_time = seconds;
+  stun_clock = 0.0;
+
+  state = CombatantState::HIT_STUN;
+  start_tint = tint;
+
+  PLOGI << "COMBATANT '" << name << "' [ID: " << entity_id << "]"
+    " has forcibly entered hitstun for: " << stun_time << " seconds.";
 }
 
 void Combatant::stunLogic() {

@@ -104,6 +104,14 @@ void Enemy::enterHitstun(DamageData &data) {
   Combatant::enterHitstun(data);
 }
 
+void Enemy::enterHitstun(float seconds, StunType type, Color tint) {
+  assert(state != DEAD);
+  combo++;
+  PLOGI << "Combo: " << combo;
+
+  Combatant::enterHitstun(seconds, type, tint);
+}
+
 bool Enemy::counterToastCondition(DamageData &data) {
   if (data.assailant == NULL && data.assailant->team == team) {
     return false;

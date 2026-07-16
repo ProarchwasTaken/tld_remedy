@@ -139,6 +139,10 @@ void KnifePiercer::hitRegistration() {
       continue;
     }
 
+    if (user->state == HIT_STUN) {
+      return;
+    }
+
     if (combatant->state != CombatantState::DEAD) {
       hits.emplace(combatant);
     }

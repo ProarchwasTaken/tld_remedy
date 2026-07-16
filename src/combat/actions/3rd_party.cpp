@@ -143,6 +143,9 @@ void ThirdParty::inflictDamage(set<pair<float, Combatant*>> &hits) {
 
   data.hitbox = &hitbox.rect;
   victim->takeDamage(data);
+  if (user->state == HIT_STUN) {
+    return;
+  }
 
   attack_connected = true;
   sfx->play("3rdparty_hit");
