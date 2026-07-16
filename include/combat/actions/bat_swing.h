@@ -1,4 +1,7 @@
 #pragma once
+#include <utility>
+#include <vector>
+#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/damage.h"
 #include "data/rect_ex.h"
@@ -13,11 +16,15 @@ public:
   ~BatSwing();
 
   void updateHitboxOffset();
+  void sendWarning();
 
   void windUp() override;
   void freeTurning();
 
   void action() override;
+  void hitRegistration(std::vector<std::pair<float, Combatant*>> &hits);
+  void inflictDamage(std::vector<std::pair<float, Combatant*>> &hits);
+
   void endLag() override;
 
   void drawDebug() override;
@@ -25,6 +32,9 @@ private:
   Mary *user;
   RectEx hitbox;
   DamageData data;
+
+  const int attack_weight = 2;
+  bool attack_connected = false;
 
   SpriteAtlas *atlas;
   Animation anim_windup = {{38, 39, 40}, 0.2};
