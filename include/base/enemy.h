@@ -15,6 +15,7 @@ public:
 
   static int memberCount() {return member_count;}
   static int comboCount() {return combo;} 
+  static void updateStunnedCount();
 
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;

@@ -304,6 +304,7 @@ void CombatScene::update() {
       entity->update();
     }
 
+    Enemy::updateStunnedCount();
     camera.update(player);
     black_bars.update(&camera);
 

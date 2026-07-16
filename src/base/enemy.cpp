@@ -20,6 +20,30 @@ int Enemy::stunned = 0;
 int Enemy::combo = 0;
 
 
+void Enemy::updateStunnedCount() {
+  if (member_count == 0) {
+    return;
+  }
+
+  stunned = 0;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team != CombatantTeam::ENEMY) {
+      continue;
+    }
+
+    if (combatant->state == HIT_STUN || combatant->state == DEAD) {
+      stunned++;
+    }
+  }
+
+  if (combo > 0 && stunned == 0) {
+    PLOGI << "Combo has been broken. Score: " << combo;
+    combo = 0;
+  }
+}
+
+
 Enemy::Enemy(string name, EnemyID id, Vector2 position): 
   Combatant(name, CombatantTeam::ENEMY, position, LEFT)
 {
@@ -30,19 +54,9 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 Enemy::~Enemy() {
   member_count--;
   assert(member_count >= 0);
-
-  if (state == DEAD) {
-    assert(stunned > 0);
-    stunned--;
-  }
 }
 
 void Enemy::takeDamage(DamageData &data) {
-  if (stunned == 0) {
-    PLOGI << "Reseting Combo Count.";
-    combo = 0;
-  }
-
   if (data.damage_type == DamageType::LIFE) {
     float percentage = combo / 15.0;
     percentage = Clamp(percentage, 0.0, 1.0);
@@ -79,10 +93,6 @@ void Enemy::finalIntercept(float &damage, DamageData &data) {
 
 void Enemy::enterHitstun(DamageData &data) {
   assert(state != DEAD);
-  if (state != HIT_STUN) {
-    stunned = Clamp(stunned + 1, 0, member_count);
-  }
-
   combo++;
   PLOGI << "Combo: " << combo;
 
@@ -105,16 +115,9 @@ bool Enemy::counterToastCondition(DamageData &data) {
 
 void Enemy::exitHitstun() {
   Combatant::exitHitstun();
-
-  assert(stunned > 0);
-  stunned--;
 }
 
 void Enemy::death() {
-  if (state != HIT_STUN) {
-    stunned++;
-  }
-
   combo++;
   PLOGI << "Combo: " << combo;
 
