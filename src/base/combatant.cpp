@@ -200,16 +200,22 @@ float Combatant::damageCalculation(DamageData &data) {
     } 
   }
 
-  float base_damage = data.base_damage;
+  float damage_floor = data.damage_floor;
   int a_atk = *data.a_atk;
   float atk_mod = data.atk_mod;
 
   int b_def = *data.b_def;
   float def_mod = data.def_mod;
 
-  PLOGD << "Base Damage: " << base_damage;
+  PLOGD << "Damage Floor: " << damage_floor;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
-  return (base_damage + (a_atk * atk_mod)) - (b_def * def_mod);
+
+  float result = (a_atk * atk_mod) - (b_def * def_mod);
+  if (result < damage_floor) {
+    result = damage_floor;
+  }
+
+  return result;
 }
 
 bool Combatant::useTenacity(float damage, DamageType type) {

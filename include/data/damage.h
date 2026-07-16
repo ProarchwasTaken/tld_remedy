@@ -10,7 +10,7 @@ struct DamageData {
   float stun_time;
   StunType stun_type;
 
-  float base_damage = 0; 
+  float damage_floor = 1; 
   float knockback = 0;
   float hit_stop = 0;
 
