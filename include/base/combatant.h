@@ -163,7 +163,7 @@ public:
   float speed_multiplier = 1.0;
   float recovery = 1.0;
   float resilience = 1.0;
-  int priority = 0;
+  int priority = 1;
 
   float acceleration = 0.0;
   float accel_rate = 5;
