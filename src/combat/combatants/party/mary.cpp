@@ -62,8 +62,8 @@ Mary::Mary(Player *plr):
   buffer_lifetime = buffer_lifetime * quotient;
   PLOGD << "Buffer Lifetime: " << buffer_lifetime;
 
-  bounding_box.scale = {80, 80};
-  bounding_box.offset = {-40, -80};
+  bounding_box.scale = {96, 80};
+  bounding_box.offset = {-48, -80};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
   rectExCorrection(bounding_box, hurtbox);
@@ -263,7 +263,7 @@ void Mary::readActionBuffer() {
       break;
     }
     case MaryAction::GHOST_STEP: {
-      if (life > 1) {
+      if (life > 1 && moving_x != 0) {
         float cost = calculateLifeCost(gs_cost);
         increaseExhaustion(cost);
         action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);

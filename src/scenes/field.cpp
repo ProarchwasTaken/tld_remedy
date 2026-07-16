@@ -140,7 +140,7 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
       player->intimid += 2;
       player->discipline -= 2;
 
-      player->recovery -= 0.25;
+      player->recovery -= 0.15;
       break;
     }
   }
