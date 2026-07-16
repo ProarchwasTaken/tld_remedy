@@ -65,13 +65,13 @@ public:
   static SpriteAtlas atlas;
   bool has_moved = false;
   bool moving = true;
+  int moving_x = 0;
 
   const float gs_cost = 4.5;
 private:
   CombatKeybinds *keybinds;
 
   const float default_speed = 68;
-  int moving_x = 0;
   float last_moved = 0.0;
 
   MaryAction buffer = MaryAction::NONE;

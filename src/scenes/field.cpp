@@ -73,7 +73,7 @@ FieldScene::FieldScene(string map_name) {
   session = make_unique<Session>();
   session->version = Game::session_version;
 
-  initPlayerData(SubWeaponID::BAT);
+  initPlayerData(SubWeaponID::KNIFE);
   initCompanionData(CompanionID::ERWIN);
 
   setup(map_name);
