@@ -17,7 +17,6 @@ public:
 
   void stunTimer();
   void endTimer();
-  void highestComboDecay();
   void startComboToast();
 
   void draw();
@@ -40,9 +39,11 @@ private:
   float hit_clock = 1.0;
   float hit_time = 0.10;
 
-  int highest_combo = 0;
-  float decay_clock = 0.0;
-  float decay_time = 3.0;
+  int displayed_combo = 0;
+  int previous_combo = 0;
+
+  float toast_clock = 1.0;
+  float toast_cooldown = 3.0;
 
   float damage_dealt = 0.0;
   float damage_total = 0.0;

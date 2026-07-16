@@ -75,6 +75,7 @@ FieldScene::FieldScene(string map_name) {
 
   initPlayerData(SubWeaponID::KNIFE);
   initCompanionData(CompanionID::ERWIN);
+  session->player.life = session->player.max_life;
 
   setup(map_name);
 }
