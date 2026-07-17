@@ -27,6 +27,7 @@ BatSwing::BatSwing(Mary *user) :
   CombatAction(ActionID::BAT_SWING, ActionType::OFFENSE_HP, user, 
                0.5, 0.10, 0.5)
 {
+  name = "Bat Swing";
   this->user = user;
   this->atlas = &Mary::atlas;
 

@@ -17,7 +17,8 @@ class SubWeapon;
 enum class MaryAction {
   NONE = -1,
   ATTACK,
-  GHOST_STEP,
+  GHOST_STEP_FWD,
+  GHOST_STEP_BWD,
   EVADE,
   LIGHT_TECH,
   HEAVY_TECH,

@@ -203,15 +203,18 @@ void Mary::actionInput(bool gamepad) {
 }
 
 void Mary::defensiveActionInput(bool gamepad) {
-  if (moving) {
-    PLOGI << "Sending GhostStep input to buffer.";
-    buffer = MaryAction::GHOST_STEP;
-    return;
+  int direction_x = static_cast<int>(direction);
+  if (moving && moving_x == direction_x) {
+    PLOGI << "Sending GhostStep Forward input to buffer.";
+    buffer = MaryAction::GHOST_STEP_FWD;
+  }
+  else if (moving && moving_x != direction_x) {
+    PLOGI << "Sending GhostStep Backward input to buffer.";
+    buffer = MaryAction::GHOST_STEP_BWD;
   }
   else if (Input::down(keybinds->down, gamepad)) {
     PLOGI << "Sending Evade input to buffer.";
     buffer = MaryAction::EVADE;
-    return;
   }
 }
 
@@ -232,10 +235,12 @@ bool Mary::canCancel(bool ignore_buffer) {
     return buffer != MaryAction::EVADE && evade_action->evaded_attack;
   }
   else if (action_id == ActionID::GHOST_STEP) {
-    return buffer != MaryAction::GHOST_STEP;
+    return buffer != MaryAction::GHOST_STEP_FWD || buffer != 
+    MaryAction::GHOST_STEP_BWD;
   }
   else {
-    return buffer == MaryAction::GHOST_STEP;
+    return buffer == MaryAction::GHOST_STEP_FWD || 
+    buffer == MaryAction::GHOST_STEP_BWD;
   }
 }
 
@@ -262,11 +267,17 @@ void Mary::readActionBuffer() {
       action = make_unique<Attack>(this, atlas, hitbox, atk_set);
       break;
     }
-    case MaryAction::GHOST_STEP: {
-      if (life > 1 && moving_x != 0) {
+    case MaryAction::GHOST_STEP_FWD: 
+    case MaryAction::GHOST_STEP_BWD: {
+      int direction_x = static_cast<int>(direction);
+      if (buffer == MaryAction::GHOST_STEP_BWD) {
+        direction_x = direction_x * -1;
+      }
+
+      if (life > 1) {
         float cost = calculateLifeCost(gs_cost);
         increaseExhaustion(cost);
-        action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
+        action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
       }
 
       break;
