@@ -16,7 +16,7 @@ Despondent::Despondent(PartyMember *afflicted) :
   this->afflicted = afflicted;
 
   float intimid = afflicted->intimid;
-  float dec_intimid = std::floorf(intimid * 0.90);
+  float dec_intimid = std::floorf(intimid * 0.75);
   intimid_lost = intimid - dec_intimid;
   PLOGD << "Intimidation to be lost: " << intimid_lost;
 }
@@ -24,7 +24,7 @@ Despondent::Despondent(PartyMember *afflicted) :
 void Despondent::init(bool hide_text) {
   afflicted->demoralized = true;
 
-  PLOGI << "Decreasing afflicted's intimidation by 10%";
+  PLOGI << "Decreasing afflicted's intimidation by 25%";
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: " << afflicted->intimid;
@@ -78,7 +78,9 @@ void Despondent::logic() {
     magnitude = remaining;
   }
 
-  afflicted->morale += magnitude;
+  if (magnitude > 0) {
+    afflicted->morale += magnitude;
+  }
 
   if (afflicted->morale >= init_morale) {
     end = true;
