@@ -12,10 +12,11 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
-#include "combat/combatants/party/mary.h"
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
 #include "combat/system/stage.h"
+#include "combat/combatants/party/mary.h"
+#include "combat/sub_weapons/bat.h"
 #include "combat/actions/bat_swing.h"
 #include <plog/Log.h>
 
@@ -28,6 +29,9 @@ BatSwing::BatSwing(Mary *user) :
 {
   this->user = user;
   this->atlas = &Mary::atlas;
+
+  this->sfx = &Bat::sfx;
+  assert(sfx->users() > 0);
 
   data.damage_type = DamageType::LIFE;
   data.calculation = DamageType::LIFE;
@@ -49,6 +53,10 @@ BatSwing::BatSwing(Mary *user) :
 
 BatSwing::~BatSwing() {
   user->animation = NULL;
+
+  if (use_clash_effect) {
+    clashEffect();
+  }
 }
 
 void BatSwing::intercept(DamageData &data) {
@@ -58,7 +66,7 @@ void BatSwing::intercept(DamageData &data) {
     return;
   }
 
-  bool way_too_early = state_clock < 0.5;
+  bool way_too_early = state_clock < 0.4;
   if (way_too_early && !CheckCollisionRecs(hitbox.rect, *data.hitbox)) {
     return;
   }
@@ -70,7 +78,7 @@ void BatSwing::intercept(DamageData &data) {
     return;
   }
 
-  PLOGI << "Conditions have been met for a clash.";
+  PLOGI << "Conditions have been met for a Perfect Clash!";
   normalClash(data);
 }
 
@@ -88,6 +96,7 @@ void BatSwing::flawedClash(DamageData &data) {
                      data.assailant->direction);
 
   user->sprite = &atlas->sprites[41];
+  sfx->play("bat_swing_flawed");
   Game::sleep(0.25);
 } 
 
@@ -106,17 +115,21 @@ void BatSwing::normalClash(DamageData &data) {
   user->setKnockback(m_knockback, end_time, assailant->direction);
   user->sprite = &atlas->sprites[44];
 
-  CombatStage::tintStage(Game::palette[2]);
-  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
-  CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 56.0f);
+  CombatStage::tintStage(Game::palette[48]);
+  CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 48.0f);
 
   phase = ActionPhase::ACTIVE;
   state_clock = 0.999999;
   clashed = true;
+
+  use_clash_effect = true;
   attack_connected = true;
   data.intercepted = true;
 
-  Combatant::sfx.play("technical");
+  Game::bgm->pause();
+
+  sfx->play("bat_swing_hit");
+  Combatant::sfx.play("evade_perfect");
   Game::sleep(0.75);
 }
 
@@ -138,7 +151,7 @@ void BatSwing::updateHitboxOffset() {
 }
 
 void BatSwing::windUp() {
-  if (state_clock >= 0.4) {
+  if (state_clock >= 0.7) {
     freeTurning();
   }
 
@@ -148,6 +161,7 @@ void BatSwing::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[41];
+    sfx->play("bat_swing");
   }
 }
 
@@ -174,6 +188,7 @@ void BatSwing::action() {
 
   if (!hits.empty()) {
     inflictDamage(hits);
+    sfx->play("bat_swing_hit");
   }
 }
 
@@ -231,12 +246,29 @@ void BatSwing::inflictDamage(vector<pair<float, Combatant*>> &hits) {
 }
 
 void BatSwing::endLag() {
+  if (use_clash_effect) {
+    clashEffect();
+  }
+
   if (clashed) {
     user->applyKnockback(state_clock);
   }
 
   SpriteAnimation::play(user->animation, &anim_end, false);
   user->sprite = &atlas->sprites[*user->animation->current];
+}
+
+void BatSwing::clashEffect() {
+  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+  Game::bgm->resume();
+
+  if (user->action != nullptr && user->action->id == id) {
+    sfx->play("bat_swing_slide");
+  }
+
+  sfx->play("bat_swing_clash");
+  Combatant::sfx.play("technical");
+  use_clash_effect = false;
 }
 
 void BatSwing::drawDebug() {

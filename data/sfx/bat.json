@@ -1,0 +1,24 @@
+{
+  "sfx": [
+    {
+      "name": "bat_swing",
+      "filename": "bat/bat_swing.mp3"
+    },
+    {
+      "name": "bat_swing_hit",
+      "filename": "bat/bat_swing_hit.mp3"
+    },
+    {
+      "name": "bat_swing_slide",
+      "filename": "bat/bat_swing_slide.mp3"
+    },
+    {
+      "name": "bat_swing_clash",
+      "filename": "bat/bat_swing_clash.mp3"
+    },
+    {
+      "name": "bat_swing_flawed",
+      "filename": "bat/bat_swing_flawed.mp3"
+    }
+  ]
+}

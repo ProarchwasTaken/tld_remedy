@@ -7,6 +7,7 @@
 #include "data/rect_ex.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 
 
@@ -30,16 +31,21 @@ public:
   void inflictDamage(std::vector<std::pair<float, Combatant*>> &hits);
 
   void endLag() override;
+  void clashEffect();
 
   void drawDebug() override;
 private:
   Mary *user;
+  SoundAtlas *sfx;
+
   RectEx hitbox;
   DamageData data;
 
   const int attack_weight = 2;
   bool attack_connected = false;
+
   bool clashed = false;
+  bool use_clash_effect = false;
 
   SpriteAtlas *atlas;
   Animation anim_windup = {{38, 39, 40}, 0.2};
