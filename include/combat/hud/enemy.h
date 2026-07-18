@@ -24,11 +24,15 @@ public:
   ~EnemyHud();
   void assign(Mary *&player, PartyMember *&companion);
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
-  void damageHandling(Combatant *sender);
+  void damageHandling(Combatant *sender, TookDamageCBT *event);
 
   void update();
   void targetCheck(PartyMember *member);
+  TargetData *findUnusedData(Combatant *target);
+  void addTargetData(Combatant *target, TargetData *data);
+
   void targetLogic();
+  bool beingTargeted(Combatant *target);
   void redGuageTimer(TargetData &data);
 
   void draw();
@@ -36,6 +40,8 @@ public:
 
   void drawLifeGauge(TargetData &data, Vector2 position, float width, 
                      float max_width, bool overflow);
+  void drawTenacityGauge(TargetData &data, Vector2 position, float width,
+                         float max_width);
   void drawGaugeNormal(TargetData &data, Vector2 position, float width);
   void drawGaugeOverflow(TargetData &data, Vector2 position, float width,
                          float max_width);
@@ -56,7 +62,7 @@ private:
   Texture life_bar;
   Texture life_empty;
 
-  static constexpr float LIFE_PER_SEGMENT = 20;
+  static constexpr float LIFE_PER_SEGMENT = 30;
   static constexpr float RED_GAUGE_TIME = 0.10;
   static constexpr float END_TIME = 0.5;
 };

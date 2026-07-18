@@ -48,21 +48,35 @@ void EnemyHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
   assert(event->sender->entity_type == COMBATANT);
   Combatant *sender = static_cast<Combatant*>(event->sender);
+  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+
   if (sender->team == CombatantTeam::ENEMY) {
     PLOGI << "Acknowledging TookDamage event sent by '" << sender->name
       << "' [ID: " << sender->entity_id << "]";
-    damageHandling(sender);
+    damageHandling(sender, dmg_event);
   }
 }
 
-void EnemyHud::damageHandling(Combatant *sender) {
+void EnemyHud::damageHandling(Combatant *sender, TookDamageCBT *dmg_event)
+{
   for (TargetData &data : targets) {
     if (sender == data.target) {
       PLOGD << "Reseting red gauge and end timer.";
       data.red_clock = 0.0;
       data.end_clock = 0.0;
-      break;
+      return;
     }
+  }
+
+  TargetData *unused = findUnusedData(sender);
+  if (unused == NULL) {
+    return;
+  }
+
+  addTargetData(sender, unused);
+
+  if (dmg_event->damage_type == DamageType::LIFE) {
+    unused->prev_life += dmg_event->damage_taken;
   }
 }
 
@@ -82,9 +96,16 @@ void EnemyHud::targetCheck(PartyMember *member) {
     return;
   }
 
+  TargetData *unused = findUnusedData(target);
+  if (unused != NULL) {
+    addTargetData(target, unused);
+  }
+}
+
+TargetData *EnemyHud::findUnusedData(Combatant *target) {
   TargetData *unused = NULL;
   for (auto &data : targets) {
-    if (data.target == NULL) {
+    if (data.target == NULL || !beingTargeted(data.target)) {
       unused = &data;
       continue;
     }
@@ -95,18 +116,22 @@ void EnemyHud::targetCheck(PartyMember *member) {
     }
   }
 
-  if (unused != NULL) {
-    unused->target = target;
-    unused->prev_life = Clamp(target->life, 0.0, target->max_life);
-    unused->red_clock = 0.0;
-    unused->end_clock = 0.0;
-  }
+  return unused;
+}
+
+void EnemyHud::addTargetData(Combatant *target, TargetData *data) {
+  assert(target != NULL);
+  assert(target->team == CombatantTeam::ENEMY);
+
+  PLOGI << "Adding Enemy: '" << target->name << "' [ID: " << 
+    target->entity_id << "] to Target Data.";
+  data->target = target;
+  data->prev_life = Clamp(target->life, 0.0, target->max_life);
+  data->red_clock = 0.0;
+  data->end_clock = 0.0;
 }
 
 void EnemyHud::targetLogic() {
-  PartyMember *mary = *player;
-  PartyMember *companion = *this->companion;
-
   for (TargetData &data : targets) {
     Combatant *target = data.target;
 
@@ -118,11 +143,7 @@ void EnemyHud::targetLogic() {
       redGuageTimer(data);
     }
 
-    bool targeted_by_plr = mary != NULL && target == mary->target;
-    bool targeted_by_com = companion != NULL && 
-      target == companion->target;
-
-    if (targeted_by_plr || targeted_by_com) {
+    if (beingTargeted(target)) {
       data.end_clock = 0.0;
       continue;
     }
@@ -131,6 +152,24 @@ void EnemyHud::targetLogic() {
     if (data.end_clock > 1.0) {
       data.target = NULL;
     }
+  }
+}
+
+bool EnemyHud::beingTargeted(Combatant *target) {
+  PartyMember *mary = *player;
+  PartyMember *companion = *this->companion;
+
+  bool targeted_by_plr = mary != NULL && target == mary->target;
+  if (targeted_by_plr) {
+    return true;
+  }
+
+  bool targeted_by_com = companion != NULL && target == companion->target;
+  if (targeted_by_com) {
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
@@ -179,11 +218,18 @@ void EnemyHud::drawTargetHud(TargetData &data, Vector2 position) {
     frame_width = max_gauge_width + 4;
   }
 
-  Rectangle frame = {position.x, position.y, frame_width, 7};
+  bool has_tenacity = target->tp_threshold > 0.0;
+  float frame_height = 7 + (2 * has_tenacity);
+
+  Rectangle frame = {position.x, position.y, frame_width, frame_height};
   DrawRectanglePro(frame, {frame_width, 0}, 0, BLACK);
 
   drawName(target, position);
   drawLifeGauge(data, position, gauge_width, max_gauge_width, overflow);
+
+  if (has_tenacity) {
+    drawTenacityGauge(data, position, gauge_width, max_gauge_width);
+  }
 
   if (overflow) {
     drawSegments(data, position);
@@ -192,8 +238,8 @@ void EnemyHud::drawTargetHud(TargetData &data, Vector2 position) {
   drawTargetReticle(target, position, frame_width);
 }
 
-void EnemyHud::drawLifeGauge(TargetData &data, Vector2 position, float width,
-                         float max_width, bool overflow)
+void EnemyHud::drawLifeGauge(TargetData &data, Vector2 position, 
+                             float width, float max_width, bool overflow)
 {
   if (!overflow) {
     drawGaugeNormal(data, position, width);
@@ -201,6 +247,24 @@ void EnemyHud::drawLifeGauge(TargetData &data, Vector2 position, float width,
   else {
     drawGaugeOverflow(data, position, width, max_width);
   }
+}
+
+void EnemyHud::drawTenacityGauge(TargetData &data, Vector2 position,
+                                 float width, float max_width)
+{
+  Combatant *target = data.target;
+  float tp_percentage = target->tenacity / target->max_life;
+
+  float thres_percentage = tp_percentage / target->tp_threshold;
+  thres_percentage = Clamp(thres_percentage, 0.0, 1.0);
+
+  float max_length = Clamp(width, 0.0, max_width);
+  float length = max_length * thres_percentage;
+
+  Vector2 start_pos = Vector2Add(position, {-2, 7});
+  Vector2 end_pos = Vector2Subtract(start_pos, {length, 0});
+
+  DrawLineV(start_pos, end_pos, Game::palette[22]);
 }
 
 void EnemyHud::drawGaugeNormal(TargetData &data, Vector2 position,
@@ -298,6 +362,10 @@ void EnemyHud::drawSegments(TargetData &data, Vector2 position) {
   float max_life = target->max_life;
   float life = Clamp(target->life, 0.0, max_life);
   float prev_life = data.prev_life;
+
+  if (target->tp_threshold > 0.0) {
+    position.y += 2;
+  }
 
   int max_segments = std::floorf(max_life / LIFE_PER_SEGMENT);
   int segments = std::floorf(life / LIFE_PER_SEGMENT);
