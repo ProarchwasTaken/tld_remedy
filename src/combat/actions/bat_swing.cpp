@@ -121,6 +121,7 @@ void BatSwing::normalClash(DamageData &data) {
 
   phase = ActionPhase::ACTIVE;
   state_clock = 0.999999;
+  user->tech1.clock = 0.0;
   clashed = true;
 
   use_clash_effect = true;

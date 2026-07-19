@@ -14,6 +14,8 @@ SoundAtlas Bat::sfx("bat");
 
 Bat::Bat(Mary *user) : SubWeapon("Bat", SubWeaponID::BAT, user) {
   *tech1 = {"Swing", TechCostType::MORALE, 3.6};
+  tech1->cooldown = 2.1;
+
   *tech2 = {"Hail Mary", TechCostType::MORALE, 3.6};
 
   sfx.use();
