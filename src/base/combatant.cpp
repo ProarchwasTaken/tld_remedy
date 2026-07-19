@@ -124,12 +124,12 @@ void Combatant::takeDamage(DamageData &data) {
 
   float damage_sustained = damageProcedure(data);
   setKnockback(data.knockback, data.stun_time, data.assailant->direction);
-  acceleration = 0.0;
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
 
+  acceleration = 0.0;
   PLOGD << "Proceeding to queue TookDamage event.";
   CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
                                          damage_sustained, 
@@ -155,7 +155,7 @@ bool Combatant::preDamageInterception(DamageData &data) {
 }
 
 float Combatant::damageProcedure(DamageData &data) {
-  float damage = Clamp(damageCalculation(data), 0, 9999);
+  float damage = damageCalculation(data);
   PLOGD << "Damage Calculation: " << damage;
 
   if (useTenacity(damage, data.damage_type)) {
@@ -342,10 +342,11 @@ void Combatant::lifeDecay() {
 
 void Combatant::damageTenacity(float magnitude) {
   tenacity = tenacity - magnitude;
+  tp_regen_clock = 0.0;
 
   if (tenacity <= 0) {
     tenacity = 0;
-    tp_threshold = 0.0;
+    tp_threshold = tp_natural;
   }
 }
 
@@ -355,7 +356,29 @@ void Combatant::increaseTenacity(float magnitude, float threshold) {
     tp_threshold = threshold;
   }
 
-  tenacity = Clamp(tenacity + magnitude, 0, max_life * tp_threshold);
+  float max_tenacity = max_life * tp_threshold;
+  tenacity = Clamp(tenacity + magnitude, 0, max_tenacity);
+}
+
+void Combatant::regenerateTenacity() {
+  if (tp_natural <= 0) {
+    return;
+  }
+
+  if (tenacity / max_life > tp_natural) {
+    return;
+  }
+
+  if (tp_regen_clock < 1.0) {
+    tp_regen_clock += Game::deltaTime() / tp_regen_delay;
+    return;
+  }
+
+  float max_tenacity = max_life * tp_natural;
+  float magnitude = recovery * (max_tenacity * 0.125);
+  magnitude *= Game::deltaTime();
+
+  increaseTenacity(magnitude, tp_natural);
 }
 
 void Combatant::damageMorale(float magnitude) {
@@ -612,6 +635,7 @@ void Combatant::endLogic() {
     lifeDecay();
   }
 
+  regenerateTenacity();
   statusLogic();
 }
 

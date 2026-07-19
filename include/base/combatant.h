@@ -86,6 +86,7 @@ public:
 
   void damageTenacity(float magnitude);
   void increaseTenacity(float magnitude, float threshold);
+  void regenerateTenacity();
 
   /* This function (Along with increaseMorale) does nothing. This is 
    * because, Combatants at their core do not possess Morale attributes.
@@ -162,6 +163,10 @@ public:
 
   float tenacity = 0.0;
   float tp_threshold = 0.0;
+  float tp_natural = 0.0;
+
+  float tp_regen_delay = 8.0;
+  float tp_regen_clock = 0.0;
 
   bool targetable = true;
   bool intangible = false;
