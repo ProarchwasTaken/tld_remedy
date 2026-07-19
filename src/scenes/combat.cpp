@@ -900,8 +900,9 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Tenacity: %01.02f/%01.02f", member->tenacity,
-                    member->tp_threshold);
+  text = TextFormat("Tenacity: %01.02f/%01.02f/%01.02f/%01.02f", 
+                    member->tenacity, member->tp_threshold, 
+                    member->tp_natural, member->tp_regen_clock);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
