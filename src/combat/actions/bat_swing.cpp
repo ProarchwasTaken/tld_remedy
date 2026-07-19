@@ -89,7 +89,7 @@ void BatSwing::flawedClash(DamageData &data) {
   StunType stun_type = StunType::STAGGER;
   float knockback = data.knockback * 2;
 
-  float damage = Clamp(user->damageCalculation(data), 0, 9999);
+  float damage = user->damageCalculation(data);
   user->increaseEntropy(damage / 2);
 
   user->enterHitstun(data.stun_time, data.stun_type, Game::palette[37]);

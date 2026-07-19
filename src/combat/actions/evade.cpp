@@ -63,7 +63,7 @@ void Evade::intercept(DamageData &data) {
   PLOGD << "Timing: " << act_time * state_clock;
   data.b_def = &user->dexterity;
 
-  float damage = Clamp(user->damageCalculation(data), 0, 9999);
+  float damage = user->damageCalculation(data);
   PLOGD << "Result: " << damage;
 
   float life_time;
