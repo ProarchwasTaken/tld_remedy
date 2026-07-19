@@ -158,16 +158,16 @@ void PlayerCmdHud::draw() {
   drawNamePlate(font, txt_size);
   drawCmdFrames();
 
-  drawCmdText("Attack", 0, font, txt_size, attack_color);
+  drawCmdDetails("Attack", 0, font, txt_size, attack_color);
 
-  drawCmdText(txt_defend.c_str(), 1, font, txt_size, defend_color,
-              player->life <= 1);
+  drawCmdDetails(txt_defend.c_str(), 1, font, txt_size, defend_color, 
+                 player->life <= 1);
 
-  drawCmdText(player->tech1.name.c_str(), 2, font, txt_size, tech1_color,
-              player->demoralized);
+  drawCmdDetails(&player->tech1, 2, font, txt_size, 
+                 tech1_color, player->demoralized);
 
-  drawCmdText(player->tech2.name.c_str(), 3, font, txt_size, tech2_color,
-              player->demoralized);
+  drawCmdDetails(&player->tech2, 3, font, txt_size, 
+                 tech2_color, player->demoralized);
 }
 
 void PlayerCmdHud::drawNamePlate(Font *font, int txt_size) {
@@ -190,8 +190,9 @@ void PlayerCmdHud::drawCmdFrames() {
   }
 }
 
-void PlayerCmdHud::drawCmdText(const char *text, int frame, Font *font, 
-                               int txt_size, Color color, bool unusable) 
+void PlayerCmdHud::drawCmdDetails(const char *text, int frame, Font *font, 
+                                  int txt_size, Color color, 
+                                  bool unusable) 
 {
   float offset = 11 * frame;
 
@@ -208,3 +209,54 @@ void PlayerCmdHud::drawCmdText(const char *text, int frame, Font *font,
   }
 }
 
+void PlayerCmdHud::drawCmdDetails(Technique *tech, int frame, Font *font, 
+                                  int txt_size, Color color, 
+                                  bool unusable)
+{
+  float offset = 11 * frame;
+
+  bool off_cooldown = tech->clock >= 1.0;
+  if (off_cooldown) {
+    const char* text = tech->name.c_str();
+    Vector2 position = Vector2Add(main_position, {59, 12 + offset});
+    position = TextUtils::alignRight(text, position, *font, -3, 0);
+
+    DrawTextEx(*font, text, position, txt_size, -3, color);
+  }
+  else {
+    drawCmdCooldown(tech, offset, font, txt_size);
+  }
+
+  if (unusable) {
+    color = Game::palette[33];
+    Vector2 position = Vector2Add(main_position, {0, 11 + offset});
+
+    DrawTextureRec(atlas->sheet, atlas->sprites[3], position, color);
+  }
+}
+
+void PlayerCmdHud::drawCmdCooldown(Technique *tech, float offset,
+                                   Font *font, int txt_size)
+{
+  float percentage = tech->clock;
+
+  Rectangle source = atlas->sprites[4];
+  float max_width = source.width;
+  float width = max_width * percentage;
+  float remaining = max_width - width;
+
+  source.x += remaining;
+  source.width = width;
+  Vector2 position = Vector2Add(main_position, 
+                                {remaining, 11 + offset}); 
+  DrawTextureRec(atlas->sheet, source, position, WHITE);
+
+  float cooldown = player->calculateCooldown(tech->cooldown);
+  float time_remaining = cooldown * (1 - percentage);
+
+  const char *text = TextFormat("%01.01fs", time_remaining);
+  position = Vector2Add(main_position, {59, 12 + offset});
+  position = TextUtils::alignRight(text, position, *font, -3, 0);
+
+  DrawTextEx(*font, text, position, txt_size, -3, WHITE);
+}
