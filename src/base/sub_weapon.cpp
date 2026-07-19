@@ -33,6 +33,11 @@ bool SubWeapon::lightTechCondition() {
     return false;
   }
 
+  if (tech1->clock < 1.0) {
+    PLOGI << "Light Technique is still on cooldown!";
+    return false;
+  }
+
   switch (tech1->type) {
     case TechCostType::LIFE: {
       if (user->life > 1) {
@@ -64,6 +69,11 @@ bool SubWeapon::heavyTechCondition() {
 
   if (user->demoralized) {
     PLOGI << "Player is Despondent. Unable to use Technique!";
+    return false;
+  }
+
+  if (tech2->clock < 0.0) {
+    PLOGI << "Heavy Technique is still on Cooldown!";
     return false;
   }
 

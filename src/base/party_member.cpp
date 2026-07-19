@@ -376,6 +376,10 @@ void PartyMember::depleteInstant() {
 }
 
 void PartyMember::techniqueCooldown() {
+  if (demoralized) {
+    return;
+  }
+
   if (tech1.clock < 1.0) {
     float cooldown = calculateCooldown(tech1.cooldown);
     tech1.clock += Game::deltaTime() / cooldown;
