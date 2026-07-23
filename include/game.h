@@ -127,9 +127,6 @@ public:
   #else
   static constexpr bool devmode = false;
   #endif // !NDEBUG
-
-  bool quick_load = false;
-  std::string ql_map;
 private:
   static GameState game_state;
   static bool EXIT_GAME;
@@ -159,4 +156,9 @@ private:
 
   std::unique_ptr<Scene> scene;
   static std::unique_ptr<Scene> reserve;
+
+  bool quick_load = false;
+  std::string ql_map = "db_05";
+  SubWeaponID ql_weapon = SubWeaponID::KNIFE;
+  CompanionID ql_companion = CompanionID::ERWIN;
 };

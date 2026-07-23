@@ -72,7 +72,14 @@ Game::Game(int argc, char *argv[]) {
     if (arg == "-m" && x + 1 != argc) {
       quick_load = true;
       ql_map = argv[x + 1];
-      PLOGI << "Quick loading map: " << ql_map;
+    }
+    else if (arg == "--bat") {
+      ql_weapon = SubWeaponID::BAT;
+      quick_load = true;
+    }
+    else if (arg == "--xander") {
+      ql_companion = CompanionID::XANDER;
+      quick_load = true;
     }
   }
 }
@@ -113,7 +120,8 @@ void Game::init() {
     scene = make_unique<TitleScene>();
   }
   else {
-    scene = make_unique<FieldScene>(ql_map);
+    PLOGI << "Quick loading map: " << ql_map;
+    scene = make_unique<FieldScene>(ql_map, ql_weapon, ql_companion);
     run_timer = true;
   }
 

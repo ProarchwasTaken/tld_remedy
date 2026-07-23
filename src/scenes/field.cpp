@@ -68,14 +68,18 @@ FieldScene::FieldScene(Session *session_data) {
   setup(session->map_name);  
 }
 
-FieldScene::FieldScene(string map_name) {
+FieldScene::FieldScene(string map_name, SubWeaponID weapon, 
+                       CompanionID companion) 
+{
   PLOGI << "Initializing the field scene with the map: " << map_name;
   session = make_unique<Session>();
   session->version = Game::session_version;
 
-  initPlayerData(SubWeaponID::KNIFE);
-  initCompanionData(CompanionID::ERWIN);
+  initPlayerData(weapon);
+  initCompanionData(companion);
+
   session->player.life = session->player.max_life;
+  session->flags[3].raised = true;
 
   setup(map_name);
 }

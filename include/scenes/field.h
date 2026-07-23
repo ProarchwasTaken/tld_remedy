@@ -50,10 +50,11 @@ public:
    * where that session had left off.*/
   FieldScene(Session *session_data);
 
-  /* For directly load a map from startup. Purely meant for debug 
-   * purposes as this constructor can only be ran through the
-   * use of command-line arguments.*/
-  FieldScene(std::string map_name);
+  /* For directly loading a map from startup with specific conditions. 
+   * Purely meant for debug purposes as this constructor can only be ran 
+   * through the use of command-line arguments.*/
+  FieldScene(std::string map_name, SubWeaponID weapon, 
+             CompanionID companion);
   ~FieldScene();
 
   void initPlayerData(SubWeaponID weapon_id);
