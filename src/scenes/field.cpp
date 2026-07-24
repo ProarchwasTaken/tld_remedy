@@ -1140,8 +1140,13 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (e1->entity_type != e2->entity_type) {
     return e1->entity_type > e2->entity_type;
   }
+  else if (e1->position.y != e2->position.y) {
+    return e1->position.y < e2->position.y; 
+  } 
   else {
-    return e1->position.y < e2->position.y;
+    float e1_area = e1->bounding_box.scale.x * e1->bounding_box.scale.y;
+    float e2_area = e2->bounding_box.scale.x * e2->bounding_box.scale.y;
+    return e1_area > e2_area;
   }
 }
 
