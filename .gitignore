@@ -1,6 +1,9 @@
 log*
 build/
 .cache/
-data/session.data
+data/temp_session
+data/session1.data
+data/session2.data
+data/session3.data
 data/personal.data
 screenshots/

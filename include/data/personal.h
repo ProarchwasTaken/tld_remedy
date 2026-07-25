@@ -22,7 +22,6 @@ struct Settings {
     this->framerate != cfg.framerate ||
     this->field_keybinds != cfg.field_keybinds ||
     this->combat_keybinds != cfg.combat_keybinds; 
-
   }
 };
 

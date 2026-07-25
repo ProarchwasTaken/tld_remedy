@@ -27,7 +27,7 @@
  *
  * So instead of being cleared from memory when the game loads a new 
  * scene, the FieldScene will be placed in "reserve" or "shelfed" until 
- * the game eventually returns to it. This is to make sure that important
+ * the game eventually returns to it. This is to make sure important
  * data like the player's session wouldn't become lost, and to also 
  * presevere minor stuff like the player's position on the map. 
  *

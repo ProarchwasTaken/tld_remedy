@@ -53,7 +53,9 @@ struct GameFlag {
 };
 
 struct Session {
-  unsigned int version;
+  unsigned int version = 0;
+  SessionID file_id = UNSAVED;
+
   double playtime = 0.0;
   int supplies = 8;
 

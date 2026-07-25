@@ -32,6 +32,8 @@ std::string, std::mt19937_64, std::uniform_int_distribution,
 nlohmann::json, nlohmann::basic_json, std::tuple;
 
 GameState Game::game_state = GameState::READY;
+SessionID Game::current_file = SessionID::UNSAVED;
+
 bool Game::EXIT_GAME = false;
 bool Game::SKIP_FRAME = true;
 unique_ptr<Scene> Game::reserve;
@@ -62,6 +64,7 @@ float Game::time_scale = 1.0;
 
 double Game::session_playtime = 0.0;
 bool Game::run_timer = false;
+
 
 Game::Game(int argc, char *argv[]) {
   PLOGI << "Evaluating command line arguments.";
@@ -129,6 +132,26 @@ void Game::init() {
   PLOGI << "Everything should be good to go!";
 }
 
+Game::~Game() {
+  bgm.reset();
+  noise.reset();
+  scene.reset();
+
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  UnloadRenderTexture(canvas);
+  UnloadFont(sm_font);
+  UnloadFont(med_font);
+  UnloadImagePalette(palette);
+  menu_sfx.release();
+  assert(menu_sfx.users() == 0);
+  
+  savePersonal();
+  PLOGI << "Thanks for playing!";
+}
+
 void Game::loadPersonal() {
   ifstream file;
   file.open("data/personal.data", std::ios::binary);
@@ -163,26 +186,6 @@ void Game::loadPersonal() {
   PLOGD << "Fullscreen: " << settings.fullscreen;
   PLOGD << "Framerate: " << settings.framerate;
   PLOGI << "Loaded the player's personal settings.";
-}
-
-Game::~Game() {
-  bgm.reset();
-  noise.reset();
-  scene.reset();
-
-  if (reserve != nullptr) {
-    reserve.reset();
-  }
-
-  UnloadRenderTexture(canvas);
-  UnloadFont(sm_font);
-  UnloadFont(med_font);
-  UnloadImagePalette(palette);
-  menu_sfx.release();
-  assert(menu_sfx.users() == 0);
-  
-  savePersonal();
-  PLOGI << "Thanks for playing!";
 }
 
 void Game::savePersonal() {
@@ -278,6 +281,103 @@ void Game::toggleFullscreen() {
   }
  
   setupCanvas();
+}
+
+void Game::newGame(SubWeaponID sub_weapon, CompanionID companion) {
+  PLOGI << "Starting a new game.";
+  assert(reserve == nullptr);
+
+  bgm->stop();
+  reserve = make_unique<FieldScene>(sub_weapon, companion);
+
+  session_playtime = 0;
+  current_file = UNSAVED;
+  run_timer = true;
+
+  game_state = GameState::SWITCHING_SCENE;
+}
+
+void Game::saveGame(Session *data, SessionID file_id) {
+  PLOGI << "Saving the player's current session as file: " << file_id;
+  current_file = file_id;
+  data->file_id = file_id;
+  data->playtime = session_playtime;
+
+  string path = "data/session" + std::to_string(file_id) + ".data";
+  ofstream file;
+
+  file.open(path, std::ios::binary);
+  file.write(reinterpret_cast<char*>(data), sizeof(Session));
+
+  file.close();
+  PLOGI << "Session data saved successfully.";
+}
+
+bool Game::loadGame(SessionID file_id) {
+  PLOGI << "Attempting to load session " << file_id << " from external " 
+    << "file.";
+  Session session;
+
+  try {
+    session = validateSession(file_id);
+    PLOGI << "Session data has been successfully retrieved.";
+  } 
+  catch (SessionError error_code) {
+    PLOGE << "Attempt to load session has failed!";
+    PLOGE << "Error Code: " << error_code;
+    return false;
+  }
+
+  assert(reserve == nullptr);
+  bgm->stop();
+  reserve = make_unique<FieldScene>(&session);
+
+  session_playtime = session.playtime;
+  current_file = session.file_id;
+  run_timer = true;
+
+  game_state = GameState::SWITCHING_SCENE;
+  return true;
+}
+
+void Game::exitGame() {
+  PLOGI << "Exit function has been called!";
+  EXIT_GAME = true;
+}
+
+Session Game::validateSession(SessionID file_id) {
+  ifstream file;
+
+  string path = "data/session" + std::to_string(file_id) + ".data";
+  file.open(path, std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGI << "Existing session data not found.";
+    throw SESSION_NOT_FOUND;
+  }
+
+  Session session;
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    file.close();
+    throw SESSION_FAILURE;
+  }
+
+  file.close();
+
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    throw SESSION_OUTDATED;
+  }
+
+  if (session.file_id != file_id) {
+    PLOGE << "File ID does not match!";
+    throw SESSION_MISMATCHED_ID;
+  }
+
+  PLOGI << "Session [ID: " << file_id << "] has been validated.";
+  return session;
 }
 
 void Game::gameLogic() {
@@ -574,165 +674,19 @@ void Game::drawScene() {
   EndDrawing();
 }
 
+float Game::deltaTime() {
+  return GetFrameTime() * time_scale;
+}
+
+void Game::setTimeScale(float new_scale) {
+  time_scale = new_scale;
+  PLOGI << "Time scale has been changed: " << time_scale;
+}
+
 void Game::fullscreenCheck() {
   if (settings.fullscreen != IsWindowState(FLAG_WINDOW_UNDECORATED)) {
     game_state = GameState::TOGGLE_FULLSCREEN;
   }
-}
-
-void Game::fadeout(float seconds) {
-  switch (game_state) {
-    case GameState::READY:
-    case GameState::SWITCHING_SCENE: {
-      PLOGI << "Fading out the screen.";
-      Game::screen_tint = WHITE;
-      Game::fade_clock = 1.0;
-      Game::fade_time = seconds;
-      game_state = GameState::FADING_OUT;
-      break;
-    }
-    default: {
-      PLOGE << "Function cannot be called in this current gamestate!";
-      return;
-    }
-  }
-}
-
-void Game::fadein(float seconds) {
-  switch (game_state) {
-    case GameState::READY:
-    case GameState::RETURN_TO_FIELD:
-    case GameState::SWITCHING_SCENE: 
-    case GameState::INIT_COMBAT: {
-      PLOGI << "Fading in the screen.";
-      Game::screen_tint = BLACK;
-      Game::fade_clock = 0.0;
-      Game::fade_time = seconds;
-      game_state = GameState::FADING_IN;
-      break;
-    }
-    default: {
-      PLOGE << "Function cannot be called in this current gamestate!";
-      return;
-    }
-  }
-}
-
-void Game::sleep(float seconds) {
-  if (game_state == GameState::GAME_OVER) {
-    return;
-  }
-
-  if (game_state == GameState::DEATH_SAVE) {
-    return;
-  }
-
-  PLOGI << "Pausing game logic for: " << seconds << " seconds";
-  Game::sleep_time = seconds;
-  game_state = GameState::SLEEP;
-}
-
-void Game::exitGame() {
-  PLOGI << "Exit function has been called!";
-  EXIT_GAME = true;
-}
-
-void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
-  PLOGI << "Starting a new game.";
-  assert(reserve == nullptr);
-
-  bgm->stop();
-  reserve = make_unique<FieldScene>(sub_weapon, companion);
-
-  session_playtime = 0;
-  run_timer = true;
-
-  game_state = GameState::SWITCHING_SCENE;
-}
-
-void Game::saveSession(Session *data) {
-  PLOGI << "Saving the player's current session.";
-  data->playtime = session_playtime;
-
-  ofstream file;
-  file.open("data/session.data", std::ios::binary);
-  file.write(reinterpret_cast<char*>(data), sizeof(Session));
-
-  file.close();
-  PLOGI << "Session data saved successfully.";
-}
-
-bool Game::loadSession() {
-  PLOGI << "Attempting to load session data.";
-  ifstream file;
-  file.open("data/session.data", std::ios::binary);
-
-  if (!file.is_open()) {
-    PLOGE << "'data/session.data' is not found.";
-    file.close();
-    return false;
-  }
-
-  Session session;
-  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
-
-  if (file.fail()) {
-    PLOGE << "Error opening file!";
-    file.close();
-    return false;
-  }
-
-  file.close();
-
-  PLOGI << "Successfully loaded session data.";
-  PLOGD << "Map Name: " << session.map_name;
-  PLOGD << "Location: " << session.location;
-  PLOGD << "Medical Supplies: " << session.supplies;
-  PLOGD << "Player Life: " << session.player.life;
-  PLOGD << "Status Count: " << session.player.status_count;
-
-  if (session.version != session_version) {
-    PLOGE << "Loaded session data is outdated!";
-    return false;
-  }
-
-  assert(reserve == nullptr);
-  bgm->stop();
-  reserve = make_unique<FieldScene>(&session);
-
-  session_playtime = session.playtime;
-  run_timer = true;
-
-  game_state = GameState::SWITCHING_SCENE;
-  return true;
-}
-
-bool Game::existingSession() {
-  ifstream file;
-  file.open("data/session.data", std::ios::binary);
-
-  if (!file.is_open()) {
-    PLOGI << "Existing session data not found.";
-    return false;
-  }
-
-  Session session;
-  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
-
-  if (file.fail()) {
-    file.close();
-    return false;
-  }
-
-  file.close();
-
-  if (session.version != session_version) {
-    PLOGE << "Loaded session data is outdated!";
-    return false;
-  }
-
-  PLOGI << "Detected existing session data.";
-  return true;
 }
 
 void Game::loadTitleScreen() {
@@ -767,6 +721,20 @@ void Game::openRestMenu(Session *data) {
   reserve = make_unique<RestMenuScene>(data);
 
   game_state = GameState::OPEN_RESTMENU;
+  SKIP_FRAME = true;
+}
+
+void Game::initCombat(Session *data, TroopID id, int reward) {
+  PLOGI << "Battle Time! (Forced Style!)";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CombatScene>(data, id, reward, true);
+  flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
+
+  game_state = GameState::INIT_COMBAT;
   SKIP_FRAME = true;
 }
 
@@ -861,20 +829,6 @@ int Game::getTroopReward(TroopID troop_id, nlohmann::json &pool) {
   return 0;
 }
 
-void Game::initCombat(Session *data, TroopID id, int reward) {
-  PLOGI << "Battle Time! (Forced Style!)";
-  assert(reserve == nullptr);
-
-  reserve = make_unique<CombatScene>(data, id, reward, true);
-  flash_color = WHITE;
-
-  noise->setTint(WHITE);
-  noise->setAlpha(0.10);
-
-  game_state = GameState::INIT_COMBAT;
-  SKIP_FRAME = true;
-}
-
 void Game::returnToField() {
   if (game_state == GameState::RETURN_TO_FIELD) {
     return;
@@ -918,20 +872,54 @@ void Game::gameover(string reason) {
   run_timer = false;
 }
 
-float Game::deltaTime() {
-  return GetFrameTime() * time_scale;
+void Game::fadeout(float seconds) {
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::SWITCHING_SCENE: {
+      PLOGI << "Fading out the screen.";
+      Game::screen_tint = WHITE;
+      Game::fade_clock = 1.0;
+      Game::fade_time = seconds;
+      game_state = GameState::FADING_OUT;
+      break;
+    }
+    default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
+      return;
+    }
+  }
 }
 
-bool Game::debugInfo() {
-  return debug_info;
+void Game::fadein(float seconds) {
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::RETURN_TO_FIELD:
+    case GameState::SWITCHING_SCENE: 
+    case GameState::INIT_COMBAT: {
+      PLOGI << "Fading in the screen.";
+      Game::screen_tint = BLACK;
+      Game::fade_clock = 0.0;
+      Game::fade_time = seconds;
+      game_state = GameState::FADING_IN;
+      break;
+    }
+    default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
+      return;
+    }
+  }
 }
 
-void Game::toggleDebugInfo() {
-  debug_info = !debug_info;
-  PLOGI << "Debug info has been toggled: " << debug_info;
-}
+void Game::sleep(float seconds) {
+  if (game_state == GameState::GAME_OVER) {
+    return;
+  }
 
-void Game::setTimeScale(float new_scale) {
-  time_scale = new_scale;
-  PLOGI << "Time scale has been changed: " << time_scale;
+  if (game_state == GameState::DEATH_SAVE) {
+    return;
+  }
+
+  PLOGI << "Pausing game logic for: " << seconds << " seconds";
+  Game::sleep_time = seconds;
+  game_state = GameState::SLEEP;
 }

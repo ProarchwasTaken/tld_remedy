@@ -280,7 +280,7 @@ void RestMenuScene::panelTermination() {
       }
 
       if (*ptr->selected == PromptOptions::YES) {
-        Game::saveSession(session);
+        Game::saveGame(session, FILE1);
 
         panel.reset();
 

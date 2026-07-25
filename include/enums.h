@@ -1,6 +1,21 @@
 #pragma once
 
 
+enum SessionID {
+  TEMPORARY = -1,
+  UNSAVED,
+  FILE1,
+  FILE2,
+  FILE3
+};
+
+enum SessionError {
+  SESSION_NOT_FOUND = 605,
+  SESSION_FAILURE,
+  SESSION_OUTDATED,
+  SESSION_MISMATCHED_ID,
+};
+
 enum class SceneID {
   TITLE,
   FIELD,

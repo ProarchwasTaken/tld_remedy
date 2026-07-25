@@ -589,7 +589,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGD << "Event Detected: SaveSessionEvent";
 
       PLOGI << "Saving the session.";
-      Game::saveSession(session.get());
+      Game::saveGame(session.get(), FILE1);
       break;
     }
     case FieldEVT::OPEN_MENU: {
@@ -1158,9 +1158,15 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string text = TextFormat("Current Map: %s", session->map_name);
+  string text = TextFormat("Session ID: %i", session->file_id);
   Vector2 position = TextUtils::alignRight(text.c_str(), {base_x, y}, 
                                            *font, -3, 0);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  y += spacing;
+
+  text = TextFormat("Current Map: %s", session->map_name);
+  position = TextUtils::alignRight(text.c_str(), {base_x, y}, 
+                                   *font, -3, 0);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   y += spacing;
 

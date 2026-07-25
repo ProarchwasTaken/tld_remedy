@@ -26,7 +26,16 @@ TitleScene::TitleScene() {
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 
-  valid_session = Game::existingSession();
+  try {
+    Game::validateSession(FILE1);
+    valid_session = true;
+  } 
+  catch (SessionError error_code) {
+    PLOGI << "Greying out the LOAD GAME option for reason: " << 
+      error_code;
+    valid_session = false;
+  }
+
   if (!valid_session) {
     disallowed.emplace(TitleOption::LOAD_GAME);
   }
@@ -87,12 +96,12 @@ void TitleScene::optionNavigation() {
 void TitleScene::selectOption() {
   switch (*selected) {
     case TitleOption::NEW_GAME: {
-      Game::newSession(SubWeaponID::KNIFE, CompanionID::ERWIN);
+      Game::newGame(SubWeaponID::KNIFE, CompanionID::ERWIN);
       break;
     }
     case TitleOption::LOAD_GAME: {
       assert(valid_session);
-      valid_session = Game::loadSession();
+      valid_session = Game::loadGame(FILE1);
 
       if (!valid_session) {
         disallowed.emplace(TitleOption::LOAD_GAME); 
