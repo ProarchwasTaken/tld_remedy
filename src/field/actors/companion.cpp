@@ -51,8 +51,8 @@ void CompanionActor::setupAtlas(CompanionID id) {
     case CompanionID::XANDER: {
       sprite_group = "xander_actor";
 
-      bounding_box.scale = {96, 64};
-      bounding_box.offset = {-48, -60};
+      bounding_box.scale = {80, 64};
+      bounding_box.offset = {-40, -60};
       collis_box = {24, 32};
       collis_box.offset = {-12, -28};
       break;
