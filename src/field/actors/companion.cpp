@@ -53,8 +53,8 @@ void CompanionActor::setupAtlas(CompanionID id) {
 
       bounding_box.scale = {96, 64};
       bounding_box.offset = {-48, -60};
-      collis_box = {16, 16};
-      collis_box.offset = {-8, -12};
+      collis_box = {24, 32};
+      collis_box.offset = {-12, -28};
       break;
     }
   }
@@ -78,6 +78,8 @@ void CompanionActor::evaluateEvent(unique_ptr<ActorEvent> &event) {
 
 void CompanionActor::update() {
   moving = shouldBeMoving();
+  obscuring_player = playerObscured();
+
   if (!moving) {
     setIdleSprite();
     return;
@@ -100,6 +102,26 @@ bool CompanionActor::shouldBeMoving() {
   }
   else {
     return false;
+  }
+}
+
+bool CompanionActor::playerObscured() {
+  if (plr == NULL || position.y <= plr->position.y) {
+    return false;
+  }
+
+  Rectangle *rect = &collis_box.rect;
+  Rectangle *plr_rect = &plr->collis_box.rect;
+
+  if (CheckCollisionRecs(*rect, *plr_rect)) {
+    Rectangle collision = GetCollisionRec(*rect, *plr_rect);
+
+    float plr_area = plr_rect->width * plr_rect->height;
+    float collision_area = collision.width * collision.height;
+    return collision_area / plr_area >= 0.8;
+  }
+  else {
+    return false; 
   }
 }
 
@@ -164,8 +186,13 @@ void CompanionActor::moveAnimation() {
 
 void CompanionActor::draw() {
   assert(sprite != NULL);
+  Color tint = WHITE;
+  if (follow_player && obscuring_player) {
+    tint.a = 200;
+  }
+
   DrawTexturePro(atlas.sheet, *sprite, bounding_box.rect, {0, 0}, 0, 
-                 WHITE);
+                 tint);
 
   if (emote != NULL) {
     drawEmote();

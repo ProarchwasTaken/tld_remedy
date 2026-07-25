@@ -19,6 +19,7 @@ public:
   void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
 
   void update() override;
+  bool playerObscured();
   bool shouldBeMoving();
   void setIdleSprite();
   void moveAnimation();
@@ -30,6 +31,7 @@ public:
 private:
   PlayerActor *plr = NULL;
   bool moving = false;
+  bool obscuring_player = false;
 
   float anim_move_speed = 0.25;
   Animation anim_down = {{0, 1, 2, 1}, anim_move_speed};
