@@ -1,7 +1,7 @@
 log*
 build/
 .cache/
-data/temp_session
+data/.temp_session
 data/session1.data
 data/session2.data
 data/session3.data

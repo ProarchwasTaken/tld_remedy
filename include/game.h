@@ -60,6 +60,7 @@ public:
   static void exitGame();
 
   static Session validateSession(SessionID file_id);
+  static std::string getSessionKey(Session *data);
   static SessionID currentFile() {return current_file;}
 
   static double playtime() {return session_playtime;}
@@ -111,7 +112,7 @@ public:
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
   static constexpr unsigned int session_version = 17;
-  static constexpr unsigned int personal_version = 5;
+  static constexpr unsigned int personal_version = 6;
   static constexpr float TARGET_FPS = 60.0;
 
   static Settings settings;
@@ -135,6 +136,7 @@ public:
 private:
   static GameState game_state;
   static SessionID current_file;
+  static HashKeys hash_keys;
 
   static bool EXIT_GAME;
   static bool SKIP_FRAME;

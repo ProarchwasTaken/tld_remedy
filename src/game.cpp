@@ -1,5 +1,8 @@
 #include <nlohmann/json.hpp>
+#include <functional>
 #include <string>
+#include <sstream>
+#include <cstring>
 #include <cassert>
 #include <fstream>
 #include <chrono>
@@ -9,6 +12,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
+#include <ios>
 #include "enums.h"
 #include "system/noise_effect.h"
 #include "system/sprite_atlas.h"
@@ -52,6 +56,7 @@ unique_ptr<MusicPlayer> Game::bgm;
 unique_ptr<NoiseEffect> Game::noise;
 
 Settings Game::settings;
+HashKeys Game::hash_keys;
 
 Color Game::screen_tint = WHITE;
 float Game::fade_clock = 0.0;
@@ -178,18 +183,13 @@ void Game::loadPersonal() {
     return;
   }
 
-
   settings = data.settings;
-  PLOGD << "Master Volume: " << settings.master_volume;
-  PLOGD << "SFX Volume: " << settings.sfx_volume;
-  PLOGD << "BGM Volume: " << settings.bgm_volume;
-  PLOGD << "Fullscreen: " << settings.fullscreen;
-  PLOGD << "Framerate: " << settings.framerate;
+  hash_keys = data.hash_keys;
   PLOGI << "Loaded the player's personal settings.";
 }
 
 void Game::savePersonal() {
-  Personal data = {personal_version, settings};
+  Personal data = {personal_version, hash_keys, settings};
 
   ofstream file;
   file.open("data/personal.data", std::ios::binary);
@@ -298,26 +298,60 @@ void Game::newGame(SubWeaponID sub_weapon, CompanionID companion) {
 }
 
 void Game::saveGame(Session *data, SessionID file_id) {
-  PLOGI << "Saving the player's current session as file: " << file_id;
+  assert(file_id != SessionID::UNSAVED);
+  PLOGI << "Saving the player's current session on File " << file_id;
+
   current_file = file_id;
   data->file_id = file_id;
   data->playtime = session_playtime;
 
-  string path = "data/session" + std::to_string(file_id) + ".data";
+  string path;
+  if (file_id != TEMPORARY) {
+    path = "data/session" + std::to_string(file_id) + ".data";
+  }
+  else {
+    path = "data/.temp_session"; 
+  }
+
   ofstream file;
-
   file.open(path, std::ios::binary);
-  file.write(reinterpret_cast<char*>(data), sizeof(Session));
 
+  file.write(reinterpret_cast<char*>(data), sizeof(Session));
   file.close();
-  PLOGI << "Session data saved successfully.";
+  PLOGD << "Finished writing to file."; 
+  
+  string result = getSessionKey(data);
+  PLOGD << "Session Key: '" << result << "'";
+
+  switch (file_id) {
+    case FILE1: {
+      std::strcpy(hash_keys.file1, result.c_str());
+      break;
+    }
+    case FILE2: {
+      std::strcpy(hash_keys.file2, result.c_str());
+      break;
+    }
+    case FILE3: {
+      std::strcpy(hash_keys.file3, result.c_str());
+      break;
+    }
+    case TEMPORARY: {
+      std::strcpy(hash_keys.temp, result.c_str());
+      break;
+    }
+    default: {
+    }
+  }
+
+  PLOGI << "Game has been saved.";
 }
 
 bool Game::loadGame(SessionID file_id) {
   PLOGI << "Attempting to load session " << file_id << " from external " 
     << "file.";
-  Session session;
 
+  Session session;
   try {
     session = validateSession(file_id);
     PLOGI << "Session data has been successfully retrieved.";
@@ -346,13 +380,21 @@ void Game::exitGame() {
 }
 
 Session Game::validateSession(SessionID file_id) {
-  ifstream file;
+  assert(file_id != SessionID::UNSAVED);
 
-  string path = "data/session" + std::to_string(file_id) + ".data";
+  string path;
+  if (file_id != TEMPORARY) {
+    path = "data/session" + std::to_string(file_id) + ".data";
+  }
+  else {
+    path = "data/.temp_session"; 
+  }
+
+  ifstream file;
   file.open(path, std::ios::binary);
 
   if (!file.is_open()) {
-    PLOGI << "Existing session data not found.";
+    PLOGE << "Existing session data not found!";
     throw SESSION_NOT_FOUND;
   }
 
@@ -360,6 +402,7 @@ Session Game::validateSession(SessionID file_id) {
   file.read(reinterpret_cast<char*>(&session), sizeof(Session));
 
   if (file.fail()) {
+    PLOGE << "Reading operation has failed!";
     file.close();
     throw SESSION_FAILURE;
   }
@@ -376,8 +419,56 @@ Session Game::validateSession(SessionID file_id) {
     throw SESSION_MISMATCHED_ID;
   }
 
+  string session_key = getSessionKey(&session);
+  PLOGD << "Hash key of loaded session: '" << session_key << "'";
+
+  string expected_key;
+  switch (file_id) {
+    case FILE1: {
+      expected_key = hash_keys.file1;
+      break;
+    }
+    case FILE2: {
+      expected_key = hash_keys.file2;
+      break;
+    }
+    case FILE3: {
+      expected_key = hash_keys.file3;
+      break;
+    }
+    case TEMPORARY: {
+      expected_key = hash_keys.temp;
+      break;
+    }
+    default: {
+    }
+  }
+
+  PLOGD << "Expected Session Key: '" << expected_key << "'";
+  if (session_key != expected_key) {
+    PLOGE << "Session key does not match what was expected!";
+    PLOGE << "The loaded session has might've been corrupted or modified" 
+      << "externally.";
+    throw SESSION_CORRUPTED;
+  }
+
   PLOGI << "Session [ID: " << file_id << "] has been validated.";
   return session;
+}
+
+string Game::getSessionKey(Session *data) {
+  char *ptr = reinterpret_cast<char*>(data);
+  int size = sizeof(Session);
+
+  std::hash<string> session_hash;
+  string raw(ptr, size);
+
+  std::stringstream stream;
+  stream << std::hex << session_hash(raw);
+
+  string result = stream.str();
+  assert(result.size() <= SAVE_KEY_SIZE);
+  return result;
 }
 
 void Game::gameLogic() {

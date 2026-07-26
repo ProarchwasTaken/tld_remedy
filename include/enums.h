@@ -14,6 +14,7 @@ enum SessionError {
   SESSION_FAILURE,
   SESSION_OUTDATED,
   SESSION_MISMATCHED_ID,
+  SESSION_CORRUPTED
 };
 
 enum class SceneID {
