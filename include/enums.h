@@ -9,12 +9,17 @@ enum SessionID {
   FILE3
 };
 
-enum SessionError {
+enum SessionException {
   SESSION_NOT_FOUND = 605,
   SESSION_FAILURE,
   SESSION_OUTDATED,
   SESSION_MISMATCHED_ID,
   SESSION_CORRUPTED
+};
+
+enum class GameMode {
+  INDIFFERENCE,
+  REVERENCE
 };
 
 enum class SceneID {
@@ -30,10 +35,11 @@ enum class PanelID {
   CONFIG,
   CONFIRM,
   REMAP,
+  DIALOG,
+  FILE_SELECT,
   STATUS,
   ITEMS,
   TECH,
-  DIALOG,
   DIAGNOSE,
   CRAFTING
 };

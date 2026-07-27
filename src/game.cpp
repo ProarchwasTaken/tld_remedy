@@ -356,7 +356,7 @@ bool Game::loadGame(SessionID file_id) {
     session = validateSession(file_id);
     PLOGI << "Session data has been successfully retrieved.";
   } 
-  catch (SessionError error_code) {
+  catch (SessionException error_code) {
     PLOGE << "Attempt to load session has failed!";
     PLOGE << "Error Code: " << error_code;
     return false;

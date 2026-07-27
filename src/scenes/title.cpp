@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
@@ -10,6 +11,7 @@
 #include "utils/menu.h"
 #include "menu/panels/config.h"
 #include "menu/panels/confirm.h"
+#include "menu/panels/file_select.h"
 #include "scenes/title.h"
 #include <plog/Log.h>
 
@@ -30,14 +32,11 @@ TitleScene::TitleScene() {
     Game::validateSession(FILE1);
     valid_session = true;
   } 
-  catch (SessionError error_code) {
+  catch (SessionException error_code) {
     PLOGI << "Greying out the LOAD GAME option for reason: " << 
       error_code;
-    valid_session = false;
-  }
-
-  if (!valid_session) {
     disallowed.emplace(TitleOption::LOAD_GAME);
+    valid_session = false;
   }
 
   Game::bgm->prepare("title");
@@ -101,12 +100,8 @@ void TitleScene::selectOption() {
     }
     case TitleOption::LOAD_GAME: {
       assert(valid_session);
-      valid_session = Game::loadGame(FILE1);
-
-      if (!valid_session) {
-        disallowed.emplace(TitleOption::LOAD_GAME); 
-      }
-
+      panel = make_unique<FileSelectPanel>();
+      panel_mode = true;
       break;
     }
     case TitleOption::CONFIG: {

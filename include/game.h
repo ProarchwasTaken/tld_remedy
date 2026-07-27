@@ -111,7 +111,7 @@ public:
   static void sleep(float seconds);
 
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 17;
+  static constexpr unsigned int session_version = 18;
   static constexpr unsigned int personal_version = 6;
   static constexpr float TARGET_FPS = 60.0;
 
