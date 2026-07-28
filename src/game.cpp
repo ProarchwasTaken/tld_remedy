@@ -456,6 +456,52 @@ Session Game::validateSession(SessionID file_id) {
   return session;
 }
 
+bool Game::sessionExists(SessionID file_id) {
+  PLOGI << "Checking if File" << file_id << " exists";
+
+  try {
+    validateSession(FILE1);
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File " << file_id << " is not available.";
+    return false;
+  }
+}
+
+bool Game::sessionExists() {
+  PLOGI << "Searching for any available sessions...";
+
+  try {
+    validateSession(FILE1);
+    PLOGI << "File 1 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File 1 is not available! Error Code: " << error_code;
+  }
+
+  try {
+    validateSession(FILE2);
+    PLOGI << "File 2 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File 2 is not available! Error Code: " << error_code;
+  }
+
+  try {
+    validateSession(FILE3);
+    PLOGI << "File 3 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) { 
+    PLOGW << "File 3 is not available! Error Code: " << error_code;
+  }
+
+  return false;
+}
+
 string Game::getSessionKey(Session *data) {
   char *ptr = reinterpret_cast<char*>(data);
   int size = sizeof(Session);

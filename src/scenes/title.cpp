@@ -1,6 +1,5 @@
 #include <cassert>
 #include <cmath>
-#include <cstddef>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
@@ -28,15 +27,14 @@ TitleScene::TitleScene() {
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 
-  try {
-    Game::validateSession(FILE1);
-    valid_session = true;
-  } 
-  catch (SessionException error_code) {
-    PLOGI << "Greying out the LOAD GAME option for reason: " << 
-      error_code;
+  if (!Game::sessionExists()) {
+    PLOGI << "Greying out the LOAD GAME because no sessions are " 
+      << "available to load.";
     disallowed.emplace(TitleOption::LOAD_GAME);
     valid_session = false;
+  }
+  else {
+    valid_session = true;
   }
 
   Game::bgm->prepare("title");

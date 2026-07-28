@@ -60,6 +60,9 @@ public:
   static void exitGame();
 
   static Session validateSession(SessionID file_id);
+  static bool sessionExists(SessionID file_id);
+  static bool sessionExists();
+
   static std::string getSessionKey(Session *data);
   static SessionID currentFile() {return current_file;}
 
