@@ -4,10 +4,11 @@
 
 class TargetReticle {
 public:
-  TargetReticle();
+  TargetReticle(Vector2 size);
   ~TargetReticle();
 
   void draw(Vector2 position, float clock);
 private:
   SpriteAtlas *menu_atlas;
+  Vector2 size;
 };
