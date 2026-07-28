@@ -14,7 +14,7 @@ CrippledLeg::CrippledLeg(Combatant *afflicted) :
   name = "Crippled Leg";
   persistent = true;
 
-  float percentage = Lerp(0.25, 1.0, afflicted->resilience);
+  float percentage = Lerp(0.70, 1.0, afflicted->resilience);
   PLOGD << "Percentage Reduction: " << 1.0 - percentage;
 
   if (percentage >= 1.0) {
