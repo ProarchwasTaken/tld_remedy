@@ -350,17 +350,13 @@ void LifeHud::drawMorale(Vector2 position) {
 }
 
 void LifeHud::drawMoraleGauge(Vector2 position) {
-  float intended = 11.0 / 85;
-  float init_percentage = user->init_morale / user->max_morale;
-  float exponent = std::logf(intended) / std::logf(init_percentage);
-
   if (dmg_morale_clock != 1.0) {
-    drawGauge(4, position, WHITE, white_morale, exponent);
+    drawGauge(4, position, WHITE, white_morale, 1.0);
   }
 
   float morale_percentage = user->morale / user->max_morale;
   morale_percentage = Clamp(morale_percentage, 0.0, 1.0);
-  drawGauge(4, position, morale_color, morale_percentage, exponent);
+  drawGauge(4, position, morale_color, morale_percentage, 1.0);
 }
 
 void LifeHud::drawTenacity(Vector2 position) {
