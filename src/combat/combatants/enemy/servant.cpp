@@ -37,10 +37,10 @@ Servant::Servant(Vector2 position, Direction direction) :
   max_life = 10;
   life = max_life;
 
-  offense = 8;
+  offense = 10;
   defense = 6;
-  intimid = 6;
-  persist = 6;
+  intimid = 8;
+  persist = 2;
   dexterity = 4;
   discipline = 1;
 

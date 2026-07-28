@@ -96,6 +96,10 @@ void EnemyHud::targetCheck(PartyMember *member) {
     return;
   }
 
+  if (target->team != CombatantTeam::ENEMY) {
+    return;
+  }
+
   TargetData *unused = findUnusedData(target);
   if (unused != NULL) {
     addTargetData(target, unused);
