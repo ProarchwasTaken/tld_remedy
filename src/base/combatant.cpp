@@ -320,7 +320,7 @@ void Combatant::increaseEntropy(float magnitude) {
 
 void Combatant::lifeDecay() {
   float percentage = entropy / max_life;
-  float magnitude = percentage / (resilience * 2);
+  float magnitude = percentage / (resilience * 3);
   magnitude = Clamp(magnitude, 0.20, 10);
   magnitude *= Game::deltaTime();
 
