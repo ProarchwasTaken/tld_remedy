@@ -79,7 +79,7 @@ void DiagnosePanel::updateCureCosts() {
   cure_crippled_cost = calculateCureCost(15);
   PLOGD << "Crippled Leg: " << cure_crippled_cost;
 
-  cure_mangled_cost = calculateCureCost(20);
+  cure_mangled_cost = 30;
   PLOGD << "Mangled: " << cure_mangled_cost;
 }
 

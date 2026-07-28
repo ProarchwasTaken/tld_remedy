@@ -475,7 +475,7 @@ bool PartyMember::deathSavingThrow() {
     return false;
   }
 
-  float save_chance = 0.20 + resilience;
+  float save_chance = 0.50 + resilience;
   PLOGD << "Base Chance: " << save_chance;
 
   save_chance = applySavePenalties(save_chance);
