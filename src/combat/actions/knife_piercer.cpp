@@ -37,6 +37,9 @@ KnifePiercer::KnifePiercer(Mary *user):
 
   data.assailant = user;
 
+  atk = user->offense + user->dexterity;
+  data.a_atk = &atk;
+
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(24);
   sendWarning();

@@ -33,8 +33,9 @@ private:
 
   RectEx hitbox;
   DamageData data;
-  std::unordered_set<Combatant*> hits;
+  int atk;
 
+  std::unordered_set<Combatant*> hits;
   bool second_hit = false;
 
   SpriteAtlas *atlas;

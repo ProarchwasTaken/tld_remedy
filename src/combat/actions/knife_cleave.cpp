@@ -42,6 +42,9 @@ KnifeCleave::KnifeCleave(Mary *user):
   data.hit_stop = 0.2;
 
   data.assailant = user;
+
+  atk = user->offense + user->dexterity;
+  data.a_atk = &atk;
   
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(20);

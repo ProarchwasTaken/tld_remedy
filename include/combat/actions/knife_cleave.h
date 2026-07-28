@@ -30,6 +30,7 @@ public:
 private:
   RectEx hitbox;
   DamageData data;
+  int atk;
 
   bool canceled_into;
   bool attack_connected = false;
