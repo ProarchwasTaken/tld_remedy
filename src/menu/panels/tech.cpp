@@ -83,7 +83,7 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
   switch (id) {
     case SubWeaponID::KNIFE: {
       return 
-      "<Cleave> - MP Cost: 8\n"
+      "<Cleave> - MP Cost: 6\n"
       "\"We all have to start somewhere.\"\n\n"
 
       "Mary performs a slash attack that inflicts\n"
@@ -91,7 +91,7 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
       "enemy in front of him. The action itself also\n"
       "has a shorter windup if canceled into.\n\n"
 
-      "<Piercer> - MP Cost: 12\n"
+      "<Piercer> - MP Cost: 8\n"
       "\"Commit when it counts. \"\n\n"
 
       "Mary thrusts his knife while propelling\n"
@@ -239,9 +239,9 @@ string TechsPanel::getTechEntry() {
         "targeting at the time of when the Assist was\n"
         "called. Once within range, Erwin will perform\n"
         "a dropkick that inflicts a high amount of\n"
-        "knockback if it hits. Obviously, this Assist\n"
-        "cannot be called if Mary isn't targeting\n"
-        "anybody.\n\n"
+        "knockback and stun if it hits. Obviously,\n"
+        "this Assist cannot be called if Mary isn't\n"
+        "targeting anybody.\n\n"
 
         "--[PASSIVES]--\n\n"
 

@@ -32,10 +32,10 @@ ThirdParty::ThirdParty(Erwin *user):
   data.damage_type = DamageType::LIFE;
   data.calculation = DamageType::LIFE;
 
-  data.stun_time = 1.0;
+  data.stun_time = 1.5;
   data.stun_type = StunType::NORMAL;
 
-  data.power = 1.25;
+  data.dmg_floor = user->offense / 2.0;
   data.knockback = 200.0;
 
   data.hit_stop = 0.25;
