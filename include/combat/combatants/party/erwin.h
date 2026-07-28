@@ -131,6 +131,7 @@ private:
   bool has_moved = false;
   bool attempt_evade = false;
 
+  int hp_atk;
   float preferred_plr_distance = 128;
 
   Animation anim_idle = {{0, 1}, 2.0};

@@ -65,10 +65,10 @@ Erwin::Erwin(Companion *data, Mary *player):
 
   ai = make_unique<ErwinAI>();
 
-  tech1 = {"Provoke", TechCostType::MORALE, 5.45};
+  tech1 = {"Provoke", TechCostType::MORALE, 5.25};
   tech1.cooldown = 5.0;
 
-  tech2 = {"3rd Party", TechCostType::MORALE, 7.45};
+  tech2 = {"3rd Party", TechCostType::MORALE, 7.25};
   tech2.cooldown = 8.0;
 
   afflictPersistent(data->status);
@@ -522,7 +522,11 @@ void Erwin::attackHP() {
   data.stun_type = StunType::NORMAL;
   data.knockback = 45.0;
   data.hit_stop = 0.2;
+
   data.assailant = this;
+
+  hp_atk = offense + dexterity;
+  data.a_atk = &hp_atk;
 
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.20, 0.05,
