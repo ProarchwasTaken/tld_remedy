@@ -212,7 +212,6 @@ enum class ActorEVT {
 };
 
 enum class SequenceID {
-  SAVE,
   REST,
   REJECT,
   INCAP,

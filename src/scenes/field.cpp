@@ -30,7 +30,6 @@
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "field/entities/save_point.h"
-#include "field/sequences/save.h"
 #include "field/sequences/rest.h"
 #include "field/sequences/reject.h"
 #include "field/sequences/incap.h"
@@ -808,10 +807,6 @@ void FieldScene::initSequence(SequenceID sequence_id) {
       break;
     }
     #endif // !NDEBUG
-    case SequenceID::SAVE: {
-      sequence = make_unique<SaveSequence>();
-      break;
-    }
     case SequenceID::REST: {
       sequence = make_unique<RestSequence>();
       break;
