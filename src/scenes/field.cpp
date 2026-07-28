@@ -116,24 +116,23 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->max_life = 15;
 
   player->init_morale = 10;
-  player->max_morale = 25;
+  player->max_morale = 15;
 
-  player->offense = 6;
+  player->offense = 4;
   player->defense = 4;
-  player->intimid = 6;
+  player->intimid = 4;
   player->persist = 4;
-  player->dexterity = 5;
-  player->discipline = 6;
+  player->dexterity = 4;
+  player->discipline = 4;
 
   player->recovery = 1.0;
-  player->resilience = 0.8;
+  player->resilience = 0.5;
 
   switch (weapon_id) {
     case SubWeaponID::KNIFE: {
       PLOGI << "Applying Knife status changes.";
-      player->offense += 2;
-      player->intimid += 1;
-      player->dexterity += 1;
+      player->dexterity += 2;
+      player->intimid += 2;
       break;
     }
     case SubWeaponID::BAT: {
@@ -165,17 +164,17 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->max_life = 20;
 
       companion->init_morale = 10;
-      companion->max_morale = 20;
+      companion->max_morale = 15;
 
-      companion->offense = 8;
-      companion->defense = 6;
-      companion->intimid = 7;
-      companion->persist = 5;
-      companion->dexterity = 5;
-      companion->discipline = 7;
+      companion->offense = 5;
+      companion->defense = 4;
+      companion->intimid = 6;
+      companion->persist = 6;
+      companion->dexterity = 6;
+      companion->discipline = 5;
 
       companion->recovery = 1.0;
-      companion->resilience = 0.70;
+      companion->resilience = 0.5;
       break;
     }
     case CompanionID::XANDER: {

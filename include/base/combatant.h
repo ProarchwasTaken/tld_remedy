@@ -199,7 +199,7 @@ protected:
 
   float death_time = 1.0;
   float death_clock = 0.0;
-  float damage_ceiling = 9999;
+  float dmg_ceiling = 9999;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
