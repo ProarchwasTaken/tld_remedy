@@ -788,6 +788,8 @@ void Game::loadTitleScreen() {
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+
+  session_playtime = 0.0;
   run_timer = false;
 }
 
