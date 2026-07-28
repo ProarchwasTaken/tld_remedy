@@ -201,21 +201,17 @@ float Combatant::damageCalculation(DamageData &data) {
     } 
   }
 
-  float damage_floor = data.damage_floor;
   int a_atk = *data.a_atk;
-  float atk_mod = data.atk_mod;
-
   int b_def = *data.b_def;
-  float def_mod = data.def_mod;
+  float damage_floor = data.damage_floor;
+  float power = data.power;
 
+  PLOGD << "Attack Power: " << power;
   PLOGD << "Damage Floor: " << damage_floor;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
 
-  float result = (a_atk * atk_mod) - (b_def * def_mod);
-  if (result < damage_floor) {
-    result = damage_floor;
-  }
-
+  float result = (a_atk - b_def) * power;
+  result = Clamp(result, damage_floor, damage_ceiling);
   return result;
 }
 

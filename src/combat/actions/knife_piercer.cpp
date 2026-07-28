@@ -184,7 +184,7 @@ void KnifePiercer::performSecondHit() {
   assert(!hits.empty());
   data.knockback = 0.0;
   data.stun_time = 0.30;
-  data.atk_mod = 1.0;
+  data.power = 0.80;
 
   for (Combatant *combatant : hits) {
     Rectangle *hurtbox = &combatant->hurtbox.rect;

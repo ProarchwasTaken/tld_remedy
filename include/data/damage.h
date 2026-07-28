@@ -21,7 +21,6 @@ struct DamageData {
   int *a_atk = NULL;
   int *b_def = NULL;
 
-  float atk_mod = 1.20;
-  float def_mod = 0.80;
+  float power = 1.0;
   bool force_hitstop = false;
 };

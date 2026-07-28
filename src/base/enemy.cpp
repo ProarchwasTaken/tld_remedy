@@ -61,8 +61,8 @@ void Enemy::takeDamage(DamageData &data) {
     float percentage = combo / 15.0;
     percentage = Clamp(percentage, 0.0, 1.0);
 
-    float modifier = 1.0 - std::powf(percentage, 2);
-    data.def_mod = data.def_mod * modifier; 
+    float bonus = std::powf(percentage, 2);
+    data.power = data.power + bonus; 
   }
 
   Combatant::takeDamage(data);

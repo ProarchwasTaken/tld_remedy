@@ -35,7 +35,7 @@ ThirdParty::ThirdParty(Erwin *user):
   data.stun_time = 1.0;
   data.stun_type = StunType::NORMAL;
 
-  data.atk_mod = 1.30;
+  data.power = 1.25;
   data.knockback = 200.0;
 
   data.hit_stop = 0.25;
