@@ -1,8 +1,11 @@
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
 #include "game.h"
+#include "base/panel.h"
 #include "data/session.h"
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
@@ -13,7 +16,9 @@ SpriteAtlas SaveFile::atlas("menu", "savefile");
 
 
 SaveFile::SaveFile(Vector2 position, SessionID file_id) {
+  assert(file_id != UNSAVED && file_id != TEMPORARY);
   main_position = position;
+  this->file_id = file_id;
   atlas.use();
 
   try {
@@ -24,10 +29,12 @@ SaveFile::SaveFile(Vector2 position, SessionID file_id) {
   } 
   catch (SessionException error_code) {
     PLOGI << "Marking Save File " << file_id << " as empty.";
-    frame = &atlas.sprites[0];
+    frame = atlas.sprites[0];
     frame_color = WHITE;
     valid = false;
   }
+
+  frame.height = 0;
 }
 
 SaveFile::~SaveFile() {
@@ -35,7 +42,8 @@ SaveFile::~SaveFile() {
 }
 
 void SaveFile::updateText(Session *data) {
-  frame = &atlas.sprites[1];
+  assert(data != NULL);
+  frame = atlas.sprites[1];
   location = data->location;
 
   if (data->game_mode == GameMode::INDIFFERENCE) {
@@ -62,16 +70,40 @@ void SaveFile::updateText(Session *data) {
     }
   }
 
-  long seconds = std::floor(data->playtime);
+  long seconds;
+  if (Game::playtime() < data->playtime) {
+    seconds = std::floor(data->playtime);
+  }
+  else {
+    seconds = std::floor(Game::playtime());;
+  }
+
   int minutes = (seconds / 60) % 60;
   int hours = seconds / 3600;
   playtime = TextFormat("%02i:%02i", hours, minutes);
 }
 
-void SaveFile::draw() {
-  DrawTextureRec(atlas.sheet, *frame, main_position, frame_color);
+void SaveFile::update(PanelState state, float clock) {
+  switch (state) {
+    case PanelState::READY: {
+      frame.height = frame_height;
+      return;
+    }
+    case PanelState::OPENING: {
+      frame.height = Lerp(0, frame_height, clock);
+      break;
+    }
+    case PanelState::CLOSING: {
+      frame.height = Lerp(frame_height, 0, clock);
+      break;
+    }
+  }
+}
 
-  if (valid) {
+void SaveFile::draw() {
+  DrawTextureRec(atlas.sheet, frame, main_position, frame_color);
+
+  if (valid && frame.height == frame_height) {
     DrawTextureRec(atlas.sheet, atlas.sprites[2], main_position, 
                    pattern_color);
     drawSaveInfo();

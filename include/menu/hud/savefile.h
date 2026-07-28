@@ -2,6 +2,7 @@
 #include <string>
 #include <raylib.h>
 #include "enums.h"
+#include "base/panel.h"
 #include "data/session.h"
 #include "system/sprite_atlas.h"
 
@@ -12,14 +13,19 @@ public:
   ~SaveFile();
 
   void updateText(Session *data);
+  void update(PanelState state, float clock);
+
   void draw();
   void drawSaveInfo();
 
+  SessionID file_id;
+  Vector2 main_position;
+  bool valid;
+
   static SpriteAtlas atlas;
 private:
-  bool valid;
-  Vector2 main_position;
-  Rectangle *frame;
+  Rectangle frame;
+  float frame_height = 42;
 
   Color frame_color;
   Color pattern_color;

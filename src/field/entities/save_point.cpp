@@ -42,8 +42,7 @@ void SavePoint::interact() {
   PLOGD << "Interaction function for SavePoint [ID: " << entity_id << "]"
   " has been called.";
   if (!rest_point) {
-    FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,
-                                            SequenceID::SAVE);
+    FieldHandler::raise<FieldEvent>(FieldEVT::SAVE_SESSION);
   }
   else {
     FieldHandler::raise<StartSequenceEvent>(FieldEVT::START_SEQUENCE,

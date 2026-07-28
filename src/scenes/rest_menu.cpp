@@ -16,11 +16,10 @@
 #include "menu/panels/diagnose.h"
 #include "menu/panels/crafting.h"
 #include "menu/panels/confirm.h"
-#include "menu/panels/dialog.h"
+#include "menu/panels/file_select.h"
 #include "scenes/rest_menu.h"
 
-using std::string, std::vector, std::uniform_int_distribution, 
-std::make_unique;
+using std::string, std::uniform_int_distribution, std::make_unique;
 
 
 RestMenuScene::RestMenuScene(Session *session) {
@@ -237,13 +236,7 @@ void RestMenuScene::selectOption() {
       break;
     }
     case RestMenuOptions::SAVE: {
-      vector<string> dialog = {
-        "Record your progress?\n"
-        "(Existing data will be overwritten.)"
-      };
-
-      Vector2 position = {16, 183};
-      panel = make_unique<DialogPanel>(position, dialog, true);
+      panel = make_unique<FileSelectPanel>(session);
       break;
     }
     case RestMenuOptions::LEAVE: {
@@ -271,24 +264,6 @@ void RestMenuScene::panelTermination() {
         exiting = true;
       }
       break;
-    }
-    case PanelID::DIALOG: {
-      DialogPanel *ptr = static_cast<DialogPanel*>(panel.get());
-
-      if (ptr->selected == NULL) {
-        break;
-      }
-
-      if (*ptr->selected == PromptOptions::YES) {
-        Game::saveGame(session, FILE1);
-
-        panel.reset();
-
-        vector<string> dialog = {"Progress has been saved."};
-        Vector2 position = {16, 183};
-        panel = make_unique<DialogPanel>(position, dialog);
-        return;
-      }
     }
     default: {
       break;

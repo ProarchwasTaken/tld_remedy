@@ -20,6 +20,7 @@
 #include "utils/text.h"
 #include "utils/flag.h"
 #include "menu/panels/dialog.h"
+#include "menu/panels/file_select.h"
 #include "field/system/field_map.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
@@ -504,6 +505,10 @@ void FieldScene::panelTermination() {
   if (panel->id == PanelID::DIALOG) {
     dialogHandling();
   }
+  else if (sequence == nullptr && panel->id == PanelID::FILE_SELECT) {
+    PLOGD << "Detected that FileSelect was closed outside of a sequence.";
+    PlayerActor::setControllable(true);
+  }
 
   panel.reset();
   panel_mode = false;
@@ -588,8 +593,15 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
     case FieldEVT::SAVE_SESSION: {
       PLOGD << "Event Detected: SaveSessionEvent";
 
-      PLOGI << "Saving the session.";
-      Game::saveGame(session.get(), FILE1);
+      PLOGI << "Opening File Select in save mode.";
+      panel = make_unique<FileSelectPanel>(session.get());
+      panel_mode = true;
+
+      if (sequence == nullptr) {
+        PLOGD << "Detected that File Select was opened outside of a " 
+          << "sequence.";
+        PlayerActor::setControllable(false);
+      }
       break;
     }
     case FieldEVT::OPEN_MENU: {

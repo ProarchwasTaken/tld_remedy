@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 #include <array>
 #include <cstddef>
 #include <memory>
@@ -11,6 +12,8 @@
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "menu/hud/savefile.h"
+#include "menu/hud/reticle.h"
+#include "menu/panels/dialog.h"
 
 
 class FileSelectPanel : public Panel {
@@ -19,14 +22,29 @@ public:
   ~FileSelectPanel();
 
   void setupSaveFiles();
+  void setupMainText();
+  void updateSelected();
 
   void update() override;
-  void draw() override;
+  void panelLogic();
+  void promptHandling(PromptOptions response);
 
+  void menuNavigation();
+  void openDialog();
+
+  void draw() override;
 private:
+  Session *session;
+  SpriteAtlas *atlas;
+  SoundAtlas *sfx;
+  MenuKeybinds *keybinds;
+
   std::string text;
   Vector2 text_position;
+  Rectangle text_rect;
+
   bool save_mode;
+  bool load_game = false;
 
   std::array<SessionID, 3> options = {
     SessionID::FILE1,
@@ -35,9 +53,10 @@ private:
   };
   std::array<SessionID, 3>::iterator selected;
   std::array<std::unique_ptr<SaveFile>, 3> save_files;
+  std::unordered_set<SessionID> disallowed;
 
-  Session *session;
-  SpriteAtlas *atlas;
-  SoundAtlas *sfx;
-  MenuKeybinds *keybinds;
+  TargetReticle reticle = TargetReticle({210, 50});
+  float blink_clock = 0;
+
+  std::unique_ptr<DialogPanel> panel = nullptr;
 };
