@@ -104,7 +104,7 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
     }
     case SubWeaponID::BAT: {
       return
-      "<Swing> - MP Cost: 6\n"
+      "<Swing> - MP Cost: 5\n"
       "\"One decisive blow, and the battles over.\"\n\n"
 
       "Mary wind back his baseball bat, and swings\n"
@@ -113,7 +113,7 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
       "action's windup, Mary can freely change the\n"
       "direction he's currently facing.\n\n"
 
-      "<Hail Mary> - MP Cost: 6\n"
+      "<Hail Mary> - MP Cost: 5\n"
       "\"When there's love, there's hope...\n"
       "but a little luck wouldn't hurt.\n\n"
 

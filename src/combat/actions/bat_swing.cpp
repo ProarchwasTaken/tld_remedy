@@ -44,6 +44,7 @@ BatSwing::BatSwing(Mary *user) :
   data.hit_stop = 0.25;
 
   data.assailant = user;
+  data.power = 2.0;
 
   hitbox.scale = {38, 17};
   updateHitboxOffset();

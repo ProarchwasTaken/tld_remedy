@@ -210,7 +210,7 @@ float Combatant::damageCalculation(DamageData &data) {
   PLOGD << "Damage Floor: " << dmg_floor;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
 
-  float result = a_atk - b_def * power;
+  float result = (a_atk - b_def) * power;
   result = Clamp(result, dmg_floor, dmg_ceiling);
   return result;
 }

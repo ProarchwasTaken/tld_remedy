@@ -137,10 +137,10 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
     }
     case SubWeaponID::BAT: {
       PLOGI << "Applying Bat status changes.";
-      player->init_morale = 6;
-      player->max_morale -= 10;
+      player->init_morale = 5;
+      player->max_morale -= 5;
 
-      player->offense += 3;
+      player->offense += 5;
       player->intimid += 2;
       player->discipline -= 2;
 
