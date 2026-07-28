@@ -148,7 +148,7 @@ void Erwin::warningHandling(WarningCBT *event) {
     return;
   }
 
-  if (event->assailant == NULL && team == event->assailant->team) {
+  if (event->assailant == NULL || team == event->assailant->team) {
     return;
   }
 
