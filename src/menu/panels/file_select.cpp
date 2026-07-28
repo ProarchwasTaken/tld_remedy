@@ -150,7 +150,7 @@ void FileSelectPanel::promptHandling(PromptOptions response) {
     assert(session != NULL);
     
     auto &file = save_files[*selected - 1];
-    file->updateText(session);
+    file->updateText(session, true);
     file->valid = true;
 
     PLOGI << "Saving to external file " << *selected;

@@ -12,7 +12,7 @@ public:
   SaveFile(Vector2 position, SessionID file_id);
   ~SaveFile();
 
-  void updateText(Session *data);
+  void updateText(Session *data, bool active_playtime);
   void update(PanelState state, float clock);
 
   void draw();

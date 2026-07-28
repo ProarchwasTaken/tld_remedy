@@ -23,7 +23,7 @@ SaveFile::SaveFile(Vector2 position, SessionID file_id) {
 
   try {
     Session data = Game::validateSession(file_id);
-    updateText(&data);
+    updateText(&data, false);
     valid = true;
     PLOGI << "File " << file_id << "has been initialized.";
   } 
@@ -41,7 +41,7 @@ SaveFile::~SaveFile() {
   atlas.release();
 }
 
-void SaveFile::updateText(Session *data) {
+void SaveFile::updateText(Session *data, bool active_playtime) {
   assert(data != NULL);
   frame = atlas.sprites[1];
   location = data->location;
@@ -71,11 +71,11 @@ void SaveFile::updateText(Session *data) {
   }
 
   long seconds;
-  if (Game::playtime() < data->playtime) {
-    seconds = std::floor(data->playtime);
+  if (active_playtime) {
+    seconds = std::floor(Game::playtime());;
   }
   else {
-    seconds = std::floor(Game::playtime());;
+    seconds = std::floor(data->playtime);
   }
 
   int minutes = (seconds / 60) % 60;
