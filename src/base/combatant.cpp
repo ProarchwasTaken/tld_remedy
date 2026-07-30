@@ -129,7 +129,6 @@ void Combatant::takeDamage(DamageData &data) {
     enterHitstun(data);
   }
 
-  acceleration = 0.0;
   PLOGD << "Proceeding to queue TookDamage event.";
   CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
                                          damage_sustained, 
@@ -164,7 +163,8 @@ float Combatant::damageProcedure(DamageData &data) {
   }
 
   finalIntercept(damage, data);
-  applyDamage(damage, data);
+  applyDamage(damage, data.damage_type);
+  acceleration = 0.0;
   return damage;
 }
 
@@ -243,10 +243,11 @@ float Combatant::tpDamageCalculation(float damage) {
   return life_damage;
 }
 
-void Combatant::applyDamage(float damage, DamageData &data) {
-  damage_type = data.damage_type;
+void Combatant::applyDamage(float damage, DamageType type, 
+                            float inc_entropy) 
+{
 
-  if (damage_type == DamageType::LIFE) {
+  if (type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
     sfx.play("damage_hp");
@@ -254,14 +255,19 @@ void Combatant::applyDamage(float damage, DamageData &data) {
   else {
     PLOGD << "Directing damage towards Combatant's Morale.";
     damageMorale(damage);
-    data.assailant->increaseMorale(damage);
     sfx.play("damage_mp");
+  }
+
+  if (inc_entropy != 0) {
+    PLOGD << "Attempting to increasing the combatant's Entropy by: " << 
+      inc_entropy;
+    increaseEntropy(inc_entropy);
   }
 
   if (damage != 0) {
     PLOGD << "Sending a request for a DamageNumber to be created.";
     CombatHandler::raise<CreateDmgNumCB>(CombatEVT::CREATE_DMG_NUM,
-                                         this, data.damage_type, damage);
+                                         this, type, damage);
   }
 }
 
@@ -379,10 +385,6 @@ void Combatant::regenerateTenacity() {
 
 void Combatant::damageMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to damage.";
-}
-
-void Combatant::increaseMorale(float magnitude, bool mp_share) {
-  PLOGD << "Combatant does not possess Morale to increase.";
 }
 
 void Combatant::enterHitstun(DamageData &data) {

@@ -76,7 +76,7 @@ public:
   float tpDamageCalculation(float damage);
 
   virtual void finalIntercept(float &damage, DamageData &data) {};
-  void applyDamage(float damage, DamageData &data);
+  void applyDamage(float damage, DamageType type, float inc_entropy = 0);
 
   virtual void damageLife(float magnitude);
   virtual void increaseLife(float magnitude);
@@ -88,12 +88,11 @@ public:
   void increaseTenacity(float magnitude, float threshold);
   void regenerateTenacity();
 
-  /* This function (Along with increaseMorale) does nothing. This is 
-   * because, Combatants at their core do not possess Morale attributes.
-   * Rather theses functions are meant to be overwritten by Combatants
-   * who do have those values. The notable example are PartyMembers.*/
+  /* This function does nothing. This is because, Combatants at their core
+   * do not possess Morale attributes. Rather theses functions are meant 
+   * to be overwritten by Combatants who do have those values. The notable
+   * example are PartyMembers.*/
   virtual void damageMorale(float magnitude);
-  virtual void increaseMorale(float magnitude, bool mp_share = true);
 
   /* Hit Stun is a state that most combatants will enter upon taking
    * damage. In such a state, they will be unable to do anything the
