@@ -18,7 +18,7 @@ public:
 
   void intercept(DamageData &data) override;
   void flawedClash(DamageData &data);
-  void normalClash(DamageData &data);
+  void perfectClash(DamageData &data);
 
   void updateHitboxOffset();
   void sendWarning();

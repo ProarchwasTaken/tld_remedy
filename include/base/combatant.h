@@ -74,9 +74,10 @@ public:
 
   bool useTenacity(float damage, DamageType type);
   float tpDamageCalculation(float damage);
+  float entropySplit(float damage, float split, float &inc_entropy);
 
   virtual void finalIntercept(float &damage, DamageData &data) {};
-  void applyDamage(float damage, DamageType type, float inc_entropy = 0);
+  void applyDamage(float damage, DamageType type, float inc_entropy);
 
   virtual void damageLife(float magnitude);
   virtual void increaseLife(float magnitude);

@@ -81,28 +81,25 @@ void BatSwing::intercept(DamageData &data) {
   }
 
   PLOGI << "Conditions have been met for a Perfect Clash!";
-  normalClash(data);
+  perfectClash(data);
 }
 
 void BatSwing::flawedClash(DamageData &data) {
-  data.intercepted = true;
+  data.damage_type = DamageType::MORALE;
   float stun_time = data.stun_time * 0.5;
+
   StunType stun_type = StunType::STAGGER;
   float knockback = data.knockback * 2;
 
-  float damage = user->damageCalculation(data);
-  user->increaseEntropy(damage / 2);
-
-  user->enterHitstun(data.stun_time, data.stun_type, Game::palette[37]);
-  user->setKnockback(data.knockback, data.stun_time, 
-                     data.assailant->direction);
-
+  data.power = 0.25;
+  data.ent_split = 1.0;
+ 
   user->sprite = &atlas->sprites[41];
   sfx->play("bat_swing_flawed");
   Game::sleep(0.25);
 } 
 
-void BatSwing::normalClash(DamageData &data) {
+void BatSwing::perfectClash(DamageData &data) {
   PLOGI << "Refunding Morale...";
   float refund = user->calculateMoraleCost(user->tech1.cost);
   user->increaseMorale(refund, true);

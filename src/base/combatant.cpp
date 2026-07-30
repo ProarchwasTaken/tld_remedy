@@ -162,8 +162,14 @@ float Combatant::damageProcedure(DamageData &data) {
     PLOGD << "Final Calculation: " << damage << " Life damage.";
   }
 
+  float inc_entropy = 0;
+  if (data.ent_split > 0) {
+    damage = entropySplit(damage, data.ent_split, inc_entropy);
+    PLOGD << "After Entropy Split: " << damage;
+  }
+
   finalIntercept(damage, data);
-  applyDamage(damage, data.damage_type);
+  applyDamage(damage, data.damage_type, inc_entropy);
   acceleration = 0.0;
   return damage;
 }
@@ -241,6 +247,18 @@ float Combatant::tpDamageCalculation(float damage) {
   absorbed * 100 << "%";
 
   return life_damage;
+}
+
+float Combatant::entropySplit(float damage, float split, 
+                              float &inc_entropy) 
+{
+  split = Clamp(split, 0.0, 1.0);
+  inc_entropy = damage * split;
+
+  damage = damage - inc_entropy;
+  PLOGI << "Converted " << split * 100 << "percent of damage to "
+    << "possible Entropy.";
+  return damage;
 }
 
 void Combatant::applyDamage(float damage, DamageType type, 
