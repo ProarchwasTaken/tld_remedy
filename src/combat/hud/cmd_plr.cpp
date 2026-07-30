@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "game.h"
 #include "data/keybinds.h"
+#include "base/combatant.h"
 #include "scenes/combat.h"
 #include "utils/input.h"
 #include "utils/text.h"
@@ -54,16 +55,16 @@ void PlayerCmdHud::update() {
 
   if (player->state == NEUTRAL || player->canCancel(true)) {
     attack_color = determineAttackColor();
-    updateDefendText();
     tech1_color = determineTechColor(player->tech1.cost);
     tech2_color = determineTechColor(player->tech2.cost); 
   }
   else {
     attack_color = Game::palette[2];
-    defend_color = Game::palette[2];
     tech1_color = Game::palette[2];
     tech2_color = Game::palette[2];
   }
+
+  updateDefendText();
 }
 
 Color PlayerCmdHud::determineAttackColor() {
@@ -119,9 +120,17 @@ Color PlayerCmdHud::determineTechColor(float base_cost)
 
 
 Color PlayerCmdHud::determineGSColor() {
-  bool using_action = player->state == ACTION;
-  if (using_action && player->action->id != ActionID::GHOST_STEP) {
+  bool in_end_lag = false;
+  if (player->state == ACTION) {
+    in_end_lag = player->action->phase == ActionPhase::END_LAG;
+  }
+
+  if (in_end_lag && player->action->id != ActionID::GHOST_STEP) {
     return Game::palette[51];
+  }
+
+  if (player->state != NEUTRAL) {
+    return Game::palette[2];
   }
 
   float gs_cost = player->gs_cost;
@@ -135,11 +144,16 @@ Color PlayerCmdHud::determineGSColor() {
 }
 
 Color PlayerCmdHud::determineEvadeColor() {
-  bool using_action = player->state == ACTION;
-  if (using_action && player->action->id != ActionID::EVADE) {
+  bool in_end_lag = false;
+  if (player->state == ACTION) {
+    in_end_lag = player->action->phase == ActionPhase::END_LAG;
+  }
+
+  if (in_end_lag && player->action->id == ActionID::GHOST_STEP) {
     return Game::palette[51];
   }
-  else if (using_action && player->action->id == ActionID::EVADE) {
+
+  if (player->state != NEUTRAL) {
     return Game::palette[2];
   }
   else {
