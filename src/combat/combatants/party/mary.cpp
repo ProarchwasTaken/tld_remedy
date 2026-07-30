@@ -235,19 +235,15 @@ bool Mary::canCancel(bool ignore_buffer) {
     return buffer != MaryAction::EVADE && evade_action->evaded_attack;
   }
   
-  if (action_id != ActionID::GHOST_STEP) {
-    return false; 
-  }
+  bool gs_fwd = buffer == MaryAction::GHOST_STEP_FWD;
+  bool gs_bwd = buffer == MaryAction::GHOST_STEP_BWD;
 
-  if (buffer == MaryAction::GHOST_STEP_FWD) {
-    return false;
+  if (action_id == ActionID::GHOST_STEP) {
+    return !gs_fwd && !gs_bwd; 
   }
-
-  if (buffer == MaryAction::GHOST_STEP_BWD) {
-    return false;
+  else {
+    return gs_fwd || gs_bwd;
   }
-
-  return true;
 }
 
 void Mary::readActionBuffer() {
