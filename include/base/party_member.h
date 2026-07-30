@@ -42,7 +42,7 @@ public:
   void clearNonPersistant();
 
   void damageMorale(float magnitude) override;
-  void increaseMorale(float magnitude, bool mp_share) override;
+  void increaseMorale(float magnitude, bool mp_share = true);
 
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();

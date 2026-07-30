@@ -63,9 +63,27 @@ void PartyMember::setEnabled(bool value) {
 void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Combatant::evaluateEvent(event);
 
-  if (event->event_type == CombatantEVT::MORALE_GAINED) {
-    auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
-    moraleShare(mp_event);
+  switch (event->event_type) {
+    case CombatantEVT::TOOK_DAMAGE: {
+      auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+      Combatant *assailant = dmg_event->assailant;
+      DamageType dmg_type = dmg_event->damage_type;
+
+      if (assailant == this && dmg_type == DamageType::MORALE) {
+        assert(dmg_event->sender != this);
+        increaseMorale(dmg_event->damage_taken, true);
+      }
+
+      break;
+    }
+    case CombatantEVT::MORALE_GAINED: {
+      auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
+      moraleShare(mp_event);
+      break;
+    }
+    default: {
+
+    }
   }
 }
 
