@@ -20,6 +20,8 @@ public:
 
   SessionID file_id;
   Vector2 main_position;
+  Color frame_color;
+  Color pattern_color;
   bool valid;
 
   static SpriteAtlas atlas;
@@ -27,8 +29,6 @@ private:
   Rectangle frame;
   float frame_height = 42;
 
-  Color frame_color;
-  Color pattern_color;
   Color gm_color;
 
   std::string location;

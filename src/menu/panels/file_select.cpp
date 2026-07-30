@@ -118,6 +118,11 @@ void FileSelectPanel::update() {
     return;
   }
 
+  if (saved_game) {
+    saveDelay();
+    return;
+  }
+
   if (panel == nullptr) {
     blink_clock += Game::deltaTime();
     menuNavigation();
@@ -151,10 +156,15 @@ void FileSelectPanel::promptHandling(PromptOptions response) {
     
     auto &file = save_files[*selected - 1];
     file->updateText(session, true);
+    file->frame_color = Game::palette[22];
+    file->pattern_color = Game::palette[21];
     file->valid = true;
 
     PLOGI << "Saving to external file " << *selected;
     Game::saveGame(session, *selected);
+
+    saved_game = true;
+    sfx->play("save");
   }
   else {
     PLOGI << "Preparing to load file " << *selected;
@@ -202,6 +212,15 @@ void FileSelectPanel::openDialog() {
 
   Vector2 position = {97, 183};
   panel = make_unique<DialogPanel>(position, dialog, true);
+}
+
+void FileSelectPanel::saveDelay() {
+  assert(saved_game);
+  delay_clock += Game::deltaTime() / delay_time;
+  if (delay_clock >= 1.5) {
+    state = PanelState::CLOSING;
+    sfx->play("menu_cancel");
+  }
 }
 
 void FileSelectPanel::draw() {

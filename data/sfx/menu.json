@@ -29,12 +29,16 @@
       "filename": "menu/menu_camp_reverse.mp3"
     },
     {
+      "name": "menu_craft",
+      "filename": "menu/menu_craft.mp3"
+    },
+    {
       "name": "gameover",
       "filename": "menu/gameover.mp3"
     },
     {
-      "name": "menu_craft",
-      "filename": "menu/menu_craft.mp3"
+      "name": "save",
+      "filename": "menu/save.mp3"
     }
   ]
 }

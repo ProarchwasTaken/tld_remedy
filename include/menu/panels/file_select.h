@@ -31,6 +31,7 @@ public:
 
   void menuNavigation();
   void openDialog();
+  void saveDelay();
 
   void draw() override;
 private:
@@ -45,6 +46,10 @@ private:
 
   bool save_mode;
   bool load_game = false;
+
+  bool saved_game = false;
+  float delay_time = 1.0;
+  float delay_clock = 0.0;
 
   std::array<SessionID, 3> options = {
     SessionID::FILE1,
