@@ -170,7 +170,6 @@ float Combatant::damageProcedure(DamageData &data) {
 
   finalIntercept(damage, data);
   applyDamage(damage, data.damage_type, inc_entropy);
-  acceleration = 0.0;
   return damage;
 }
 
@@ -264,8 +263,10 @@ float Combatant::entropySplit(float damage, float split,
 void Combatant::applyDamage(float damage, DamageType type, 
                             float inc_entropy) 
 {
+  damage_type = type;
+  acceleration = 0.0;
 
-  if (type == DamageType::LIFE) {
+  if (damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
     damageLife(damage);
     sfx.play("damage_hp");

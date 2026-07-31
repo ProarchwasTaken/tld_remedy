@@ -144,33 +144,10 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
 void Erwin::warningHandling(WarningCBT *event) {
   assert(event->sender != this);
-  if (life <= 1) {
-    return;
-  }
 
-  if (event->assailant == NULL || team == event->assailant->team) {
-    return;
-  }
-
-  if (ai_goal == ErwinGoals::DODGING) {
-    return;
-  }
-
-  if (ai_goal == ErwinGoals::THIRD_PARTY) {
-    return;
-  }
-
-  bool from_target = false;
-  if (target != NULL) {
-    float distance = distanceTo(target);
-    bool contested = distance <= ai->contest_distance;
-
-    from_target = contested && target == event->assailant;
-  }
-
-  bool in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
-
-  if (!from_target && !in_range) {
+  bool from_target;
+  bool in_range;
+  if (!shouldAcknowledge(event, from_target, in_range)) {
     return;
   }
   
@@ -181,11 +158,77 @@ void Erwin::warningHandling(WarningCBT *event) {
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
   setGoal(ErwinGoals::DODGING, dodge_chance);
-  if (ai_goal != ErwinGoals::DODGING) {
-    return;
+  if (ai_goal == ErwinGoals::DODGING) {
+    PLOGI << "Decided to dodge the attack.";
+    warningReaction(event, from_target, in_range);
   }
-  PLOGI << "Decided to dodge the attack.";
 
+  if (target == NULL) {
+    chooseTarget();
+  }
+}
+
+bool Erwin::shouldAcknowledge(WarningCBT *event, bool &from_target,
+                              bool &in_range) 
+{
+  if (life <= 1) {
+    return false;
+  }
+
+  if (event->assailant == NULL || team == event->assailant->team) {
+    return false;
+  }
+
+  if (ai_goal == ErwinGoals::DODGING) {
+    return false;
+  }
+
+  if (ai_goal == ErwinGoals::THIRD_PARTY) {
+    return false;
+  }
+
+  if (target != NULL) {
+    float distance = distanceTo(target);
+    bool contested = distance <= ai->contest_distance;
+
+    from_target = contested && target == event->assailant;
+  }
+
+  in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
+
+  if (from_target || in_range) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+float Erwin::chanceCalculation(WarningCBT *event, bool from_target)
+{
+  float range = event->hitbox.width;
+  float distance = distanceTo(event->sender);
+
+  assert(range != 0);
+  float range_multiplier = ai->dodging.range_multiplier;
+  float range_bonus = std::sinf(distance / range) * range_multiplier;
+  PLOGD << "Range Bonus: " << range_bonus;
+
+  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
+  float time_multiplier = ai->dodging.time_multiplier;
+  float time_bonus = (event->time_until * time_multiplier) * life_attack;
+  PLOGD << "Time Bonus: " << time_bonus;
+
+  float penalty = ai->dodging.penalty;
+  float multiplier = 1.0 - (penalty * from_target);
+  PLOGD << "Multiplier: " << multiplier;
+
+  return (time_bonus + range_bonus) * multiplier;
+}
+
+void Erwin::warningReaction(WarningCBT *event, bool from_target, 
+                            bool in_range) 
+{
   float evade_chance = getEvadeChance(event, from_target, in_range);
   PLOGI << "Chance to evade attack: " << evade_chance;
 
@@ -206,10 +249,26 @@ void Erwin::warningHandling(WarningCBT *event) {
   }
 
   ai->dodge_clock = 0.0;
+}
 
-  if (target == NULL) {
-    chooseTarget();
+float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
+                            bool in_range)
+{
+  if (event->time_until <= 0.16) {
+    return 0.0;
   }
+
+  float chance = 0.40;
+  if (from_target) {
+    chance += 0.20;
+  }
+
+  Rectangle *player_hurtbox = &player->hurtbox.rect;
+  if (in_range && CheckCollisionRecs(*player_hurtbox, event->hitbox)) {
+    chance += 0.30;
+  }
+
+  return chance;
 }
 
 void Erwin::damageHandling(TookDamageCBT *event) {
@@ -274,48 +333,6 @@ bool Erwin::retaliation(Combatant *assailant, float chance) {
   else {
     return false;
   }
-}
-
-float Erwin::chanceCalculation(WarningCBT *event, bool from_target)
-{
-  float range = event->hitbox.width;
-  float distance = distanceTo(event->sender);
-
-  assert(range != 0);
-  float range_multiplier = ai->dodging.range_multiplier;
-  float range_bonus = std::sinf(distance / range) * range_multiplier;
-  PLOGD << "Range Bonus: " << range_bonus;
-
-  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
-  float time_multiplier = ai->dodging.time_multiplier;
-  float time_bonus = (event->time_until * time_multiplier) * life_attack;
-  PLOGD << "Time Bonus: " << time_bonus;
-
-  float penalty = ai->dodging.penalty;
-  float multiplier = 1.0 - (penalty * from_target);
-  PLOGD << "Multiplier: " << multiplier;
-
-  return (time_bonus + range_bonus) * multiplier;
-}
-
-float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
-                            bool in_range)
-{
-  if (event->time_until <= 0.16) {
-    return 0.0;
-  }
-
-  float chance = 0.40;
-  if (from_target) {
-    chance += 0.20;
-  }
-
-  Rectangle *player_hurtbox = &player->hurtbox.rect;
-  if (in_range && CheckCollisionRecs(*player_hurtbox, event->hitbox)) {
-    chance += 0.30;
-  }
-
-  return chance;
 }
 
 void Erwin::assistInput() {

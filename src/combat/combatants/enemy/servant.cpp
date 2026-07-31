@@ -91,15 +91,42 @@ void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
 void Servant::warningHandling(WarningCBT *event) {
   assert(event->sender != this);
-  if (ai_goal == ServantGoals::DODGING) {
+
+  bool from_target;
+  bool in_range;
+  if (!shouldAcknowledge(event, from_target, in_range)) {
     return;
   }
 
+  PLOGI << "Servant [ID: " << entity_id << "] Acknowledging Warning sent"
+    << " by Entity [ID: " << event->sender->entity_id << "]";
+
+  float dodge_chance = chanceCalculation(event, from_target, in_range);
+  PLOGI << "Chance to dodge attack: " << dodge_chance;
+
+  setGoal(ServantGoals::DODGING, dodge_chance);
+  if (ai_goal == ServantGoals::DODGING) {
+    PLOGI << "Servant [ID: " << entity_id << "] has decided to dodge the" 
+      << " attack";
+    warningReaction(event);
+  }
+
+  if (target == NULL) {
+    chooseTarget();
+  }
+}
+
+bool Servant::shouldAcknowledge(WarningCBT *event, bool &from_target,
+                                bool &in_range)
+{
   if (event->assailant == NULL || team == event->assailant->team) {
-    return;
+    return false;
+  }
+
+  if (ai_goal == ServantGoals::DODGING) {
+    return false;
   }
   
-  bool from_target = false;
   if (target != NULL) {
     float distance = distanceTo(target);
     bool contested = distance <= ai->contest_distance;
@@ -107,35 +134,48 @@ void Servant::warningHandling(WarningCBT *event) {
     from_target = contested && target == event->assailant;
   }
 
-  bool in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
+  in_range = CheckCollisionRecs(hurtbox.rect, event->hitbox);
 
-  if (!from_target && !in_range) {
-    return;
+  if (from_target || in_range) {
+    return true;
   }
-
-  PLOGI << "Servant [ID: " << entity_id << "] Acknowledging Warning sent"
-    << " by Entity [ID: " << event->sender->entity_id << "]";
-
-
-  float dodge_chance = chanceCalculation(event, from_target, in_range);
-  PLOGI << "Chance to dodge attack: " << dodge_chance;
-
-  setGoal(ServantGoals::DODGING, dodge_chance);
-  if (ai_goal != ServantGoals::DODGING) {
-    return;
+  else {
+    return false;
   }
+}
 
-  PLOGI << "Servant [ID: " << entity_id << "] has decided to dodge the" 
-    << " attack";
+float Servant::chanceCalculation(WarningCBT *event, bool from_target,
+                                 bool in_range)
+{
+  float range = event->hitbox.width;
+  PLOGD << "Range: " << range; 
+
+  float distance = distanceTo(event->sender);
+  PLOGD << "Distance from sender: " << distance;
+
+  assert(range != 0);
+  float range_multiplier = ai->dodging.range_multiplier;
+  float range_bonus = std::sinf(distance / range) * range_multiplier;
+  PLOGD << "Range Bonus: " << range_bonus;
+
+  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
+  float time_multiplier = ai->dodging.time_multiplier;
+  float time_bonus = (event->time_until * time_multiplier) * life_attack;
+  PLOGD << "Time Bonus: " << time_bonus;
+
+  float penalty = ai->dodging.penalty;
+  float multiplier = 1.0 - (penalty * from_target);
+  PLOGD << "Multiplier: " << multiplier;
+
+  return (time_bonus + range_bonus) * multiplier;
+}
+
+void Servant::warningReaction(WarningCBT *event) {
   ai->dodge_time = event->time_until * 0.90;
   ai->dodge_clock = 0.0;
 
   float retaliation_chance = ai->dodging.retaliation_chance;
   retaliation(event->assailant, retaliation_chance);
-
-  if (target == NULL) {
-    chooseTarget();
-  }
 }
 
 void Servant::damageHandling(TookDamageCBT *event) {
@@ -192,32 +232,6 @@ void Servant::retaliation(Combatant *assailant, float chance) {
   PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
   << "retaliate against: '" << target->name << "' [ID: " << 
     target->entity_id << "]";
-}
-
-float Servant::chanceCalculation(WarningCBT *event, bool from_target,
-                                 bool in_range)
-{
-  float range = event->hitbox.width;
-  PLOGD << "Range: " << range; 
-
-  float distance = distanceTo(event->sender);
-  PLOGD << "Distance from sender: " << distance;
-
-  assert(range != 0);
-  float range_multiplier = ai->dodging.range_multiplier;
-  float range_bonus = std::sinf(distance / range) * range_multiplier;
-  PLOGD << "Range Bonus: " << range_bonus;
-
-  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
-  float time_multiplier = ai->dodging.time_multiplier;
-  float time_bonus = (event->time_until * time_multiplier) * life_attack;
-  PLOGD << "Time Bonus: " << time_bonus;
-
-  float penalty = ai->dodging.penalty;
-  float multiplier = 1.0 - (penalty * from_target);
-  PLOGD << "Multiplier: " << multiplier;
-
-  return (time_bonus + range_bonus) * multiplier;
 }
 
 void Servant::rootBehavior() {

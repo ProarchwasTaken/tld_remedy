@@ -61,13 +61,30 @@ public:
 
   void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
+
   void warningHandling(WarningCBT *event);
+
+  /* Determines whether Erwin should acknowledge any given warning event
+   * in the first place.*/
+  bool shouldAcknowledge(WarningCBT *event, bool &from_target, 
+                         bool &in_range);
+
+  /* Very important function that calculate the odds that Erwin will
+   * choose to REACT to the warning after acknowledging it. There are a 
+   * numerous amount of factors that will influence these odds. 
+   * (ie: Distance, time, action type, etc)*/
+  float chanceCalculation(WarningCBT *event, bool from_target);
+
+  /* Determines HOW Ewin should react to the warning. Depending on the 
+   * result, he might try to dodge the attack with Ghoststep or Evade.*/
+  void warningReaction(WarningCBT *event, bool from_target, 
+                       bool in_range);
+  float getEvadeChance(WarningCBT *event, bool from_target, 
+                       bool in_range);
+
   void damageHandling(TookDamageCBT *event);
   void evadeHandling(EvadedAttackCBT *event);
   bool retaliation(Combatant *assailant, float chance);
-  float chanceCalculation(WarningCBT *event, bool from_target);
-  float getEvadeChance(WarningCBT *event, bool from_target, 
-                       bool in_range);
 
   void assistInput();
   bool lightAssistCondition();
