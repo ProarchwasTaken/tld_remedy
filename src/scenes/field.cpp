@@ -166,11 +166,11 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->init_morale = 10;
       companion->max_morale = 15;
 
-      companion->offense = 5;
+      companion->offense = 4;
       companion->defense = 4;
       companion->intimid = 6;
       companion->persist = 6;
-      companion->dexterity = 6;
+      companion->dexterity = 5;
       companion->discipline = 5;
 
       companion->recovery = 1.0;
@@ -195,7 +195,7 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->dexterity = 4;
       companion->discipline = 1;
 
-      companion->recovery = 0.75;
+      companion->recovery = 0.60;
       companion->resilience = 0.75;
       break;
     }

@@ -88,6 +88,7 @@ public:
   #endif // !NDEBUG
 
   static SpriteAtlas cmd_atlas;
+  static bool verbose_debug;
 private:
   CombatStage stage;
   Texture debug_overlay;

@@ -46,7 +46,10 @@
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+
 SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
+bool CombatScene::verbose_debug = false;
+
 
 CombatScene::CombatScene(Session *session, TroopID id, int reward, 
                          bool for_glory) {
@@ -755,7 +758,7 @@ void CombatScene::draw() {
   }
 
   #ifndef NDEBUG
-  if (debug_info) drawDebugInfo();
+  if (debug_info && verbose_debug) drawDebugInfo();
   #endif // !NDEBUG
 }
 
@@ -827,6 +830,9 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
 void CombatScene::debugKeybinds() {
   if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
     dummy->attack();
+  }
+  else if (IsKeyPressed(KEY_GRAVE)) {
+    verbose_debug = !verbose_debug;
   }
   else if (companion != NULL && IsKeyPressed(KEY_F4)) {
     bool enabled = companion->isEnabled();
@@ -922,24 +928,6 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   text = TextFormat("Priority: %i", member->priority); 
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y = 228;
-
-  if (member->important) {
-    return;
-  }
-
-  int goal_id;
-  switch (member->id) {
-    case PartyMemberID::ERWIN: {
-      Erwin *erwin = static_cast<Erwin*>(member);
-      goal_id = static_cast<int>(erwin->ai_goal);
-    }
-    default: {
-      assert(member->id != PartyMemberID::MARY);
-    }
-  }
-
-  text = TextFormat("AI Goal: %i", goal_id);
-  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
 }
 
 void CombatScene::drawDebugCombo(Font *font, int text_size) {

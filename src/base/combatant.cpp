@@ -667,10 +667,13 @@ void Combatant::applyStaggerEffect(Rectangle &final) {
 
 void Combatant::drawDebug() {
   Entity::drawDebug();
-  DrawRectangleLinesEx(hurtbox.rect, 1, RED);
+  Color color = RED;
+  color.a = 64;
 
-  Font *font = &Game::sm_font;
-  int size = font->baseSize;
-  const char *text = TextFormat("%01.02f", acceleration);
-  DrawTextEx(*font, text, position, size, -3, GREEN);
+  DrawRectangleLinesEx(hurtbox.rect, 1, color);
+
+  // Font *font = &Game::sm_font;
+  // int size = font->baseSize;
+  // const char *text = TextFormat("%01.02f", acceleration);
+  // DrawTextEx(*font, text, position, size, -3, GREEN);
 }
