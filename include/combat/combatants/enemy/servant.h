@@ -65,8 +65,6 @@ public:
   void targetingBehavior();
   void chooseTarget();
 
-  void setGoal(ServantGoals goal, float chance);
-
   void decideAttack();
   void attackMP();
   void attackHP();
@@ -77,10 +75,6 @@ public:
   void targetingLogic();
   void retreatingLogic();
   void dodgingLogic();
-
-  void wait(float time);
-  void wait(float min, float max);
-  void waitTimer();
 
   void movement();
 

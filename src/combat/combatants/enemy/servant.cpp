@@ -104,7 +104,7 @@ void Servant::warningHandling(WarningCBT *event) {
   float dodge_chance = chanceCalculation(event, from_target, in_range);
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
-  setGoal(ServantGoals::DODGING, dodge_chance);
+  ai->setGoal(ai_goal, ServantGoals::DODGING, dodge_chance);
   if (ai_goal == ServantGoals::DODGING) {
     PLOGI << "Servant [ID: " << entity_id << "] has decided to dodge the" 
       << " attack";
@@ -193,7 +193,7 @@ void Servant::damageHandling(TookDamageCBT *event) {
   }
 
   float retreat_chance = ai->damaged.retreat_chance;
-  setGoal(ServantGoals::RETREATING, retreat_chance);
+  ai->setGoal(ai_goal, ServantGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
@@ -272,7 +272,7 @@ void Servant::targetingBehavior() {
   }
 
   float retreat_chance = ai->contesting.retreat_chance;
-  setGoal(ServantGoals::RETREATING, retreat_chance);
+  ai->setGoal(ai_goal, ServantGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Deciding to retreat from target.";
@@ -291,7 +291,7 @@ void Servant::targetingBehavior() {
   if (percentage <= wait_chance) {
     float min_wait = ai->contesting.min_wait;
     float max_wait = ai->contesting.max_wait;
-    wait(min_wait, max_wait);
+    ai->wait(min_wait, max_wait);
   }
 }
 
@@ -325,15 +325,6 @@ void Servant::chooseTarget() {
                                     Comparison::combatantDistance);
 
     target = closest->second;
-  }
-}
-
-void Servant::setGoal(ServantGoals goal, float chance) {
-  uniform_real_distribution<float> range(0.0, 1.0);
-  float percentage = range(Game::RNG);
-
-  if (percentage <= chance) {
-    ai_goal = goal;
   }
 }
 
@@ -494,7 +485,7 @@ void Servant::targetingLogic() {
 
   if (ai->waiting) {
     decelerate();
-    waitTimer();
+    ai->waitTimer();
     return;
   }
 
@@ -512,7 +503,7 @@ void Servant::targetingLogic() {
   }
 
   float retreat_chance = ai->targeting.retreat_chance;
-  setGoal(ServantGoals::RETREATING, retreat_chance);
+  ai->setGoal(ai_goal, ServantGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ServantGoals::RETREATING) {
     PLOGI << "Retreating from target.";
@@ -548,7 +539,7 @@ void Servant::retreatingLogic() {
   }
 
   float target_chance = ai->retreating.target_chance;
-  setGoal(ServantGoals::TARGETING, target_chance);
+  ai->setGoal(ai_goal, ServantGoals::TARGETING, target_chance);
 
   if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
@@ -558,7 +549,7 @@ void Servant::retreatingLogic() {
   else {
     float min_wait = ai->retreating.min_wait;
     float max_wait = ai->retreating.max_wait;
-    wait(min_wait, max_wait);  
+    ai->wait(min_wait, max_wait);  
   }
 
   ai->retreat_clock = 0.0;
@@ -601,7 +592,7 @@ void Servant::dodgingLogic() {
   ghoststep();
 
   float target_chance = ai->dodging.target_chance;
-  setGoal(ServantGoals::TARGETING, target_chance);
+  ai->setGoal(ai_goal, ServantGoals::TARGETING, target_chance);
 
   if (ai_goal != ServantGoals::TARGETING) {
     PLOGI << "Returning to idle.";
@@ -611,38 +602,10 @@ void Servant::dodgingLogic() {
   else {
     float min_wait = ai->dodging.min_wait;
     float max_wait = ai->dodging.max_wait;
-    wait(min_wait, max_wait);
+    ai->wait(min_wait, max_wait);
   }
 
   ai->dodge_clock = 0.0;
-}
-
-void Servant::wait(float time) {
-  ai->wait_time = time;
-  ai->wait_clock = 0.0;
-  ai->waiting = true;
-  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << time 
-    << " seconds.";
-}
-
-void Servant::wait(float min, float max) {
-  uniform_real_distribution<float> range(min, max);
-
-  ai->wait_time = range(Game::RNG);
-  ai->wait_clock = 0.0;
-  ai->waiting = true;
-  PLOGI << "Servant [ID: " << entity_id << "] Waiting for: " << 
-    ai->wait_time << " seconds.";
-}
-
-void Servant::waitTimer() {
-  ai->wait_clock += Game::deltaTime() / ai->wait_time;
-
-  if (ai->wait_clock >= 1.0) {
-    PLOGI << "Servant [ID: " << entity_id << "] is done waiting.";
-    ai->wait_clock = 0.0;
-    ai->waiting = false;
-  }
 }
 
 void Servant::movement() {

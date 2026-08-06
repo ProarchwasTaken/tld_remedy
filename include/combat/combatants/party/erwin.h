@@ -108,8 +108,6 @@ public:
   void provoke();
   void thirdparty();
 
-  void setGoal(ErwinGoals goal, float chance);
-
   void update() override;
   void neutralLogic();
 
@@ -119,10 +117,6 @@ public:
   void retreatingLogic();
   void dodgingLogic();
   void thirdPartyLogic();
-
-  void wait(float time);
-  void wait(float min, float max);
-  void waitTimer();
 
   void movement(float multiplier);
   void animationLogic();

@@ -157,7 +157,7 @@ void Erwin::warningHandling(WarningCBT *event) {
   float dodge_chance = chanceCalculation(event, from_target);
   PLOGI << "Chance to dodge attack: " << dodge_chance;
 
-  setGoal(ErwinGoals::DODGING, dodge_chance);
+  ai->setGoal(ai_goal, ErwinGoals::DODGING, dodge_chance);
   if (ai_goal == ErwinGoals::DODGING) {
     PLOGI << "Decided to dodge the attack.";
     warningReaction(event, from_target, in_range);
@@ -409,7 +409,7 @@ void Erwin::rootBehavior() {
 
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
-    setGoal(ErwinGoals::LOOK_AT_PLR, 0.25);
+    ai->setGoal(ai_goal, ErwinGoals::LOOK_AT_PLR, 0.25);
     tick_clock = 0.0;
   }
 }
@@ -439,7 +439,7 @@ void Erwin::targetingBehavior() {
   }
 
   float retreat_chance = ai->contesting.retreat_chance;
-  setGoal(ErwinGoals::RETREATING, retreat_chance);
+  ai->setGoal(ai_goal, ErwinGoals::RETREATING, retreat_chance);
   if (ai_goal == ErwinGoals::RETREATING) {
     PLOGI << "Deciding to retreat from target.";
     float min_retreat = ai->contesting.min_retreat;
@@ -457,7 +457,7 @@ void Erwin::targetingBehavior() {
   if (percentage <= wait_chance) {
     float min_wait = ai->contesting.min_wait;
     float max_wait = ai->contesting.max_wait;
-    wait(min_wait, max_wait);
+    ai->wait(min_wait, max_wait);
   }
 }
 
@@ -596,15 +596,6 @@ void Erwin::thirdparty() {
   performAction(action);
 }
 
-void Erwin::setGoal(ErwinGoals goal, float chance) {
-  uniform_real_distribution<float> range(0.0, 1.0);
-  float percentage = range(Game::RNG);
-
-  if (percentage <= chance) {
-    ai_goal = goal;
-  }
-}
-
 void Erwin::update() {
   tintFlash();
 
@@ -730,7 +721,7 @@ void Erwin::targetingLogic() {
 
   if (ai->waiting) {
     decelerate();
-    waitTimer();
+    ai->waitTimer();
     return;
   }
 
@@ -748,7 +739,7 @@ void Erwin::targetingLogic() {
   }
 
   float retreat_chance = ai->targeting.retreat_chance;
-  setGoal(ErwinGoals::RETREATING, retreat_chance);
+  ai->setGoal(ai_goal, ErwinGoals::RETREATING, retreat_chance);
 
   if (ai_goal == ErwinGoals::RETREATING) {
     PLOGI << "Retreating from target.";
@@ -784,7 +775,7 @@ void Erwin::retreatingLogic() {
   }
 
   float target_chance = ai->retreating.target_chance;
-  setGoal(ErwinGoals::TARGETING, target_chance);
+  ai->setGoal(ai_goal, ErwinGoals::TARGETING, target_chance);
 
   if (ai_goal != ErwinGoals::TARGETING) {
     PLOGI << "Returning to idle.";
@@ -794,7 +785,7 @@ void Erwin::retreatingLogic() {
   else {
     float min_wait = ai->retreating.min_wait;
     float max_wait = ai->retreating.max_wait;
-    wait(min_wait, max_wait);
+    ai->wait(min_wait, max_wait);
   }
 
   ai->retreat_clock = 0.0;
@@ -851,7 +842,7 @@ void Erwin::dodgingLogic() {
   }
 
   float target_chance = ai->dodging.target_chance;
-  setGoal(ErwinGoals::TARGETING, target_chance);
+  ai->setGoal(ai_goal, ErwinGoals::TARGETING, target_chance);
 
   if (ai_goal != ErwinGoals::TARGETING) {
     PLOGI << "Returning to idle.";
@@ -861,7 +852,7 @@ void Erwin::dodgingLogic() {
   else {
     float min_wait = ai->dodging.min_wait;
     float max_wait = ai->dodging.max_wait;
-    wait(min_wait, max_wait);
+    ai->wait(min_wait, max_wait);
   }
 
   ai->dodge_clock = 0.0;
@@ -894,32 +885,6 @@ void Erwin::thirdPartyLogic() {
 
   thirdparty();
   ai_goal = ErwinGoals::IDLE;
-}
-
-void Erwin::wait(float time) {
-  ai->wait_time = time;
-  ai->wait_clock = 0.0;
-  ai->waiting = true;
-  PLOGI << "Waiting for: " << time << " seconds.";
-}
-
-void Erwin::wait(float min, float max) {
-  uniform_real_distribution<float> range(min, max);
-
-  ai->wait_time = range(Game::RNG);
-  ai->wait_clock = 0.0;
-  ai->waiting = true;
-  PLOGI << "Waiting for: " << time << " seconds.";
-}
-
-void Erwin::waitTimer() {
-  ai->wait_clock += Game::deltaTime() / ai->wait_time;
-
-  if (ai->wait_clock >= 1.0) {
-    PLOGI << "Erwin is done waiting.";
-    ai->wait_clock = 0.0;
-    ai->waiting = false;
-  }
 }
 
 void Erwin::movement(float multiplier) {

@@ -1,8 +1,36 @@
+#include <random>
 #include <raylib.h>
 #include "game.h"
 #include "data/rect_ex.h"
 #include "base/ai_parameters.h"
+#include <plog/Log.h>
 
+using std::uniform_real_distribution;
+
+
+void AIParameters::wait(float seconds) {
+  wait_time = seconds;
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Waiting for: " << seconds << " seconds.";
+}
+
+void AIParameters::wait(float min_seconds, float max_seconds) {
+  uniform_real_distribution<float> range(min_seconds, max_seconds);
+  wait_time = range(Game::RNG);
+  wait_clock = 0.0;
+  waiting = true;
+  PLOGI << "Waiting for: " << wait_time << " seconds.";
+}
+
+void AIParameters::waitTimer() {
+  wait_clock += Game::deltaTime() / wait_time;
+
+  if (wait_clock >= 1.0) {
+    wait_clock = 0.0;
+    waiting = false;
+  }
+}
 
 void AIParameters::drawDebug(int ai_goal, Vector2 position, 
                              RectEx &bounding_box) 
