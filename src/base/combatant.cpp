@@ -83,6 +83,19 @@ float Combatant::distanceTo(Entity *entity) {
   return distance;
 }
 
+Direction Combatant::directionTo(Entity *entity) {
+  assert(entity != NULL);
+  assert(entity != this);
+
+  float difference = position.x - entity->position.x;
+  if (difference > 0) {
+    return Direction::LEFT;
+  }
+  else {
+    return Direction::RIGHT;
+  }
+}
+
 void Combatant::accelerate() {
   if (acceleration == 1.0) {
     return;

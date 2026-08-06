@@ -644,7 +644,7 @@ void Erwin::neutralLogic() {
       break;
     }
     case ErwinGoals::LOOK_AT_PLR: {
-      lookAtPlayer();
+      direction = directionTo(player);
       ai_goal = ErwinGoals::IDLE;
       break;
     }
@@ -679,25 +679,8 @@ void Erwin::neutralLogic() {
   animationLogic();
 }
 
-void Erwin::lookAtPlayer() {
-  float difference = position.x - player->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-  }
-  else {
-    direction = RIGHT; 
-  }
-}
-
 void Erwin::followPlayer() {
-  float difference = position.x - player->position.x;
-  if (difference > 0) {
-    moving_x = LEFT;
-  }
-  else {
-    moving_x = RIGHT;
-  }
-
+  moving_x = directionTo(player);
   movement(speed_multiplier);
 
   float distance = distanceTo(player);
@@ -709,15 +692,8 @@ void Erwin::followPlayer() {
 
 void Erwin::targetingLogic() {
   assert(target != NULL);
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-    moving_x = LEFT;
-  }
-  else {
-    direction = RIGHT;
-    moving_x = RIGHT; 
-  }
+  direction = directionTo(target);
+  moving_x = direction;
 
   if (ai->waiting) {
     decelerate();
@@ -819,16 +795,8 @@ void Erwin::dodgingLogic() {
     decelerate();
   }
 
-  int x_direction;
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-    x_direction = RIGHT;
-  }
-  else {
-    direction = RIGHT;
-    x_direction = LEFT;
-  }
+  direction = directionTo(target);
+  int x_direction = direction * -1;
 
   if (ai->dodge_clock < 1.0) {
     return;
@@ -867,15 +835,8 @@ void Erwin::thirdPartyLogic() {
     return;
   }
 
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-    moving_x = LEFT;
-  }
-  else {
-    direction = RIGHT;
-    moving_x = RIGHT; 
-  }
+  direction = directionTo(target);
+  moving_x = direction;
 
   float distance = distanceTo(target);
   if (distance > 96) {

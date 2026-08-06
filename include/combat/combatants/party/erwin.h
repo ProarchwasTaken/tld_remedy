@@ -111,7 +111,6 @@ public:
   void update() override;
   void neutralLogic();
 
-  void lookAtPlayer();
   void followPlayer();
   void targetingLogic();
   void retreatingLogic();

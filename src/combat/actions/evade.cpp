@@ -110,16 +110,8 @@ void Evade::intercept(DamageData &data) {
                                            CombatantEVT::EVADED_ATTACK,
                                            data.assailant);
 
-  if (data.assailant == NULL) {
-    return;
-  }
-
-  float difference = user->position.x - data.assailant->position.x;
-  if (difference > 0) {
-    user->direction = LEFT;
-  }
-  else {
-    user->direction = RIGHT;
+  if (data.assailant != NULL) {
+    user->direction = user->directionTo(data.assailant);
   }
 
   PLOGI << "Interception complete.";

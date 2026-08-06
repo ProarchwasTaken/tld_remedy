@@ -54,6 +54,7 @@ public:
   Color spriteTint() {return tint;}
 
   float distanceTo(Entity *entity);
+  Direction directionTo(Entity *entity);
 
   virtual void behavior() {};
   virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event);

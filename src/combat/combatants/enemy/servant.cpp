@@ -390,15 +390,7 @@ void Servant::attackHP() {
 void Servant::ghoststep() {
   assert(target != NULL);
 
-  int direction_x;
-
-  float difference = position.x - target->position.x;
-  if (difference < 0) {
-    direction_x = LEFT;
-  }
-  else {
-    direction_x = RIGHT;
-  }
+  int direction_x = directionTo(target) * -1;
 
   unique_ptr<CombatAction> action;
   action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
@@ -473,15 +465,8 @@ void Servant::neutralLogic() {
 void Servant::targetingLogic() {
   assert(target != NULL);
 
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-    moving_x = LEFT;
-  }
-  else {
-    direction = RIGHT;
-    moving_x = RIGHT; 
-  }
+  direction = directionTo(target);
+  moving_x = direction;
 
   if (ai->waiting) {
     decelerate();
@@ -523,14 +508,7 @@ void Servant::retreatingLogic() {
     return;
   }
 
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    moving_x = RIGHT;
-  }
-  else {
-    moving_x = LEFT; 
-  }
-
+  moving_x = directionTo(target) * -1;
   movement();
 
   ai->retreat_clock += Game::deltaTime() / ai->retreat_time;
@@ -577,13 +555,7 @@ void Servant::dodgingLogic() {
     decelerate();
   }
 
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    direction = LEFT;
-  }
-  else {
-    direction = RIGHT;
-  }
+  direction = directionTo(target);
 
   if (ai->dodge_clock < 1.0) {
     return;
