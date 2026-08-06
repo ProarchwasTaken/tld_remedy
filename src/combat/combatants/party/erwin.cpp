@@ -8,17 +8,17 @@
 #include <set>
 #include <raylib.h>
 #include <raymath.h>
-#include "base/combatant.h"
 #include "enums.h"
 #include "game.h"
+#include "base/combatant.h"
 #include "base/party_member.h"
-#include "base/enemy.h"
 #include "base/combat_action.h"
+#include "base/ai_parameters.h"
+#include "base/enemy.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
 #include "data/rect_ex.h"
 #include "data/damage.h"
-#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
@@ -997,6 +997,8 @@ void Erwin::draw() {
 
 void Erwin::drawDebug() {
   Combatant::drawDebug();
+  ai->drawDist(position, preferred_plr_distance, SKYBLUE);
+  ai->drawDebug(static_cast<int>(ai_goal), position, bounding_box);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();

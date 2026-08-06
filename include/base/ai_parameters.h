@@ -1,4 +1,6 @@
 #pragma once
+#include <raylib.h>
+#include "data/rect_ex.h"
 
 
 struct Contesting {
@@ -69,5 +71,9 @@ struct AIParameters {
   Retreating retreating;
   Dodging dodging;
   Damaged damaged;
+
+  void drawDebug(int ai_goal, Vector2 position, RectEx &bounding_box);
+  void drawDist(Vector2 position, float distance, Color color);
+  void drawTimers(int ai_goal, Vector2 position);
 };
 

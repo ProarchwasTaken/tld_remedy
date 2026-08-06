@@ -15,7 +15,7 @@
 #include "base/party_member.h"
 #include "base/combat_action.h"
 #include "data/rect_ex.h"
-#include "data/ai_parameters.h"
+#include "base/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "data/damage.h"
 #include "utils/animation.h"
@@ -699,13 +699,7 @@ void Servant::draw() {
 
 void Servant::drawDebug() {
   Combatant::drawDebug();
-
-  Font *font = &Game::sm_font;
-  int size = font->baseSize;
-  const char *txt_goal = TextFormat("%i", static_cast<int>(ai_goal));
-
-  Vector2 txt_pos = Vector2Add(position, {0, 8});
-  DrawTextEx(*font, txt_goal, txt_pos, size, -3, RED);
+  ai->drawDebug(static_cast<int>(ai_goal), position, bounding_box);
 
   if (state == CombatantState::ACTION) {
     action->drawDebug();

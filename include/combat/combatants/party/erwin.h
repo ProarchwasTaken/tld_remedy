@@ -3,10 +3,10 @@
 #include <raylib.h>
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/ai_parameters.h"
 #include "data/session.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
-#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
