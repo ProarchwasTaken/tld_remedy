@@ -74,6 +74,12 @@ void RestMenuScene::setupCharacters() {
     case CompanionID::ERWIN: {
       com_sprite = &atlas.sprites[2];
       com_position = {4, -21};
+      break;
+    }
+    case CompanionID::XANDER: {
+      com_sprite = &atlas.sprites[3];
+      com_position = {-35, -55};
+      break;
     }
   }
 }
@@ -340,11 +346,12 @@ void RestMenuScene::drawBackground() {
   { 
     DrawTextureV(background, {-250, -150}, bg_color);
     black_bars.draw();
-    DrawTextureRec(atlas.sheet, *plr_sprite, plr_position, char_color);
 
     if (com_sprite != NULL) {
       DrawTextureRec(atlas.sheet, *com_sprite, com_position, char_color);
     }
+
+    DrawTextureRec(atlas.sheet, *plr_sprite, plr_position, char_color);
   }
   EndMode2D();
 }
