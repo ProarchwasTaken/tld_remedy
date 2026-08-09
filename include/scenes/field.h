@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <string>
+#include <thread>
 #include <vector>
 #include <memory>
 #include "enums.h"
@@ -72,15 +73,14 @@ public:
    * as to only be called once.*/
   void onSceneReturn(SceneID from);
   void deathsaveProcedure();
-  void updatePartySpeed();
+  float getPartySpeed();
+  void updatePartySpeed(float multiplier);
   void updateInjury(Character &party_member);
 
-  /* The root function for loading the game's maps, and initializing the 
-   * entities for the map as well. Works hand in hand with FieldMap to
-   * make it all possible.*/
-  void mapLoadProcedure(std::string map_name, 
+  void loadMapProcedure(std::string map_name, 
                         std::string *spawn_name = NULL, 
                         bool map_history = true);
+  void loadWrapup();
   void clearMapHistory();
 
   void setupEntities();
@@ -136,8 +136,9 @@ private:
   PlayerActor *player_actor = NULL;
   CompanionActor *companion_actor = NULL;
 
+  std::thread map_loading;
   LoadMapEvent next_map;
-  bool map_ready = false;
+  bool init_load = false;
 
   std::vector<std::unique_ptr<Entity>> entities;
 };

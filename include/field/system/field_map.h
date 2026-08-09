@@ -23,9 +23,10 @@
 class FieldMap {
 public:
   ~FieldMap();
-  void loadMap(Session &session, std::string map_name, 
+  void loadMap(Session *session, std::string map_name, 
                std::string *spawn_name = NULL);
-  void parseMapData(Session &session, std::string &map_name, 
+  void loadMapGraphics();
+  void parseMapData(Session *session, std::string &map_name, 
                     std::string json_path, std::string *spawn_name);
   void setupCollision(nlohmann::json &layer_objects);
 
@@ -34,9 +35,9 @@ public:
                        std::string spawn_name);
 
   void findMapTransitions(nlohmann::json &layer_objects);
-  void findPickups(Session &session, std::string &map_name, 
+  void findPickups(Session *session, std::string &map_name, 
                    nlohmann::json &layer_objects);
-  void findEnemies(Session &session, std::string &map_name, 
+  void findEnemies(Session *session, std::string &map_name, 
                    nlohmann::json &layer_objects);
   std::vector<Direction> parseEnemyRoutine(std::string &raw_routine);
 
@@ -57,6 +58,9 @@ public:
   std::vector<std::unique_ptr<EntityData>> entity_queue;
 private:
   Texture base;
+  std::string base_path;
+
   Texture overlay;
+  std::string overlay_path;
   bool overlay_available = false;
 };

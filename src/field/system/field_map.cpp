@@ -34,41 +34,46 @@ FieldMap::~FieldMap() {
   entity_queue.clear();
 }
 
-void FieldMap::loadMap(Session &session, string map_name, 
+void FieldMap::loadMap(Session *session, string map_name, 
                        string *spawn_name) 
 {
-  PLOGI << "Loading map: '" << map_name << "'";
+  float start_time = GetTime();
+  PLOGI << "Loading external map: '" << map_name << "'";
 
-  string base_path = "graphics/maps/" + map_name + ".png";
   string json_path = "data/maps/" + map_name + ".tmj";
-  PLOGD << "Base Texture Path: '" << base_path << "'";
   PLOGD << "Map Data Path: '" << json_path << "'";
 
-  if (!FileExists(base_path.c_str())) {
-    PLOGE << "'" << map_name + ".png" << "' not found!";
-    throw;
-  }
-  else if (!FileExists(json_path.c_str())) {
+  if (!FileExists(json_path.c_str())) {
     PLOGE << "'" << map_name + ".tmj" << "' not found!";
     throw;
   }
 
+  base_path = "graphics/maps/" + map_name + ".png";
+  overlay_path = "graphics/maps/" + map_name + "o.png";
+  overlay_available = FileExists(overlay_path.c_str());
+
+  parseMapData(session, map_name, json_path, spawn_name);
+  float elapsed_time = GetTime() - start_time;
+
+  PLOGI << "Map Data for: '" << map_name << "' has been retrieved."; 
+  PLOGD << "Retrieval Time: " << elapsed_time << "s";
+}
+
+void FieldMap::loadMapGraphics() {
   UnloadTexture(base);
+  PLOGD << "Base Texture Path: '" << base_path << "'";
+  assert(FileExists(base_path.c_str()));
   base = LoadTexture(base_path.c_str());
 
   UnloadTexture(overlay);
-  string overlay_path = "graphics/maps/" + map_name + "o.png";
-  overlay_available = FileExists(overlay_path.c_str());
   if (overlay_available) {
     PLOGD << "Found overlay file.";
+    assert(FileExists(overlay_path.c_str()));
     overlay = LoadTexture(overlay_path.c_str());
   }
-
-  parseMapData(session, map_name, json_path, spawn_name);
-  PLOGI << "Map: '" << map_name << "' has been loaded successfully."; 
 }
 
-void FieldMap::parseMapData(Session &session, string &map_name, 
+void FieldMap::parseMapData(Session *session, string &map_name, 
                             string json_path, string *spawn_name) 
 {
   ifstream file(json_path);
@@ -106,7 +111,7 @@ void FieldMap::parseMapData(Session &session, string &map_name,
         string location = property["value"];
 
         PLOGI << "Detected location: " << location;
-        std::strcpy(session.location, location.c_str());
+        std::strcpy(session->location, location.c_str());
       }
     }
   }
@@ -310,15 +315,15 @@ void FieldMap::findMapTransitions(json &layer_objects) {
   }
 }
 
-void FieldMap::findPickups(Session &session, string &map_name, 
+void FieldMap::findPickups(Session *session, string &map_name, 
                            json &layer_objects) {
   PLOGI << "Searching for Pickup data...";
   for (basic_json object : layer_objects) {
     int object_id = object["id"];
     PLOGD << "Object ID: " << object_id;
 
-    int active = activeObject(map_name, object_id, session.common,
-                              session.common_count);
+    int active = activeObject(map_name, object_id, session->common,
+                              session->common_count);
     if (active == 0) {
       PLOGD << "Object [ID: " << object_id << "] is marked as inactive.";
       continue;
@@ -367,13 +372,13 @@ void FieldMap::findPickups(Session &session, string &map_name,
     entity_queue.push_back(make_unique<PickupData>(data));
 
     if (active == 2) {
-      setupCommonData(map_name, object_id, session.common, 
-                      &session.common_count, session.common_limit);
+      setupCommonData(map_name, object_id, session->common, 
+                      &session->common_count, session->common_limit);
     }
   }
 }
 
-void FieldMap::findEnemies(Session &session, string &map_name,
+void FieldMap::findEnemies(Session *session, string &map_name,
                            json &layer_objects) {
   PLOGI << "Searching for enemy data";
 
@@ -381,8 +386,8 @@ void FieldMap::findEnemies(Session &session, string &map_name,
     int object_id = object["id"];
     PLOGD << "Object ID: " << object_id;
 
-    int active = activeObject(map_name, object_id, session.enemy, 
-                              session.enemy_count);
+    int active = activeObject(map_name, object_id, session->enemy, 
+                              session->enemy_count);
     if (active == 0) {
       PLOGD << "Enemy Object [ID: " << object_id << "] is marked as " <<
         "dead.";
@@ -420,8 +425,8 @@ void FieldMap::findEnemies(Session &session, string &map_name,
     entity_queue.push_back(make_unique<EnemyActorData>(data));
 
     if (active == 2) {
-      setupCommonData(map_name, object_id, session.enemy, 
-                      &session.enemy_count, session.enemy_limit);
+      setupCommonData(map_name, object_id, session->enemy, 
+                      &session->enemy_count, session->enemy_limit);
     }
   }
 }

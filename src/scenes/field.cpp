@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <thread>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
@@ -209,7 +210,7 @@ void FieldScene::setup(string starting_map) {
   scene_id = SceneID::FIELD;
 
   field = make_unique<FieldMap>();
-  mapLoadProcedure(starting_map, NULL, false);
+  loadMapProcedure(starting_map, NULL, false);
   PlayerActor::setControllable(true);
 
   #ifndef NDEBUG
@@ -228,7 +229,9 @@ void FieldScene::setup(string starting_map) {
 void FieldScene::onSceneReturn(SceneID from) {
   assert(from != scene_id);
   PLOGD << "Running functions for when the game returns to this scene.";
-  updatePartySpeed();
+  float multiplier = getPartySpeed();
+  updatePartySpeed(multiplier);
+
   updateInjury(session->player);
   updateInjury(session->companion);
 
@@ -261,16 +264,14 @@ void FieldScene::deathsaveProcedure() {
   }
 
   PLOGI << "Map Selected: '" << next_map << "'";
-  mapLoadProcedure(next_map, NULL, false);
+  loadMapProcedure(next_map, NULL, false);
   clearMapHistory();
 
   Flag::set(session.get(), FlagID::DEATH_SAVE, false);
   initSequence(SequenceID::INCAP);
 }
 
-void FieldScene::updatePartySpeed() {
-  assert(player_actor != NULL);
-  assert(companion_actor != NULL);
+float FieldScene::getPartySpeed() {
   float speed_penalty = 0;
 
   for (int x = 0; x < STATUS_LIMIT; x++) {
@@ -288,13 +289,19 @@ void FieldScene::updatePartySpeed() {
 
   PLOGD << "Speed Penalty: -%" << speed_penalty * 100;
   float party_speed = 1.0 - speed_penalty;
-  PLOGI << "Party Speed: " << party_speed;
+  return party_speed;
+}
+
+void FieldScene::updatePartySpeed(float multiplier) {
+  assert(player_actor != NULL);
+  assert(companion_actor != NULL);
+  PLOGI << "Party Speed: " << multiplier;
 
   float default_speed = player_actor->default_speed;
-  player_actor->movement_speed = default_speed * party_speed;
+  player_actor->movement_speed = default_speed * multiplier;
 
   default_speed = companion_actor->default_speed;
-  companion_actor->movement_speed = default_speed * party_speed;
+  companion_actor->movement_speed = default_speed * multiplier;
 }
 
 void FieldScene::updateInjury(Character &party_member) {
@@ -342,11 +349,30 @@ void FieldScene::updateInjury(Character &party_member) {
   party_member.injury = injury;
 }
 
-void FieldScene::mapLoadProcedure(string map_name, string *spawn_name,
+void FieldScene::loadMapProcedure(string map_name, string *spawn_name,
                                   bool map_history) 
 {
-  PLOGI << "Running map load procedure";
-  float start_time = GetTime();
+  PLOGI << "Beginning map load procedure";
+
+  PLOGI << "Retrieving external map data on a separate thread.";
+  map_loading = std::thread(&FieldMap::loadMap, field.get(), 
+                            session.get(), map_name, spawn_name);
+
+  if (map_history) {
+    PLOGI << "Updating map history.";
+    std::strcpy(session->prev_map1, session->prev_map1);
+    std::strcpy(session->prev_map1, session->map_name);
+  }
+
+  std::strcpy(session->map_name, map_name.c_str());
+
+  updateInjury(session->player);
+  updateInjury(session->companion);
+  session->party_speed = getPartySpeed();
+}
+
+void FieldScene::loadWrapup() {
+  field->loadMapGraphics();
   ActorHandler::clearEvents();
 
   if (!entities.empty()) {
@@ -355,26 +381,12 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name,
     companion_actor = NULL;
   }
 
-  field->loadMap(*session, map_name, spawn_name);
   setupEntities();
-  updatePartySpeed();
-
-  updateInjury(session->player);
-  updateInjury(session->companion);
+  updatePartySpeed(session->party_speed);
   camera.target = player_actor->position;
 
-  if (map_history) {
-    PLOGI << "Updating map history.";
-    std::strcpy(session->prev_map2, session->prev_map1);
-    std::strcpy(session->prev_map1, session->map_name);
-  }
-
-  std::strcpy(session->map_name, map_name.c_str());
-  map_ready = true;
-
-  PLOGI << "Procedure complete.";
-  float elapsed_time = GetTime() - start_time;
-  PLOGI << "Load Time: " << elapsed_time;
+  PLOGI << "Showtime! The map is now loaded, and ready to go!";
+  Game::fadein(0.25);
 }
 
 void FieldScene::clearMapHistory() {
@@ -457,10 +469,9 @@ void FieldScene::setupActor(ActorData *data) {
 }
 
 void FieldScene::update() { 
-  if (!map_ready) {
-    mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
-    Game::fadein(0.25);
-    return;
+  if (map_loading.joinable()) {
+    map_loading.join();
+    loadWrapup();
   }
 
   #ifndef NDEBUG
@@ -570,6 +581,12 @@ void FieldScene::eventProcessing() {
   }
 
   actor_handler.transferEvents();
+
+  if (init_load) {
+    loadMapProcedure(next_map.map_name, &next_map.spawn_point);
+    Game::fadeout(0.25);
+    init_load = false;
+  }
 }
 
 void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
@@ -584,8 +601,7 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
-      Game::fadeout(0.25);
-      map_ready = false;
+      init_load = true;
       break;
     }
     case FieldEVT::SAVE_SESSION: {
