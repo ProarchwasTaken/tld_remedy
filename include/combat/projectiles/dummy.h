@@ -14,4 +14,7 @@ public:
   void draw() override;
 
   static SpriteAtlas atlas;
+private:
+  float wait_time = 3.0;
+  float wait_clock = 0.0;
 };

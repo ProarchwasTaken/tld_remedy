@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <raylib.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/projectile.h"
 #include "system/sprite_atlas.h"
@@ -22,11 +23,11 @@ DummyProjectile::DummyProjectile(Combatant *owner, Vector2 position) :
   rectExCorrection(bounding_box, hitbox);
 
   terminal_velocity = 40;
-  gravity = 0.10;
-  drag = 5;
+  gravity = 0.20;
+  drag = 20;
   launch(120, -20);
 
-  predictTrajectory(2);
+  calc_thread = std::thread(&Projectile::predictTrajectory, this, 0.50);
 
   atlas.use();
   sprite = &atlas.sprites[0];
@@ -37,6 +38,17 @@ DummyProjectile::~DummyProjectile() {
 }
 
 void DummyProjectile::update() {
+  if (calc_thread.joinable()) {
+    calc_thread.join();
+  }
+
+  if (wait_clock < 1.0) {
+    wait_clock += Game::deltaTime() / wait_time;
+    return;
+  }
+
+  runPhysics();
+  lifeTimer();
 }
 
 void DummyProjectile::draw() {

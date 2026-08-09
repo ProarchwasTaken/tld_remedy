@@ -2,6 +2,7 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <thread>
 #include <raylib.h>
 #include "enums.h"
 #include "base/entity.h"
@@ -20,8 +21,13 @@ public:
   float degrees(float radians);
 
   void launch(float velocity, float angle);
-  void predictTrajectory(float accuracy);
+  void predictTrajectory(float interval);
   bool inBounds(Vector2 position);
+
+  void runPhysics();
+
+  void lifeTimer();
+  virtual void onEndLife();
 
   void drawDebug() override;
 
@@ -43,6 +49,10 @@ protected:
 
   RectEx hitbox;
   std::vector<Vector2> trajectory;
+  std::thread calc_thread;
+
+  float life_time = 0.5;
+  float life_clock = -1;
 
   static constexpr float GROUND_LEVEL = 152;
 };

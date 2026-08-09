@@ -5,9 +5,11 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/projectile.h"
 #include "data/combat_event.h"
+#include "combat/system/evt_handler.h"
 #include <plog/Log.h>
 
 using std::string;
@@ -47,46 +49,55 @@ void Projectile::launch(float velocity, float angle) {
   direction = Vector2Rotate({1.0, 0.0}, radians(angle));
 }
 
-void Projectile::predictTrajectory(float accuracy) {
-  assert(accuracy > 0);
+void Projectile::predictTrajectory(float interval) {
+  assert(interval > 0);
   assert(velocity > 0);
   assert(terminal_velocity <= velocity);
+  PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
+    << "calculating Trajectory...";
 
-  float mock_velocity = velocity / accuracy;
-  float mock_terminal = terminal_velocity / accuracy;
-  float mock_gravity = gravity / accuracy;
-  float mock_drag = gravity / accuracy;
+  float mock_velocity = velocity;
+  float mock_terminal = terminal_velocity;
 
   Vector2 mock_position = position;
   Vector2 mock_direction = direction;
-  float seconds = 0;
+
+  int count = 0;
+  int frames = Game::TARGET_FPS * interval;
+  float unit_time = 1 / Game::TARGET_FPS;
+  float seconds = 0.0;
   
   do {
     if (gravity != 0) {
-      float result = mock_direction.y + mock_gravity;
-      mock_direction.y = Clamp(result, -1, 1);
+      float magnitude = gravity * unit_time;
+      mock_direction.y = Clamp(mock_direction.y + magnitude, -1, 1);
     }
 
     if (mock_velocity > mock_terminal) {
-      mock_velocity -= mock_drag;
-    }
-
-    if (mock_velocity < mock_terminal) {
-      mock_velocity = mock_terminal;
+      mock_velocity -= drag * unit_time;
     }
 
     Vector2 magnitude;
-    magnitude.x = mock_velocity * mock_direction.x;
-    magnitude.y = mock_velocity * mock_direction.y;
+    magnitude.x = mock_velocity * mock_direction.x * unit_time;
+    magnitude.y = mock_velocity * mock_direction.y * unit_time;
 
     mock_position = Vector2Add(mock_position, magnitude);
-    trajectory.push_back(mock_position);
 
-    seconds += 1 / accuracy;
-  } while (seconds < 120 && inBounds(mock_position));
+    if (count == frames) {
+      trajectory.push_back(mock_position);
+      count = 0;
+    }
+    else {
+      count++;
+    }
+
+    seconds += unit_time;
+  } while (seconds < 60 && inBounds(mock_position));
 
   PLOGD << "Trajectory Points: " << trajectory.size();
   PLOGD << "Estimated Lifetime: " << seconds << "s";
+  life_time = seconds;
+  life_clock = 0.0;
 }
 
 bool Projectile::inBounds(Vector2 position) {
@@ -111,6 +122,48 @@ bool Projectile::inBounds(Vector2 position) {
   return true;
 }
 
+void Projectile::runPhysics() {
+  if (gravity != 0) {
+    float magnitude = gravity * Game::deltaTime();
+    direction.y = Clamp(direction.y + magnitude, -1, 1);
+  }
+
+  if (velocity > terminal_velocity) {
+    float magnitude = drag * Game::deltaTime();
+    velocity = velocity - magnitude;
+  }
+
+  Vector2 magnitude;
+  magnitude.x = velocity * direction.x * Game::deltaTime();
+  magnitude.y = velocity * direction.y * Game::deltaTime();
+
+  position = Vector2Add(position, magnitude);
+  rectExCorrection(bounding_box, hitbox);
+
+  float radians = std::atan2f(direction.y, direction.x);
+  angle = degrees(radians);
+}
+
+void Projectile::lifeTimer() {
+  assert(life_clock >= 0);
+  life_clock += Game::deltaTime() / life_time;
+  
+  if (life_clock >= 1.0) {
+    PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
+      << "has reached the end of it's Life";
+
+    onEndLife();
+    life_clock = 1.0;
+  }
+}
+
+void Projectile::onEndLife() {
+  CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY, 
+                                       entity_id);
+  PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
+    << "has now been queued for deletion.";
+}
+
 void Projectile::drawDebug() {
   Entity::drawDebug();
   DrawRectangleLinesEx(hitbox.rect, 1, RED);
@@ -119,11 +172,11 @@ void Projectile::drawDebug() {
   Vector2 end_pos = Vector2Add({position}, offset);
   DrawLineV(position, end_pos, YELLOW);
 
-  if (trajectory.empty()) {
+  if (calc_thread.joinable() || trajectory.empty()) {
     return;
   }
 
   for (Vector2 point : trajectory) {
-    DrawCircleV(point, 2, ORANGE);
+    DrawCircleV(point, 1, ORANGE);
   }
 }
