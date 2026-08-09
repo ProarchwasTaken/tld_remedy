@@ -35,3 +35,8 @@ void Projectile::launch(float velocity, float angle) {
   this->velocity = velocity;
   direction = Vector2Rotate({1.0, 0.0}, angle);
 }
+
+void Projectile::drawDebug() {
+  Entity::drawDebug();
+  DrawRectangleLinesEx(hitbox.rect, 1, RED);
+}

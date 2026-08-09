@@ -14,8 +14,8 @@
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
-#include "base/status_effect.h"
 #include "base/enemy.h"
+#include "base/status_effect.h"
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "data/combatant_event.h"
@@ -41,6 +41,7 @@
 #include "combat/combatants/party/erwin.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "combat/combatants/enemy/servant.h"
+#include "combat/projectiles/dummy.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -505,6 +506,16 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       deleteEntity(entity_id);
       break;
     }
+    case CombatEVT::CREATE_PROJECTILE: {
+      PLOGD << "Event detected: CreateProjectileCB";
+      auto *event_data = static_cast<CreateProjectileCB*>(event.get());
+      ProjectileID id = event_data->projectile_id;
+      Vector2 position = event_data->position;
+      Combatant *owner = event_data->owner;
+
+      createProjectile(id, position, owner);
+      break;
+    }
     case CombatEVT::CREATE_DMG_NUM: {
       PLOGD << "Event detected: CreateDmgNumCB";
       auto *event_data = static_cast<CreateDmgNumCB*>(event.get());
@@ -579,33 +590,6 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
   }
 }
 
-void CombatScene::dmgNumberHandling(Combatant *target, 
-                                    DamageType damage_type,
-                                    float damage_taken) 
-{
-  for (auto &entity : entities) {
-    if (entity->entity_type != EntityType::DMG_NUMBER) {
-      continue;
-    }
-
-    DamageNumber *dmg_num = static_cast<DamageNumber*>(entity.get());
-    
-    if (target != dmg_num->target) {
-      continue;
-    }
-
-    if (damage_type == dmg_num->type) {
-      dmg_num->incrementValue(damage_taken);
-      return;
-    }
-  }
-
-  PLOGD << "Proceeding to create new Damage Number.";
-  auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
-                                           damage_taken);
-  entities.push_back(std::move(dmg_num));
-}
-
 void CombatScene::deleteEntity(int entity_id) {
   vector<unique_ptr<Entity>> temporary;
 
@@ -651,6 +635,51 @@ void CombatScene::deleteEntity(int entity_id) {
 
   entities.clear();
   temporary.swap(entities);
+}
+
+void CombatScene::createProjectile(ProjectileID id, Vector2 position,
+                                   Combatant *owner)
+{
+  PLOGI << "Attempting to create new projectile...";
+  unique_ptr<Entity> projectile;
+
+  switch (id) {
+    case ProjectileID::DUMMY: {
+      projectile = make_unique<DummyProjectile>(owner, position);
+      break;
+    }
+  }
+
+  if (projectile != nullptr) {
+    entities.push_back(std::move(projectile));
+  }
+}
+
+void CombatScene::dmgNumberHandling(Combatant *target, 
+                                    DamageType damage_type,
+                                    float damage_taken) 
+{
+  for (auto &entity : entities) {
+    if (entity->entity_type != EntityType::DMG_NUMBER) {
+      continue;
+    }
+
+    DamageNumber *dmg_num = static_cast<DamageNumber*>(entity.get());
+    
+    if (target != dmg_num->target) {
+      continue;
+    }
+
+    if (damage_type == dmg_num->type) {
+      dmg_num->incrementValue(damage_taken);
+      return;
+    }
+  }
+
+  PLOGD << "Proceeding to create new Damage Number.";
+  auto dmg_num = make_unique<DamageNumber>(target, damage_type, 
+                                           damage_taken);
+  entities.push_back(std::move(dmg_num));
 }
 
 void CombatScene::endCombatProcedure() {
@@ -839,22 +868,9 @@ void CombatScene::debugKeybinds() {
     companion->setEnabled(!enabled);
   }
   else if (player != NULL && IsKeyPressed(KEY_F5)) {
-    float threshold = 0.5;
-    float magnitude = player->max_life * threshold;
-    player->increaseTenacity(magnitude, threshold);
-  }
-  else if (companion != NULL && IsKeyPressed(KEY_F6)) {
-    float threshold = 0.5;
-    float magnitude = companion->max_life * threshold;
-    companion->increaseTenacity(magnitude, threshold);
-  }
-  else if (player != NULL && IsKeyPressed(KEY_F7)) {
-    float magnitude = player->max_life * 0.20;
-    player->increaseEntropy(magnitude);
-  }
-  else if (companion != NULL && IsKeyPressed(KEY_F8)) {
-    float magnitude = companion->max_life * 0.20;
-    companion->increaseEntropy(magnitude);
+    Vector2 position = player->position;
+    position.y -= 48;
+    createProjectile(ProjectileID::DUMMY, position, player);
   }
   else if (companion != NULL && IsKeyPressed(KEY_F9)) {
     companion->death();

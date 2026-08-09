@@ -17,7 +17,11 @@ public:
 
   void launch(float velocity, float angle);
 
+  void drawDebug() override;
+
   std::string name;
+  ProjectileID id;
+
   Combatant *owner;
   CombatantTeam alignment;
 protected:

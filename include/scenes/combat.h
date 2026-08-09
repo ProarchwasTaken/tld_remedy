@@ -5,6 +5,7 @@
 #include "enums.h"
 #include "base/scene.h"
 #include "base/entity.h"
+#include "base/combatant.h"
 #include "base/party_member.h"
 #include "base/enemy.h"
 #include "data/keybinds.h"
@@ -69,9 +70,12 @@ public:
   void updateHud();
 
   void eventHandling(std::unique_ptr<CombatEvent> &event);
+  void deleteEntity(int entity_id);
+  void createProjectile(ProjectileID id, Vector2 position, 
+                        Combatant *owner);
   void dmgNumberHandling(Combatant *target, DamageType damage_type,
                          float damage_taken);
-  void deleteEntity(int entity_id);
+
   void endCombatProcedure();
   void updatePartyAttr(PartyMember *member, Character *data);
 

@@ -138,7 +138,7 @@ enum class EnemyID {
 };
 
 enum class ProjectileID {
-  BASE_BALL
+  DUMMY = -1,
 };
 
 enum class ActionID {
@@ -229,10 +229,11 @@ enum class SequenceID {
 };
 
 enum class CombatEVT {
+  DELETE_ENTITY,
+  CREATE_PROJECTILE,
   CREATE_DMG_NUM,
   CREATE_STAT_TXT,
   CREATE_AFTERIMAGE,
-  DELETE_ENTITY,
   OPEN_ITEM_HUD,
   REMOVE_ITEM,
   START_TOAST,
