@@ -2,11 +2,16 @@
 #include <raylib.h>
 #include "base/combatant.h"
 #include "base/projectile.h"
+#include "system/sprite_atlas.h"
 
 
 class DummyProjectile : public Projectile {
 public:
   DummyProjectile(Combatant *owner, Vector2 position);
+  ~DummyProjectile();
+
   void update() override;
-  void draw() override {};
+  void draw() override;
+
+  static SpriteAtlas atlas;
 };
