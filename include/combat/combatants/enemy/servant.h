@@ -48,7 +48,6 @@ public:
   Servant(Vector2 position, Direction direction);
   ~Servant();
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
 
   void warningHandling(WarningCBT *event);
@@ -61,6 +60,7 @@ public:
   void damageHandling(TookDamageCBT *event);
   void retaliation(Combatant *assailant, float chance);
 
+  void behavior() override;
   void rootBehavior();
   void targetingBehavior();
   void chooseTarget();

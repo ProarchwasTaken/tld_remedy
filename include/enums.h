@@ -51,6 +51,7 @@ enum EntityType {
   MAP_TRANSITION,
   DMG_NUMBER,
   STATUS_TEXT,
+  PROJECTILE,
   COMBATANT,
   AFTERIMAGE
 };
@@ -100,27 +101,6 @@ enum class ItemID {
   J_TPAPER,
 };
 
-enum class CombatantTeam {
-  PARTY,
-  ENEMY
-};
-
-enum class PartyMemberID {
-  MARY,
-  ERWIN,
-  XANDER,
-};
-
-enum class TechCostType {
-  MORALE,
-  LIFE
-};
-
-enum class EnemyID {
-  DUMMY = -1,
-  SERVANT
-};
-
 enum class TroopID {
   INVALID = -1,
   CD_TROOP1,
@@ -134,6 +114,31 @@ enum class TroopID {
   DB_TROOP2 = 96,
   DB_TROOP3 = 97,
   #endif // !NDEBUG
+};
+
+enum class CombatantTeam {
+  PARTY,
+  ENEMY
+};
+
+enum class TechCostType {
+  MORALE,
+  LIFE
+};
+
+enum class PartyMemberID {
+  MARY,
+  ERWIN,
+  XANDER,
+};
+
+enum class EnemyID {
+  DUMMY = -1,
+  SERVANT
+};
+
+enum class ProjectileID {
+  BASE_BALL
 };
 
 enum class ActionID {

@@ -63,15 +63,6 @@ Servant::~Servant() {
   atlas.release();
 }
 
-void Servant::behavior() {
-  if (ai_goal == ServantGoals::IDLE) {
-    rootBehavior();
-  }
-  else if (ai_goal == ServantGoals::TARGETING) {
-    targetingBehavior();
-  }
-}
-
 void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Enemy::evaluateEvent(event);
 
@@ -232,6 +223,15 @@ void Servant::retaliation(Combatant *assailant, float chance) {
   PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
   << "retaliate against: '" << target->name << "' [ID: " << 
     target->entity_id << "]";
+}
+
+void Servant::behavior() {
+  if (ai_goal == ServantGoals::IDLE) {
+    rootBehavior();
+  }
+  else if (ai_goal == ServantGoals::TARGETING) {
+    targetingBehavior();
+  }
 }
 
 void Servant::rootBehavior() {

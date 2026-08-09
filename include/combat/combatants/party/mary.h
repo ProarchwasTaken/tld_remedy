@@ -38,10 +38,10 @@ public:
   void assignSubWeapon(SubWeaponID id);
   void useItem(ItemID item, float use_time, PartyMember *target);
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void damageHandling(TookDamageCBT *event);
 
+  void behavior() override;
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
   void defensiveActionInput(bool gamepad);

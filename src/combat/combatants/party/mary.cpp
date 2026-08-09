@@ -109,20 +109,6 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
   item_target = target;
 }
 
-void Mary::behavior() {
-  if (!enabled) {
-    return;
-  }
-
-  bool gamepad = IsGamepadAvailable(0);
-  movementInput(gamepad);
-  actionInput(gamepad);
-
-  if (state == CombatantState::NEUTRAL || canCancel()) {
-    readActionBuffer();
-  }
-}
-
 void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
 
@@ -157,6 +143,20 @@ void Mary::damageHandling(TookDamageCBT *event) {
     target = potential_target;
     PLOGI << "Now targeting: '" << target->name << "' [ID: " << 
     target->entity_id << "]";
+  }
+}
+
+void Mary::behavior() {
+  if (!enabled) {
+    return;
+  }
+
+  bool gamepad = IsGamepadAvailable(0);
+  movementInput(gamepad);
+  actionInput(gamepad);
+
+  if (state == CombatantState::NEUTRAL || canCancel()) {
+    readActionBuffer();
   }
 }
 

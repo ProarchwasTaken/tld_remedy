@@ -100,21 +100,6 @@ void Erwin::setEnabled(bool value) {
   tick_clock = 0;
 }
 
-void Erwin::behavior() {
-  if (!enabled) {
-    return;
-  }
-
-  assistInput();
-
-  if (ai_goal == ErwinGoals::IDLE) {
-    rootBehavior();
-  }
-  else if (ai_goal == ErwinGoals::TARGETING){
-    targetingBehavior();
-  }
-}
-
 void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
   
@@ -332,6 +317,21 @@ bool Erwin::retaliation(Combatant *assailant, float chance) {
   }
   else {
     return false;
+  }
+}
+
+void Erwin::behavior() {
+  if (!enabled) {
+    return;
+  }
+
+  assistInput();
+
+  if (ai_goal == ErwinGoals::IDLE) {
+    rootBehavior();
+  }
+  else if (ai_goal == ErwinGoals::TARGETING){
+    targetingBehavior();
   }
 }
 

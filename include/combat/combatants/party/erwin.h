@@ -59,7 +59,6 @@ public:
 
   void setEnabled(bool value) override;
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
 
   void warningHandling(WarningCBT *event);
@@ -86,6 +85,7 @@ public:
   void evadeHandling(EvadedAttackCBT *event);
   bool retaliation(Combatant *assailant, float chance);
 
+  void behavior() override;
   void assistInput();
   bool lightAssistCondition();
   bool heavyAssistCondition();
