@@ -86,7 +86,9 @@ void BatSwing::intercept(DamageData &data) {
 
 void BatSwing::flawedClash(DamageData &data) {
   data.damage_type = DamageType::MORALE;
+
   float stun_time = data.stun_time * 0.5;
+  data.stun_type = StunType::STAGGER;
 
   StunType stun_type = StunType::STAGGER;
   float knockback = data.knockback * 2;
@@ -106,7 +108,7 @@ void BatSwing::perfectClash(DamageData &data) {
 
   Combatant *assailant = data.assailant;
   float a_knockback = data.knockback / 2;
-  assailant->enterHitstun(data.stun_time, StunType::NORMAL, WHITE);
+  assailant->enterHitstun(data.stun_time, StunType::STAGGER, BLACK);
   assailant->setKnockback(a_knockback, data.stun_time, user->direction);
 
   end_time = data.stun_time * 2;
