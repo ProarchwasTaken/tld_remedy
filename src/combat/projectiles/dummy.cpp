@@ -47,14 +47,15 @@ void DummyProjectile::update() {
     return;
   }
 
-  runPhysics();
-  lifeTimer();
+  if (!dying) {
+    runPhysics();
+    lifeTimer();
+  }
+  else {
+    deathTimer();
+  }
 }
 
 void DummyProjectile::draw() {
-  assert(sprite != NULL);
-  Rectangle dest = bounding_box.rect;
-  dest.x -= bounding_box.offset.x;
-  dest.y -= bounding_box.offset.y;
-  DrawTexturePro(atlas.sheet, *sprite, dest, {16, 16}, angle, WHITE);
+  drawSprite(&atlas.sheet);
 }

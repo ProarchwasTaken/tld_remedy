@@ -149,19 +149,48 @@ void Projectile::lifeTimer() {
   life_clock += Game::deltaTime() / life_time;
   
   if (life_clock >= 1.0) {
-    PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
-      << "has reached the end of it's Life";
-
     onEndLife();
     life_clock = 1.0;
   }
 }
 
 void Projectile::onEndLife() {
-  CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY, 
-                                       entity_id);
   PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
-    << "has now been queued for deletion.";
+    << "has reached the end of it's Life";
+  dying = true;
+}
+
+void Projectile::deathTimer() {
+  death_clock += Game::deltaTime() / death_time;
+
+  if (death_clock >= 1.0) {
+    CombatHandler::raise<DeleteEntityCB>(CombatEVT::DELETE_ENTITY, 
+                                         entity_id);
+    PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
+      << "has now been queued for deletion.";
+    death_clock = 1.0;
+  }
+
+}
+
+void Projectile::drawSprite(Texture *sheet) {
+  assert(sprite != NULL);
+  Rectangle dest = bounding_box.rect;
+  dest.x -= bounding_box.offset.x;
+  dest.y -= bounding_box.offset.y;
+
+  Color color = tint;
+  if (dying) {
+    applyFlicker(death_clock, color);
+  }
+
+  DrawTexturePro(*sheet, *sprite, dest, {16, 16}, angle, color);
+}
+
+void Projectile::applyFlicker(float x, Color &tint) {
+  float sin_a = std::sinf(x * 100);
+  sin_a = (sin_a / 2) + 0.5;
+  tint.a = 255 * sin_a;
 }
 
 void Projectile::drawDebug() {
