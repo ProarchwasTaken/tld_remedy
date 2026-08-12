@@ -108,8 +108,10 @@ void BatSwing::perfectClash(DamageData &data) {
 
   Combatant *assailant = data.assailant;
   float a_knockback = data.knockback / 2;
-  assailant->enterHitstun(data.stun_time, StunType::STAGGER, BLACK);
+  assailant->enterHitstun(data.stun_time * 2, StunType::STAGGER, BLACK);
   assailant->setKnockback(a_knockback, data.stun_time, user->direction);
+
+  user->target = assailant;
 
   end_time = data.stun_time * 2;
   float m_knockback = data.knockback * 2;
