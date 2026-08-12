@@ -146,7 +146,9 @@ public:
    * update cycle.*/
   virtual void endLogic();
 
+  void drawSprite(Texture *sheet);
   void applyStaggerEffect(Rectangle &final);
+
   virtual void drawDebug() override;
 
   std::string name;

@@ -480,13 +480,7 @@ Rectangle *Mary::getStunSprite() {
 }
 
 void Mary::draw() {
-  assert(sprite != NULL);
-
-  Rectangle final = *sprite;
-  final.width = final.width * direction;
-
-  applyStaggerEffect(final);
-  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
+  drawSprite(&atlas.sheet);
 }
 
 void Mary::drawDebug() {

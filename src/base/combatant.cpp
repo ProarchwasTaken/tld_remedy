@@ -427,6 +427,7 @@ void Combatant::enterHitstun(DamageData &data) {
   }
 
   stun_time = data.stun_time * multiplier;
+  stun_type = data.stun_type;
   stun_clock = 0.0;
 
   data.hit_stop *= multiplier;
@@ -450,6 +451,7 @@ void Combatant::enterHitstun(DamageData &data) {
 
 void Combatant::enterHitstun(float seconds, StunType type, Color tint) {
   stun_time = seconds;
+  stun_type = type;
   stun_clock = 0.0;
 
   state = CombatantState::HIT_STUN;
@@ -667,6 +669,18 @@ void Combatant::endLogic() {
 
   regenerateTenacity();
   statusLogic();
+}
+
+void Combatant::drawSprite(Texture *sheet) {
+  assert(sprite != NULL);
+
+  Rectangle source = *sprite;
+  source.width = source.width * direction;
+
+  Rectangle dest = bounding_box.rect;
+  applyStaggerEffect(dest);
+
+  DrawTexturePro(*sheet, source, dest, {0, 0}, 0, tint);
 }
 
 void Combatant::applyStaggerEffect(Rectangle &final) {
