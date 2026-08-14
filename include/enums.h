@@ -248,6 +248,7 @@ enum class CombatantEVT {
   EFFECT_GAINED,
   EFFECT_LOST,
   WARNING,
+  PROJ_WARNING,
   EVADED_ATTACK
 };
 

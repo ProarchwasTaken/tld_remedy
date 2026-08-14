@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "base/entity.h"
 #include "base/combatant.h"
+#include "base/projectile.h"
 #include "base/combat_action.h"
 
 
@@ -44,6 +45,13 @@ struct WarningCBT : CombatantEvent {
 
   Combatant *assailant = NULL;
   bool punishable = false;
+};
+
+struct ProjWarningCBT : CombatantEvent {
+  Combatant *target;
+  TrajectPoint point;
+  Rectangle intersect;
+  float until_collision = 0.0;
 };
 
 struct EvadedAttackCBT : CombatantEvent {

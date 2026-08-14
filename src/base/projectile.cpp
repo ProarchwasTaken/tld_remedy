@@ -9,7 +9,9 @@
 #include "base/combatant.h"
 #include "base/projectile.h"
 #include "data/combat_event.h"
+#include "data/combatant_event.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/cbt_handler.h"
 #include <plog/Log.h>
 
 using std::string;
@@ -32,6 +34,15 @@ Projectile::Projectile(string name, Combatant *owner, Vector2 position) {
 Projectile::~Projectile() {
   int erased = existing_projectiles.erase(this);
   assert(erased == 1);
+
+  if (!oncoming_collisions.empty()) {
+    oncoming_collisions.clear();
+  }
+
+  if (!trajectory.empty()) {
+    trajectory.clear();
+  }
+
   PLOGI << "Removed projectile: '" << name << "'";
 }
 
@@ -41,63 +52,6 @@ float Projectile::radians(float degrees) {
 
 float Projectile::degrees(float radians) {
   return radians * (180 / M_PI);
-}
-
-void Projectile::launch(float velocity, float angle) {
-  this->velocity = velocity;
-  this->angle = angle;
-  direction = Vector2Rotate({1.0, 0.0}, radians(angle));
-}
-
-void Projectile::predictTrajectory(float interval) {
-  assert(interval > 0);
-  assert(velocity > 0);
-  assert(terminal_velocity <= velocity);
-  PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
-    << "calculating Trajectory...";
-
-  float mock_velocity = velocity;
-  float mock_terminal = terminal_velocity;
-
-  Vector2 mock_position = position;
-  Vector2 mock_direction = direction;
-
-  int count = 0;
-  int frames = Game::TARGET_FPS * interval;
-  float unit_time = 1 / Game::TARGET_FPS;
-  float seconds = 0.0;
-  
-  do {
-    if (gravity != 0) {
-      float magnitude = gravity * unit_time;
-      mock_direction.y = Clamp(mock_direction.y + magnitude, -1, 1);
-    }
-
-    if (mock_velocity > mock_terminal) {
-      mock_velocity -= drag * unit_time;
-    }
-
-    Vector2 magnitude;
-    magnitude.x = mock_velocity * mock_direction.x * unit_time;
-    magnitude.y = mock_velocity * mock_direction.y * unit_time;
-
-    mock_position = Vector2Add(mock_position, magnitude);
-
-    if (count == frames) {
-      trajectory.push_back(mock_position);
-      count = 0;
-    }
-    else {
-      count++;
-    }
-
-    seconds += unit_time;
-  } while (seconds < 60 && inBounds(mock_position));
-
-  PLOGD << "Trajectory Points: " << trajectory.size();
-  PLOGD << "Estimated Lifetime: " << seconds << "s";
-  life_time = seconds;
-  life_clock = 0.0;
 }
 
 bool Projectile::inBounds(Vector2 position) {
@@ -122,6 +76,145 @@ bool Projectile::inBounds(Vector2 position) {
   return true;
 }
 
+void Projectile::launch(float velocity, float angle) {
+  this->velocity = velocity;
+  this->angle = angle;
+  direction = Vector2Rotate({1.0, 0.0}, radians(angle));
+}
+
+void Projectile::predictTrajectory(float interval) 
+{
+  assert(interval > 0);
+  assert(velocity > 0);
+  assert(terminal_velocity <= velocity);
+  PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] " 
+    << "calculating Trajectory...";
+
+  float mock_velocity = velocity;
+  float mock_terminal = terminal_velocity;
+
+  Vector2 mock_position = position;
+  Vector2 mock_direction = direction;
+
+  int count = 0;
+  int frames = Game::TARGET_FPS * interval;
+  float unit_time = 1 / Game::TARGET_FPS;
+  float seconds = 0.0;
+  
+  do {
+    seconds += unit_time;
+
+    if (gravity != 0) {
+      float magnitude = gravity * unit_time;
+      mock_direction.y = Clamp(mock_direction.y + magnitude, -1, 1);
+    }
+
+    if (mock_velocity > mock_terminal) {
+      mock_velocity -= drag * unit_time;
+    }
+
+    Vector2 magnitude;
+    magnitude.x = mock_velocity * mock_direction.x * unit_time;
+    magnitude.y = mock_velocity * mock_direction.y * unit_time;
+
+    mock_position = Vector2Add(mock_position, magnitude);
+
+    if (count == frames) {
+      TrajectPoint point = {
+        mock_position, 
+        mock_direction, 
+        mock_velocity, 
+        seconds
+      };
+
+      trajectory.push_back(point);
+      count = 0;
+    }
+    else {
+      count++;
+    }
+  } while (seconds < max_life_time && inBounds(mock_position));
+
+  PLOGD << "Trajectory Points: " << trajectory.size();
+  PLOGD << "Estimated Lifetime: " << seconds << "s";
+  life_time = seconds;
+  life_clock = 0.0;
+}
+
+void Projectile::detectOncoming() {
+  PLOGI << "Searching for oncoming collisions in trajectory..";
+  if (trajectory.empty()) {
+    return;
+  }
+
+  PLOGD << "Max Collisions: " << max_collisions;
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant->state == DEAD) {
+      continue;
+    }
+
+    if (combatant->team == alignment) {
+      continue;
+    }
+
+    int hit = inTrajectory(combatant);
+    if (hit == -1) {
+      continue;
+    }
+
+    PLOGI << "Detected oncoming collision with Combatant: '" 
+      << combatant->name << "' [ID: " << combatant->entity_id << "]";
+    TrajectPoint *point = &trajectory.at(hit);
+    Rectangle rect = hitbox.rect;
+    rect.x = point->position.x + hitbox.offset.x;
+    rect.y = point->position.y + hitbox.offset.y;
+    
+    Rectangle intersect = GetCollisionRec(combatant->hurtbox.rect, rect);
+    oncoming_collisions.push_back({combatant, point, intersect});
+
+    if (oncoming_collisions.size() == max_collisions) {
+      break;
+    }
+  }
+
+  PLOGD << "Total Collisions: " << oncoming_collisions.size();
+}
+
+int Projectile::inTrajectory(Combatant *combatant) {
+  int hit = -1;
+  Rectangle *hurtbox = &combatant->hurtbox.rect;
+
+  for (int x = 0; x < trajectory.size(); x++) {
+    TrajectPoint *point = &trajectory.at(x);
+
+    if (!inBounds(point->position)) {
+      continue;
+    }
+
+    Rectangle rect = hitbox.rect;
+    rect.x = point->position.x + hitbox.offset.x;
+    rect.y = point->position.y + hitbox.offset.y;
+
+    if (CheckCollisionRecs(rect, *hurtbox)) {
+      hit = x;
+      break;
+    }
+  }
+
+  return hit;
+}
+
+void Projectile::ownerCheck() {
+  if (owner == NULL) {
+    return;
+  }
+
+  if (owner->state == DEAD) {
+    PLOGD << "Detected that the projectile's owner is dead.";
+    owner = NULL;
+  }
+}
+
 void Projectile::runPhysics() {
   if (gravity != 0) {
     float magnitude = gravity * Game::deltaTime();
@@ -142,6 +235,44 @@ void Projectile::runPhysics() {
 
   float radians = std::atan2f(direction.y, direction.x);
   angle = degrees(radians);
+}
+
+void Projectile::warningProcess() {
+  if (oncoming_collisions.empty()) {
+    return;
+  }
+
+  float elapsed_time = life_time * life_clock;
+  int warned = 0;
+  for (auto &collision : oncoming_collisions) {
+    if (collision.warned) {
+      warned++;
+      continue;
+    }
+
+    float until_collision = collision.point->seconds - elapsed_time;
+    if (until_collision <= warning_time) {
+      Combatant *combatant = collision.target;
+      PLOGI << "Sending warning to COMBATANT: '" << combatant->name <<
+      "' [ID: " << combatant->entity_id << "]";
+
+      CombatantHandler::queue<ProjWarningCBT>(this, 
+                                              CombatantEVT::PROJ_WARNING,
+                                              combatant, 
+                                              *collision.point,
+                                              collision.intersect,
+                                              until_collision
+                                              );
+      collision.warned = true;
+      warned++;
+    }
+  }
+
+  if (warned == oncoming_collisions.size()) {
+    PLOGI << "PROJECTILE: '" << name << "' [ID: " << entity_id << "] all"
+      << " combatants in trajectory have been warned.";
+    oncoming_collisions.clear();
+  }
 }
 
 void Projectile::lifeTimer() {
@@ -198,14 +329,39 @@ void Projectile::drawDebug() {
   DrawRectangleLinesEx(hitbox.rect, 1, RED);
 
   Vector2 offset = Vector2Multiply({velocity, velocity}, direction);
-  Vector2 end_pos = Vector2Add({position}, offset);
+  Vector2 end_pos = Vector2Add(position, offset);
   DrawLineV(position, end_pos, YELLOW);
 
-  if (calc_thread.joinable() || trajectory.empty()) {
-    return;
+  if (!trajectory.empty()) {
+    for (TrajectPoint point : trajectory) {
+      DrawCircleV(point.position, 1, ORANGE);
+    }
   }
 
-  for (Vector2 point : trajectory) {
-    DrawCircleV(point, 1, ORANGE);
+  if (!oncoming_collisions.empty()) {
+    drawOncoming();
+  }
+}
+
+void Projectile::drawOncoming() {
+  Color intersect_color = RED;
+  intersect_color.a = 128;
+
+  for (auto &collision : oncoming_collisions) {
+    Vector2 p_position = collision.point->position;
+    Vector2 p_direction = collision.point->direction;
+    float p_velocity = collision.point->velocity;
+    
+    Rectangle rect = hitbox.rect;
+    rect.x = p_position.x + hitbox.offset.x;
+    rect.y = p_position.y + hitbox.offset.y;
+
+    DrawRectangleLinesEx(rect, 1, BLUE); 
+    DrawRectangleRec(collision.intersect, intersect_color);
+
+    Vector2 offset = Vector2Multiply({p_velocity, p_velocity}, 
+                                     p_direction);
+    Vector2 end_pos = Vector2Add(p_position, offset);
+    DrawLineV(p_position, end_pos, YELLOW);
   }
 }

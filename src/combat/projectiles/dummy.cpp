@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cstddef>
 #include <raylib.h>
 #include "enums.h"
 #include "game.h"
@@ -27,7 +26,8 @@ DummyProjectile::DummyProjectile(Combatant *owner, Vector2 position) :
   drag = 20;
   launch(120, -20);
 
-  calc_thread = std::thread(&Projectile::predictTrajectory, this, 0.50);
+  predictTrajectory(0.25);
+  detectOncoming();
 
   atlas.use();
   sprite = &atlas.sprites[0];
@@ -38,9 +38,7 @@ DummyProjectile::~DummyProjectile() {
 }
 
 void DummyProjectile::update() {
-  if (calc_thread.joinable()) {
-    calc_thread.join();
-  }
+  ownerCheck();
 
   if (wait_clock < 1.0) {
     wait_clock += Game::deltaTime() / wait_time;
@@ -50,6 +48,7 @@ void DummyProjectile::update() {
   if (!dying) {
     runPhysics();
     lifeTimer();
+    warningProcess();
   }
   else {
     deathTimer();
