@@ -48,6 +48,7 @@ Baseball::Baseball(Combatant *owner, Vector2 position) :
   data.assailant = owner;
   data.hitbox = &hitbox.rect;
 
+  PLOGD << "Initial ATK: " << owner->dexterity;
   atk = owner->dexterity;
   data.a_atk = &atk;
 
@@ -121,7 +122,7 @@ void Baseball::swingDetection() {
 
 void Baseball::swingSuccessful() {
   assert(!hit_by_swing);
-  PLOGI << "Boosting the projectile's atk by: " << owner->offense;
+  PLOGD << "Boosting the projectile's atk by: " << owner->offense;
   atk += owner->offense;
   data.stun_time = 0.35;
 

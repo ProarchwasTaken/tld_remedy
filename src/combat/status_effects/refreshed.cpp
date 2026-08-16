@@ -66,7 +66,7 @@ void Refreshed::logic() {
   float max_morale = afflicted->max_morale;
   float recovery = afflicted->recovery;
 
-  float magnitude = (max_morale * 0.035) * recovery;
+  float magnitude = (max_morale * 0.1) * recovery;
   magnitude = magnitude * Game::deltaTime();
 
   *morale = Clamp(*morale + magnitude, 0.0, max_morale);
