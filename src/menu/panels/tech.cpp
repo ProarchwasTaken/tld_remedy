@@ -113,7 +113,7 @@ string TechsPanel::weaponTechInfo(SubWeaponID id) {
       "action's windup, Mary can freely change the\n"
       "direction he's currently facing.\n\n"
 
-      "<Hail Mary> - MP Cost: 5\n"
+      "<Hail Mary> - MP Cost: 3\n"
       "\"When there's love, there's hope...\n"
       "but a little luck wouldn't hurt.\n\n"
 

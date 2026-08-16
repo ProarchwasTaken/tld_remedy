@@ -34,11 +34,12 @@ public:
   void clashEffect();
 
   void drawDebug() override;
+
+  RectEx hitbox;
 private:
   Mary *user;
   SoundAtlas *sfx;
 
-  RectEx hitbox;
   DamageData data;
 
   const int attack_weight = 2;

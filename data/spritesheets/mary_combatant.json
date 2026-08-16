@@ -403,11 +403,56 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
     "sourceSize": { "w": 96, "h": 80 },
     "duration": 100
+   },
+   {
+    "filename": "hail mary_0",
+    "frame": { "x": 480, "y": 320, "w": 96, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
+    "sourceSize": { "w": 96, "h": 80 },
+    "duration": 100
+   },
+   {
+    "filename": "hail mary_1",
+    "frame": { "x": 576, "y": 320, "w": 96, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
+    "sourceSize": { "w": 96, "h": 80 },
+    "duration": 100
+   },
+   {
+    "filename": "hail mary_2",
+    "frame": { "x": 672, "y": 320, "w": 96, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
+    "sourceSize": { "w": 96, "h": 80 },
+    "duration": 100
+   },
+   {
+    "filename": "hail mary_3",
+    "frame": { "x": 768, "y": 320, "w": 96, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
+    "sourceSize": { "w": 96, "h": 80 },
+    "duration": 100
+   },
+   {
+    "filename": "hail mary_4",
+    "frame": { "x": 864, "y": 320, "w": 96, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 96, "h": 80 },
+    "sourceSize": { "w": 96, "h": 80 },
+    "duration": 100
    }
  ],
  "meta": {
   "app": "http://www.aseprite.org/",
-  "version": "1.3.17.2-x64",
+  "version": "1.3.18.2-x64",
   "image": "mary_combatant.png",
   "format": "RGBA8888",
   "size": { "w": 960, "h": 400 },

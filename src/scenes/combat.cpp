@@ -42,6 +42,7 @@
 #include "combat/combatants/enemy/dummy.h"
 #include "combat/combatants/enemy/servant.h"
 #include "combat/projectiles/dummy.h"
+#include "combat/projectiles/baseball.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
@@ -646,6 +647,10 @@ void CombatScene::createProjectile(ProjectileID id, Vector2 position,
   switch (id) {
     case ProjectileID::DUMMY: {
       projectile = make_unique<DummyProjectile>(owner, position);
+      break;
+    }
+    case ProjectileID::BASEBALL: {
+      projectile = make_unique<Baseball>(owner, position);
       break;
     }
   }

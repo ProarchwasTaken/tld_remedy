@@ -12,6 +12,7 @@ public:
   ~Bat();
 
   std::unique_ptr<CombatAction> lightTechnique() override;
+  std::unique_ptr<CombatAction> heavyTechnique() override;
 
   static SoundAtlas sfx;
 };

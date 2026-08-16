@@ -139,6 +139,7 @@ enum class EnemyID {
 
 enum class ProjectileID {
   DUMMY = -1,
+  BASEBALL
 };
 
 enum class ActionID {
@@ -148,6 +149,7 @@ enum class ActionID {
   KNIFE_CLEAVE,
   KNIFE_PIERCER,
   BAT_SWING,
+  BAT_HAILMARY,
   USE_ITEM,
   ERWIN_PROVOKE,
   ERWIN_3RD_PARTY
