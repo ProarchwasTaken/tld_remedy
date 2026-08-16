@@ -307,15 +307,16 @@ void Projectile::deathTimer() {
 void Projectile::drawSprite(Texture *sheet) {
   assert(sprite != NULL);
   Rectangle dest = bounding_box.rect;
-  dest.x -= bounding_box.offset.x;
-  dest.y -= bounding_box.offset.y;
+  Vector2 origin = Vector2Multiply(bounding_box.offset, {-1, -1});
+  dest.x += origin.x;
+  dest.y += origin.y;
 
   Color color = tint;
   if (dying) {
     applyFlicker(death_clock, color);
   }
 
-  DrawTexturePro(*sheet, *sprite, dest, {16, 16}, angle, color);
+  DrawTexturePro(*sheet, *sprite, dest, origin, angle, color);
 }
 
 void Projectile::applyFlicker(float x, Color &tint) {
