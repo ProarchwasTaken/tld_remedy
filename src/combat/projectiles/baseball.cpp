@@ -4,12 +4,15 @@
 #include <algorithm>
 #include <utility>
 #include <raylib.h>
+#include <raymath.h>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/projectile.h"
 #include "base/combat_action.h"
+#include "data/combat_event.h"
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
+#include "combat/system/evt_handler.h"
 #include "combat/sub_weapons/bat.h"
 #include "combat/actions/bat_swing.h"
 #include "combat/projectiles/baseball.h"
@@ -68,12 +71,15 @@ void Baseball::update() {
     return;
   }
 
+  Vector2 old_position = position;
   runPhysics();
   lifeTimer();
 
   swingDetection();
 
   if (hit_by_swing || direction.y > 0) {
+    distance_traveled += Vector2Distance(old_position, position);
+    afterimages();
     hitRegistration(hits);
   }
 
@@ -133,6 +139,18 @@ void Baseball::swingSuccessful() {
 
   sfx->play("bat_swing_hit");
   hit_by_swing = true;
+}
+
+void Baseball::afterimages() {
+  if (distance_traveled < 2) {
+    return;
+  }
+
+  CombatHandler::raise<CreateAfterImgCB>(CombatEVT::CREATE_AFTERIMAGE,
+                                         &atlas, sprite, 
+                                         bounding_box.position, 
+                                         RIGHT);
+  distance_traveled = 0;
 }
 
 void Baseball::hitRegistration(set<pair<float, Combatant*>> &hits) {

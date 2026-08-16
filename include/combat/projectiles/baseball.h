@@ -17,6 +17,7 @@ public:
   void swingDetection();
   void swingSuccessful();
 
+  void afterimages();
   void hitRegistration(std::set<std::pair<float, Combatant*>> &hits);
   void inflictDamage(std::set<std::pair<float, Combatant*>> &hits);
 
@@ -26,6 +27,8 @@ public:
 private:
   DamageData data;
   int atk;
+
+  float distance_traveled = 0;
 
   std::set<std::pair<float, Combatant*>> hits;
   bool hit_by_swing = false;

@@ -15,7 +15,7 @@
 
 BatHailMary::BatHailMary(Mary *user) : 
   CombatAction(ActionID::BAT_HAILMARY, ActionType::OFFENSE_HP, user, 
-               0.40, 0.10, 0.0)
+               0.40, 0.05, 0.0)
 {
   name = "Bat Hail Mary";
   this->atlas = &Mary::atlas;
