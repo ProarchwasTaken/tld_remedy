@@ -23,6 +23,7 @@ Despondent::Despondent(PartyMember *afflicted) :
 
 void Despondent::init(bool hide_text) {
   afflicted->demoralized = true;
+  afflicted->morale = -afflicted->max_morale;
 
   PLOGI << "Decreasing afflicted's intimidation by 25%";
   afflicted->intimid -= intimid_lost;
@@ -62,11 +63,6 @@ void Despondent::intercept(DamageData &data) {
 }
 
 void Despondent::logic() {
-  if (delay_clock <= 1.0) {
-    delay_clock += Game::deltaTime() / delay_time;
-    return;
-  }
-
   float init_morale = afflicted->init_morale;
   float recovery = afflicted->recovery;
 
