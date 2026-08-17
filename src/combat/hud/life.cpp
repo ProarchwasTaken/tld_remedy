@@ -4,6 +4,7 @@
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
+#include "enums.h"
 #include "game.h"
 #include "data/combatant_event.h"
 #include "base/combatant.h"
@@ -25,10 +26,7 @@ LifeHud::LifeHud(Vector2 position) {
   main_position = position;
 
   life_color = Game::palette[32];
-  life_txt_color = Game::palette[34];
-
   morale_color = Game::palette[42];
-  morale_txt_color = Game::palette[43];
 
   atlas.use();
   status_atlas.use();
@@ -78,10 +76,21 @@ void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
     }
     case CombatantEVT::EFFECT_GAINED: {
       auto *effect_gained = static_cast<EffectGainedCBT*>(event.get());
-      if (effect_gained->effect_id == StatusID::MENDING) {
+      StatusID id = effect_gained->effect_id;
+
+      if (id == StatusID::MENDING) {
         PLOGD << "Acknowledging EffectGained event sent by: '" << 
           user->name << "' [ID: " << user->entity_id << "]";
         has_mending = true;
+        break;
+      }
+
+      if (id == StatusID::DESPONDENT) {
+        PLOGD << "Acknowledging EffectGained event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "]";
+        morale_color = Game::palette[37];
+        morale_clock = 0.0;
+        break;
       }
 
       break;
@@ -93,6 +102,15 @@ void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
         PLOGD << "Acknowledging EffectLost event sent by: '" << 
           user->name << "' [ID: " << user->entity_id << "]";
         has_mending = false;
+        break;
+      }
+
+      if (id == StatusID::DESPONDENT) {
+        PLOGD << "Acknowledging EffectGained event sent by: '" << 
+          user->name << "' [ID: " << user->entity_id << "]";
+        morale_color = Game::palette[42];
+        morale_clock = 0.0;
+        break;
       }
 
       break;
@@ -160,7 +178,6 @@ void LifeHud::update() {
   }
   else {
     life_color = Game::palette[32]; 
-    life_txt_color = Game::palette[34];
   }
 
   if (user->demoralized) {
@@ -168,7 +185,6 @@ void LifeHud::update() {
   }
   else {
     morale_color = Game::palette[42];
-    morale_txt_color = Game::palette[43];
   }
 }
 
@@ -184,31 +200,27 @@ void LifeHud::criticalFlash() {
 
   if (crit_flash) {
     life_color = Game::palette[34];
-    life_txt_color = Game::palette[34];
   } 
   else {
     life_color = Game::palette[32];
-    life_txt_color = Game::palette[32];
   }
 }
 
 void LifeHud::demoralizedFlash() {
-  demo_clock += Game::deltaTime() / demo_time;
+  demo_flash_clock += Game::deltaTime() / demo_flash_time;
 
-  if (demo_clock < 1.0) {
+  if (demo_flash_clock < 1.0) {
     return;
   }
 
   demo_flash = !demo_flash;
-  demo_clock = 0.0;
+  demo_flash_clock = 0.0;
 
   if (demo_flash) {
-    morale_color = WHITE;
-    morale_txt_color = Game::palette[34];
+    morale_color = Game::palette[38];
   }
   else {
-    morale_color = Game::palette[34];
-    morale_txt_color = Game::palette[32];
+    morale_color = Game::palette[37];
   }
 
 }
@@ -344,9 +356,23 @@ void LifeHud::drawToBeHealed(Vector2 position) {
 
 void LifeHud::drawMorale(Vector2 position) {
   position = Vector2Add(position, {10, -6});
+
+  if (morale_clock < 1.0) {
+    float percentage = 1.0 - morale_clock;
+    float offset = std::sinf(percentage * 5) * 32;
+    position.y -= offset * percentage;
+
+    morale_clock += Game::deltaTime() / morale_time;
+  }
+
   DrawTextureRec(atlas.sheet, atlas.sprites[3], position, WHITE);
 
-  drawMoraleGauge(position);
+  if (!user->demoralized) {
+    drawMoraleGauge(position);
+  }
+  else {
+    drawDespondenceGauge(position); 
+  }
 }
 
 void LifeHud::drawMoraleGauge(Vector2 position) {
@@ -357,6 +383,15 @@ void LifeHud::drawMoraleGauge(Vector2 position) {
   float morale_percentage = user->morale / user->max_morale;
   morale_percentage = Clamp(morale_percentage, 0.0, 1.0);
   drawGauge(4, position, morale_color, morale_percentage, 1.0);
+}
+
+void LifeHud::drawDespondenceGauge(Vector2 position) {
+  drawGauge(4, position, Game::palette[36], 1.0, 1.0);
+
+  float start_morale = -user->max_morale;
+  float init_morale = user->init_morale;
+  float progress = Normalize(user->morale, init_morale, start_morale);
+  drawGauge(4, position, morale_color, progress, 1.0);
 }
 
 void LifeHud::drawTenacity(Vector2 position) {
