@@ -63,7 +63,6 @@ public:
   void behavior() override;
   void rootBehavior();
   void targetingBehavior();
-  void chooseTarget();
 
   void decideAttack();
   void attackMP();

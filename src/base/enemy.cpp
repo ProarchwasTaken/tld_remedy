@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cmath>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -14,7 +15,7 @@
 #include "base/enemy.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::uniform_real_distribution;
 int Enemy::member_count = 0;
 int Enemy::stunned = 0;
 int Enemy::combo = 0;
@@ -54,6 +55,55 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 Enemy::~Enemy() {
   member_count--;
   assert(member_count >= 0);
+}
+
+void Enemy::chooseTarget() {
+  PartyMember *mary = NULL;
+  PartyMember *companion = NULL;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team == CombatantTeam::ENEMY) {
+      continue;
+    }
+
+    if (!combatant->targetable || combatant->state == DEAD) {
+      continue;
+    }
+
+    PartyMember *party_member = static_cast<PartyMember*>(combatant);
+    if (party_member->id == PartyMemberID::MARY) {
+      assert(mary == NULL);
+      mary = party_member;
+    }
+    else {
+      assert(companion == NULL);
+      companion = party_member;
+    }
+  }
+
+  if (mary == NULL) {
+    return;
+  }
+
+  if (companion == NULL) {
+    target = mary;
+    return;
+  }
+
+  float m_distance = distanceTo(mary);
+  float c_distance = distanceTo(companion);
+
+  float difference = c_distance - m_distance;
+  float chance = 1.25 + (difference / 200);
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float roll = range(Game::RNG);
+  if (roll <= chance) {
+    target = mary;
+  }
+  else {
+    target = companion;
+  }
 }
 
 void Enemy::takeDamage(DamageData &data) {

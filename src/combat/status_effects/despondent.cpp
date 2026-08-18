@@ -29,7 +29,6 @@ void Despondent::init(bool hide_text) {
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: " << afflicted->intimid;
-
   StatusEffect::init(hide_text);
 }
 
@@ -53,12 +52,9 @@ Despondent::~Despondent() {
 void Despondent::intercept(DamageData &data) {
   if (afflicted->state != CombatantState::NEUTRAL) {
     PLOGI << "Afflicted has taken damage while not in Neutral.";
-    data.stun_type = StunType::STAGGER;
     data.calculation = DamageType::LIFE;
     data.damage_type = DamageType::LIFE;
-
-    Combatant::sfx.play("damage_stagger");
-    PLOGD << "Forcing Life damage calculation and Stagger.";
+    PLOGD << "Forcing Life damage calculation.";
   }
 }
 

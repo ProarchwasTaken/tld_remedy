@@ -17,6 +17,8 @@ public:
   static int comboCount() {return combo;} 
   static void updateStunnedCount();
 
+  void chooseTarget();
+
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
 

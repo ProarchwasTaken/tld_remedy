@@ -1,11 +1,8 @@
-#include <algorithm>
 #include <random>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <memory>
-#include <set>
-#include <utility>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -19,7 +16,6 @@
 #include "data/combatant_event.h"
 #include "data/damage.h"
 #include "utils/animation.h"
-#include "utils/comparisons.h"
 #include "utils/collision.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -292,39 +288,6 @@ void Servant::targetingBehavior() {
     float min_wait = ai->contesting.min_wait;
     float max_wait = ai->contesting.max_wait;
     ai->wait(min_wait, max_wait);
-  }
-}
-
-void Servant::chooseTarget() {
-  int count = PartyMember::memberCount();
-  assert(count != 0);
-
-  std::set<std::pair<float, Combatant*>> party_members;
-
-  for (Combatant *combatant : existing_combatants) {
-    if (combatant->team != CombatantTeam::PARTY) {
-      continue;
-    }
-
-    if (combatant->targetable && combatant->state != DEAD) {
-      float distance = distanceTo(combatant);
-      party_members.emplace(std::make_pair(distance, combatant));
-    }
-  }
-
-  if (party_members.empty()) {
-    return;
-  }
-
-  if (party_members.size() == 1) {
-    target = party_members.begin()->second;
-  }
-  else {
-    auto closest = std::min_element(party_members.begin(), 
-                                    party_members.end(),
-                                    Comparison::combatantDistance);
-
-    target = closest->second;
   }
 }
 
