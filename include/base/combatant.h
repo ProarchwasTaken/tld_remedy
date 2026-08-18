@@ -115,6 +115,9 @@ public:
   void stunTintLerp();
   virtual void exitHitstun();
 
+  /* This function decides whether to apply knockback to the victim, or
+   * apply pushback to the assailant. It depends on the circumstance.*/
+  void decideKnockback(DamageData &data);
   void setKnockback(float velocity, float seconds, Direction direction);
   void knockbackLogic();
   void applyKnockback(float clock, float minimum = 0.0);
@@ -192,6 +195,8 @@ public:
   float decel_rate = 10;
 
   std::unique_ptr<CombatAction> action;
+  bool kb_push_back = false;
+
   Status status;
 
   Color tint = WHITE;
@@ -209,6 +214,7 @@ private:
 
   float knockback = 0;
   Direction kb_direction = LEFT;
+
   float kb_time = 0;
   float kb_clock = 0;
 

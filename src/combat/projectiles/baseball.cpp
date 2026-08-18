@@ -47,6 +47,7 @@ Baseball::Baseball(Combatant *owner, Vector2 position) :
 
   data.assailant = owner;
   data.hitbox = &hitbox.rect;
+  data.negate_pushback = true;
 
   PLOGD << "Initial ATK: " << owner->dexterity;
   atk = owner->dexterity;

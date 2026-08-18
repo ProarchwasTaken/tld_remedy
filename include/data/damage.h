@@ -22,5 +22,6 @@ struct DamageData {
   float power = 1.0;
   float ent_split = 0.0;
   bool force_hitstop = false;
+  bool negate_pushback = false;
   bool intercepted = false;
 };

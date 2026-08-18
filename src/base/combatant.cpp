@@ -136,7 +136,7 @@ void Combatant::takeDamage(DamageData &data) {
   }
 
   float damage_sustained = damageProcedure(data);
-  setKnockback(data.knockback, data.stun_time, data.assailant->direction);
+  decideKnockback(data);
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
@@ -493,6 +493,27 @@ void Combatant::exitHitstun() {
   knockback = 0;
 }
 
+void Combatant::decideKnockback(DamageData &data) {
+  Combatant *assailant = data.assailant;
+  bool negate_pushback = data.negate_pushback;
+  int x_direction = data.assailant->direction;
+
+  if (negate_pushback || !Collision::checkX(this, 0.01, x_direction)) {
+    PLOGI << "Proceeding to apply knockback to victim.";
+    Direction kb_dir = static_cast<Direction>(x_direction);
+    setKnockback(data.knockback, data.stun_time, kb_dir);
+    return;
+  }
+  else if (assailant != NULL && assailant->state == ACTION) {
+    PLOGI << "Victim is against the wall. Pushing back assailant";
+    x_direction *= -1;
+    Direction kb_dir = static_cast<Direction>(x_direction);
+
+    assailant->setKnockback(data.knockback, data.stun_time, kb_dir);
+    assailant->kb_push_back = true;
+  }
+}
+
 void Combatant::setKnockback(float velocity, float seconds, 
                              Direction direction)
 {
@@ -519,7 +540,6 @@ void Combatant::applyKnockback(float clock, float minimum) {
 
   if (state != DEAD && Collision::checkX(this, magnitude, kb_direction)) {
     Collision::snapX(this, kb_direction);
-    stun_clock = Clamp(stun_clock, 0.75, 1.0);
   }
   else {
     position.x += magnitude * kb_direction; 
@@ -592,6 +612,8 @@ void Combatant::performAction(unique_ptr<CombatAction> &action) {
 
   this->action.swap(action);
   state = CombatantState::ACTION;
+  kb_push_back = false;
+
   old_action.reset();
   acceleration = 0.0;
 } 
@@ -600,6 +622,7 @@ void Combatant::cancelAction() {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] action"
   << " has been canceled!";
   action.reset();
+  kb_push_back = false;
 
   if (state != CombatantState::HIT_STUN) {
     state = CombatantState::NEUTRAL;

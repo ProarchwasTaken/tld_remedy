@@ -36,6 +36,7 @@ KnifePiercer::KnifePiercer(Mary *user):
   data.hit_stop = 0.2;
 
   data.assailant = user;
+  data.negate_pushback = true;
 
   atk = user->offense + user->dexterity;
   data.a_atk = &atk;

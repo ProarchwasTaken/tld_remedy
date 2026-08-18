@@ -368,6 +368,10 @@ void Servant::update() {
     }
     case CombatantState::ACTION: {
       action->logic();
+
+      if (kb_push_back) {
+        knockbackLogic();
+      }
       break;
     }
     case CombatantState::HIT_STUN: {
