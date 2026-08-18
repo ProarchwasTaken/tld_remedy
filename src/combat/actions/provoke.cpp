@@ -37,16 +37,7 @@ void Provoke::drawEnemyAggro() {
     return;
   }
 
-  int aggro_drawn = 0;
-  int limit = (enemy_count + 1) / 2;
-  PLOGD << "Enemies: " << enemy_count << ", Limit: " << limit;
-
   for (Combatant *combatant : Combatant::existing_combatants) {
-    if (aggro_drawn == limit) {
-      PLOGI << "Reached the limit of aggro drawn.";
-      break;
-    }
-
     if (combatant->state == DEAD) {
       continue;
     }
@@ -59,7 +50,6 @@ void Provoke::drawEnemyAggro() {
       PLOGI << "Attracted the aggro of '" << combatant->name << "' [ID: "
         << combatant->entity_id << "]";
       combatant->target = user;
-      aggro_drawn++;
     }
   }
 }

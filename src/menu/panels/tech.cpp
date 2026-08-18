@@ -226,10 +226,8 @@ string TechsPanel::getTechEntry() {
 
         "Erwin performs a taunt that draws the aggro\n"
         "of all enemies that happen to be targeting\n"
-        "Mary. There is a limit to how many enemies that\n"
-        "can be provoked though. Erwin also receives\n"
-        "intangibility that lasts until the end lag of\n"
-        "the action.\n\n"
+        "Mary. He also receives intangibility that\n"
+        "lasts until the end of the action.\n\n"
 
         "<3rd Party> - MP Cost: 10 | CD: 8s\n"
         "\"The notion of playing 'fair' when your life\n"
@@ -239,9 +237,7 @@ string TechsPanel::getTechEntry() {
         "targeting at the time of when the Assist was\n"
         "called. Once within range, Erwin will perform\n"
         "a dropkick that inflicts a high amount of\n"
-        "knockback and stun if it hits. Obviously,\n"
-        "this Assist cannot be called if Mary isn't\n"
-        "targeting anybody.\n\n"
+        "knockback and stun if it hits.\n\n"
 
         "--[PASSIVES]--\n\n"
 
