@@ -29,7 +29,9 @@ void Vulnerable::intercept(DamageData &data) {
   else {
     data.power += 0.25;
     data.stun_time = data.stun_time * 1.20;
+
     data.stun_type = StunType::STAGGER;
+    Combatant::sfx.play("damage_stagger");
   }
 
   data.damage_type = DamageType::LIFE;

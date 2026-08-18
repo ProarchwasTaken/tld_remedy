@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <set>
+#include "base/combatant.h"
 #include "base/combat_action.h"
 #include "data/animation.h"
 #include "data/damage.h"
@@ -21,6 +22,7 @@ public:
   void action() override;
   void hitRegistration(std::set<std::pair<float, Combatant*>> &hits);
   void inflictDamage(std::set<std::pair<float, Combatant*>> &hits);
+  void applyVulnerable(Combatant *victim);
 
   void endLag() override;
 
