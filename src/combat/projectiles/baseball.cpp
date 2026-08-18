@@ -86,7 +86,7 @@ void Baseball::update() {
 
   if (!hits.empty()) {
     inflictDamage(hits);
-    dying = true;
+    onEndLife();
     death_time = 0.10;
   }
 
@@ -193,6 +193,11 @@ void Baseball::inflictDamage(set<pair<float, Combatant*>> &hits) {
   PLOGD << "Victim selected: '" << victim->name << "' [ID: " << 
     victim->entity_id << "]";
   victim->takeDamage(data);
+}
+
+void Baseball::onEndLife() {
+  Projectile::onEndLife();
+  sfx->play("baseball_grounded");
 }
 
 void Baseball::draw() {

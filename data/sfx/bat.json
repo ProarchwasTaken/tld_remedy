@@ -19,6 +19,14 @@
     {
       "name": "bat_swing_flawed",
       "filename": "bat/bat_swing_flawed.mp3"
+    },
+    {
+      "name": "bat_hailmary_throw",
+      "filename": "bat/bat_hailmary_throw.mp3"
+    },
+    {
+      "name": "baseball_grounded",
+      "filename": "bat/baseball_grounded.mp3"
     }
   ]
 }

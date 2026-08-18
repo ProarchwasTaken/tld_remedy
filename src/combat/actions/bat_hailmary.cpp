@@ -34,6 +34,7 @@ void BatHailMary::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     createProjectile();
+    sfx->play("bat_hailmary_throw");
     user->sprite = &atlas->sprites[49];
   }
 }

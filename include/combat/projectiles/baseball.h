@@ -20,6 +20,7 @@ public:
   void afterimages();
   void hitRegistration(std::set<std::pair<float, Combatant*>> &hits);
   void inflictDamage(std::set<std::pair<float, Combatant*>> &hits);
+  void onEndLife() override;
 
   void draw() override;
 
