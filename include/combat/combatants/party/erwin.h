@@ -49,9 +49,9 @@ struct ErwinAI : AIParameters {
 
 
 /* Erwin is a Companion Combatant of the "Maverick" archetype. Their
- * behavior is designed to make sure the player doesn't get overwhelmed.
- * As such, they tend to be a lot more self-sufficent than other 
- * companions.*/
+ * behavior is designed around creating opportunities for the player to
+ * capitalize on. He is also highly self sufficient as well, but he not
+ * very good in terms of DPS.*/
 class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);

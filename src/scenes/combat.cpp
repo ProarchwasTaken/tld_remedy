@@ -39,6 +39,7 @@
 #include "combat/entities/afterimage.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
+#include "combat/combatants/party/xander.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "combat/combatants/enemy/servant.h"
 #include "combat/projectiles/dummy.h"
@@ -157,6 +158,11 @@ void CombatScene::initializeCompanion() {
   switch (data->companion_id) {
     case CompanionID::ERWIN: {
       companion = make_unique<Erwin>(data, player);
+      break;
+    }
+    case CompanionID::XANDER: {
+      companion = make_unique<Xander>(data, player);
+      break;
     }
   }
 

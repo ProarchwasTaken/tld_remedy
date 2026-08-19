@@ -43,6 +43,7 @@ SoundAtlas Erwin::psfx("erwin");
 Erwin::Erwin(Companion *data, Mary *player): 
   PartyMember("Erwin", PartyMemberID::ERWIN, {-96, 152}, &atlas)
 {
+  assert(id == data->member_id);
   this->player = player;
 
   life = data->life;

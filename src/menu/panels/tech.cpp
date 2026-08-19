@@ -297,7 +297,7 @@ string TechsPanel::getTechEntry() {
         "the assist was called, he will instead\n"
         "perform the attack in Mary's direction.\n\n"
 
-        "<Steel Wall> - HP Cost: N/A | CD: 5s\n"
+        "<Steel Wall> - HP Cost: N/A | CD: 8s\n"
         "\"Get behind me...\"\n\n"
 
         "Xander will take on a defensive stance for\n"
