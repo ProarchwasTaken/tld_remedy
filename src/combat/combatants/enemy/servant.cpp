@@ -303,7 +303,7 @@ void Servant::decideAttack() {
     chance += 0.20;
   }
 
-  if (party_member->demoralized) {
+  if (party_member->demoralized || party_member->max_morale == 0) {
     chance += 0.40;
   }
 
