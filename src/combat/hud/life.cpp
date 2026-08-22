@@ -346,7 +346,7 @@ void LifeHud::drawToBeHealed(Vector2 position) {
     return;
   }
 
-  float life_total = user->life + user->exhaustion + user->tenacity;
+  float life_total = user->life + user->exhaustion;
   float to_be_healed = mending->to_be_healed;
 
   float percentage = (life_total + to_be_healed) / user->max_life;
