@@ -1,8 +1,11 @@
+#include <cassert>
+#include <cstddef>
 #include <random>
 #include <raylib.h>
 #include "game.h"
-#include "data/rect_ex.h"
+#include "base/combatant.h"
 #include "base/ai_parameters.h"
+#include "data/rect_ex.h"
 #include <plog/Log.h>
 
 using std::uniform_real_distribution;
@@ -30,6 +33,16 @@ void AIParameters::waitTimer() {
     wait_clock = 0.0;
     waiting = false;
   }
+}
+
+
+bool AIParameters::inAttackRange(Combatant *owner, Combatant *target) {
+  assert(target != NULL);
+  float distance = owner->distanceTo(target);
+  float half_scale = target->hurtbox.scale.x / 2;
+
+  distance = distance - half_scale;
+  return distance <= attack_distance;
 }
 
 void AIParameters::drawDebug(int ai_goal, Vector2 position, 

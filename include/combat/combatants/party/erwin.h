@@ -32,7 +32,7 @@ enum class ErwinGoals {
  * gamestate, these variables may change.*/
 struct ErwinAI : AIParameters {
   ErwinAI() {
-    attack_distance = 27;
+    attack_distance = 20;
     contest_distance = 96;
     
     attack_cooldown = 0.10;

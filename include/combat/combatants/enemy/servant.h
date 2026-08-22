@@ -22,7 +22,7 @@ enum class ServantGoals {
 
 struct ServantAI : AIParameters {
   ServantAI() {
-    attack_distance = 28;
+    attack_distance = 20;
     contest_distance = 128;
 
     attack_cooldown = 0.35;

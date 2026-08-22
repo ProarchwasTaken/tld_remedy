@@ -706,18 +706,16 @@ void Erwin::targetingLogic() {
     return;
   }
 
-  float distance = distanceTo(target);
-  if (distance > ai->attack_distance) {
+  if (!ai->inAttackRange(this, target)) {
     movement(speed_multiplier);
     return;
   }
 
-  if (ai->cooldown_clock >= 1.0) {
-    decideAttack();
-  }
-  else {
+  if (ai->cooldown_clock < 1.0) {
     return;
   }
+
+  decideAttack();
 
   float retreat_chance = ai->targeting.retreat_chance;
   ai->setGoal(ai_goal, ErwinGoals::RETREATING, retreat_chance);

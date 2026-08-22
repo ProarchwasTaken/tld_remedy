@@ -2,6 +2,7 @@
 #include <random>
 #include <raylib.h>
 #include "game.h"
+#include "base/combatant.h"
 #include "data/rect_ex.h"
 
 
@@ -87,6 +88,8 @@ struct AIParameters {
   void wait(float seconds);
   void wait(float min, float max);
   void waitTimer();
+
+  bool inAttackRange(Combatant *owner, Combatant *target);
 
   void drawDebug(int ai_goal, Vector2 position, RectEx &bounding_box);
   void drawDist(Vector2 position, float distance, Color color);
