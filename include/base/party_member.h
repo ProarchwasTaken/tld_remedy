@@ -28,6 +28,7 @@ public:
   void moraleShare(GainedMoraleCBT *event);
 
   void takeDamage(DamageData &data) override;
+  void impDamageProcessing(DamageData &data, bool not_demo, bool in_crit);
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;

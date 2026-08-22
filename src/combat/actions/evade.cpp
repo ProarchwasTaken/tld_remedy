@@ -69,7 +69,7 @@ void Evade::intercept(DamageData &data) {
   float life_time;
   Color tint;
 
-  float sleep_time;
+  float hit_stop;
 
   if (user->important && state_clock <= 0.10) {
     PLOGI << "Perfect Evasion! Exhaustion depleted!";
@@ -80,7 +80,7 @@ void Evade::intercept(DamageData &data) {
     tint = Game::palette[51];
 
     Combatant::sfx.play("evade_perfect");
-    sleep_time = 0.25;
+    hit_stop = 0.25;
 
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
     CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 48.0f);
@@ -90,11 +90,12 @@ void Evade::intercept(DamageData &data) {
     PLOGD << "Redirection damage towards the combatant's exhaustion.";
     user->increaseExhaustion(damage); 
     tint = Game::palette[29];
-    sleep_time = 0.15;
+    hit_stop = 0.15;
   }
 
   if (user->important) {
-    Game::sleep(sleep_time);
+    data.apply_hitstop = true;
+    data.hit_stop = hit_stop;
   }
  
   state_clock = 0.999999;

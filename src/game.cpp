@@ -610,6 +610,7 @@ void Game::fadeScreenProcedure() {
 
 void Game::sleepProcedure() {
   sleep_clock += deltaTime() / sleep_time;
+
   if (sleep_clock >= 1.0) {
     PLOGI << "Now returning to normal logic processing.";
     PLOGI << sleep_time;
@@ -1058,6 +1059,7 @@ void Game::sleep(float seconds) {
     return;
   }
 
+  PLOGD << "Overwriting previous value: " << Game::sleep_time;
   PLOGI << "Pausing game logic for: " << seconds << " seconds";
   Game::sleep_time = seconds;
   game_state = GameState::SLEEP;

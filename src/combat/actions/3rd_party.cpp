@@ -42,7 +42,7 @@ ThirdParty::ThirdParty(Erwin *user):
   data.knockback = 200.0;
 
   data.hit_stop = 0.25;
-  data.force_hitstop = true;
+  data.apply_hitstop = true;
 
   data.assailant = user;
 

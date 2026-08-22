@@ -122,7 +122,7 @@ void Enemy::takeDamage(DamageData &data) {
   }
 
   PartyMember *combatant = static_cast<PartyMember*>(data.assailant);
-  if (!combatant->important && !data.force_hitstop) {
+  if (!combatant->important && !data.apply_hitstop) {
     return;
   }
 
@@ -168,7 +168,7 @@ bool Enemy::counterToastCondition(DamageData &data) {
   }
 
   PartyMember *assailant = static_cast<PartyMember*>(data.assailant);
-  return assailant->important || data.force_hitstop;
+  return assailant->important || data.apply_hitstop;
 }
 
 void Enemy::exitHitstun() {

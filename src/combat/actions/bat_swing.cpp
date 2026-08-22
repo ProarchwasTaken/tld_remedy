@@ -95,10 +95,12 @@ void BatSwing::flawedClash(DamageData &data) {
 
   data.power = 0.25;
   data.ent_split = 1.0;
+
+  data.hit_stop = 0.25;
+  data.apply_hitstop = true;
  
   user->sprite = &atlas->sprites[41];
   sfx->play("bat_swing_flawed");
-  Game::sleep(0.25);
 } 
 
 void BatSwing::perfectClash(DamageData &data) {
@@ -130,11 +132,12 @@ void BatSwing::perfectClash(DamageData &data) {
   attack_connected = true;
   data.intercepted = true;
 
-  Game::bgm->pause();
+  data.hit_stop = 0.75;
+  data.apply_hitstop = true;
 
   sfx->play("bat_swing_hit");
   Combatant::sfx.play("evade_perfect");
-  Game::sleep(0.75);
+  Game::bgm->pause();
 }
 
 void BatSwing::sendWarning() {

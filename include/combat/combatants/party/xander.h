@@ -35,7 +35,7 @@ public:
   Mary *player;
   static SpriteAtlas atlas;
 private:
-  Animation anim_idle = {{0, 0, 0, 2, 1}, 1.5};
+  Animation anim_idle = {{0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
 
   bool protective = false;

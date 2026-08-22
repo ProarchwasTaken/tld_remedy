@@ -117,26 +117,32 @@ void PartyMember::takeDamage(DamageData &data) {
     );
   }
 
-  if (!important) {
-    return;
+  if (important) {
+    impDamageProcessing(data, not_demoralized, in_critical);
   }
 
-  bool apply_hitstop = false;
+  if (data.apply_hitstop) {
+    Game::sleep(data.hit_stop);
+  }
+}
+
+void PartyMember::impDamageProcessing(DamageData &data, bool not_demo, 
+                                      bool in_crit) {
 
   if (data.damage_type == DamageType::LIFE) {
-    apply_hitstop = true;
+    data.apply_hitstop = true;
   }
 
-  bool became_demoralized = not_demoralized && demoralized;
+  bool became_demoralized = not_demo && demoralized;
   if (became_demoralized) {
     data.hit_stop *= 2;
-    apply_hitstop = true;
+    data.apply_hitstop = true;
     CombatStage::tintStage(Game::palette[40]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
     sfx.play("demoralized");
   }
 
-  bool entered_critical = !in_critical && critical_life;
+  bool entered_critical = !in_crit && critical_life;
   if (entered_critical && state != CombatantState::DEAD) {
     CombatStage::tintStage(Game::palette[32]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
@@ -144,10 +150,6 @@ void PartyMember::takeDamage(DamageData &data) {
     Game::noise->setTint(Game::palette[32]);
     Game::noise->setAlpha(0.10);
     sfx.play("critical_life");
-  }
-
-  if (apply_hitstop) {
-    Game::sleep(data.hit_stop);
   }
 }
 
