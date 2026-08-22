@@ -1,6 +1,7 @@
 #pragma once
 #include "base/party_member.h"
 #include "data/session.h"
+#include "data/damage.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
@@ -14,6 +15,10 @@ class Xander : public PartyMember {
 public:
   Xander(Companion *data, Mary *player);
   ~Xander();
+
+  void damageMorale(float magnitude) override;
+  void enterHitstun(DamageData &data) override;
+  bool nullifyHitstun(DamageData &data);
 
   void update() override;
 

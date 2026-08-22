@@ -63,6 +63,38 @@ Xander::~Xander() {
   atlas.release();
 }
 
+void Xander::damageMorale(float magnitude) {
+  PLOGI << "Xander does not possess Morale. Opting to increase his"
+  << " Entropy instead.";
+
+  increaseEntropy(magnitude);
+}
+
+void Xander::enterHitstun(DamageData &data) {
+  if (nullifyHitstun(data)) {
+    PLOGI << "Attempt to enter hit stun has been nullified.";
+    return;
+  }
+
+  PartyMember::enterHitstun(data);
+}
+
+bool Xander::nullifyHitstun(DamageData &data) {
+  if (state == CombatantState::HIT_STUN) {
+    return false;
+  }
+  else if (data.stun_type == StunType::STAGGER) {
+    return false;
+  }
+
+  if (data.damage_type == DamageType::MORALE) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void Xander::update() {
   tintFlash();
 
