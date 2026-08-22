@@ -869,7 +869,10 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
 #ifndef NDEBUG
 void CombatScene::debugKeybinds() {
   if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
-    dummy->attack();
+    dummy->attackMP();
+  }
+  else if (dummy != NULL && IsKeyPressed(KEY_RIGHT_CONTROL)) { 
+    dummy->attackHP();
   }
   else if (IsKeyPressed(KEY_GRAVE)) {
     verbose_debug = !verbose_debug;

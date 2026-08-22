@@ -27,9 +27,10 @@ Xander::Xander(Companion *data, Mary *player) :
   morale = init_morale;
   max_morale = data->max_morale;
 
-  tenacity = 6;
-  tp_natural = 0.20;
+  tenacity = 3;
+  tp_natural = 0.10;
   tp_threshold = tp_natural;
+  tp_regen_delay = 10.0;
 
   offense = data->offense;
   defense = data->defense;

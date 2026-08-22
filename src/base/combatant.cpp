@@ -305,6 +305,7 @@ void Combatant::applyDamage(float damage, DamageType type,
 
 void Combatant::damageLife(float magnitude) {
   life = life - magnitude;
+  tp_regen_clock = 0.0;
   PLOGI << "Life decreased to: " << life;
 
   if (!critical_life && life < max_life * LOW_LIFE_THRESHOLD) {
@@ -376,7 +377,6 @@ void Combatant::lifeDecay() {
 
 void Combatant::damageTenacity(float magnitude) {
   tenacity = tenacity - magnitude;
-  tp_regen_clock = 0.0;
 
   if (tenacity <= 0) {
     tenacity = 0;

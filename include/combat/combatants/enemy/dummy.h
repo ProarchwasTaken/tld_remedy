@@ -11,7 +11,8 @@ public:
   Dummy(Vector2 position, Direction direction);
   ~Dummy();
 
-  void attack();
+  void attackMP();
+  void attackHP();
 
   void update() override;
   void draw() override;

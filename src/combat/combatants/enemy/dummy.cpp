@@ -42,7 +42,7 @@ Dummy::~Dummy() {
   atlas.release();
 }
 
-void Dummy::attack() {
+void Dummy::attackMP() {
   RectEx hitbox;
   hitbox.scale = {32, 16};
   hitbox.offset = {-16 + (16.0f * direction), -40};
@@ -50,6 +50,28 @@ void Dummy::attack() {
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, atlas, hitbox, atk_set);
   performAction(action);
+}
+
+void Dummy::attackHP() {
+  RectEx hitbox;
+  hitbox.scale = {32, 16};
+  hitbox.offset = {-16 + (16.0f * direction), -40};
+
+  DamageData data;
+  data.damage_type = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+  data.knockback = 20.0;
+  data.hit_stop = 0.2;
+  data.assailant = this;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.35, 0.05,
+                               0.25, hitbox, data, atlas, atk_set);
+
+  performAction(action);
+  sfx.play("enemy_warning1");
 }
 
 void Dummy::update() {
