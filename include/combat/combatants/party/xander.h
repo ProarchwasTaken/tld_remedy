@@ -1,6 +1,7 @@
 #pragma once
 #include "base/party_member.h"
 #include "data/session.h"
+#include "data/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 
@@ -15,8 +16,15 @@ public:
   ~Xander();
 
   void update() override;
+
+  void animationLogic();
+  Animation *getIdleAnim();
+
   void draw() override;
 
   Mary *player;
   static SpriteAtlas atlas;
+private:
+  Animation anim_idle = {{0, 0, 0, 2, 1}, 1.5};
+  Animation anim_crit = {{3, 4}, 1.0};
 };

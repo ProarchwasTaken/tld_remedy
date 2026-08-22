@@ -1,8 +1,10 @@
 #include <cassert>
-#include "base/combatant.h"
 #include "enums.h"
+#include "base/combatant.h"
 #include "base/party_member.h"
 #include "data/session.h"
+#include "data/animation.h"
+#include "utils/animation.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/xander.h"
@@ -70,6 +72,7 @@ void Xander::update() {
         depleteExhaustion();
       }
 
+      animationLogic();
       break;
     }
     case CombatantState::ACTION: {
@@ -83,6 +86,9 @@ void Xander::update() {
     case CombatantState::HIT_STUN: {
       stunLogic();
       knockbackLogic();
+
+      // This is temporary!! Remove this later!!
+      sprite = &atlas.sprites[4];
       break;
     }
     case CombatantState::DEAD: {
@@ -92,6 +98,21 @@ void Xander::update() {
   }
 
   endLogic();
+}
+
+void Xander::animationLogic() {
+  Animation *next_anim = getIdleAnim();
+  SpriteAnimation::play(animation, next_anim, true);
+  sprite = &atlas.sprites[*animation->current];
+}
+
+Animation *Xander::getIdleAnim() {
+  if (!critical_life) {
+    return &anim_idle;
+  }
+  else {
+    return &anim_crit;
+  }
 }
 
 void Xander::draw() {
