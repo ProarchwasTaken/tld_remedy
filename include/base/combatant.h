@@ -118,7 +118,9 @@ public:
   /* This function decides whether to apply knockback to the victim, or
    * apply pushback to the assailant. It depends on the circumstance.*/
   void decideKnockback(DamageData &data);
-  void setKnockback(float velocity, float seconds, Direction direction);
+  virtual void setKnockback(float velocity, float seconds, 
+                            Direction direction);
+
   void knockbackLogic();
   void applyKnockback(float clock, float minimum = 0.0);
 

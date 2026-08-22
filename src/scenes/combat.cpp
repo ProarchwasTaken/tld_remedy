@@ -729,6 +729,8 @@ void CombatScene::endCombatProcedure() {
   Game::bgm->prepare("field");
   Game::bgm->play();
 
+  Game::noise->setTint(WHITE);
+  Game::noise->setAlpha(0);
   Game::returnToField();
 }
 

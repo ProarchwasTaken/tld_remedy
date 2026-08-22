@@ -1,4 +1,5 @@
 #pragma once
+#include "enums.h"
 #include "base/party_member.h"
 #include "data/session.h"
 #include "data/damage.h"
@@ -20,7 +21,11 @@ public:
   void enterHitstun(DamageData &data) override;
   bool nullifyHitstun(DamageData &data);
 
+  void setKnockback(float velocity, float seconds, 
+                    Direction direction) override;
+
   void update() override;
+  void endLogic() override;
 
   void animationLogic();
   Animation *getIdleAnim();
@@ -32,4 +37,6 @@ public:
 private:
   Animation anim_idle = {{0, 0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
+
+  bool protective = false;
 };

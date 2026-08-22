@@ -27,10 +27,9 @@ Xander::Xander(Companion *data, Mary *player) :
   morale = init_morale;
   max_morale = data->max_morale;
 
-  tenacity = 3;
-  tp_natural = 0.10;
+  tenacity = 4.5;
+  tp_natural = 0.15;
   tp_threshold = tp_natural;
-  tp_regen_delay = 10.0;
 
   offense = data->offense;
   defense = data->defense;
@@ -69,6 +68,7 @@ void Xander::damageMorale(float magnitude) {
   << " Entropy instead.";
 
   increaseEntropy(magnitude);
+  tp_regen_clock = 0.0;
 }
 
 void Xander::enterHitstun(DamageData &data) {
@@ -94,6 +94,15 @@ bool Xander::nullifyHitstun(DamageData &data) {
   else {
     return false;
   }
+}
+
+void Xander::setKnockback(float velocity, float seconds, 
+                          Direction direction)
+{
+  seconds = seconds / 2;
+  PLOGD << "Knockback time has been split in half.";
+
+  PartyMember::setKnockback(velocity, seconds, direction);
 }
 
 void Xander::update() {
@@ -131,6 +140,21 @@ void Xander::update() {
   }
 
   endLogic();
+}
+
+void Xander::endLogic() {
+  PartyMember::endLogic();
+
+  if (!protective && tenacity > 0) {
+    priority++;
+    protective = true;
+    PLOGI << "'Protective' is now active.";
+  }
+  else if (protective && tenacity == 0) {
+    priority--;
+    protective = false;
+    PLOGI << "'Protective' is now inactive.";
+  }
 }
 
 void Xander::animationLogic() {
