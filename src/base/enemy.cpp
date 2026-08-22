@@ -91,10 +91,14 @@ void Enemy::chooseTarget() {
   }
 
   float m_distance = distanceTo(mary);
+  int m_priority = mary->priority;
+
   float c_distance = distanceTo(companion);
+  int c_priority = mary->priority;
 
   float difference = c_distance - m_distance;
-  float chance = 1.25 + (difference / 200);
+  int p_difference = c_priority - m_priority;
+  float chance = 1.25 + (difference / 200) - (0.25 * p_difference);
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float roll = range(Game::RNG);
