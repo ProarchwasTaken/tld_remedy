@@ -19,6 +19,7 @@ Provoke::Provoke(Erwin *user):
   this->atlas = &user->atlas;
 
   user->intangible = true;
+  user->priority += 5;
 }
 
 Provoke::~Provoke() {
@@ -71,6 +72,7 @@ void Provoke::action() {
   bool end_state = state_clock == 1.0;
   if (end_state) {
     user->intangible = false;
+    user->priority -= 5;
   }
 }
 
