@@ -69,10 +69,16 @@ public:
   void update() override;
   void neutralLogic();
 
-  void endLogic() override;
+  void followPlayer();
+
+  void movement(float multiplier);
+  void takeStep();
+  void stepping(float multiplier);
 
   void animationLogic();
   Animation *getIdleAnim();
+
+  void endLogic() override;
 
   void draw() override;
   void drawDebug() override;
@@ -84,8 +90,23 @@ public:
   Mary *player;
   static SpriteAtlas atlas;
 private:
+  const float def_step_interval = 0.5;
+  const float def_step_distance = 32; 
+  const float default_speed = 90;
+
+  float step_clock = 0.0;
+  bool taking_step = false;
+  Vector2 intended_pos;
+
+  int moving_x = 0;
+  bool has_moved = false;
+  float last_moved = 1.0;
+
+  float preferred_plr_distance = 32;
+
   Animation anim_idle = {{0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
+  Animation anim_move = {{5, 6, 7, 6}, 0.5};
 
   bool protective = false;
 };
