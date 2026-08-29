@@ -1,5 +1,7 @@
 #include <cassert>
+#include <memory>
 #include "enums.h"
+#include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
 #include "data/session.h"
@@ -10,6 +12,7 @@
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
 
+using  std::make_unique;
 SpriteAtlas Xander::atlas("combatants", "xander_combatant");
 
 
@@ -41,6 +44,8 @@ Xander::Xander(Companion *data, Mary *player) :
   recovery = data->recovery;
   resilience = data->resilience;
 
+  ai = make_unique<XanderAI>();
+
   tech1 = {"Tail Whip", TechCostType::LIFE, 2.0};
   tech1.cooldown = 5.0;
 
@@ -60,7 +65,16 @@ Xander::Xander(Companion *data, Mary *player) :
 }
 
 Xander::~Xander() {
+  ai.reset();
   atlas.release();
+}
+
+void Xander::setEnabled(bool value) {
+  PartyMember::setEnabled(value);
+
+  ai_goal = XanderGoals::IDLE;
+  target = NULL;
+  tick_clock = 0;
 }
 
 void Xander::damageMorale(float magnitude) {
@@ -105,6 +119,24 @@ void Xander::setKnockback(float velocity, float seconds,
   PartyMember::setKnockback(velocity, seconds, direction);
 }
 
+void Xander::behavior() {
+  if (!enabled) {
+    return;
+  }
+
+  if (ai_goal == XanderGoals::IDLE) {
+    rootBehavior();
+  }
+}
+
+void Xander::rootBehavior() {
+  tick_clock += Game::deltaTime();
+  if (tick_clock >= 1.0) {
+    ai->setGoal(ai_goal, XanderGoals::LOOK_AT_PLR, 0.75);
+    tick_clock = 0;
+  }
+}
+
 void Xander::update() {
   tintFlash();
 
@@ -114,7 +146,7 @@ void Xander::update() {
         depleteExhaustion();
       }
 
-      animationLogic();
+      neutralLogic();
       break;
     }
     case CombatantState::ACTION: {
@@ -140,6 +172,24 @@ void Xander::update() {
   }
 
   endLogic();
+}
+
+void Xander::neutralLogic() {
+  if (ai->cooldown_clock < 1.0) {
+    ai->cooldown_clock += Game::deltaTime() / ai->attack_cooldown;
+  }
+
+  float old_x = position.x;
+  switch (ai_goal) {
+    case XanderGoals::IDLE: 
+      break;
+    case XanderGoals::LOOK_AT_PLR:
+      direction = directionTo(player);
+      ai_goal = XanderGoals::IDLE;
+      break; 
+  }
+
+  animationLogic();
 }
 
 void Xander::endLogic() {
@@ -174,4 +224,13 @@ Animation *Xander::getIdleAnim() {
 
 void Xander::draw() {
   drawSprite(&atlas.sheet);
+}
+
+void Xander::drawDebug() {
+  Combatant::drawDebug();
+  ai->drawDebug(static_cast<int>(ai_goal), position, bounding_box);
+
+  if (state == CombatantState::ACTION) {
+    action->drawDebug();
+  }
 }
