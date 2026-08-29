@@ -74,7 +74,9 @@ void SoundAtlas::release() {
   }
 }
 
-void SoundAtlas::play(string sound_name, float pitch, bool restart) {
+void SoundAtlas::play(string sound_name, float pitch, float pan, 
+                      float base_volume, bool restart) 
+{
   assert(user_count != 0);
   auto data = sound_table.find(sound_name);
 
@@ -90,7 +92,9 @@ void SoundAtlas::play(string sound_name, float pitch, bool restart) {
   PlaySound(data->second);
 
   float master_volume = Game::settings.master_volume;
-  float volume = Game::settings.sfx_volume * master_volume;
+  float sfx_volume = Game::settings.sfx_volume;
+  float volume = base_volume * sfx_volume * master_volume;
+
   SetSoundVolume(data->second, volume);
   SetSoundPitch(data->second, pitch);
 }
