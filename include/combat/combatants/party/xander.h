@@ -6,6 +6,7 @@
 #include "data/session.h"
 #include "data/damage.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
@@ -64,6 +65,10 @@ public:
   void setKnockback(float velocity, float seconds, 
                     Direction direction) override;
 
+  void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
+  void onWarning(WarningCBT *event);
+  bool shouldAcknowledge(WarningCBT *event);
+
   void behavior() override;
   void rootBehavior();
 
@@ -71,8 +76,10 @@ public:
   void neutralLogic();
 
   void followPlayer();
+  void protectionLogic();
 
   void movement(float multiplier);
+  float getStepInterval(float multiplier, bool use_accel);
   void takeStep();
   void stepping(float multiplier);
 
@@ -94,7 +101,7 @@ public:
 private:
   const float def_step_interval = 0.5;
   const float def_step_distance = 32; 
-  const float default_speed = 90;
+  const float step_speed = 90;
 
   float step_clock = 0.0;
   bool taking_step = false;
@@ -102,13 +109,13 @@ private:
 
   int moving_x = 0;
   bool has_moved = false;
-  float last_moved = 1.0;
-
-  float preferred_plr_distance = 32;
+  float preferred_plr_distance = 48;
 
   Animation anim_idle = {{0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
   Animation anim_move = {{5, 6, 7, 6}, 0.5};
 
   bool protective = false;
+  float protect_clock = 0.0;
+  float protect_time = 0.20;
 };

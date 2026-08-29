@@ -38,6 +38,8 @@ Dummy::Dummy(Vector2 position, Direction direction) :
   atlas.use();
 
   sprite = &atlas.sprites[0];
+
+  chooseTarget();
 }
 
 Dummy::~Dummy() {

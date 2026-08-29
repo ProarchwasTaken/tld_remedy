@@ -8,8 +8,10 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/combat_action.h"
 #include "data/session.h"
 #include "data/animation.h"
+#include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "system/sprite_atlas.h"
@@ -18,7 +20,7 @@
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
 
-using std::make_unique, std::uniform_real_distribution;
+using std::unique_ptr, std::make_unique, std::uniform_real_distribution;
 SpriteAtlas Xander::atlas("combatants", "xander_combatant");
 SoundAtlas Xander::psfx("xander");
 
@@ -40,6 +42,7 @@ Xander::Xander(Companion *data, Mary *player) :
   tenacity = 4.5;
   tp_natural = 0.15;
   tp_threshold = tp_natural;
+  tp_regen_delay = 15;
 
   offense = data->offense;
   defense = data->defense;
@@ -133,6 +136,74 @@ void Xander::setKnockback(float velocity, float seconds,
   PartyMember::setKnockback(velocity, seconds, direction);
 }
 
+void Xander::evaluateEvent(unique_ptr<CombatantEvent> &event) {
+  PartyMember::evaluateEvent(event);
+
+  bool from_itself = event->sender == this;
+  if (!enabled || from_itself) {
+    return;
+  }
+
+  switch (event->event_type) {
+    case CombatantEVT::WARNING: {
+      WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
+      onWarning(warn_event);
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+}
+
+void Xander::onWarning(WarningCBT *event) {
+  assert(event->sender != this);
+
+  if (shouldAcknowledge(event)) {
+    PLOGI << "Acknowledging Warning sent by Entity [ID: " 
+      << event->sender->entity_id << "]";
+
+    protect_time = event->time_until + event->active_time;
+    protect_clock = 0.0;
+    step_clock = 1.0;
+
+    ai_goal = XanderGoals::PROTECT_PLR;
+    target = NULL;
+    PLOGI << "Now attempting to protect Mary.";
+  }
+}
+
+bool Xander::shouldAcknowledge(WarningCBT *event) {
+  if (event->assailant == NULL || team == event->assailant->team) {
+    return false;
+  }
+
+  if (state != NEUTRAL) {
+    return false;
+  } 
+
+  bool already_protecting = ai_goal == XanderGoals::PROTECT_PLR;
+  bool on_assist = ai_goal == XanderGoals::TAIL_WHIP || 
+    ai_goal == XanderGoals::STEEL_WALL;
+  if (already_protecting || on_assist) {
+    return false;
+  }
+
+  bool life_attack = event->action_type == ActionType::OFFENSE_HP;
+  bool targeting_mary = event->target == player;
+  if (!life_attack || !targeting_mary) {
+    return false;
+  }
+
+  float m_max_life = player->max_life;
+  Rectangle *m_hurtbox = &player->hurtbox.rect;
+
+  bool m_at_risk = CheckCollisionRecs(*m_hurtbox, event->hitbox);
+  bool potentially_fatal = player->life <= m_max_life * 0.45;
+  bool not_at_risk = !CheckCollisionRecs(hurtbox.rect, event->hitbox);
+  return m_at_risk && potentially_fatal && not_at_risk;
+}
+
 void Xander::behavior() {
   if (!enabled) {
     return;
@@ -146,7 +217,7 @@ void Xander::behavior() {
 void Xander::rootBehavior() {
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
-    ai->setGoal(ai_goal, XanderGoals::LOOK_AT_PLR, 0.75);
+    ai->setGoal(ai_goal, XanderGoals::LOOK_AT_PLR, 0.20);
     tick_clock = 0;
   }
 
@@ -201,16 +272,23 @@ void Xander::neutralLogic() {
 
   float old_x = position.x;
   switch (ai_goal) {
-    case XanderGoals::IDLE: 
+    case XanderGoals::IDLE: {
       movement(speed_multiplier);
       break;
-    case XanderGoals::LOOK_AT_PLR:
+    } 
+    case XanderGoals::LOOK_AT_PLR: {
       direction = directionTo(player);
       ai_goal = XanderGoals::IDLE;
       break; 
-    case XanderGoals::FOLLOW_PLR:
+    }
+    case XanderGoals::FOLLOW_PLR: {
       followPlayer();
       break;
+    }
+    case XanderGoals::PROTECT_PLR: {
+      protectionLogic();
+      break;
+    }
   }
 
   has_moved = old_x != position.x;
@@ -230,6 +308,32 @@ void Xander::followPlayer() {
   }
 }
 
+void Xander::protectionLogic() {
+  Rectangle *m_rect = &player->hurtbox.rect;
+  float m_area = m_rect->width * m_rect->height;
+
+  float c_area = 0;
+  if (CheckCollisionRecs(hurtbox.rect, *m_rect)) {
+    Rectangle collision = GetCollisionRec(hurtbox.rect, *m_rect);
+    c_area = collision.width * collision.height;
+  }
+
+  moving_x = directionTo(player);
+
+  bool inside_hurtbox = m_area == c_area;
+  if (!inside_hurtbox || taking_step) {
+    acceleration = 1.0;
+
+    movement(speed_multiplier + 0.50);
+  }
+
+  protect_clock += Game::deltaTime() / protect_time;
+  if (protect_clock >= 1.0 && !taking_step) {
+    ai_goal = XanderGoals::IDLE;
+    moving_x = 0;
+  }
+}
+
 void Xander::movement(float multiplier) {
   if (moving_x == 0) {
     decelerate();
@@ -242,8 +346,11 @@ void Xander::movement(float multiplier) {
     accelerate();
   }
 
-  float factor = 2.0 - (multiplier * acceleration);
-  float step_interval = def_step_interval * factor;
+  float step_interval = getStepInterval(multiplier, true);
+  if (step_interval < 0) {
+    step_interval = 0.1;
+  }
+  
   step_clock += Game::deltaTime() / step_interval;
 
   if (taking_step) {
@@ -254,6 +361,18 @@ void Xander::movement(float multiplier) {
   if (step_clock >= 1.0) {
     takeStep();
   }
+}
+
+float Xander::getStepInterval(float multiplier, bool use_accel) {
+  float factor;
+  if (use_accel) {
+    factor = 2.0 - (multiplier * acceleration);
+  }
+  else {
+    factor = 2.0 - multiplier;
+  }
+
+  return def_step_interval * factor;
 }
 
 void Xander::takeStep() {
@@ -292,7 +411,7 @@ void Xander::takeStep() {
 void Xander::stepping(float multiplier) {
   assert(taking_step);
 
-  float speed = default_speed * multiplier;
+  float speed = step_speed * multiplier;
   float magnitude = speed * Game::deltaTime();
 
   if (Collision::checkX(this, magnitude, moving_x)) {
@@ -308,11 +427,8 @@ void Xander::stepping(float multiplier) {
 }
 
 void Xander::animationLogic() {
-  last_moved += Game::deltaTime();
-
   if (has_moved) {
     rectExCorrection(bounding_box, hurtbox);
-    last_moved = 0.0;
   }
 
   if (animation == NULL || moving_x == 0) {
