@@ -842,29 +842,14 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
     return e1->entity_type > e2->entity_type;
   }
   
-  if (e1->entity_type != EntityType::COMBATANT) {
-    return e1->entity_id < e2->entity_id;
-  }
+  if (e1->entity_type == EntityType::COMBATANT) {
+    Combatant *c1 = static_cast<Combatant*>(e1.get());
+    Combatant *c2 = static_cast<Combatant*>(e2.get());
 
-  Combatant *c1 = static_cast<Combatant*>(e1.get());
-  Combatant *c2 = static_cast<Combatant*>(e2.get());
-
-  if (c1->state != c2->state) {
-    return c1->state > c2->state;
-  }
-
-  if (c1->team != c2->team){
-    return c1->team > c2->team;
-  }
-  
-  if (c1->team == CombatantTeam::PARTY) {
-    PartyMember *p1 = static_cast<PartyMember*>(c1);
-    PartyMember *p2 = static_cast<PartyMember*>(c2);
-
-    return p1->important < p2->important;
+    return c1->z_order < c2->z_order;
   }
   else {
-    return c1->entity_id < c2->entity_id;
+    return e1->entity_id < e2->entity_id; 
   }
 }
 

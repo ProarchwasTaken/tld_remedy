@@ -27,6 +27,8 @@ Dummy::Dummy(Vector2 position, Direction direction) :
 
   resilience = 0.8;
 
+  z_order = 5;
+
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
   hurtbox.scale = {16, 56};

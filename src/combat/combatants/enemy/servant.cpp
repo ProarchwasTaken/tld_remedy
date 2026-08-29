@@ -41,6 +41,8 @@ Servant::Servant(Vector2 position, Direction direction) :
   discipline = 1;
 
   resilience = 0.8;
+  z_order = 5;
+
   ai = make_unique<ServantAI>();
 
   bounding_box.scale = {80, 80};

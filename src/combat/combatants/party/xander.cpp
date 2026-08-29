@@ -50,6 +50,7 @@ Xander::Xander(Companion *data, Mary *player) :
 
   accel_rate = 0.125;
   decel_rate = 0.5;
+  z_order = 2;
 
   ai = make_unique<XanderAI>();
 

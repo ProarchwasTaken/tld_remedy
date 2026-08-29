@@ -64,6 +64,8 @@ Erwin::Erwin(Companion *data, Mary *player):
   recovery = data->recovery;
   resilience = data->resilience;
 
+  z_order = 8;
+
   ai = make_unique<ErwinAI>();
 
   tech1 = {"Provoke", TechCostType::MORALE, 5.25};
@@ -85,7 +87,7 @@ Erwin::Erwin(Companion *data, Mary *player):
 
   sprite = &atlas.sprites[0];
   keybinds = &Game::settings.combat_keybinds;
-}
+} 
 
 Erwin::~Erwin() {
   ai.reset();
