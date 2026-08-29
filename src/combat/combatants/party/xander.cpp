@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstddef>
 #include <memory>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -12,12 +13,14 @@
 #include "utils/animation.h"
 #include "utils/collision.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
 
-using  std::make_unique;
+using std::make_unique, std::uniform_real_distribution;
 SpriteAtlas Xander::atlas("combatants", "xander_combatant");
+SoundAtlas Xander::psfx("xander");
 
 
 Xander::Xander(Companion *data, Mary *player) : 
@@ -70,11 +73,14 @@ Xander::Xander(Companion *data, Mary *player) :
 
   atlas.use();
   sprite = &atlas.sprites[0];
+
+  psfx.use();
 }
 
 Xander::~Xander() {
   ai.reset();
   atlas.release();
+  psfx.release();
 }
 
 void Xander::setEnabled(bool value) {
@@ -257,6 +263,28 @@ void Xander::takeStep() {
   animation = &anim_move;
   SpriteAnimation::progress(animation, true);
 
+
+  float pitch;
+  if (*animation->current == 6) {
+    pitch = 1.15;
+  }
+  else {
+    pitch = 0.80;
+  }
+
+  uniform_real_distribution<float> range(-0.15, 0.10);
+  pitch = pitch + range(Game::RNG);
+
+  float pan = 0.5;
+  float distance = distanceTo(player);
+  if (distance > 64) {
+    float magnitude = (64 - distance) / 1000;
+    int x_direction = player->directionTo(this);
+
+    pan += magnitude * x_direction;
+  }
+
+  psfx.play("xander_footstep", pitch, pan);
   taking_step = true;
   step_clock = 0.0;
 }

@@ -97,4 +97,5 @@ void SoundAtlas::play(string sound_name, float pitch, float pan,
 
   SetSoundVolume(data->second, volume);
   SetSoundPitch(data->second, pitch);
+  SetSoundPan(data->second, pan);
 }

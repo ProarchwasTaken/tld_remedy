@@ -7,6 +7,7 @@
 #include "data/damage.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/mary.h"
 
 
@@ -89,6 +90,7 @@ public:
 
   Mary *player;
   static SpriteAtlas atlas;
+  static SoundAtlas psfx;
 private:
   const float def_step_interval = 0.5;
   const float def_step_distance = 32; 

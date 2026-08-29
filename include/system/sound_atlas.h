@@ -17,7 +17,7 @@ public:
   void use();
   void release();
 
-  void play(std::string sound_name, float pitch = 1.0, float pan = 0.0,
+  void play(std::string sound_name, float pitch = 1.0, float pan = 0.5,
             float base_volume = 1.0, bool restart = false);
 private:
   std::string category;
