@@ -90,6 +90,11 @@ void Xander::setEnabled(bool value) {
   PartyMember::setEnabled(value);
 
   ai_goal = XanderGoals::IDLE;
+  moving_x = 0;
+
+  taking_step = false;
+  step_clock = 0.0;
+
   target = NULL;
   tick_clock = 0;
 }
@@ -167,8 +172,9 @@ void Xander::onWarning(WarningCBT *event) {
     protect_clock = 0.0;
     step_clock = 1.0;
 
-    ai_goal = XanderGoals::PROTECT_PLR;
     target = NULL;
+    ai_goal = XanderGoals::PROTECT_PLR;
+    psfx.play("xander_roar");
     PLOGI << "Now attempting to protect Mary.";
   }
 }

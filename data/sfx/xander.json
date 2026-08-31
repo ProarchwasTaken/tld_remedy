@@ -3,6 +3,10 @@
     {
       "name": "xander_footstep",
       "filename": "xander/xander_footstep.mp3"
+    },
+    {
+      "name": "xander_roar",
+      "filename": "xander/xander_roar.mp3"
     }
   ]
 }

@@ -34,11 +34,12 @@ Mending::~Mending() {
     return;
   }
 
-  if (to_be_healed > 0) {
-    PLOGI << "Effect has ended before healing could be complete.";
+  if (!interupted && to_be_healed > 0) {
+    PLOGI << "Effect has ended before healing would finish.";
     afflicted->increaseLife(to_be_healed);
   }
   else {
+    PLOGI << "Healing is now complete.";
     afflicted->sfx.play("mending_loss"); 
   }
 
@@ -77,26 +78,21 @@ void Mending::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   if (dmg_event->damage_type == DamageType::LIFE) {
     PLOGI << "Mending status effect has been interrupted.";
     end = true;
+    interupted = true;
   }
 }
 
 void Mending::logic() {
+  if (end) {
+    return;
+  }
+
   float max_life = afflicted->max_life;
-  float recovery = afflicted->recovery;
-
-  float magnitude = max_life * speed;
-  magnitude = magnitude * Game::deltaTime();
-
-  if (magnitude > to_be_healed) {
-    magnitude = to_be_healed;
-  } 
+  float magnitude = (max_life * speed) * Game::deltaTime();
 
   afflicted->increaseLife(magnitude);
   to_be_healed -= magnitude;
 
-  float life = afflicted->life;
-  if (to_be_healed <= 0 || life == max_life) {
-    PLOGI << "Healing complete.";
-    end = true;
-  }
+  end = to_be_healed <= 0 || afflicted->life == max_life;
+  interupted = end && to_be_healed > 0;
 }
