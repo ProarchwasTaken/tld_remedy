@@ -257,9 +257,7 @@ void Xander::update() {
     case CombatantState::HIT_STUN: {
       stunLogic();
       knockbackLogic();
-
-      // This is temporary!! Remove this later!!
-      sprite = &atlas.sprites[4];
+      sprite = &atlas.sprites[8];
       break;
     }
     case CombatantState::DEAD: {
