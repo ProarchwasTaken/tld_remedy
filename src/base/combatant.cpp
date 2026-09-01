@@ -248,10 +248,9 @@ float Combatant::tpDamageCalculation(float damage) {
     persist << ", " << resilience << "}";
 
   float life_damage = damage - (persist * resilience);
-  life_damage = Clamp(life_damage, 0, 9999);
+  life_damage = Clamp(life_damage, 0.5, dmg_ceiling);
 
-  bool not_zero = life_damage != 0;
-  float absorbed = 1 - ((life_damage / damage) * not_zero); 
+  float absorbed = 1 - (life_damage / damage); 
   float tenacity_damage = damage * absorbed;
   damageTenacity(tenacity_damage);
 
