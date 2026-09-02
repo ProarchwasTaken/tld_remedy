@@ -171,7 +171,9 @@ bool Erwin::shouldAcknowledge(WarningCBT *event, bool &from_target,
     return false;
   }
 
-  if (ai_goal == ErwinGoals::THIRD_PARTY) {
+  bool on_assist = ai_goal == ErwinGoals::PROVOKE || 
+    ai_goal == ErwinGoals::THIRD_PARTY;
+  if (on_assist) {
     return false;
   }
 

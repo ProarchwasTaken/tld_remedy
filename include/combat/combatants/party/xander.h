@@ -20,8 +20,7 @@ enum class XanderGoals {
   TARGETING = 4,
   RETREATING = 5,
   TAIL_WHIP = 6,
-  STEEL_WALL = 7,
-  METEOR_READY = 8
+  METEOR = 7,
 };
 
 /* The parameters that govern how Xander will behave. In this case, it's

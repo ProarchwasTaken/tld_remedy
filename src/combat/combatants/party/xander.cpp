@@ -61,10 +61,10 @@ Xander::Xander(Companion *data, Mary *player) :
   ai = make_unique<XanderAI>();
 
   tech1 = {"Tail Whip", TechCostType::LIFE, 2.0};
-  tech1.cooldown = 5.0;
+  tech1.cooldown = 10.0;
 
-  tech2 = {"Steel Wall", TechCostType::LIFE, 0.0};
-  tech2.cooldown = 8.0;
+  tech2 = {"Meteor", TechCostType::LIFE, 2.0};
+  tech2.cooldown = 15.0;
 
   afflictPersistent(data->status);
 
@@ -190,7 +190,7 @@ bool Xander::shouldAcknowledge(WarningCBT *event) {
 
   bool already_protecting = ai_goal == XanderGoals::PROTECT_PLR;
   bool on_assist = ai_goal == XanderGoals::TAIL_WHIP || 
-    ai_goal == XanderGoals::STEEL_WALL;
+    ai_goal == XanderGoals::METEOR;
   if (already_protecting || on_assist) {
     return false;
   }
