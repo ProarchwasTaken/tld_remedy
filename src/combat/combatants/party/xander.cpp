@@ -262,6 +262,9 @@ void Xander::update() {
     }
     case CombatantState::DEAD: {
       deathLogic();
+
+      SpriteAnimation::play(animation, &anim_dead, false);
+      sprite = &atlas.sprites[*animation->current];
       break;
     }
   }

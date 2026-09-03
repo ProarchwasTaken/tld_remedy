@@ -113,6 +113,7 @@ private:
   Animation anim_idle = {{0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
   Animation anim_move = {{5, 6, 7, 6}, 0.5};
+  Animation anim_dead = {{8, 4}, 0.60};
 
   bool protective = false;
   float protect_clock = 0.0;
