@@ -112,7 +112,7 @@ void Enemy::chooseTarget() {
 
 void Enemy::takeDamage(DamageData &data) {
   if (data.damage_type == DamageType::LIFE) {
-    float percentage = combo / 15.0;
+    float percentage = combo / 10.0;
     percentage = Clamp(percentage, 0.0, 1.0);
 
     float bonus = std::powf(percentage, 2);
@@ -137,7 +137,7 @@ void Enemy::takeDamage(DamageData &data) {
 
 void Enemy::finalIntercept(float &damage, DamageData &data) {
   if (data.damage_type == DamageType::MORALE) {
-    float damage_mod = 1.0 - (combo / 18.0);
+    float damage_mod = 1.0 - (combo / 10.0);
     damage_mod = Clamp(damage_mod, 0.0, 1.0);
 
     damage = damage * damage_mod;
