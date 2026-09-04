@@ -82,7 +82,10 @@ void KnifePiercer::windUp() {
 
 void KnifePiercer::action() {
   movement();
-  hitRegistration();
+
+  if (hits.size() < 2) {
+    hitRegistration();
+  }
 }
 
 void KnifePiercer::movement(float percentage) {
