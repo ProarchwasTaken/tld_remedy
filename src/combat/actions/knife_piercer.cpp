@@ -8,8 +8,10 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/stage.h"
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
+#include "combat/status_effects/vulnerable.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
@@ -151,8 +153,36 @@ void KnifePiercer::hitRegistration() {
     }
 
     if (combatant->state != CombatantState::DEAD) {
+      technicalCheck(combatant);
       hits.emplace(combatant);
     }
+  }
+}
+
+void KnifePiercer::technicalCheck(Combatant *hit_enemy) {
+  if (hit_enemy->state != CombatantState::HIT_STUN) {
+    return;
+  }
+
+  Vulnerable *vulnerable = NULL;
+  for (auto &effect : hit_enemy->status) {
+    if (effect->id == StatusID::VULNERABLE) {
+      vulnerable = static_cast<Vulnerable*>(effect.get());
+    }
+  }
+
+  if (vulnerable == NULL) {
+    return;
+  }
+
+  if (vulnerable->effect_time <= 0.50) {
+    return;
+  }
+
+  if (vulnerable->effect_clock < 0.33) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+    CombatStage::tintStage(Game::palette[48]);
+    Combatant::sfx.play("technical");
   }
 }
 

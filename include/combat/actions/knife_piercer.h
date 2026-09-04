@@ -21,6 +21,8 @@ public:
 
   void movement(float percentage = 1.0);
   void hitRegistration();
+  void technicalCheck(Combatant *hit_enemy);
+
   void performSecondHit();
 
   void endLag() override;

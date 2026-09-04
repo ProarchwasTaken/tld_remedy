@@ -15,7 +15,7 @@ public:
   void intercept(DamageData &data) override;
   void refresh(float seconds);
   void logic() override;
-private:
+
   float effect_time;
   float effect_clock = 0.0;
 };
