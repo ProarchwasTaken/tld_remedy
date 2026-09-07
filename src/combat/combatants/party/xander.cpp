@@ -8,6 +8,7 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/enemy.h"
 #include "base/combat_action.h"
 #include "data/session.h"
 #include "data/animation.h"
@@ -219,14 +220,21 @@ void Xander::behavior() {
   if (ai_goal == XanderGoals::IDLE) {
     rootBehavior();
   }
-
-  // Remove this later!
-  if (state == NEUTRAL && IsKeyPressed(KEY_L)) {
-    attack();
-  }
 }
 
 void Xander::rootBehavior() {
+  bool enemies_present = Enemy::memberCount() != 0;
+  if (enemies_present) {
+    chooseTarget();
+  }
+
+  if (target != NULL) {
+    PLOGI << "Now targeting: '" << target->name << "' [ID: " 
+      << target->entity_id << "]";
+    ai_goal = XanderGoals::TARGETING;
+    return;
+  }
+
   tick_clock += Game::deltaTime();
   if (tick_clock >= 1.0) {
     ai->setGoal(ai_goal, XanderGoals::LOOK_AT_PLR, 0.20);
@@ -240,10 +248,74 @@ void Xander::rootBehavior() {
   }
 }
 
+void Xander::targetingBehavior() {
+  assert(target != NULL);
+  if (target->state == DEAD || !target->targetable) {
+    ai_goal = XanderGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  if (ai->waiting) {
+    return;
+  }
+
+  tick_clock += Game::deltaTime();
+  if (tick_clock < 1.0) {
+    return;
+  }
+
+  tick_clock = 0.0;
+  float distance = distanceTo(target);
+  if (distance > ai->contest_distance) {
+    return;
+  }
+
+  float retreat_chance = ai->contesting.retreat_chance;
+  ai->setGoal(ai_goal, XanderGoals::RETREATING, retreat_chance);
+
+  if (ai_goal == XanderGoals::RETREATING) {
+    PLOGI << "Deciding to retreat from target.";
+    float min_retreat = ai->contesting.min_retreat;
+    float max_retreat = ai->contesting.max_retreat;
+
+    uniform_real_distribution<float> range(min_retreat, max_retreat);
+    ai->retreat_time = range(Game::RNG);
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+  float wait_chance = ai->contesting.wait_chance;
+
+  if (percentage <= wait_chance) {
+    float min_wait = ai->contesting.min_wait;
+    float max_wait = ai->contesting.max_wait;
+    ai->wait(min_wait, max_wait);
+  }
+}
+
+void Xander::chooseTarget() {
+  if (player->state == DEAD || player->target == NULL) {
+    return;
+  }
+
+  Combatant *plr_target = player->target;
+  if (plr_target->state == CombatantState::DEAD) {
+    return;
+  }
+
+  if (plr_target->targetable) {
+    assert(team != plr_target->team);
+    target = plr_target;
+  }
+}
+
 void Xander::attack() {
   unique_ptr<CombatAction> action;
   action = make_unique<HandBlade>(this);
   performAction(action);
+  ai->cooldown_clock = 0.0;
 }
 
 void Xander::update() {
@@ -292,6 +364,7 @@ void Xander::neutralLogic() {
   float old_x = position.x;
   switch (ai_goal) {
     case XanderGoals::IDLE: {
+      moving_x = 0;
       movement(speed_multiplier);
       break;
     } 
@@ -308,6 +381,14 @@ void Xander::neutralLogic() {
       protectionLogic();
       break;
     }
+    case XanderGoals::TARGETING: {
+      targetingLogic();
+      break;
+    }
+    case XanderGoals::RETREATING: {
+      retreatingLogic();
+      break;
+    }
   }
 
   has_moved = old_x != position.x;
@@ -315,7 +396,8 @@ void Xander::neutralLogic() {
 }
 
 void Xander::followPlayer() {
-  moving_x = directionTo(player);
+  direction = directionTo(player);
+  moving_x = direction;
   movement(speed_multiplier);
 
   float distance = distanceTo(player);
@@ -337,7 +419,8 @@ void Xander::protectionLogic() {
     c_area = collision.width * collision.height;
   }
 
-  moving_x = directionTo(player);
+  direction = directionTo(player);
+  moving_x = direction;
 
   bool inside_hurtbox = m_area == c_area;
   if (!inside_hurtbox || taking_step) {
@@ -353,16 +436,83 @@ void Xander::protectionLogic() {
   }
 }
 
-void Xander::movement(float multiplier) {
-  if (moving_x == 0) {
+void Xander::targetingLogic() {
+  assert(target != NULL);
+  direction = directionTo(target);
+  moving_x = direction;
+
+  if (ai->waiting) {
     decelerate();
-    step_clock = 0.0;
+    ai->waitTimer();
     return;
   }
 
+  if (taking_step || !ai->inAttackRange(this, target)) {
+    movement(speed_multiplier);
+    return;
+  }
+
+  if (ai->cooldown_clock < 1.0) {
+    return;
+  }
+
+  attack();
+
+  float retreat_chance = ai->targeting.retreat_chance;
+  ai->setGoal(ai_goal, XanderGoals::RETREATING, retreat_chance);
+
+  if (ai_goal == XanderGoals::RETREATING) {
+    PLOGI << "Retreating from target.";
+    float min_retreat = ai->targeting.min_retreat;
+    float max_retreat = ai->targeting.max_retreat;
+
+    uniform_real_distribution<float> range(min_retreat, max_retreat);
+    ai->retreat_time = range(Game::RNG);
+  }
+}
+
+void Xander::retreatingLogic() {
+  assert(target != NULL);
+  if (target->state == DEAD) {
+    ai_goal = XanderGoals::IDLE;
+    target = NULL;
+    return;
+  }
+
+  direction = directionTo(target);
+  moving_x = direction * -1;
+  movement(speed_multiplier);
+
+  ai->retreat_clock += Game::deltaTime() / ai->retreat_time;
+  if (taking_step || ai->retreat_clock < 1.0) {
+    return;
+  }
+
+  float target_chance = ai->retreating.target_chance;
+  ai->setGoal(ai_goal, XanderGoals::TARGETING, target_chance);
+
+  if (ai_goal == XanderGoals::TARGETING) {
+    float min_wait = ai->retreating.min_wait;
+    float max_wait = ai->retreating.max_wait;
+    ai->wait(min_wait, max_wait);
+  }
+  else {
+    PLOGI << "Returning to idle.";
+    ai_goal = XanderGoals::IDLE;
+    target = NULL; 
+  }
+
+  ai->retreat_clock = 0.0;
+}
+
+void Xander::movement(float multiplier) {
   if (moving_x != 0) {
-    direction = static_cast<Direction>(moving_x);
     accelerate();
+  }
+  else {
+    decelerate();
+    step_clock = 0.0;
+    return;
   }
 
   float step_interval = getStepInterval(multiplier, true);

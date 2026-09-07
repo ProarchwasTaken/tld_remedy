@@ -34,7 +34,7 @@ struct XanderAI : AIParameters {
     attack_distance = 64;
     contest_distance = 160;
 
-    attack_cooldown = 1.5;
+    attack_cooldown = 2.0;
     retreat_time = 0.5;
     wait_time = 0.5;
 
@@ -70,6 +70,8 @@ public:
 
   void behavior() override;
   void rootBehavior();
+  void targetingBehavior();
+  void chooseTarget();
 
   void attack();
 
@@ -78,6 +80,8 @@ public:
 
   void followPlayer();
   void protectionLogic();
+  void targetingLogic();
+  void retreatingLogic();
 
   void movement(float multiplier);
   float getStepInterval(float multiplier, bool use_accel);
