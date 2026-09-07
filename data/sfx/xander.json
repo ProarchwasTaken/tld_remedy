@@ -7,6 +7,14 @@
     {
       "name": "xander_roar",
       "filename": "xander/xander_roar.mp3"
+    },
+    {
+      "name": "xander_growl",
+      "filename": "xander/xander_growl.mp3"
+    },
+    {
+      "name": "xander_handblade",
+      "filename": "xander/xander_handblade.mp3"
     }
   ]
 }

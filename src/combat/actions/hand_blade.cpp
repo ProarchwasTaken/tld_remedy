@@ -24,6 +24,8 @@ HandBlade::HandBlade(Xander *user) :
 {
   name = "Hand Blade";
   this->atlas = &Xander::atlas;
+  this->sfx = &Xander::psfx;
+  assert(sfx->users() > 0);
 
   data.damage_type = DamageType::LIFE;
   data.calculation = DamageType::LIFE;
@@ -40,6 +42,8 @@ HandBlade::HandBlade(Xander *user) :
   warning_box.scale = {72, 48};
   warning_box.offset = {-36.0f + (36.0f * user->direction), -69};
   user->rectExCorrection(hitbox, warning_box);
+
+  sfx->play("xander_growl");
 }
 
 HandBlade::~HandBlade() {
@@ -60,6 +64,7 @@ void HandBlade::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[11];
+    sfx->play("xander_handblade");
   }
 }
 
