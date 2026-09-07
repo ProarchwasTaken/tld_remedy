@@ -72,13 +72,67 @@
     "duration": 500
    },
    {
-    "filename": "stun_0",
+    "filename": "s_0",
     "frame": { "x": 432, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
     "sourceSize": { "w": 144, "h": 128 },
     "duration": 500
+   },
+   {
+    "filename": "attack_0",
+    "frame": { "x": 576, "y": 128, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 250
+   },
+   {
+    "filename": "attack_1",
+    "frame": { "x": 0, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 250
+   },
+   {
+    "filename": "attack_2",
+    "frame": { "x": 144, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "attack_3",
+    "frame": { "x": 288, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 150
+   },
+   {
+    "filename": "attack_4",
+    "frame": { "x": 432, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 150
+   },
+   {
+    "filename": "attack_5",
+    "frame": { "x": 576, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 300
    }
  ],
  "meta": {
@@ -86,7 +140,7 @@
   "version": "1.3.18.3-x64",
   "image": "xander_combatant.png",
   "format": "RGBA8888",
-  "size": { "w": 720, "h": 256 },
+  "size": { "w": 720, "h": 384 },
   "scale": "1"
  }
 }

@@ -31,7 +31,7 @@ enum class XanderGoals {
  * attack. He is also very prone to disengaging from his target.*/
 struct XanderAI : AIParameters {
   XanderAI() {
-    attack_distance = 56;
+    attack_distance = 64;
     contest_distance = 160;
 
     attack_cooldown = 1.5;
@@ -70,6 +70,8 @@ public:
 
   void behavior() override;
   void rootBehavior();
+
+  void attack();
 
   void update() override;
   void neutralLogic();
@@ -110,12 +112,12 @@ private:
   bool has_moved = false;
   float preferred_plr_distance = 48;
 
+  bool protective = false;
+  float protect_clock = 0.0;
+  float protect_time = 0.20;
+
   Animation anim_idle = {{0, 0, 2, 1}, 1.5};
   Animation anim_crit = {{3, 4}, 1.0};
   Animation anim_move = {{5, 6, 7, 6}, 0.5};
   Animation anim_dead = {{8, 4}, 0.60};
-
-  bool protective = false;
-  float protect_clock = 0.0;
-  float protect_time = 0.20;
 };

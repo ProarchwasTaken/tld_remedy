@@ -16,6 +16,7 @@
 #include "utils/collision.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "combat/actions/hand_blade.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
@@ -218,6 +219,11 @@ void Xander::behavior() {
   if (ai_goal == XanderGoals::IDLE) {
     rootBehavior();
   }
+
+  // Remove this later!
+  if (state == NEUTRAL && IsKeyPressed(KEY_L)) {
+    attack();
+  }
 }
 
 void Xander::rootBehavior() {
@@ -232,6 +238,12 @@ void Xander::rootBehavior() {
     ai_goal = XanderGoals::FOLLOW_PLR;
     return;
   }
+}
+
+void Xander::attack() {
+  unique_ptr<CombatAction> action;
+  action = make_unique<HandBlade>(this);
+  performAction(action);
 }
 
 void Xander::update() {

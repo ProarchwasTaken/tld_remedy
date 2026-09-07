@@ -147,10 +147,9 @@ void BatSwing::sendWarning() {
   user->rectExCorrection(warning_hitbox);
 
   Combatant *target = user->target;
-  CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING,
-                                      user->target, type, 
-                                      warning_hitbox.rect, wind_time, 
-                                      act_time, user, true);
+  CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING, target,
+                                      type, warning_hitbox.rect, 
+                                      wind_time, act_time, user, true);
 }
 
 void BatSwing::updateHitboxOffset() {

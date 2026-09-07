@@ -152,7 +152,8 @@ enum class ActionID {
   BAT_HAILMARY,
   USE_ITEM,
   ERWIN_PROVOKE,
-  ERWIN_3RD_PARTY
+  ERWIN_3RD_PARTY,
+  XANDER_HANDBLADE
 };
 
 enum class StatusID {
