@@ -192,7 +192,7 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->offense = 12;
       companion->defense = 8;
       companion->intimid = 4;
-      companion->persist = 6;
+      companion->persist = 3;
       companion->dexterity = 4;
       companion->discipline = 1;
 

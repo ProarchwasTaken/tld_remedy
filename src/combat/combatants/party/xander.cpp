@@ -41,8 +41,8 @@ Xander::Xander(Companion *data, Mary *player) :
   morale = init_morale;
   max_morale = data->max_morale;
 
-  tenacity = 4.5;
-  tp_natural = 0.15;
+  tenacity = 3.0;
+  tp_natural = 0.1;
   tp_threshold = tp_natural;
   tp_regen_delay = 15;
 
@@ -219,6 +219,9 @@ void Xander::behavior() {
 
   if (ai_goal == XanderGoals::IDLE) {
     rootBehavior();
+  }
+  else if (ai_goal == XanderGoals::TARGETING) {
+    targetingBehavior();
   }
 }
 
@@ -453,6 +456,7 @@ void Xander::targetingLogic() {
   }
 
   if (ai->cooldown_clock < 1.0) {
+    moving_x = 0;
     return;
   }
 
@@ -550,7 +554,6 @@ void Xander::takeStep() {
 
   animation = &anim_move;
   SpriteAnimation::progress(animation, true);
-
 
   float pitch;
   if (*animation->current == 6) {

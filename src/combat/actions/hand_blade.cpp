@@ -38,10 +38,7 @@ HandBlade::HandBlade(Xander *user) :
 
   hitbox.scale = {51, 32};
   hitbox.offset = {-25.5f + (25.5f * user->direction), -61};
-
-  warning_box.scale = {72, 48};
-  warning_box.offset = {-36.0f + (36.0f * user->direction), -69};
-  user->rectExCorrection(hitbox, warning_box);
+  user->rectExCorrection(hitbox);
 
   sfx->play("xander_growl");
 }
@@ -53,7 +50,7 @@ HandBlade::~HandBlade() {
 void HandBlade::sendWarning() {
   Combatant *target = user->target;
   CombatantHandler::queue<WarningCBT>(user, CombatantEVT::WARNING, target,
-                                      type, warning_box.rect, wind_time,
+                                      type, hitbox.rect, wind_time,
                                       act_time, user, true);
 }
 
@@ -157,6 +154,5 @@ void HandBlade::drawDebug() {
   }
 
   color.a = 128;
-  DrawRectangleLinesEx(warning_box.rect, 1, ORANGE);
   DrawRectangleRec(hitbox.rect, color);
 }

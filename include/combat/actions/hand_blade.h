@@ -29,7 +29,6 @@ public:
   void drawDebug() override;
 private:
   RectEx hitbox;
-  RectEx warning_box;
   DamageData data;
 
   const int attack_weight = 2;

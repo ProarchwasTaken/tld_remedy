@@ -31,16 +31,16 @@ enum class XanderGoals {
  * attack. He is also very prone to disengaging from his target.*/
 struct XanderAI : AIParameters {
   XanderAI() {
-    attack_distance = 64;
-    contest_distance = 160;
+    attack_distance = 46;
+    contest_distance = 128;
 
-    attack_cooldown = 2.0;
+    attack_cooldown = 3.0;
     retreat_time = 0.5;
     wait_time = 0.5;
 
-    contesting = {0.60, 0.40, 0.80, 0.60, 0.5, 1.0};
-    targeting = {0.80, 0.80, 1.5};
-    retreating = {0.30, 0.30, 0.75};
+    contesting = {0.50, 1.0, 2.0, 0.40, 0.25, 0.5};
+    targeting = {0.80, 2.0, 4.0};
+    retreating = {0.30, 1.5, 3.0};
     damaged.retaliation_chance = 1.0;
   };
 };

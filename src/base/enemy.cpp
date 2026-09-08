@@ -98,7 +98,7 @@ void Enemy::chooseTarget() {
 
   float difference = c_distance - m_distance;
   int p_difference = c_priority - m_priority;
-  float chance = 1.25 + (difference / 200) - (0.25 * p_difference);
+  float chance = 1.10 + (difference / 200) - (0.10 * p_difference);
 
   uniform_real_distribution<float> range(0.0, 1.0);
   float roll = range(Game::RNG);
