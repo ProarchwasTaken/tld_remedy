@@ -61,7 +61,7 @@ public:
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
 
-  void warningHandling(WarningCBT *event);
+  void onWarning(WarningCBT *event);
 
   /* Determines whether Erwin should acknowledge any given warning event
    * in the first place.*/
@@ -81,8 +81,8 @@ public:
   float getEvadeChance(WarningCBT *event, bool from_target, 
                        bool in_range);
 
-  void damageHandling(TookDamageCBT *event);
-  void evadeHandling(EvadedAttackCBT *event);
+  void onDamageTaken(TookDamageCBT *event);
+  void onEvade(EvadedAttackCBT *event);
   bool retaliation(Combatant *assailant, float chance);
 
   void behavior() override;

@@ -116,11 +116,11 @@ void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
   if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
     TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-    damageHandling(dmg_event);
+    onDamageTaken(dmg_event);
   }
 }
 
-void Mary::damageHandling(TookDamageCBT *event) {
+void Mary::onDamageTaken(TookDamageCBT *event) {
   Combatant *potential_target = NULL;
   if (event->sender == this) {
     assert(event->assailant != NULL);
@@ -138,8 +138,7 @@ void Mary::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  PLOGD << "Acknowledging damage event of which the Player Combatant was"
-    " involved in.";
+  PLOGD << "Acknowledging damage event of which the Mary was involved in";
   float distance = distanceTo(potential_target);
   if (distance <= 96) {
     target = potential_target;

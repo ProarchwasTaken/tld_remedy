@@ -39,7 +39,7 @@ public:
   void useItem(ItemID item, float use_time, PartyMember *target);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void damageHandling(TookDamageCBT *event);
+  void onDamageTaken(TookDamageCBT *event);
 
   void behavior() override;
   void movementInput(bool gamepad);

@@ -111,26 +111,38 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 
   bool from_itself = event->sender == this;
+  switch (event->event_type) {
+    case CombatantEVT::WARNING: {
+      if (!from_itself) {
+        auto *warn_event = static_cast<WarningCBT*>(event.get());
+        onWarning(warn_event);
+      }
 
-  if (!from_itself && event->event_type == CombatantEVT::WARNING) {
-    WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
-    warningHandling(warn_event);
-    return;
-  }
+      break;
+    }
+    case CombatantEVT::TOOK_DAMAGE: {
+      if (from_itself) {
+        auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+        onDamageTaken(dmg_event);
+      }
 
-  if (from_itself && event->event_type == CombatantEVT::TOOK_DAMAGE) {
-    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-    damageHandling(dmg_event);
-    return;
-  }
+      break;
+    }
+    case CombatantEVT::EVADED_ATTACK: {
+      if (from_itself) {
+        auto *evade_event = static_cast<EvadedAttackCBT*>(event.get());
+        onEvade(evade_event);
+      }
 
-  if (from_itself && event->event_type == CombatantEVT::EVADED_ATTACK) {
-    auto *evade_event = static_cast<EvadedAttackCBT*>(event.get());
-    evadeHandling(evade_event);
+      break;
+    }
+    default: {
+      break;
+    }
   }
 }
 
-void Erwin::warningHandling(WarningCBT *event) {
+void Erwin::onWarning(WarningCBT *event) {
   assert(event->sender != this);
 
   bool from_target;
@@ -261,7 +273,7 @@ float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
   return chance;
 }
 
-void Erwin::damageHandling(TookDamageCBT *event) {
+void Erwin::onDamageTaken(TookDamageCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }
@@ -276,7 +288,7 @@ void Erwin::damageHandling(TookDamageCBT *event) {
   }
 }
 
-void Erwin::evadeHandling(EvadedAttackCBT *event) {
+void Erwin::onEvade(EvadedAttackCBT *event) {
   assert(event->sender == this);
 
   Combatant *assailant = event->assailant;
@@ -487,7 +499,7 @@ void Erwin::chooseTarget() {
     }
 
     if (player->target != combatant) {
-      float distance = distanceTo(combatant);
+      float distance = player->distanceTo(combatant);
       enemies.emplace(std::make_pair(distance, combatant));
     }
   }

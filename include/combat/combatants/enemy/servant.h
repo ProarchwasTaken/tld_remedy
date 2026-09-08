@@ -50,14 +50,14 @@ public:
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
 
-  void warningHandling(WarningCBT *event);
+  void onWarning(WarningCBT *event);
   bool shouldAcknowledge(WarningCBT *event, bool &from_target,
                          bool &in_range);
   float chanceCalculation(WarningCBT *event, bool from_target, 
                           bool in_range);
   void warningReaction(WarningCBT *event);
 
-  void damageHandling(TookDamageCBT *event);
+  void onDamageTaken(TookDamageCBT *event);
   void retaliation(Combatant *assailant, float chance);
 
   void behavior() override;

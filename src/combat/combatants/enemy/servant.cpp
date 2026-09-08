@@ -65,20 +65,30 @@ void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Enemy::evaluateEvent(event);
 
   bool from_itself = event->sender == this;
+  switch (event->event_type) {
+    case CombatantEVT::WARNING: {
+      if (!from_itself) {
+        auto *warn_event = static_cast<WarningCBT*>(event.get());
+        onWarning(warn_event);
+      }
 
-  if (!from_itself && event->event_type == CombatantEVT::WARNING) {
-    WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
-    warningHandling(warn_event);
-  }
+      break;
+    }
+    case CombatantEVT::TOOK_DAMAGE: {
+      if (from_itself) {
+        auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+        onDamageTaken(dmg_event);
+      }
 
-  if (from_itself && event->event_type == CombatantEVT::TOOK_DAMAGE) {
-    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-    damageHandling(dmg_event);
-    return;
+      break;
+    }
+    default: {
+      break;
+    }   
   }
 }
 
-void Servant::warningHandling(WarningCBT *event) {
+void Servant::onWarning(WarningCBT *event) {
   assert(event->sender != this);
 
   bool from_target;
@@ -167,7 +177,7 @@ void Servant::warningReaction(WarningCBT *event) {
   retaliation(event->assailant, retaliation_chance);
 }
 
-void Servant::damageHandling(TookDamageCBT *event) {
+void Servant::onDamageTaken(TookDamageCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }
