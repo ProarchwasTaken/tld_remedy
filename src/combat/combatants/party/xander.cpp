@@ -146,15 +146,28 @@ void Xander::setKnockback(float velocity, float seconds,
 void Xander::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
 
-  bool from_itself = event->sender == this;
-  if (!enabled || from_itself) {
+  if (!enabled) {
     return;
   }
 
+  bool from_itself = event->sender == this;
   switch (event->event_type) {
     case CombatantEVT::WARNING: {
       WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
       onWarning(warn_event);
+      break;
+    }
+    case CombatantEVT::TOOK_DAMAGE: {
+      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+      bool from_mary = dmg_event->sender == player;
+
+      if (from_mary) {
+        onMaryDamageTaken(dmg_event);
+      }
+      else if (from_itself) {
+        onDamageTaken(dmg_event);
+      }
+
       break;
     }
     default: {
@@ -210,6 +223,76 @@ bool Xander::shouldAcknowledge(WarningCBT *event) {
   bool potentially_fatal = player->life <= m_max_life * 0.45;
   bool not_at_risk = !CheckCollisionRecs(hurtbox.rect, event->hitbox);
   return m_at_risk && potentially_fatal && not_at_risk;
+}
+
+void Xander::onDamageTaken(TookDamageCBT *event) {
+  if (event->resulting_state != HIT_STUN) {
+    return;
+  }
+
+  if (event->assailant != target) {
+    float retaliation_chance = ai->damaged.retaliation_chance;
+    retaliation(event->assailant, retaliation_chance);
+  }
+
+  if (ai_goal != XanderGoals::TARGETING) {
+    return;
+  }
+
+  float retreat_chance = ai->damaged.retreat_chance;
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  if (percentage <= retreat_chance) {
+    PLOGI << "Deciding to return to Mary's position.";
+    ai_goal = XanderGoals::FOLLOW_PLR;
+    step_clock = 0.5;
+    acceleration = 0.5;
+    psfx.play("xander_growl", 1.25);
+  }
+}
+
+void Xander::onMaryDamageTaken(TookDamageCBT *event) {
+  if (event->damage_type != DamageType::LIFE) {
+    return;
+  }
+
+  if (event->assailant != target) {
+    float retaliation_chance = ai->damaged.retaliation_chance;
+    retaliation_chance += 0.25;
+    retaliation(event->assailant, retaliation_chance);
+  }
+
+  PLOGI << "Deciding to return to Mary's position.";
+  ai_goal = XanderGoals::FOLLOW_PLR;
+  acceleration = 1.0;
+  step_clock = 1.0;
+  psfx.play("xander_growl", 0.75);
+}
+
+void Xander::retaliation(Combatant *assailant, float chance) {
+  if (assailant == NULL || assailant == target) {
+    return;
+  }
+
+  if (!assailant->targetable || team == assailant->team) {
+    return;
+  }
+
+  float distance = distanceTo(assailant);
+  if (distance > ai->contest_distance) {
+    return;
+  }
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float percentage = range(Game::RNG);
+
+  if (percentage <= chance) {
+    target = assailant;
+    PLOGI << "'" << name << "' [ID: " << entity_id << "] has decided to" 
+    << "retaliate against: '" << target->name << "' [ID: " << 
+      target->entity_id << "]";
+  }
 }
 
 void Xander::behavior() {

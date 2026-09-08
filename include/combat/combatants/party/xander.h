@@ -41,7 +41,9 @@ struct XanderAI : AIParameters {
     contesting = {0.50, 1.0, 2.0, 0.40, 0.25, 0.5};
     targeting = {0.80, 2.0, 4.0};
     retreating = {0.30, 1.5, 3.0};
-    damaged.retaliation_chance = 1.0;
+
+    damaged.retreat_chance = 0.4;
+    damaged.retaliation_chance = 0.4;
   };
 };
 
@@ -67,6 +69,10 @@ public:
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
   void onWarning(WarningCBT *event);
   bool shouldAcknowledge(WarningCBT *event);
+
+  void onDamageTaken(TookDamageCBT *event);
+  void onMaryDamageTaken(TookDamageCBT *event);
+  void retaliation(Combatant *assailant, float chance);
 
   void behavior() override;
   void rootBehavior();
