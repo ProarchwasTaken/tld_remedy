@@ -90,6 +90,7 @@ public:
 private:
   const float default_speed = 60;
   int moving_x = 0;
+  int prev_dir = 0;
   bool has_moved = false;
 
   float anim_move_speed = 0.226;

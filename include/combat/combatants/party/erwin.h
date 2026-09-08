@@ -138,6 +138,8 @@ private:
 
   const float default_speed = 68;
   int moving_x = 0;
+  int prev_dir = 0;
+
   bool has_moved = false;
   bool attempt_evade = false;
 

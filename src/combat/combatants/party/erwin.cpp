@@ -754,14 +754,8 @@ void Erwin::retreatingLogic() {
     return;
   }
 
-  float difference = position.x - target->position.x;
-  if (difference > 0) {
-    moving_x = RIGHT;
-  }
-  else {
-    moving_x = LEFT; 
-  }
-
+  direction = directionTo(target);
+  moving_x = direction * -1;
   movement(speed_multiplier);
 
   ai->retreat_clock += Game::deltaTime() / ai->retreat_time;
@@ -810,7 +804,7 @@ void Erwin::dodgingLogic() {
     return;
   }
 
-  if (acceleration != 0.0) {
+  if (acceleration > 0.0) {
     decelerate();
   }
 
@@ -868,26 +862,26 @@ void Erwin::thirdPartyLogic() {
 }
 
 void Erwin::movement(float multiplier) {
-  if (moving_x == 0 && acceleration == 0) {
-    return;
-  }
-
   if (moving_x != 0) {
-    direction = static_cast<Direction>(moving_x);
     accelerate();
+    prev_dir = moving_x;
   }
   else {
     decelerate();
   }
 
+  if (acceleration == 0.0) {
+    return;
+  }
+
   float speed = (default_speed * multiplier) * acceleration;
   float magnitude = speed * Game::deltaTime();
 
-  if (Collision::checkX(this, magnitude, moving_x)) {
-    Collision::snapX(this, moving_x);
+  if (Collision::checkX(this, magnitude, prev_dir)) {
+    Collision::snapX(this, prev_dir);
   }
   else {
-    position.x += magnitude * direction; 
+    position.x += magnitude * prev_dir; 
   }
 }
 
