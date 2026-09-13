@@ -7,11 +7,10 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
-#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
-#include "combat/system/evt_handler.h"
+#include "combat/hud/toasts.h"
 #include "combat/hud/combo.h"
 
 using std::unique_ptr, std::string;
@@ -53,10 +52,12 @@ void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
     damage_total = damage_dealt;
   }
 
-  hit_clock = 0.0;
-
-  if (dmg_event->stun_time > 0) {
+  int combo = Enemy::comboCount();
+  if (combo >= 2 && dmg_event->stun_time > 0) {
     displayed_combo = Enemy::comboCount();
+    state = ACTIVE;
+    hit_clock = 0.0;
+
     stun_time = dmg_event->stun_time;
     stun_clock = 0.0;
     end_clock = 0.0;
@@ -64,13 +65,20 @@ void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 }
 
 void ComboHud::update() {
-  if (stun_clock != 1.0) {
-    stunTimer();
+  switch (state) {
+    case ACTIVE: {
+      stunTimer();
+      break;
+    }
+    case FADING: {
+      endTimer();
+      break;
+    }
+    default: {
+      break;
+    }
   }
-  else if (end_clock != 1.0) {
-    endTimer();
-  }
-
+  
   if (toast_clock < 1.0) {
     toast_clock += Game::deltaTime() / toast_cooldown;
   }
@@ -79,12 +87,6 @@ void ComboHud::update() {
 void ComboHud::stunTimer() {
   stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
-
-  if (stun_clock == 1.0) {
-    startComboToast();
-    damage_dealt = 0;
-    previous_combo = displayed_combo;
-  }
 }
 
 void ComboHud::endTimer() {
@@ -92,23 +94,31 @@ void ComboHud::endTimer() {
   end_clock = Clamp(end_clock, 0.0, 1.0);
 
   if (end_clock == 1.0) {
+    state = HIDDEN;
     displayed_combo = 0;
     damage_total = 0;
   }
 }
 
-void ComboHud::startComboToast() {
+void ComboHud::onComboEnd(CombatToasts *toasts) {
+  selectToast(toasts);
+  damage_dealt = 0;
+  previous_combo = displayed_combo;
+  state = FADING;
+}
+
+void ComboHud::selectToast(CombatToasts *toasts) {
   string sound_name;
   if (displayed_combo >= 8) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 4);
+    toasts->startToast(4);
     sound_name = "combo_fantastic";
   }
   else if (displayed_combo >= 5) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 3); 
+    toasts->startToast(3);
     sound_name = "combo_great";
   }
   else if (displayed_combo >= 3) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 2); 
+    toasts->startToast(2);
     sound_name = "combo_good";
   }
 
@@ -124,7 +134,7 @@ void ComboHud::startComboToast() {
 }
 
 void ComboHud::draw() {
-  if (end_clock == 1.0 || displayed_combo <= 1) {
+  if (state == HIDDEN) {
     return;
   }
 

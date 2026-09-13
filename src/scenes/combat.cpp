@@ -554,6 +554,11 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       entities.push_back(std::move(afterimage));
       break;
     }
+    case CombatEVT::COMBO_BROKEN: {
+      PLOGD << "Event detected: ComboBrokenCB";
+      combo_hud->onComboEnd(toasts.get());
+      break;
+    }
     case CombatEVT::OPEN_ITEM_HUD: {
       PLOGD << "Event detected: OpenItemHud";
       item_hud->enable();

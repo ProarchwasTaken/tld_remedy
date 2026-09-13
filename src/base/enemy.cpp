@@ -40,6 +40,7 @@ void Enemy::updateStunnedCount() {
 
   if (combo > 0 && stunned == 0) {
     PLOGI << "Combo has been broken. Score: " << combo;
+    CombatHandler::raise<CombatEvent>(CombatEVT::COMBO_BROKEN);
     combo = 0;
   }
 }
