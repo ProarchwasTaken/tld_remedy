@@ -247,12 +247,12 @@ enum class CombatEVT {
 };
 
 enum class CombatantEVT {
-  TOOK_DAMAGE,
+  DAMAGE_TAKEN,
   MORALE_GAINED,
   EFFECT_GAINED,
   EFFECT_LOST,
   WARNING,
-  PROJ_WARNING,
+  WARNING_PROJ,
   EVADED_ATTACK
 };
 

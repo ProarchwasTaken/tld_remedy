@@ -256,8 +256,8 @@ void Projectile::warningProcess() {
       PLOGI << "Sending warning to COMBATANT: '" << combatant->name <<
       "' [ID: " << combatant->entity_id << "]";
 
-      CombatantHandler::queue<ProjWarningCBT>(this, 
-                                              CombatantEVT::PROJ_WARNING,
+      CombatantHandler::queue<WarningProjCBT>(this, 
+                                              CombatantEVT::WARNING_PROJ,
                                               combatant, 
                                               *collision.point,
                                               collision.intersect,

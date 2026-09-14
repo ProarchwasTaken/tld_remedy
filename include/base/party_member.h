@@ -25,7 +25,7 @@ public:
   virtual void setEnabled(bool value);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void moraleShare(GainedMoraleCBT *event);
+  void moraleShare(MoraleGainedCBT *event);
 
   void takeDamage(DamageData &data) override;
   void impDamageProcessing(DamageData &data, bool not_demo, bool in_crit);

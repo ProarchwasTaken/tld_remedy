@@ -66,11 +66,11 @@ void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 
   switch (event->event_type) {
-    case CombatantEVT::TOOK_DAMAGE: {
+    case CombatantEVT::DAMAGE_TAKEN: {
       PLOGD << "Acknowledging TookDamage event sent by: '" << user->name
         << "' [ID: " << user->entity_id << "]";
       
-      auto *evt_damage = static_cast<TookDamageCBT*>(event.get());
+      auto *evt_damage = static_cast<DamageTakenCBT*>(event.get());
       damageEventHandling(evt_damage);
       break;
     }
@@ -121,7 +121,7 @@ void LifeHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 }
 
-void LifeHud::damageEventHandling(TookDamageCBT *event) {
+void LifeHud::damageEventHandling(DamageTakenCBT *event) {
   if (event->damage_type == DamageType::LIFE) {
     float life_lost = event->damage_taken;
     prev_life = (user->life + life_lost) / user->max_life;

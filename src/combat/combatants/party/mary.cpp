@@ -114,13 +114,13 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
 void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
 
-  if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
-    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  if (event->event_type == CombatantEVT::DAMAGE_TAKEN) {
+    auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
     onDamageTaken(dmg_event);
   }
 }
 
-void Mary::onDamageTaken(TookDamageCBT *event) {
+void Mary::onDamageTaken(DamageTakenCBT *event) {
   Combatant *potential_target = NULL;
   if (event->sender == this) {
     assert(event->assailant != NULL);

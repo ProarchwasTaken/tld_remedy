@@ -13,7 +13,7 @@ public:
   void assign(PartyMember *user);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
-  void damageEventHandling(TookDamageCBT *event);
+  void damageEventHandling(DamageTakenCBT *event);
   void update();
   void criticalFlash();
   void demoralizedFlash();

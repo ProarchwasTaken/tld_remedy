@@ -70,8 +70,8 @@ public:
   void onWarning(WarningCBT *event);
   bool shouldAcknowledge(WarningCBT *event);
 
-  void onDamageTaken(TookDamageCBT *event);
-  void onMaryDamageTaken(TookDamageCBT *event);
+  void onDamageTaken(DamageTakenCBT *event);
+  void onMaryDamageTaken(DamageTakenCBT *event);
   void retaliation(Combatant *assailant, float chance);
 
   void behavior() override;

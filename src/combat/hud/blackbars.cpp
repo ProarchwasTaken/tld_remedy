@@ -82,11 +82,11 @@ void BlackBars::resetTargetValues() {
 }
 
 void BlackBars::evaluateEvent(unique_ptr<CombatantEvent> &event) {
-  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+  if (event->event_type != CombatantEVT::DAMAGE_TAKEN) {
     return;
   }
 
-  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
   if (dmg_event->damage_type != DamageType::LIFE) {
     return;
   }

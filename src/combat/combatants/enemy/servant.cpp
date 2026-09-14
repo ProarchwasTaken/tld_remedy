@@ -74,9 +74,9 @@ void Servant::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
       break;
     }
-    case CombatantEVT::TOOK_DAMAGE: {
+    case CombatantEVT::DAMAGE_TAKEN: {
       if (from_itself) {
-        auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+        auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
         onDamageTaken(dmg_event);
       }
 
@@ -177,7 +177,7 @@ void Servant::warningReaction(WarningCBT *event) {
   retaliation(event->assailant, retaliation_chance);
 }
 
-void Servant::onDamageTaken(TookDamageCBT *event) {
+void Servant::onDamageTaken(DamageTakenCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }

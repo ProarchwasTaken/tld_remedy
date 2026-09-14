@@ -24,7 +24,7 @@ public:
   ~EnemyHud();
   void assign(Mary *&player, PartyMember *&companion);
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
-  void damageHandling(Combatant *sender, TookDamageCBT *event);
+  void damageHandling(Combatant *sender, DamageTakenCBT *event);
 
   void update();
   void targetCheck(PartyMember *member);

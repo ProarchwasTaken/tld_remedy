@@ -31,11 +31,11 @@ ComboHud::~ComboHud() {
 }
 
 void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
-  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+  if (event->event_type != CombatantEVT::DAMAGE_TAKEN) {
     return;
   }
 
-  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
   Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
 
   bool from_enemy = victim->team == CombatantTeam::ENEMY;

@@ -57,7 +57,7 @@ public:
                           bool in_range);
   void warningReaction(WarningCBT *event);
 
-  void onDamageTaken(TookDamageCBT *event);
+  void onDamageTaken(DamageTakenCBT *event);
   void retaliation(Combatant *assailant, float chance);
 
   void behavior() override;

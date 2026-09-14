@@ -42,13 +42,13 @@ void EnemyHud::assign(Mary *&player, PartyMember *&companion) {
 }
 
 void EnemyHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
-  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+  if (event->event_type != CombatantEVT::DAMAGE_TAKEN) {
     return;
   }
 
   assert(event->sender->entity_type == COMBATANT);
   Combatant *sender = static_cast<Combatant*>(event->sender);
-  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
 
   if (sender->team == CombatantTeam::ENEMY) {
     PLOGI << "Acknowledging TookDamage event sent by '" << sender->name
@@ -57,7 +57,7 @@ void EnemyHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 }
 
-void EnemyHud::damageHandling(Combatant *sender, TookDamageCBT *dmg_event)
+void EnemyHud::damageHandling(Combatant *sender, DamageTakenCBT *dmg_event)
 {
   for (TargetData &data : targets) {
     if (sender == data.target) {

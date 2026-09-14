@@ -157,8 +157,8 @@ void Xander::evaluateEvent(unique_ptr<CombatantEvent> &event) {
       onWarning(warn_event);
       break;
     }
-    case CombatantEVT::TOOK_DAMAGE: {
-      TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+    case CombatantEVT::DAMAGE_TAKEN: {
+      auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
       bool from_mary = dmg_event->sender == player;
 
       if (from_mary) {
@@ -225,7 +225,7 @@ bool Xander::shouldAcknowledge(WarningCBT *event) {
   return m_at_risk && potentially_fatal && not_at_risk;
 }
 
-void Xander::onDamageTaken(TookDamageCBT *event) {
+void Xander::onDamageTaken(DamageTakenCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }
@@ -252,7 +252,7 @@ void Xander::onDamageTaken(TookDamageCBT *event) {
   }
 }
 
-void Xander::onMaryDamageTaken(TookDamageCBT *event) {
+void Xander::onMaryDamageTaken(DamageTakenCBT *event) {
   if (event->damage_type != DamageType::LIFE) {
     return;
   }

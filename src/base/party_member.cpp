@@ -64,8 +64,8 @@ void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Combatant::evaluateEvent(event);
 
   switch (event->event_type) {
-    case CombatantEVT::TOOK_DAMAGE: {
-      auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+    case CombatantEVT::DAMAGE_TAKEN: {
+      auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
       Combatant *assailant = dmg_event->assailant;
       DamageType dmg_type = dmg_event->damage_type;
 
@@ -77,7 +77,7 @@ void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
       break;
     }
     case CombatantEVT::MORALE_GAINED: {
-      auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
+      auto *mp_event = static_cast<MoraleGainedCBT*>(event.get());
       moraleShare(mp_event);
       break;
     }
@@ -87,7 +87,7 @@ void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   }
 }
 
-void PartyMember::moraleShare(GainedMoraleCBT *event) {
+void PartyMember::moraleShare(MoraleGainedCBT *event) {
   assert(event->sender->entity_type == EntityType::COMBATANT);
   Combatant *sender = static_cast<Combatant*>(event->sender);
 
@@ -312,7 +312,7 @@ void PartyMember::increaseMorale(float magnitude, bool mp_share) {
   bool eligible = mp_share && !demoralized && memberCount() > 1;
   if (eligible) {
     PLOGD << "'" << name << "' is eligible to trigger MP Share";
-    CombatantHandler::queue<GainedMoraleCBT>(this, 
+    CombatantHandler::queue<MoraleGainedCBT>(this, 
                                              CombatantEVT::MORALE_GAINED, 
                                              magnitude);
   }

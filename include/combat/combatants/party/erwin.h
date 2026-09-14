@@ -81,7 +81,7 @@ public:
   float getEvadeChance(WarningCBT *event, bool from_target, 
                        bool in_range);
 
-  void onDamageTaken(TookDamageCBT *event);
+  void onDamageTaken(DamageTakenCBT *event);
   void onEvade(EvadedAttackCBT *event);
   bool retaliation(Combatant *assailant, float chance);
 

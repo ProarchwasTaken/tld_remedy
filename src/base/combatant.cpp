@@ -143,11 +143,12 @@ void Combatant::takeDamage(DamageData &data) {
   }
 
   PLOGD << "Proceeding to queue TookDamage event.";
-  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
-                                         damage_sustained, 
-                                         data.damage_type, state,
-                                         data.stun_time, data.stun_type,
-                                         data.assailant);
+  CombatantHandler::queue<DamageTakenCBT>(this, 
+                                          CombatantEVT::DAMAGE_TAKEN,
+                                          damage_sustained, 
+                                          data.damage_type, state,
+                                          data.stun_time, data.stun_type,
+                                          data.assailant);
 
   PLOGI << "Damage procedure has reached it's conclusion.";
 }

@@ -120,9 +120,9 @@ void Erwin::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 
       break;
     }
-    case CombatantEVT::TOOK_DAMAGE: {
+    case CombatantEVT::DAMAGE_TAKEN: {
       if (from_itself) {
-        auto *dmg_event = static_cast<TookDamageCBT*>(event.get());
+        auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
         onDamageTaken(dmg_event);
       }
 
@@ -273,7 +273,7 @@ float Erwin::getEvadeChance(WarningCBT *event, bool from_target,
   return chance;
 }
 
-void Erwin::onDamageTaken(TookDamageCBT *event) {
+void Erwin::onDamageTaken(DamageTakenCBT *event) {
   if (event->resulting_state != HIT_STUN) {
     return;
   }
