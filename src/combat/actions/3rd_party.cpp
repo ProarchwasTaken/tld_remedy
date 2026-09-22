@@ -21,7 +21,7 @@ using std::set, std::pair, std::make_unique, std::unique_ptr;
 
 
 ThirdParty::ThirdParty(Erwin *user): 
-  CombatAction(ActionID::ERWIN_3RD_PARTY, ActionType::OFFENSE_HP, user, 
+  CombatAction(ActionID::ERWIN_3RDPARTY, ActionType::OFFENSE_HP, user, 
                0.30, 0.10, 0.50)
 {
   name = "3rd Party";
