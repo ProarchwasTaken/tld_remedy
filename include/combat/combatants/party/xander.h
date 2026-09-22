@@ -59,6 +59,7 @@ public:
 
   void setEnabled(bool value) override;
 
+  void finalIntercept(float &damage, DamageData &data) override;
   void damageMorale(float magnitude) override;
   void enterHitstun(DamageData &data) override;
   bool nullifyHitstun(DamageData &data);

@@ -46,7 +46,7 @@
    },
    {
     "filename": "walk_0",
-    "frame": { "x": 0, "y": 128, "w": 144, "h": 128 },
+    "frame": { "x": 720, "y": 0, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -55,7 +55,7 @@
    },
    {
     "filename": "walk_1",
-    "frame": { "x": 144, "y": 128, "w": 144, "h": 128 },
+    "frame": { "x": 0, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -64,7 +64,7 @@
    },
    {
     "filename": "walk_2",
-    "frame": { "x": 288, "y": 128, "w": 144, "h": 128 },
+    "frame": { "x": 144, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -73,7 +73,7 @@
    },
    {
     "filename": "s_0",
-    "frame": { "x": 432, "y": 128, "w": 144, "h": 128 },
+    "frame": { "x": 288, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -82,7 +82,7 @@
    },
    {
     "filename": "attack_0",
-    "frame": { "x": 576, "y": 128, "w": 144, "h": 128 },
+    "frame": { "x": 432, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -91,7 +91,7 @@
    },
    {
     "filename": "attack_1",
-    "frame": { "x": 0, "y": 256, "w": 144, "h": 128 },
+    "frame": { "x": 576, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -100,7 +100,7 @@
    },
    {
     "filename": "attack_2",
-    "frame": { "x": 144, "y": 256, "w": 144, "h": 128 },
+    "frame": { "x": 720, "y": 128, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -109,7 +109,7 @@
    },
    {
     "filename": "attack_3",
-    "frame": { "x": 288, "y": 256, "w": 144, "h": 128 },
+    "frame": { "x": 0, "y": 256, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -118,7 +118,7 @@
    },
    {
     "filename": "attack_4",
-    "frame": { "x": 432, "y": 256, "w": 144, "h": 128 },
+    "frame": { "x": 144, "y": 256, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
@@ -127,20 +127,74 @@
    },
    {
     "filename": "attack_5",
-    "frame": { "x": 576, "y": 256, "w": 144, "h": 128 },
+    "frame": { "x": 288, "y": 256, "w": 144, "h": 128 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
     "sourceSize": { "w": 144, "h": 128 },
     "duration": 300
+   },
+   {
+    "filename": "tail whip_0",
+    "frame": { "x": 432, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 175
+   },
+   {
+    "filename": "tail whip_1",
+    "frame": { "x": 576, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 175
+   },
+   {
+    "filename": "tail whip_2",
+    "frame": { "x": 720, "y": 256, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 175
+   },
+   {
+    "filename": "tail whip_3",
+    "frame": { "x": 0, "y": 384, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "tail whip_4",
+    "frame": { "x": 144, "y": 384, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "tail whip_5",
+    "frame": { "x": 288, "y": 384, "w": 144, "h": 128 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 128 },
+    "sourceSize": { "w": 144, "h": 128 },
+    "duration": 500
    }
  ],
  "meta": {
   "app": "http://www.aseprite.org/",
-  "version": "1.3.18.3-x64",
+  "version": "1.3.18.5-x64",
   "image": "xander_combatant.png",
   "format": "RGBA8888",
-  "size": { "w": 720, "h": 384 },
+  "size": { "w": 864, "h": 512 },
   "scale": "1"
  }
 }

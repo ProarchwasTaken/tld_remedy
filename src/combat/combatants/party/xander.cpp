@@ -12,6 +12,7 @@
 #include "base/combat_action.h"
 #include "data/session.h"
 #include "data/animation.h"
+#include "data/damage.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
@@ -99,6 +100,15 @@ void Xander::setEnabled(bool value) {
 
   target = NULL;
   tick_clock = 0;
+}
+
+void Xander::finalIntercept(float &damage, DamageData &data) {
+  if (data.damage_type == DamageType::MORALE) {
+    damage = damage / 2;
+  }
+  else {
+    PartyMember::finalIntercept(damage, data);
+  }
 }
 
 void Xander::damageMorale(float magnitude) {

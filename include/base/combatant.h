@@ -20,8 +20,8 @@ template <typename EventType>
 using EventPool = std::vector<std::unique_ptr<EventType>>;
 
 enum CombatantState {
-  ACTION,
   NEUTRAL,
+  ACTION,
   HIT_STUN,
   DEAD
 };
