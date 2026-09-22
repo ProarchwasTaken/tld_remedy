@@ -40,6 +40,7 @@ HandBlade::HandBlade(Xander *user) :
   hitbox.offset = {-25.5f + (25.5f * user->direction), -61};
   user->rectExCorrection(hitbox);
 
+  sendWarning();
   sfx->play("xander_growl");
 }
 
