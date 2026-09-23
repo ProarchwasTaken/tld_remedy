@@ -59,6 +59,7 @@ Xander::Xander(Companion *data, Mary *player) :
   recovery = data->recovery;
   resilience = data->resilience;
 
+  default_deplete_delay = 1.5;
   accel_rate = 0.125;
   decel_rate = 0.5;
   z_order = 2;

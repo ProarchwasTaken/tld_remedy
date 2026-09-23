@@ -80,9 +80,8 @@ public:
   static bool for_glory;
 protected:
   bool enabled = true;
+  float default_deplete_delay = 0.5;
 private:
   static int member_count;
-  constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;
-
   SpriteAtlas *atlas;
 };

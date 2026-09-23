@@ -107,7 +107,7 @@ void PartyMember::takeDamage(DamageData &data) {
   Combatant::takeDamage(data);
 
   deplete_clock = 0.0;
-  deplete_delay = DEFAULT_DEPLETE_DELAY;
+  deplete_delay = default_deplete_delay;
 
   if (data.damage_type == DamageType::MORALE && state == HIT_STUN) {
     Color tint = Game::palette[42];
@@ -339,7 +339,7 @@ void PartyMember::increaseExhaustion(float magnitude) {
     deplete_delay = 3.0;
   }
   else {
-    deplete_delay = DEFAULT_DEPLETE_DELAY; 
+    deplete_delay = default_deplete_delay; 
   }
 
   deplete_clock = 0.0;
