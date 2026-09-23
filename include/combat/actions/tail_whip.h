@@ -45,6 +45,6 @@ private:
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
 
-  Animation anim_windup = {{15, 16, 17}, 0.175};
+  Animation anim_windup = {{15, 16, 17}, 0.200};
   Animation anim_end = {{19, 20}, 0.10};
 };

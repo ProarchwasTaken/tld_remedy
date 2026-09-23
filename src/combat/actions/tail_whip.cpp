@@ -23,15 +23,13 @@ using std::pair, std::vector;
 
 TailWhip::TailWhip(Xander *user) :
   CombatAction(ActionID::XANDER_TAILWHIP, ActionType::OFFENSE_HP, user, 
-      0.625, 0.15, 0.6)
+      0.8, 0.15, 0.6)
 {
   name = "Tail Whip";
   this->user = user;
   this->atlas = &Xander::atlas;
   this->sfx = &Xander::psfx;
   assert(sfx->users() > 0);
-
-  user->sprite = &atlas->sprites[10];
 
   whip_hitbox.scale = {72, 32};
   whip_hitbox.offset = {-36.0f + (36.5f * user->direction), -51};
@@ -59,7 +57,7 @@ void TailWhip::initBodyData() {
   data.stun_time = 0.40;
   data.stun_type = StunType::NORMAL;
 
-  data.knockback = 250;
+  data.knockback = 200;
 
   data.assailant = user;
   data.hitbox = &body_hitbox.rect;
@@ -78,7 +76,7 @@ void TailWhip::initWhipData() {
   data.stun_time = 0.60;
   data.stun_type = StunType::NORMAL;
 
-  data.knockback = 300;
+  data.knockback = 160;
 
   data.assailant = user;
   data.hitbox = &whip_hitbox.rect;
@@ -99,7 +97,8 @@ void TailWhip::sendWarning() {
 
 void TailWhip::windUp() {
   float elapsed_time = state_clock * wind_time;
-  if (elapsed_time < 0.10) {
+  if (elapsed_time < 0.2) {
+    user->sprite = &atlas->sprites[10];
     return;
   }
 
