@@ -7,6 +7,7 @@
 #include <raymath.h>
 #include "enums.h"
 #include "base/combatant.h"
+#include "base/party_member.h"
 #include "base/projectile.h"
 #include "base/combat_action.h"
 #include "data/combat_event.h"
@@ -15,6 +16,8 @@
 #include "combat/system/evt_handler.h"
 #include "combat/sub_weapons/bat.h"
 #include "combat/actions/bat_swing.h"
+#include "combat/actions/tail_whip.h"
+#include "combat/combatants/party/xander.h"
 #include "combat/projectiles/baseball.h"
 #include <plog/Log.h>
 
@@ -63,6 +66,29 @@ Baseball::Baseball(Combatant *owner, Vector2 position) :
   float angle_offset = 3 * owner_direction;
   launch(300, -90 + angle_offset);
   predictTrajectory(0.25);
+  xanderCheck();
+}
+
+void Baseball::xanderCheck() {
+  for (Combatant *combatant : Combatant::existing_combatants) {
+    if (combatant == owner) {
+      continue;
+    }
+
+    if (combatant->state == DEAD) {
+      continue;
+    }
+
+    if (combatant->team != CombatantTeam::PARTY) {
+      continue;
+    }
+
+    PartyMember *member = static_cast<PartyMember*>(combatant);
+    if (member->id == PartyMemberID::XANDER) {
+      PLOGI << "Detected Xander PartyMember";
+      xander = static_cast<Xander*>(member);
+    }
+  }
 }
 
 void Baseball::update() {
@@ -99,25 +125,83 @@ void Baseball::swingDetection() {
     return;
   }
 
+  bool mary_hit = checkMary();
+
+  bool xander_hit = false;
+  if (xander != NULL) {
+    xander_hit = checkXander();
+  }
+
+  if (mary_hit || xander_hit) {
+    trajectory.clear();
+    predictTrajectory(0.025);
+    detectOncoming();
+    hit_by_swing = true;
+  }
+}
+
+bool Baseball::checkMary() {
   bool using_action = owner != NULL && owner->state == ACTION;
   if (!using_action) {
-    return;
+    return false;
   }
 
   assert(owner->action != nullptr);
   if (owner->action->id != ActionID::BAT_SWING) {
-    return;
+    return false;
   }
 
   BatSwing *action = static_cast<BatSwing*>(owner->action.get());
   if (action->phase != ActionPhase::ACTIVE) {
-    return;
+    return false;
   }
 
   Rectangle *swing_hitbox = &action->hitbox.rect;
   if (CheckCollisionRecs(*swing_hitbox, hitbox.rect)) {
     PLOGI << "Detected that BatSwing has hit the projectile.";
     swingSuccessful();
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool Baseball::checkXander() {
+  assert(xander != NULL);
+  bool using_action = xander->state == ACTION;
+  if (!using_action) {
+    return false;
+  }
+
+  assert(xander->action != nullptr);
+  if (xander->action->id != ActionID::XANDER_TAILWHIP) {
+    return false;
+  }
+
+  TailWhip *action = static_cast<TailWhip*>(xander->action.get());
+  switch (action->phase) {
+    case ActionPhase::WIND_UP: {
+      if (action->state_clock < 0.80) {
+        return false;
+      }
+    }
+    case ActionPhase::ACTIVE: {
+      break;
+    }
+    case ActionPhase::END_LAG: {
+      return false;
+    }
+  }
+
+  Rectangle *whip_hitbox = &action->whip_hitbox.rect;
+  if (CheckCollisionRecs(*whip_hitbox, hitbox.rect)) {
+    PLOGI << "Detected that TailWhip has hit the projectile.";
+    whipSuccessful();
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
@@ -134,13 +218,25 @@ void Baseball::swingSuccessful() {
   gravity = 0.5;
   drag = 25;
 
-  trajectory.clear();
   launch(400, -90 + angle_offset);
-  predictTrajectory(0.025);
-  detectOncoming();
-
   sfx->play("bat_swing_hit");
-  hit_by_swing = true;
+}
+
+void Baseball::whipSuccessful() {
+  assert(!hit_by_swing);
+  PLOGD << "Boosting a projectile's atk by: " << xander->offense;
+  atk += xander->offense;
+  data.stun_time = 0.50;
+
+  int owner_direction = owner->direction;
+  float angle_offset = 85 * owner_direction;
+
+  terminal_velocity = 450;
+  gravity = 0.35;
+  drag = 25;
+
+  launch(550, -90 + angle_offset);
+  sfx->play("bat_swing_hit");
 }
 
 void Baseball::afterimages() {

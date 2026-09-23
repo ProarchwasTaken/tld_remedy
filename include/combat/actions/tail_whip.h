@@ -30,8 +30,9 @@ public:
   void endLag() override;
 
   void drawDebug() override;
-private:
+
   RectEx whip_hitbox;
+private:
   RectEx body_hitbox;
 
   int atk;
