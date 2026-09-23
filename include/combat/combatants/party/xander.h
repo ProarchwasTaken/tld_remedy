@@ -6,6 +6,7 @@
 #include "data/session.h"
 #include "data/damage.h"
 #include "data/animation.h"
+#include "data/keybinds.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
@@ -76,11 +77,17 @@ public:
   void retaliation(Combatant *assailant, float chance);
 
   void behavior() override;
+  void assistInput();
+  void callTailWhip();
+  bool lightAssistCondition();
+  bool heavyAssistCondition();
+
   void rootBehavior();
   void targetingBehavior();
   void chooseTarget();
 
   void attack();
+  void tailwhip();
 
   void update() override;
   void neutralLogic();
@@ -89,6 +96,7 @@ public:
   void protectionLogic();
   void targetingLogic();
   void retreatingLogic();
+  void tailWhipLogic();
 
   void movement(float multiplier);
   float getStepInterval(float multiplier, bool use_accel);
@@ -106,18 +114,21 @@ public:
   XanderGoals ai_goal = XanderGoals::IDLE;
   std::unique_ptr<AIParameters> ai;
   float tick_clock = 0.0;
-
   Mary *player;
-  static SpriteAtlas atlas;
-  static SoundAtlas psfx;
-private:
-  const float def_step_interval = 0.5;
-  const float def_step_distance = 32; 
-  const float step_speed = 90;
 
   float step_clock = 0.0;
   bool taking_step = false;
   Vector2 intended_pos;
+
+  static SpriteAtlas atlas;
+  static SoundAtlas psfx;
+private:
+  CombatKeybinds *keybinds;
+
+  const float def_step_interval = 0.5;
+  const float def_step_distance = 32; 
+  const float step_speed = 90;
+
 
   int moving_x = 0;
   bool has_moved = false;

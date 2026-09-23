@@ -61,13 +61,14 @@ Color AssistCmdHud::decideTechColor(Technique *tech) {
 
   switch (tech->type) {
     case TechCostType::LIFE: {
-      bool below_one = companion->life <= 1.0;
-      if (below_one) {
+      if (companion->critical_life) {
         return Game::palette[32]; 
       }
 
       float cost = companion->calculateLifeCost(tech->cost);
-      bool one_more_use = companion->life - cost <= 1.0;
+      float threshold = companion->max_life * 0.30;
+
+      bool one_more_use = companion->life - cost <= threshold;
       if (one_more_use) { 
         return Game::palette[26];
       }
@@ -98,7 +99,7 @@ bool AssistCmdHud::isUnusable(Technique *tech) {
     return companion->demoralized;
   }
   else {
-    return companion->demoralized || companion->life <= 1;
+    return companion->demoralized || companion->critical_life;
   }
 }
 

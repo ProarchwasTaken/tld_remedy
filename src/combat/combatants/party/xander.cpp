@@ -16,9 +16,11 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "utils/input.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "combat/actions/hand_blade.h"
+#include "combat/actions/tail_whip.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
@@ -78,9 +80,10 @@ Xander::Xander(Companion *data, Mary *player) :
   rectExCorrection(bounding_box, hurtbox);
 
   atlas.use();
-  sprite = &atlas.sprites[0];
-
   psfx.use();
+
+  sprite = &atlas.sprites[0];
+  keybinds = &Game::settings.combat_keybinds;
 }
 
 Xander::~Xander() {
@@ -164,7 +167,10 @@ void Xander::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   switch (event->event_type) {
     case CombatantEVT::WARNING: {
       WarningCBT *warn_event = static_cast<WarningCBT*>(event.get());
-      onWarning(warn_event);
+      if (!from_itself) {
+        onWarning(warn_event);
+      }
+
       break;
     }
     case CombatantEVT::DAMAGE_TAKEN: {
@@ -310,12 +316,54 @@ void Xander::behavior() {
     return;
   }
 
+  assistInput();
+
   if (ai_goal == XanderGoals::IDLE) {
     rootBehavior();
   }
   else if (ai_goal == XanderGoals::TARGETING) {
     targetingBehavior();
   }
+}
+
+void Xander::assistInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  bool light_input = Input::pressed(keybinds->light_assist, gamepad);
+  if (light_input && lightAssistCondition()) {
+    callTailWhip();
+  }
+}
+
+void Xander::callTailWhip() {
+  ai_goal = XanderGoals::TAIL_WHIP;
+  tech1.clock = 0.0;
+
+  float distance = distanceTo(player);
+  if (distance <= preferred_plr_distance) {
+    direction = player->direction;
+  }
+
+  step_clock = 1.0;
+  taking_step = false;
+  sfx.play("assist_call");
+}
+
+bool Xander::lightAssistCondition() {
+  bool off_cooldown = tech1.clock >= 1.0;
+  float cost = calculateLifeCost(tech1.cost);
+
+  if (off_cooldown && !critical_life) {
+    return true;
+  }
+  else {
+    sfx.play("action_denied");
+    return false;
+  }
+}
+
+bool Xander::heavyAssistCondition() {
+  sfx.play("action_denied");
+  return false;
 }
 
 void Xander::rootBehavior() {
@@ -411,7 +459,17 @@ void Xander::attack() {
   unique_ptr<CombatAction> action;
   action = make_unique<HandBlade>(this);
   performAction(action);
+
   ai->cooldown_clock = 0.0;
+}
+
+void Xander::tailwhip() {
+  float cost = calculateLifeCost(tech1.cost);
+  increaseExhaustion(cost);
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<TailWhip>(this);
+  performAction(action);
 }
 
 void Xander::update() {
@@ -483,6 +541,10 @@ void Xander::neutralLogic() {
     }
     case XanderGoals::RETREATING: {
       retreatingLogic();
+      break;
+    }
+    case XanderGoals::TAIL_WHIP: {
+      tailWhipLogic();
       break;
     }
   }
@@ -600,6 +662,27 @@ void Xander::retreatingLogic() {
   }
 
   ai->retreat_clock = 0.0;
+}
+
+void Xander::tailWhipLogic() {
+  if (player->state == DEAD) {
+    PLOGI << "Aborting Tail Whip goal.";
+    ai_goal = XanderGoals::IDLE;
+    return;
+  }
+
+  float distance = distanceTo(player);
+  if (distance <= preferred_plr_distance) {
+    tailwhip();
+    ai_goal = XanderGoals::IDLE;
+    return;
+  }
+
+  direction = directionTo(player);
+  moving_x = direction;
+
+  acceleration = 1.0;
+  movement(speed_multiplier + 0.50);
 }
 
 void Xander::movement(float multiplier) {
