@@ -15,6 +15,14 @@
     {
       "name": "xander_handblade",
       "filename": "xander/xander_handblade.mp3"
+    },
+    {
+      "name": "xander_twirl",
+      "filename": "xander/xander_twirl.mp3"
+    },
+    {
+      "name": "xander_whip",
+      "filename": "xander/xander_whip.mp3"
     }
   ]
 }

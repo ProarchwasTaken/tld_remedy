@@ -40,6 +40,7 @@ TailWhip::TailWhip(Xander *user) :
   atk = user->offense + user->dexterity;
   initBodyData();
   sendWarning();
+  sfx->play("xander_twirl");
 }
 
 TailWhip::~TailWhip() {
@@ -65,8 +66,8 @@ void TailWhip::initBodyData() {
   data.a_atk = &atk;
   data.power = 0.5;
 
-  data.hit_stop = 0.10;
-  data.apply_hitstop = true;
+  data.hit_stop = 0.0;
+  data.apply_hitstop = false;
 }
 
 void TailWhip::initWhipData() {
@@ -117,6 +118,7 @@ void TailWhip::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[18];
+    sfx->play("xander_whip");
   }
 }
 
