@@ -131,7 +131,7 @@ void Enemy::takeDamage(DamageData &data) {
     return;
   }
 
-  if (data.damage_type == DamageType::LIFE) {
+  if (data.hit_stop > 0 && data.damage_type == DamageType::LIFE) {
     Game::sleep(data.hit_stop);
   }
 }

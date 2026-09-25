@@ -31,8 +31,8 @@ TailWhip::TailWhip(Xander *user) :
   this->sfx = &Xander::psfx;
   assert(sfx->users() > 0);
 
-  whip_hitbox.scale = {72, 32};
-  whip_hitbox.offset = {-36.0f + (36.5f * user->direction), -51};
+  whip_hitbox.scale = {72, 24};
+  whip_hitbox.offset = {-36.0f + (36.5f * user->direction), -43};
   body_hitbox.scale = {70, 40};
   body_hitbox.offset = {-30, -44};
   user->rectExCorrection(whip_hitbox, body_hitbox);

@@ -32,11 +32,11 @@ public:
   void drawDebug() override;
 
   RectEx whip_hitbox;
+  DamageData data;
 private:
   RectEx body_hitbox;
 
   int atk;
-  DamageData data;
   const int attack_weight = 3;
 
   bool performed_check = false;

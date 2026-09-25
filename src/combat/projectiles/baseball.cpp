@@ -5,6 +5,7 @@
 #include <utility>
 #include <raylib.h>
 #include <raymath.h>
+#include "combat/combatants/party/mary.h"
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
@@ -14,6 +15,7 @@
 #include "utils/comparisons.h"
 #include "system/sprite_atlas.h"
 #include "combat/system/evt_handler.h"
+#include "combat/system/stage.h"
 #include "combat/sub_weapons/bat.h"
 #include "combat/actions/bat_swing.h"
 #include "combat/actions/tail_whip.h"
@@ -66,10 +68,10 @@ Baseball::Baseball(Combatant *owner, Vector2 position) :
   float angle_offset = 3 * owner_direction;
   launch(300, -90 + angle_offset);
   predictTrajectory(0.25);
-  xanderCheck();
+  findXander();
 }
 
-void Baseball::xanderCheck() {
+void Baseball::findXander() {
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant == owner) {
       continue;
@@ -85,7 +87,7 @@ void Baseball::xanderCheck() {
 
     PartyMember *member = static_cast<PartyMember*>(combatant);
     if (member->id == PartyMemberID::XANDER) {
-      PLOGI << "Detected Xander PartyMember";
+      PLOGI << "Found Xander PartyMember";
       xander = static_cast<Xander*>(member);
     }
   }
@@ -93,6 +95,15 @@ void Baseball::xanderCheck() {
 
 void Baseball::update() {
   ownerCheck();
+
+  if (end_crit_effect) {
+    critEnd();
+  }
+
+  if (use_crit_effect) {
+    critEffect();
+    return;
+  }
 
   if (dying) {
     deathTimer();
@@ -138,6 +149,10 @@ void Baseball::swingDetection() {
     detectOncoming();
     hit_by_swing = true;
   }
+
+  if (mary_hit && xander_hit) {
+    criticalHit();
+  }
 }
 
 bool Baseball::checkMary() {
@@ -152,7 +167,7 @@ bool Baseball::checkMary() {
   }
 
   BatSwing *action = static_cast<BatSwing*>(owner->action.get());
-  if (action->phase != ActionPhase::ACTIVE) {
+  if (action->clashed || action->phase != ActionPhase::ACTIVE) {
     return false;
   }
 
@@ -236,7 +251,67 @@ void Baseball::whipSuccessful() {
   drag = 25;
 
   launch(550, -90 + angle_offset);
-  sfx->play("bat_swing_hit");
+}
+
+void Baseball::criticalHit() {
+  assert(!use_crit_effect && !end_crit_effect);
+  PLOGI << "Mary and Xander have landed a Critical Hit!";
+  CombatStage::tintStage(Game::palette[48]);
+  CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 24.0f);
+
+  assert(owner != NULL && owner->action != nullptr);
+  if (owner->action->id == ActionID::BAT_SWING) {
+    BatSwing *action = static_cast<BatSwing*>(owner->action.get());
+    action->data.hit_stop = 0;
+  }
+
+  assert(xander != NULL && xander->action != nullptr);
+  if (xander->action->id == ActionID::XANDER_TAILWHIP) {
+    TailWhip *action = static_cast<TailWhip*>(xander->action.get());
+    action->data.hit_stop = 0;
+  }
+
+  owner->sprite = &Mary::atlas.sprites[44];
+  owner->intangible = true;
+  xander->intangible = true;
+
+  data.stun_type = StunType::STAGGER;
+  use_crit_effect = true;
+
+  Combatant::sfx.play("evade_perfect");
+  Game::sleep(0.375);
+  Game::bgm->pause();
+}
+
+void Baseball::critEffect() {
+  assert(xander != NULL);
+  CombatStage::tintStage(Game::palette[48]);
+
+  assert(xander->action != NULL);
+  if (xander->action->phase == ActionPhase::ACTIVE) {
+    CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 48.0f);
+    end_crit_effect = true;
+
+    sfx->play("bat_swing_hit", 1.20);
+    Game::sleep(0.466);
+  }
+}
+
+void Baseball::critEnd() {
+  CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+  Game::bgm->resume();
+
+  sfx->play("bat_swing_clash");
+  Combatant::sfx.play("technical");
+
+  if (owner->action->id != ActionID::GHOST_STEP) {
+    owner->intangible = false;
+  }
+
+  xander->intangible = false;
+
+  use_crit_effect = false;
+  end_crit_effect = false;
 }
 
 void Baseball::afterimages() {
@@ -290,6 +365,10 @@ void Baseball::inflictDamage(set<pair<float, Combatant*>> &hits) {
   PLOGD << "Victim selected: '" << victim->name << "' [ID: " << 
     victim->entity_id << "]";
   victim->takeDamage(data);
+
+  if (!data.intercepted && data.stun_type == StunType::STAGGER) {
+    Combatant::sfx.play("damage_stagger");
+  }
 }
 
 void Baseball::onEndLife() {

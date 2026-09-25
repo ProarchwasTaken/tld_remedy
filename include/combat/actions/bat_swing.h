@@ -35,17 +35,17 @@ public:
 
   void drawDebug() override;
 
+  bool clashed = false;
   RectEx hitbox;
+  DamageData data;
 private:
   Mary *user;
   SoundAtlas *sfx;
 
-  DamageData data;
 
   const int attack_weight = 2;
   bool attack_connected = false;
 
-  bool clashed = false;
   bool use_clash_effect = false;
 
   SpriteAtlas *atlas;
