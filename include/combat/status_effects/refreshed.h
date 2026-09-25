@@ -25,5 +25,5 @@ private:
   float rec_gained = 0.0;
 
   float effect_clock = 0.0;
-  float effect_time = 20.0;
+  float effect_time = 10.0;
 };

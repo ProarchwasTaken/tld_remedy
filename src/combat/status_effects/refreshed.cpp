@@ -17,7 +17,7 @@ Refreshed::Refreshed(PartyMember *afflicted) :
   this->afflicted = afflicted;
 
   float dexterity = afflicted->dexterity;
-  dex_gained = ceilf(dexterity * 0.20);
+  dex_gained = ceilf(dexterity * 0.50);
 
   float speed = afflicted->speed_multiplier;
   speed_gained = speed * 0.20;
@@ -31,8 +31,7 @@ Refreshed::Refreshed(PartyMember *afflicted) :
 }
 
 void Refreshed::init(bool hide_text) {
-  PLOGI << "Increasing the afflicted's dexterity, speed, and recovery "
-  << "by 20%";
+  PLOGI << "Increasing the afflicted's dexterity, speed, and recovery.";
   afflicted->dexterity += dex_gained;
   afflicted->speed_multiplier += speed_gained;
   afflicted->recovery += rec_gained;
