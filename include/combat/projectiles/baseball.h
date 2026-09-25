@@ -21,7 +21,7 @@ public:
   void swingDetection();
 
   bool checkMary();
-  bool checkXander();
+  bool checkXander(bool mary_hit);
 
   void swingSuccessful();
   void whipSuccessful();

@@ -154,7 +154,7 @@ void Baseball::swingDetection() {
 
   bool xander_hit = false;
   if (xander != NULL) {
-    xander_hit = checkXander();
+    xander_hit = checkXander(mary_hit);
   }
 
   if (mary_hit || xander_hit) {
@@ -186,7 +186,7 @@ bool Baseball::checkMary() {
   }
 
   Rectangle *swing_hitbox = &action->hitbox.rect;
-  if (CheckCollisionRecs(*swing_hitbox, hitbox.rect)) {
+  if (CheckCollisionPointRec(position, *swing_hitbox)) {
     PLOGI << "Detected that BatSwing has hit the projectile.";
     swingSuccessful();
     return true;
@@ -196,7 +196,7 @@ bool Baseball::checkMary() {
   }
 }
 
-bool Baseball::checkXander() {
+bool Baseball::checkXander(bool mary_hit) {
   assert(xander != NULL);
   bool using_action = xander->state == ACTION;
   if (!using_action) {
@@ -211,7 +211,7 @@ bool Baseball::checkXander() {
   TailWhip *action = static_cast<TailWhip*>(xander->action.get());
   switch (action->phase) {
     case ActionPhase::WIND_UP: {
-      if (action->state_clock < 0.80) {
+      if (!mary_hit || action->state_clock < 0.80) {
         return false;
       }
     }
@@ -224,7 +224,7 @@ bool Baseball::checkXander() {
   }
 
   Rectangle *whip_hitbox = &action->whip_hitbox.rect;
-  if (CheckCollisionRecs(*whip_hitbox, hitbox.rect)) {
+  if (CheckCollisionPointRec(position, *whip_hitbox)) {
     PLOGI << "Detected that TailWhip has hit the projectile.";
     whipSuccessful();
     return true;
