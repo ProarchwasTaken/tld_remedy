@@ -14,6 +14,7 @@
 class Baseball : public Projectile {
 public:
   Baseball(Combatant *owner, Vector2 position);
+  bool isOwnerMary();
   void findXander();
 
   void update() override;

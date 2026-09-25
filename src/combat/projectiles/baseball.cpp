@@ -71,6 +71,20 @@ Baseball::Baseball(Combatant *owner, Vector2 position) :
   findXander();
 }
 
+bool Baseball::isOwnerMary() {
+  if (owner == NULL || owner->team != CombatantTeam::PARTY) {
+    return false;
+  }
+
+  PartyMember *member = static_cast<PartyMember*>(owner);
+  if (member->id == PartyMemberID::MARY) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
 void Baseball::findXander() {
   for (Combatant *combatant : Combatant::existing_combatants) {
     if (combatant == owner) {
@@ -265,14 +279,20 @@ void Baseball::criticalHit() {
     action->data.hit_stop = 0;
   }
 
+  owner->sprite = &Mary::atlas.sprites[44];
+  owner->intangible = true;
+
   assert(xander != NULL && xander->action != nullptr);
   if (xander->action->id == ActionID::XANDER_TAILWHIP) {
     TailWhip *action = static_cast<TailWhip*>(xander->action.get());
     action->data.hit_stop = 0;
   }
 
-  owner->sprite = &Mary::atlas.sprites[44];
-  owner->intangible = true;
+  CombatHandler::raise<CreateAfterImgCB>(
+    CombatEVT::CREATE_AFTERIMAGE, &Xander::atlas, xander->sprite, 
+    xander->bounding_box.position, xander->direction, 0.65f, 
+    Game::palette[51]);
+
   xander->intangible = true;
 
   terminal_velocity = 600;
@@ -296,6 +316,10 @@ void Baseball::critEffect() {
 
     xander->sprite = &Xander::atlas.sprites[21];
     end_crit_effect = true;
+    CombatHandler::raise<CreateAfterImgCB>(
+      CombatEVT::CREATE_AFTERIMAGE, &Xander::atlas, xander->sprite, 
+      xander->bounding_box.position, xander->direction, 0.75f, 
+      Game::palette[51]);
 
     sfx->play("bat_swing_hit", 1.20);
     Game::sleep(0.466);
@@ -317,6 +341,11 @@ void Baseball::critEnd() {
 
   use_crit_effect = false;
   end_crit_effect = false;
+
+  if (isOwnerMary()) {
+    Mary *mary = static_cast<Mary*>(owner);
+    mary->tech1.clock = 0.0;
+  }
 }
 
 void Baseball::afterimages() {
