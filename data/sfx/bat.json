@@ -27,6 +27,10 @@
     {
       "name": "baseball_grounded",
       "filename": "bat/baseball_grounded.mp3"
+    },
+    {
+      "name": "baseball_critical",
+      "filename": "bat/baseball_critical.mp3"
     }
   ]
 }

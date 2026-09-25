@@ -275,6 +275,9 @@ void Baseball::criticalHit() {
   owner->intangible = true;
   xander->intangible = true;
 
+  terminal_velocity = 600;
+  velocity = 800;
+
   data.stun_type = StunType::STAGGER;
   use_crit_effect = true;
 
@@ -290,6 +293,8 @@ void Baseball::critEffect() {
   assert(xander->action != NULL);
   if (xander->action->phase == ActionPhase::ACTIVE) {
     CombatHandler::raise<SetBarCB>(CombatEVT::BAR_SET, 0.0f, 48.0f);
+
+    xander->sprite = &Xander::atlas.sprites[21];
     end_crit_effect = true;
 
     sfx->play("bat_swing_hit", 1.20);
@@ -301,7 +306,7 @@ void Baseball::critEnd() {
   CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
   Game::bgm->resume();
 
-  sfx->play("bat_swing_clash");
+  sfx->play("baseball_critical");
   Combatant::sfx.play("technical");
 
   if (owner->action->id != ActionID::GHOST_STEP) {
