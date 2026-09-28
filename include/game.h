@@ -36,11 +36,27 @@ enum class GameState {
   SLEEP,
 };
 
+enum class BootMode {
+  DEFAULT,
+  QUICK_LOAD,
+  CUSTOM
+};
+
+struct BootOptions {
+  BootMode mode = BootMode::DEFAULT;
+  SessionID save_file;
+  TroopID troop;
+  SubWeaponID sub_weapon = SubWeaponID::KNIFE;
+  CompanionID companion = CompanionID::ERWIN;
+  std::string map = "db_05";
+};
 
 class Game {
 public:
-  Game(int argc, char *argv[]);
-  void init();
+  void init(int argc, char *argv[]);
+  BootOptions evalutateArgs(int argc, char *argv[]);
+  void setupRaylib();
+  void evaluateOptions(BootOptions &opt);
   ~Game();
 
   void loadPersonal();
@@ -168,9 +184,4 @@ private:
 
   std::unique_ptr<Scene> scene;
   static std::unique_ptr<Scene> reserve;
-
-  bool quick_load = false;
-  std::string ql_map = "db_05";
-  SubWeaponID ql_weapon = SubWeaponID::KNIFE;
-  CompanionID ql_companion = CompanionID::ERWIN;
 };

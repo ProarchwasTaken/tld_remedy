@@ -71,31 +71,63 @@ double Game::session_playtime = 0.0;
 bool Game::run_timer = false;
 
 
-Game::Game(int argc, char *argv[]) {
+void Game::init(int argc, char *argv[]) {
+  BootOptions opt = evalutateArgs(argc, argv);
+  loadPersonal();
+  setupRaylib();
+ 
+  system_clock::time_point today = system_clock::now();
+  long seed = system_clock::to_time_t(today);
+  RNG.seed(seed);
+  PLOGD << "RNG Seed: " << seed;
+
+  menu_sfx.use();
+  bgm = make_unique<MusicPlayer>();
+  noise = make_unique<NoiseEffect>();
+
+  evaluateOptions(opt);
+  PLOGI << "Time Scale: " << time_scale;
+  PLOGI << "Everything should be good to go!";
+}
+
+BootOptions Game::evalutateArgs(int argc, char *argv[]) {
   PLOGI << "Evaluating command line arguments.";
+  BootOptions boot;
 
   for (int x = 0; x < argc; x++) {
     string arg = argv[x];
+    bool last_arg = x + 1 == argc;
 
-    if (arg == "-m" && x + 1 != argc) {
-      quick_load = true;
-      ql_map = argv[x + 1];
+    if (arg == "-m" && !last_arg) {
+      boot.mode = BootMode::CUSTOM;
+      boot.map = argv[x + 1];
     }
-    else if (arg == "--bat") {
-      ql_weapon = SubWeaponID::BAT;
-      quick_load = true;
+    else if (arg == "-l" && !last_arg) {
+      boot.mode = BootMode::QUICK_LOAD;
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+      boot.save_file = static_cast<SessionID>(id);
     }
-    else if (arg == "--xander") {
-      ql_companion = CompanionID::XANDER;
-      quick_load = true;
+    else if (arg == "-w" && !last_arg) {
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+
+      boot.sub_weapon = static_cast<SubWeaponID>(id);
+    }
+    else if (arg == "-c" && !last_arg) {
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+
+      boot.companion = static_cast<CompanionID>(id);
     }
   }
+
+  return boot;
 }
 
-void Game::init() {
-  loadPersonal();
+void Game::setupRaylib() {
   InitWindow(window_res.x, window_res.y, 
-             "Project Remedy - v" VERSION " " VER_STAGE);
+             "THT: Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
@@ -114,27 +146,37 @@ void Game::init() {
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   med_font = LoadFont("graphics/fonts/med_font.png");
   defineColorPalette();
-  
-  system_clock::time_point today = system_clock::now();
-  long seed = system_clock::to_time_t(today);
-  RNG.seed(seed);
-  PLOGD << "RNG Seed: " << seed;
+}
 
-  menu_sfx.use();
-  bgm = make_unique<MusicPlayer>();
-  noise = make_unique<NoiseEffect>();
+void Game::evaluateOptions(BootOptions &opt) {
+  PLOGI << "Evaluating Boot options...";
 
-  if (!quick_load) {
-    scene = make_unique<TitleScene>();
+  switch (opt.mode) {
+    case BootMode::DEFAULT: {
+      PLOGI << "Booting into the Title Screen.";
+      scene = make_unique<TitleScene>();
+      break;
+    }
+    case BootMode::QUICK_LOAD: {
+      bool successful = loadGame(opt.save_file);
+      if (!successful) {
+        PLOGE << "Failed to load save file! Falling back to default.";
+        opt.mode = BootMode::DEFAULT;
+        evaluateOptions(opt);
+      }
+
+      scene.swap(reserve);
+      game_state = GameState::FADING_IN;
+      break;
+    }
+    case BootMode::CUSTOM: {
+      PLOGI << "Booting into the Field Scene with custom parameters.";
+      scene = make_unique<FieldScene>(opt.map, opt.sub_weapon, 
+                                      opt.companion);
+      run_timer = true;
+      break;
+    }
   }
-  else {
-    PLOGI << "Quick loading map: " << ql_map;
-    scene = make_unique<FieldScene>(ql_map, ql_weapon, ql_companion);
-    run_timer = true;
-  }
-
-  PLOGI << "Time Scale: " << time_scale;
-  PLOGI << "Everything should be good to go!";
 }
 
 Game::~Game() {

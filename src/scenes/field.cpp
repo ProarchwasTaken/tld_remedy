@@ -148,6 +148,10 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
       player->recovery -= 0.15;
       break;
     }
+    default: {
+      PLOGE << "Invalid SubWeapon ID!";
+      throw;
+    }
   }
 }
 
@@ -199,6 +203,10 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->recovery = 0.35;
       companion->resilience = 0.75;
       break;
+    }
+    default: {
+      PLOGE << "Invalid Companion ID!";
+      throw;
     }
   }
 
