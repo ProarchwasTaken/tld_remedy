@@ -40,7 +40,7 @@ Servant::Servant(Vector2 position, Direction direction) :
   dexterity = 4;
   discipline = 1;
 
-  resilience = 0.8;
+  resilience = 0.50;
   z_order = 5;
 
   ai = make_unique<ServantAI>();
