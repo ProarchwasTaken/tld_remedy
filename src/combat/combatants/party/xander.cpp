@@ -21,6 +21,7 @@
 #include "system/sound_atlas.h"
 #include "combat/actions/hand_blade.h"
 #include "combat/actions/tail_whip.h"
+#include "combat/actions/meteor.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/xander.h"
 #include <plog/Log.h>
@@ -67,10 +68,10 @@ Xander::Xander(Companion *data, Mary *player) :
   ai = make_unique<XanderAI>();
 
   tech1 = {"Tail Whip", TechCostType::LIFE, 2.0};
-  tech1.cooldown = 10.0;
+  tech1.cooldown = 8.8;
 
-  tech2 = {"Meteor", TechCostType::LIFE, 2.0};
-  tech2.cooldown = 15.0;
+  tech2 = {"Meteor", TechCostType::LIFE, 4.0};
+  tech2.cooldown = 8.8;
 
   afflictPersistent(data->status);
 
@@ -333,6 +334,11 @@ void Xander::assistInput() {
   if (light_input && lightAssistCondition()) {
     callTailWhip();
   }
+
+  bool heavy_input = Input::pressed(keybinds->heavy_assist, gamepad);
+  if (heavy_input && heavyAssistCondition()) {
+    callMeteor();
+  }
 }
 
 void Xander::callTailWhip() {
@@ -349,10 +355,14 @@ void Xander::callTailWhip() {
   sfx.play("assist_call");
 }
 
+void Xander::callMeteor() {
+  ai_goal = XanderGoals::METEOR;
+  tech2.clock = 0.0;
+  sfx.play("assist_call");
+}
+
 bool Xander::lightAssistCondition() {
   bool off_cooldown = tech1.clock >= 1.0;
-  float cost = calculateLifeCost(tech1.cost);
-
   if (off_cooldown && !critical_life) {
     return true;
   }
@@ -363,8 +373,14 @@ bool Xander::lightAssistCondition() {
 }
 
 bool Xander::heavyAssistCondition() {
-  sfx.play("action_denied");
-  return false;
+  bool off_cooldown = tech2.clock >= 1.0;
+  if (off_cooldown && !critical_life) {
+    return true;
+  }
+  else {
+    sfx.play("action_denied");
+    return false; 
+  }
 }
 
 void Xander::rootBehavior() {
@@ -473,6 +489,15 @@ void Xander::tailwhip() {
   performAction(action);
 }
 
+void Xander::meteor() {
+  float cost = calculateLifeCost(tech2.cost);
+  increaseExhaustion(cost);
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Meteor>(this);
+  performAction(action);
+}
+
 void Xander::update() {
   tintFlash();
 
@@ -546,6 +571,12 @@ void Xander::neutralLogic() {
     }
     case XanderGoals::TAIL_WHIP: {
       tailWhipLogic();
+      break;
+    }
+    case XanderGoals::METEOR: {
+      meteor();
+
+      ai_goal = XanderGoals::IDLE;
       break;
     }
   }

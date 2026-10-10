@@ -79,6 +79,7 @@ public:
   void behavior() override;
   void assistInput();
   void callTailWhip();
+  void callMeteor();
   bool lightAssistCondition();
   bool heavyAssistCondition();
 
@@ -88,6 +89,7 @@ public:
 
   void attack();
   void tailwhip();
+  void meteor();
 
   void update() override;
   void neutralLogic();
