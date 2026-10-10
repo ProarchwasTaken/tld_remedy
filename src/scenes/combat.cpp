@@ -621,6 +621,7 @@ void CombatScene::deleteEntity(int entity_id) {
 
     if (player == entity.get()) {
       player->targetable = false;
+      player->setEnabled(false);
       player = NULL;
 
       plr_hud->assign(player);
@@ -632,6 +633,7 @@ void CombatScene::deleteEntity(int entity_id) {
     }
     else if (companion == entity.get()) {
       companion->targetable = false;
+      companion->setEnabled(false);
       companion = NULL;
 
       com_hud->assign(companion);
