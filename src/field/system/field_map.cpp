@@ -50,7 +50,6 @@ void FieldMap::loadMap(Session *session, string map_name,
 
   base_path = "graphics/maps/" + map_name + ".png";
   overlay_path = "graphics/maps/" + map_name + "o.png";
-  overlay_available = FileExists(overlay_path.c_str());
 
   parseMapData(session, map_name, json_path, spawn_name);
   float elapsed_time = GetTime() - start_time;
@@ -66,6 +65,7 @@ void FieldMap::loadMapGraphics() {
   base = LoadTexture(base_path.c_str());
 
   UnloadTexture(overlay);
+  overlay_available = FileExists(overlay_path.c_str());
   if (overlay_available) {
     PLOGD << "Found overlay file.";
     assert(FileExists(overlay_path.c_str()));
