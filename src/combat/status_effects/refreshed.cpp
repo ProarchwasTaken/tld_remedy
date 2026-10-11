@@ -36,6 +36,9 @@ void Refreshed::init(bool hide_text) {
   afflicted->speed_multiplier += speed_gained;
   afflicted->recovery += rec_gained;
 
+  afflicted->deplete_clock = 1.0;
+  afflicted->tp_regen_clock = 1.0;
+
   PLOGD << "Result: {DEX: " << afflicted->dexterity << ", SPD: " << 
     afflicted->speed_multiplier << ", REC: " 
     << afflicted->recovery << "}";

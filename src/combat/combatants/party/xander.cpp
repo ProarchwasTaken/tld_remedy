@@ -45,8 +45,8 @@ Xander::Xander(Companion *data, Mary *player) :
   morale = init_morale;
   max_morale = data->max_morale;
 
-  tenacity = 3.0;
-  tp_natural = 0.1;
+  tenacity = 4.5;
+  tp_natural = 0.15;
   tp_threshold = tp_natural;
   tp_regen_delay = 15;
 
@@ -60,17 +60,16 @@ Xander::Xander(Companion *data, Mary *player) :
   recovery = data->recovery;
   resilience = data->resilience;
 
-  default_deplete_delay = 1.5;
   accel_rate = 0.125;
   decel_rate = 0.5;
   z_order = 2;
 
   ai = make_unique<XanderAI>();
 
-  tech1 = {"Tail Whip", TechCostType::LIFE, 2.0};
+  tech1 = {"Tail Whip", TechCostType::LIFE, 0.0};
   tech1.cooldown = 8.8;
 
-  tech2 = {"Meteor", TechCostType::LIFE, 4.0};
+  tech2 = {"Meteor", TechCostType::LIFE, 2.0};
   tech2.cooldown = 8.8;
 
   afflictPersistent(data->status);

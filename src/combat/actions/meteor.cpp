@@ -62,6 +62,10 @@ Meteor::Meteor(Xander *user) :
 
 Meteor::~Meteor() {
   user->animation = NULL;
+
+  if (!finished) {
+    user->intended_pos = user->position;
+  }
 }
 
 void Meteor::sendWarning() {
