@@ -7,6 +7,7 @@
 #include "data/damage.h"
 #include "data/animation.h"
 #include "system/sprite_atlas.h"
+#include "system/sound_atlas.h"
 #include "combat/combatants/party/xander.h"
 
 
@@ -35,6 +36,7 @@ private:
 
   Xander *user;
   SpriteAtlas *atlas;
+  SoundAtlas *sfx;
 
   Animation anim_windup = {{22, 23, 24, 25}, 0.30};
   Animation anim_end = {{28, 29}, 0.75};

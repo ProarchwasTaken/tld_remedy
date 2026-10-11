@@ -33,11 +33,13 @@ Meteor::Meteor(Xander *user) :
   name = "Meteor";
   this->user = user;
   this->atlas = &Xander::atlas;
+  this->sfx = &Xander::psfx;
+  assert(sfx->users() > 0);
 
   data.damage_type = DamageType::LIFE;
   data.calculation = DamageType::LIFE;
 
-  data.stun_time = 1.0;
+  data.stun_time = 0.75;
   data.stun_type = StunType::STAGGER;
 
   data.assailant = user;
@@ -55,6 +57,7 @@ Meteor::Meteor(Xander *user) :
   user->rectExCorrection(hitbox, warning_hitbox);
 
   sendWarning();
+  sfx->play("xander_charge");
 }
 
 Meteor::~Meteor() {
@@ -75,6 +78,7 @@ void Meteor::windUp() {
   bool end_phase = state_clock == 1.0;
   if (end_phase) {
     user->sprite = &atlas->sprites[26];
+    sfx->play("xander_meteor");
   }
 }
 

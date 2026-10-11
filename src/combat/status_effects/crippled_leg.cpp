@@ -46,6 +46,10 @@ void CrippledLeg::init(bool hide_text) {
     afflicted->speed_multiplier << "}";
 
   StatusEffect::init(hide_text);
+
+  if (!hide_text) {
+    afflicted->sfx.play("bone_break");
+  }
 }
 
 void CrippledLeg::applyPenalty() {

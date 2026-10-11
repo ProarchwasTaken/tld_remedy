@@ -115,6 +115,10 @@
     {
       "name": "demoralized",
       "filename": "combat/demoralized.mp3"
+    },
+    {
+      "name": "bone_break",
+      "filename": "combat/bone_break.mp3"
     }
   ]
 }

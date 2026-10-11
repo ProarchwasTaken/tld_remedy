@@ -23,6 +23,14 @@
     {
       "name": "xander_whip",
       "filename": "xander/xander_whip.mp3"
+    },
+    {
+      "name": "xander_charge",
+      "filename": "xander/xander_charge.mp3"
+    },
+    {
+      "name": "xander_meteor",
+      "filename": "xander/xander_meteor.mp3"
     }
   ]
 }
