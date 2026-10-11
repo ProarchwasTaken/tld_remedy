@@ -8,22 +8,25 @@
 #include "enums.h"
 #include "base/actor.h"
 #include "data/actor_event.h"
+#include "data/rect_ex.h"
 #include "system/sprite_atlas.h"
 #include "utils/animation.h"
 #include "field/actors/companion.h"
 
 using std::unique_ptr, std::string;
 SpriteAtlas CompanionActor::atlas("actors", "");
+RectEx CompanionActor::DEF_BOUNDS;
+RectEx CompanionActor::DEF_COLLIS;
 
 
-CompanionActor::CompanionActor(CompanionID id, Vector2 position, 
-                               enum Direction direction):
-Actor("Companion", ActorType::COMPANION, position, direction)
+CompanionActor::CompanionActor(Vector2 position, Direction direction):
+  Actor("Companion", ActorType::COMPANION, position, direction)
 {
   default_speed = 56.5;
   movement_speed = default_speed;
 
-  setupAtlas(id);
+  bounding_box = DEF_BOUNDS;
+  collis_box = DEF_COLLIS;
   rectExCorrection(bounding_box, collis_box);
   
   atlas.use();
@@ -34,7 +37,7 @@ CompanionActor::~CompanionActor() {
   atlas.release();
 }
 
-void CompanionActor::setupAtlas(CompanionID id) {
+void CompanionActor::setAtlas(CompanionID id) {
   assert(atlas.users() == 0);
   string sprite_group;
 
@@ -42,19 +45,19 @@ void CompanionActor::setupAtlas(CompanionID id) {
     case CompanionID::ERWIN: {
       sprite_group = "erwin_actor";
 
-      bounding_box.scale = {32, 34};
-      bounding_box.offset = {-16, -30};
-      collis_box.scale = {8, 16};
-      collis_box.offset = {-4, -12};
+      DEF_BOUNDS.scale = {32, 34};
+      DEF_BOUNDS.offset = {-16, -30};
+      DEF_COLLIS.scale = {8, 16};
+      DEF_COLLIS.offset = {-4, -12};
       break;
     }
     case CompanionID::XANDER: {
       sprite_group = "xander_actor";
 
-      bounding_box.scale = {80, 64};
-      bounding_box.offset = {-40, -60};
-      collis_box = {24, 32};
-      collis_box.offset = {-12, -28};
+      DEF_BOUNDS.scale = {80, 64};
+      DEF_BOUNDS.offset = {-40, -60};
+      DEF_COLLIS= {24, 32};
+      DEF_COLLIS.offset = {-12, -28};
       break;
     }
   }

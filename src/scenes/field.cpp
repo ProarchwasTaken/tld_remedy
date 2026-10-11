@@ -97,6 +97,23 @@ FieldScene::~FieldScene() {
   field.reset();
   session.reset();
 
+  Actor::emotes.release();
+  assert(Actor::emotes.users() == 0);
+
+  PlayerActor::atlas.release();
+  assert(PlayerActor::atlas.users() == 0);
+
+  CompanionActor::atlas.release();
+  assert(CompanionActor::atlas.users() == 0);
+
+  EnemyActor::atlas.release();
+  assert(EnemyActor::atlas.users() == 0);
+
+  Pickup::atlas.release();
+  assert(Pickup::atlas.users() == 0);
+
+  SavePoint::atlas.release();
+  assert(SavePoint::atlas.users() == 0);
   sfx.release();
 
   if (panel != nullptr) {
@@ -219,7 +236,16 @@ void FieldScene::setup(string starting_map) {
 
   field = make_unique<FieldMap>();
   loadMapProcedure(starting_map, NULL, false);
+
   PlayerActor::setControllable(true);
+  CompanionActor::setAtlas(session->companion.companion_id);
+
+  Actor::emotes.use();
+  PlayerActor::atlas.use();
+  CompanionActor::atlas.use();
+  EnemyActor::atlas.use();
+  Pickup::atlas.use();
+  SavePoint::atlas.use();
 
   #ifndef NDEBUG
   static CommandSystem command_system;
@@ -458,9 +484,7 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      CompanionID id = session->companion.companion_id;
-
-      entity = make_unique<CompanionActor>(id, position, direction);
+      entity = make_unique<CompanionActor>(position, direction);
       companion_actor = static_cast<CompanionActor*>(entity.get());
       break;
     }
