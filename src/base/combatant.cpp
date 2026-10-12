@@ -485,12 +485,17 @@ void Combatant::stunTintLerp() {
 }
 
 void Combatant::exitHitstun() {
+  assert(state == CombatantState::HIT_STUN);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
   " has exited hit stun.";
   state = CombatantState::NEUTRAL;
   stun_clock = 0.0;
   stun_time = 0;
   knockback = 0;
+
+  if (action != nullptr) {
+    cancelAction();
+  }
 }
 
 void Combatant::decideKnockback(DamageData &data) {
