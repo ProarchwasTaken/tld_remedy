@@ -394,7 +394,7 @@ void FieldScene::loadMapProcedure(string map_name, string *spawn_name,
 
   if (map_history) {
     PLOGI << "Updating map history.";
-    std::strcpy(session->prev_map1, session->prev_map1);
+    std::strcpy(session->prev_map2, session->prev_map1);
     std::strcpy(session->prev_map1, session->map_name);
   }
 
