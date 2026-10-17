@@ -1,0 +1,31 @@
+{
+  "frames": [
+    {
+      "filename": "weapon_select",
+      "frame": {"x": 0, "y": 0, "w": 160, "h": 24}
+    },
+    {
+      "filename": "companion_select",
+      "frame": {"x": 0, "y": 24, "w": 196, "h": 24}
+    },
+    {
+      "filename": "confirmation",
+      "frame": {"x": 0, "y": 48, "w": 127, "h": 24}
+    },
+    {
+      "filename": "selector",
+      "frame": {"x": 133, "y": 48, "w": 70, "h": 4}
+    },
+    {
+      "filename": "full_star",
+      "frame": {"x": 133, "y": 56, "w": 10, "h": 10}
+    },
+    {
+      "filename": "half_star",
+      "frame": {"x": 143, "y": 56, "w": 10, "h", 10}
+    }
+  ]
+  "meta": {
+    "size": {"w": 208, "h": 72}
+  }
+}
