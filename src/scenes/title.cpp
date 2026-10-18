@@ -93,7 +93,7 @@ void TitleScene::optionNavigation() {
 void TitleScene::selectOption() {
   switch (*selected) {
     case TitleOption::NEW_GAME: {
-      Game::newGame(SubWeaponID::KNIFE, CompanionID::ERWIN);
+      Game::loadSetupScreen();
       break;
     }
     case TitleOption::LOAD_GAME: {

@@ -19,6 +19,7 @@
 #include "system/sound_atlas.h"
 #include "system/music_player.h"
 #include "scenes/title.h"
+#include "scenes/setup.h"
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
 #include "scenes/rest_menu.h"
@@ -602,6 +603,10 @@ void Game::gameLogic() {
       returnFieldProcedure();
       break;
     }
+    case GameState::QUICK_SWITCH: {
+      quickSwitchProcedure();
+      break;
+    }
     case GameState::SWITCHING_SCENE: {
       switchSceneProcedure();
     }
@@ -670,6 +675,18 @@ void Game::switchSceneProcedure() {
 
   Game::fadein(1.0);
   SKIP_FRAME = true;
+  PLOGI << "Procedure complete.";
+}
+
+void Game::quickSwitchProcedure() {
+  PLOGI << "Quickly switching to loaded scene.";
+  scene.reset();
+
+  assert(reserve != nullptr);
+  scene.swap(reserve);
+
+  SKIP_FRAME = true;
+  game_state = GameState::READY;
   PLOGI << "Procedure complete.";
 }
 
@@ -877,6 +894,19 @@ void Game::loadTitleScreen() {
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+
+  session_playtime = 0.0;
+  run_timer = false;
+}
+
+void Game::loadSetupScreen() {
+  PLOGI << "Booting Setup Scene";
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  reserve = make_unique<SetupScene>();
+  game_state = GameState::QUICK_SWITCH;
 
   session_playtime = 0.0;
   run_timer = false;

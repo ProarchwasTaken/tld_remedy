@@ -178,8 +178,9 @@ bool GameOverScene::responseHandling() {
       SessionID current_file = Game::currentFile();
       bool successful = Game::loadGame(current_file);
       if (!successful) {
-        exiting = true;
+        Game::loadSetupScreen();
       }
+
       return false;
     }
   }

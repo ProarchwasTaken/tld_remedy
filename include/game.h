@@ -25,6 +25,7 @@ enum class GameState {
   READY,
   TOGGLE_FULLSCREEN,
   SWITCHING_SCENE,
+  QUICK_SWITCH,
   OPEN_CAMPMENU,
   OPEN_RESTMENU,
   INIT_COMBAT,
@@ -95,6 +96,7 @@ public:
   void gameLogic();
   void fadeScreenProcedure();
   void switchSceneProcedure();
+  void quickSwitchProcedure();
   void openCampMenuProcedure();
   void openRestMenuProcedure();
   void initCombatProcedure();
@@ -111,6 +113,7 @@ public:
   static void fullscreenCheck();
 
   static void loadTitleScreen();
+  static void loadSetupScreen();
   static void openCampMenu(Session *data, 
                            CampMenuOption *shortcut = NULL);
   static void openRestMenu(Session *data);

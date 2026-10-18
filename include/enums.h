@@ -24,6 +24,7 @@ enum class GameMode {
 
 enum class SceneID {
   TITLE,
+  SETUP,
   FIELD,
   CAMP_MENU,
   REST_MENU,
@@ -37,6 +38,9 @@ enum class PanelID {
   REMAP,
   DIALOG,
   FILE_SELECT,
+  WEAPON,
+  COMPANION,
+  SETUP_CONFIRM,
   STATUS,
   ITEMS,
   TECH,
