@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <array>
 #include <memory>
+#include <string>
 #include <cstddef>
 #include <raylib.h>
 #include "base/panel.h"
@@ -26,9 +27,11 @@ public:
   ~WeaponPanel();
 
   void initPortraits();
+  void initWeaponText();
 
   void update() override;
   void optionNavigation();
+  void textScroll();
 
   void startOptionMotion();
   void optionMotion();
@@ -63,4 +66,28 @@ private:
   float opt_time = 0.30;
   float opt_start_x;
   float opt_end_x;
+
+  Font *sm_font;
+  int sm_size;
+
+  Font *med_font;
+  int med_size;
+
+  std::string name;
+  std::string name_buffer;
+  std::string::iterator name_iter;
+  Vector2 name_position;
+
+  std::string type;
+  std::string type_buffer;
+  std::string::iterator type_iter;
+  Vector2 type_position;
+
+  std::string blurb;
+  std::string blurb_buffer;
+  std::string::iterator blurb_iter;
+  Vector2 blurb_position;
+
+  float scroll_clock = 1.0;
+  float scroll_time = 0.20;
 };
