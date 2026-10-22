@@ -8,6 +8,7 @@
 #include "base/panel.h"
 #include "data/keybinds.h"
 #include "menu/hud/w_portrait.h"
+#include "menu/hud/stat_sheet.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 
@@ -27,7 +28,7 @@ public:
   ~WeaponPanel();
 
   void initPortraits();
-  void initWeaponText();
+  void setupWeaponData();
 
   void update() override;
   void optionNavigation();
@@ -38,15 +39,29 @@ public:
   void selectedLogic(WeaponPortrait *portrait);
   void prevSelectedLogic(WeaponPortrait *portrait);
 
+  void informationLerp();
+
   void draw() override;
+  void drawTech(Vector2 position, const char *name, const char *cost);
 
   std::array<WeaponOption, 5>::iterator selected = NULL;
 private:
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
   MenuKeybinds *keybinds;
+  enum {
+    SELECTION,
+    INFO_IN,
+    INFORMATION,
+    INFO_OUT,
+  } menu_state = SELECTION;
+
+  float menu_clock = 0.0;
+  float menu_time = 0.6;
 
   Texture gradient;
+  Texture info_frame;
+  Rectangle info_source = {0, 0, 184, 0};
 
   std::array<WeaponOption, 5> options = {
     WeaponOption::DEFIANCE,
@@ -63,7 +78,7 @@ private:
 
   float opt_spacing = 88;
   float opt_clock = 1.0;
-  float opt_time = 0.30;
+  float opt_time = 0.20;
   float opt_start_x;
   float opt_end_x;
 
@@ -89,5 +104,13 @@ private:
   Vector2 blurb_position;
 
   float scroll_clock = 1.0;
-  float scroll_time = 0.20;
+  float scroll_time = 0.30;
+
+  std::unique_ptr<StatSheet> stats;
+  std::string tech1_name;
+  std::string tech1_cost;
+  std::string tech2_name;
+  std::string tech2_cost;
+
+  std::string description;
 };

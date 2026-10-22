@@ -56,6 +56,7 @@ void prevOption(std::array<Type, Num> &options,
     selected = options.end();
   }
 
+  at_begin = selected == options.begin();
   if (!at_begin) {
     selected--;
   }
