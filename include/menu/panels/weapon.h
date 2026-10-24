@@ -31,6 +31,9 @@ public:
   void setupWeaponData();
 
   void update() override;
+  void transitionLerp();
+
+  void readyLogic();
   void optionNavigation();
   void textScroll();
 
@@ -40,11 +43,13 @@ public:
   void prevSelectedLogic(WeaponPortrait *portrait);
 
   void informationLerp();
+  void confirmInput();
 
   void draw() override;
   void drawTech(Vector2 position, const char *name, const char *cost);
 
   std::array<WeaponOption, 5>::iterator selected = NULL;
+  bool exiting_out = false;
 private:
   SpriteAtlas *atlas;
   SoundAtlas *sfx;
@@ -63,6 +68,9 @@ private:
   Texture info_frame;
   Rectangle info_source = {0, 0, 184, 0};
 
+  Rectangle title_sprite;
+  Vector2 title_position = {16, 16};
+
   std::array<WeaponOption, 5> options = {
     WeaponOption::DEFIANCE,
     WeaponOption::BRAVERY,
@@ -71,7 +79,11 @@ private:
     WeaponOption::SPECIALIST
   };
   std::array<WeaponOption, 5>::iterator prev_selected;
-  std::unordered_set<WeaponOption> disallowed;
+  std::unordered_set<WeaponOption> disallowed = {
+    WeaponOption::DEFIANCE,
+    WeaponOption::BRAVERY,
+    WeaponOption::SPECIALIST
+  };
 
   std::array<std::unique_ptr<WeaponPortrait>, 5> portraits;
   Vector2 option_position = {213, 120};

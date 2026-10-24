@@ -31,10 +31,15 @@ void nextOption(std::array<Type, Num> &options,
     return;
   }
 
-  auto *next = selected + 1;
-  bool last = next == options.end();
-  if (loop || !last) {
+  if (loop) {
     nextOption(options, selected, disallowed, loop);
+    return;
+  }
+   
+  auto *next = selected + 1;
+  bool out_of_bounds = next >= options.end();
+  if (!out_of_bounds && disallowed->find(*next) == disallowed->end()) {
+    selected++;
   }
   else {
     selected--;
@@ -69,10 +74,15 @@ void prevOption(std::array<Type, Num> &options,
     return;
   }
 
-  bool first = selected == options.begin();
-  auto *prev = selected - 1;
-  if (loop || !first) {
+  if (loop) {
     prevOption(options, selected, disallowed, loop);
+    return;
+  }
+
+  auto *prev = selected - 1;
+  bool out_of_bounds = prev < options.begin();
+  if (!out_of_bounds && disallowed->find(*prev) == disallowed->end()) {
+    selected--;
   }
   else {
     selected++;

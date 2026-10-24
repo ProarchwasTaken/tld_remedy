@@ -1,11 +1,13 @@
 #include <array>
 #include <cassert>
+#include <cstdlib>
 #include <iterator>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
 #include "game.h"
+#include "base/panel.h"
 #include "data/keybinds.h"
 #include "utils/menu.h"
 #include "utils/input.h"
@@ -35,6 +37,11 @@ WeaponPanel::WeaponPanel() {
   med_size = med_font->baseSize;
 
   keybinds = &Game::settings.menu_keybinds;
+
+  title_sprite = atlas->sprites[0];
+  title_sprite.height = 0;
+
+  transition_time = 1.5;
 
   selected = &options.at(2);
   prev_selected = selected;
@@ -76,9 +83,14 @@ void WeaponPanel::initPortraits() {
     Vector2 position = option_position;
     float offset = opt_spacing * distance;
     position.x += offset;
+    position.y = -64;
 
     unique_ptr<WeaponPortrait> &portrait = portraits.at(index);
     portrait = make_unique<WeaponPortrait>(position, sprite_id);
+
+    if (disallowed.find(*option) != disallowed.end()) {
+      portrait->color.a = 0;
+    }
   }
 }
 
@@ -227,6 +239,58 @@ void WeaponPanel::setupWeaponData() {
 }
 
 void WeaponPanel::update() {
+  if (state != PanelState::READY) {
+    transitionLogic();
+    transitionLerp();
+  }
+  else {
+    readyLogic();
+  } 
+
+  for (auto &portrait : portraits) {
+    portrait->update();
+  }
+}
+
+void WeaponPanel::transitionLerp() { 
+  float percentage;
+  if (state == PanelState::OPENING) {
+    percentage = clock;
+  }
+  else {
+    percentage = 1.0 - clock;
+  }
+
+  for (int x = 0; x < 5; x++) {
+    WeaponOption *option = &options.at(x);
+    int index = static_cast<int>(*option);
+    int distance = std::distance(selected, option);
+    PLOGD << "Distance from selected: " << distance;
+
+    float delay = -0.15 * std::abs(distance);
+    float amount = Clamp((delay + percentage) / 0.60, 0, 1.0);
+
+    unique_ptr<WeaponPortrait> &portrait = portraits.at(index);
+    portrait->main_position.y = Math::smoothstep(-64, 120, amount);
+  }
+
+  float height = 24;
+  float amount = Clamp((-0.70 + percentage) / 0.30, 0.0, 1.0);
+
+  title_sprite.height = height * amount;
+  float offset = (height - title_sprite.height) / 2;
+
+  title_sprite.y = (height - title_sprite.height) / 2;
+  title_position.y = 16 + offset;
+
+  if (menu_state == INFORMATION) {
+    float amount = Clamp((-0.60 + percentage) / 0.40, 0.0, 1.0);
+    info_source.height = 112 * amount;
+    stats->source.height = 74 * amount;
+  }
+}
+
+void WeaponPanel::readyLogic() {
   switch (menu_state) {
     case SELECTION: {
       if (opt_clock >= 1.0) {
@@ -251,11 +315,7 @@ void WeaponPanel::update() {
       break;
     }
     case INFORMATION: {
-      bool gamepad = IsGamepadAvailable(0);
-      if (Input::pressed(keybinds->cancel, gamepad)) {
-        menu_state = INFO_OUT;
-        sfx->play("menu_cancel");
-      }
+      confirmInput(); 
       break;
     }
     case INFO_OUT: {
@@ -267,16 +327,11 @@ void WeaponPanel::update() {
       if (menu_clock == 0.0) {
         menu_state = SELECTION;
       }
-
       break;
     }
   }
 
   textScroll();
-
-  for (auto &portrait : portraits) {
-    portrait->update();
-  }
 }
 
 void WeaponPanel::optionNavigation() {
@@ -301,6 +356,11 @@ void WeaponPanel::optionNavigation() {
   else if (Input::pressed(keybinds->confirm, gamepad)) {
     menu_state = INFO_IN;
     sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    state = PanelState::CLOSING;
+    exiting_out = true;
+    sfx->play("menu_cancel");
   }
 }
 
@@ -405,7 +465,7 @@ void WeaponPanel::informationLerp() {
       float percentage = Clamp(menu_clock / 0.7, 0.0, 1.0);
       portrait->main_position.x = Math::smoothstep(213, 121, percentage);
     }
-    else {
+    else if (disallowed.find(*option) == disallowed.end()) {
       float percentage = Clamp(menu_clock / 0.30, 0.0, 1.0);
       portrait->main_position.y = Math::smoothstep(120, 140, percentage);
       portrait->color.a = Math::smoothstep(255, 0, percentage);
@@ -415,6 +475,18 @@ void WeaponPanel::informationLerp() {
   float percentage = Clamp((-0.70 + menu_clock) / 0.30, 0.0, 1.0);
   info_source.height = 112 * percentage;
   stats->source.height = 74 * percentage;
+}
+
+void WeaponPanel::confirmInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->confirm, gamepad)) {
+    state = PanelState::CLOSING;
+    sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    menu_state = INFO_OUT;
+    sfx->play("menu_cancel");
+  }
 }
 
 void WeaponPanel::draw() {
@@ -428,7 +500,11 @@ void WeaponPanel::draw() {
   }
 
   DrawTexture(gradient, 0, 0, WHITE);
-  DrawTextureRec(atlas->sheet, atlas->sprites[0], {16, 16}, WHITE);
+  DrawTextureRec(atlas->sheet, title_sprite, title_position, WHITE);
+
+  if (state != PanelState::READY) {
+    return;
+  }
 
   DrawTextEx(*med_font, name.c_str(), name_position, med_size, 0, 
              Game::palette[42]);

@@ -2,6 +2,7 @@
 #include <cstring>
 #include <memory>
 #include "enums.h"
+#include "game.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/weapon.h"
 #include "scenes/setup.h"
@@ -155,12 +156,37 @@ void SetupScene::initCompanion(CompanionID companion_id) {
 }
 
 void SetupScene::update() {
-  assert(panel_mode && panel != nullptr);
+  if (panel == nullptr) {
+    initPanel();
+  }
+
   panel->update();
 
   if (panel->terminate) {
-    // panelTermination();
+    panelTermination();
   }
+}
+
+void SetupScene::panelTermination() {
+  switch (panel->id) {
+    case PanelID::WEAPON: {
+      WeaponPanel *w_panel = static_cast<WeaponPanel*>(panel.get());
+      if (w_panel->exiting_out) {
+        Game::loadTitleScreen();
+      }
+      else {
+        SubWeaponID id = static_cast<SubWeaponID>(*w_panel->selected);
+        initPlayer(id);
+      }
+
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+  panel.reset();
 }
 
 void SetupScene::draw() {
