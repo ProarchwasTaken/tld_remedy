@@ -84,7 +84,7 @@ void Game::init(int argc, char *argv[]) {
 
   menu_sfx.use();
   bgm = make_unique<MusicPlayer>();
-  noise = make_unique<NoiseEffect>();
+  noise = make_unique<NoiseEffect>((Vector2){0, 0}, CANVAS_RES);
 
   evaluateOptions(opt);
   PLOGI << "Time Scale: " << time_scale;
