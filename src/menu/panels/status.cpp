@@ -76,6 +76,9 @@ void StatusPanel::updateDescription() {
       break;
     }
   }
+
+  int index = static_cast<int>(party_member->member_id);
+  portrait.sprite = &portrait.atlas.sprites[index];
 }
 
 void StatusPanel::update() {
@@ -136,7 +139,7 @@ void StatusPanel::draw() {
     drawPartyMemberInfo(party_member);
   }
 
-  portrait.draw(party_member->member_id);
+  portrait.draw();
   drawOptions();
 }
 

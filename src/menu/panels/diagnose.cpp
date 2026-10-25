@@ -67,6 +67,8 @@ void DiagnosePanel::updateDisallowed() {
     }
   }
 
+  int index = static_cast<int>(party_member->member_id);
+  portrait.sprite = &portrait.atlas.sprites[index];
   PLOGD << "Updated disallowed options.";
 }
 
@@ -526,7 +528,6 @@ void DiagnosePanel::drawMemberName() {
 
 void DiagnosePanel::drawPortrait() {
   Character *party_member = *current_member;
-  PartyMemberID id = party_member->member_id;
 
   Font *font = &Game::med_font;
   int txt_size = font->baseSize;
@@ -540,7 +541,7 @@ void DiagnosePanel::drawPortrait() {
                                             *font, -2, 0);
 
   DrawTextEx(*font, name.c_str(), position, txt_size, -2, WHITE);
-  portrait.draw(id);
+  portrait.draw();
 }
 
 void DiagnosePanel::drawCursor() {

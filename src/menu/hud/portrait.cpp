@@ -10,7 +10,7 @@ SpriteAtlas Portrait::atlas("menu", "portraits");
 
 
 Portrait::Portrait(Vector2 position) {
-  this->position = position;
+  main_position = position;
   atlas.use();
 }
 
@@ -27,21 +27,20 @@ void Portrait::update(float percentage) {
   }
 }
 
-void Portrait::draw(PartyMemberID member_id) {
-  int index = static_cast<int>(member_id);
-  Rectangle sprite = atlas.sprites.at(index);
-  sprite.height = portrait_height;
+void Portrait::draw() {
+  Rectangle source = *sprite;
+  source.height = portrait_height;
 
-  DrawTextureRec(atlas.sheet, sprite, position, WHITE);
+  DrawTextureRec(atlas.sheet, source, main_position, WHITE);
 
   if (fade_clock != 1.0) {
     float percentage = 1.0 - fade_clock;
     Color white = WHITE;
     white.a = Math::smoothstep(0, 255, percentage);
 
-    Rectangle rect = sprite;
-    rect.x = position.x;
-    rect.y = position.y;
+    Rectangle rect = source;
+    rect.x = main_position.x;
+    rect.y = main_position.y;
     DrawRectangleRec(rect, white);
   }
 }

@@ -5,6 +5,7 @@
 #include "game.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/weapon.h"
+#include "menu/panels/companion.h"
 #include "scenes/setup.h"
 #include <plog/Log.h>
 
@@ -39,6 +40,7 @@ void SetupScene::initPanel() {
       break;
     }
     case SetupPhase::SELECT_COMPANION: {
+      panel = make_unique<CompanionPanel>();
       break;
     }
     case SetupPhase::CONFIRMATION: {
@@ -177,6 +179,7 @@ void SetupScene::panelTermination() {
       else {
         SubWeaponID id = static_cast<SubWeaponID>(*w_panel->selected);
         initPlayer(id);
+        phase = SetupPhase::SELECT_COMPANION;
       }
 
       break;
