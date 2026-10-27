@@ -184,6 +184,14 @@ void SetupScene::panelTermination() {
 
       break;
     }
+    case PanelID::COMPANION: {
+      CompanionPanel *c_panel = static_cast<CompanionPanel*>(panel.get());
+      if (c_panel->exiting_out) {
+        phase = SetupPhase::SELECT_SUBWEAPON;
+      }
+
+      break;
+    }
     default: {
       break;
     }

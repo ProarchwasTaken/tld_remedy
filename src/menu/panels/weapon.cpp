@@ -265,7 +265,6 @@ void WeaponPanel::transitionLerp() {
     WeaponOption *option = &options.at(x);
     int index = static_cast<int>(*option);
     int distance = std::distance(selected, option);
-    PLOGD << "Distance from selected: " << distance;
 
     float delay = -0.15 * std::abs(distance);
     float amount = Clamp((delay + percentage) / 0.60, 0, 1.0);
@@ -274,13 +273,14 @@ void WeaponPanel::transitionLerp() {
     portrait->main_position.y = Math::smoothstep(-64, 120, amount);
   }
 
+  float base_y = atlas->sprites[0].y;
   float height = 24;
   float amount = Clamp((-0.70 + percentage) / 0.30, 0.0, 1.0);
 
   title_sprite.height = height * amount;
   float offset = (height - title_sprite.height) / 2;
 
-  title_sprite.y = (height - title_sprite.height) / 2;
+  title_sprite.y = base_y + offset;
   title_position.y = 16 + offset;
 
   if (menu_state == INFORMATION) {

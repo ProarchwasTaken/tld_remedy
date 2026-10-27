@@ -16,8 +16,9 @@ public:
 
   void update();
   void draw();
-private:
+
   Vector2 position;
+private:
   std::array<Texture, 6> frames;
   Animation anim = {{0, 1, 2, 3, 4, 5}, 0.10};
 
