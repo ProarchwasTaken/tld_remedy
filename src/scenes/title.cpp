@@ -37,8 +37,10 @@ TitleScene::TitleScene() {
     valid_session = true;
   }
 
-  Game::bgm->prepare("title");
-  Game::bgm->play();
+  if (Game::bgm->loaded != "title") {
+    Game::bgm->prepare("title");
+    Game::bgm->play();
+  }
   PLOGI << "TitleScene has been initialized.";
 }
 

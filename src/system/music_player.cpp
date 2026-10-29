@@ -22,6 +22,7 @@ MusicPlayer::~MusicPlayer() {
 
 void MusicPlayer::prepare(string song_name) {
   UnloadMusicStream(primary);
+  loaded.clear();
 
   PLOGI << "Retrieving music data.";
   ifstream file("data/bgm.json");
@@ -45,7 +46,9 @@ void MusicPlayer::prepare(string song_name) {
       continue;
     }
 
+    loaded = song_name;
     string path = "audio/bgm/" + filename;
+
     primary = LoadMusicStream(path.c_str());
     state = StreamState::NEUTRAL;
     volume = 1.0;
