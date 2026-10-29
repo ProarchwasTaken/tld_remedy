@@ -180,7 +180,7 @@ void StatusPanel::drawTitle(Font *font, int txt_size, PartyMemberID id) {
       break;
     }
     case PartyMemberID::XANDER: {
-      title = "Disgraced";
+      title = "Broken";
       break;
     }
   }
