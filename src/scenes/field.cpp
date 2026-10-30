@@ -49,10 +49,13 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 SoundAtlas FieldScene::sfx("field");
 
 
-FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
+FieldScene::FieldScene(GameMode mode, SubWeaponID sub_weapon, 
+                       CompanionID companion) 
+{
   PLOGI << "Starting a new session.";
   session = make_unique<Session>();
   session->version = Game::session_version;
+  session->game_mode = mode;
 
   initPlayerData(sub_weapon);
   initCompanionData(companion);

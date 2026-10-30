@@ -326,12 +326,14 @@ void Game::toggleFullscreen() {
   setupCanvas();
 }
 
-void Game::newGame(SubWeaponID sub_weapon, CompanionID companion) {
+void Game::newGame(GameMode mode, SubWeaponID sub_weapon, 
+                   CompanionID companion) 
+{
   PLOGI << "Starting a new game.";
   assert(reserve == nullptr);
 
   bgm->stop();
-  reserve = make_unique<FieldScene>(sub_weapon, companion);
+  reserve = make_unique<FieldScene>(mode, sub_weapon, companion);
 
   session_playtime = 0;
   current_file = UNSAVED;

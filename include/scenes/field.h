@@ -44,7 +44,8 @@ public:
   /* For when the player start a new game. Entirely new Session data
    * will be initialized, and the scene will be poised to load the
    * first map.*/
-  FieldScene(SubWeaponID sub_weapon, CompanionID companion);
+  FieldScene(GameMode mode, SubWeaponID sub_weapon, 
+             CompanionID companion);
 
   /* For when the player loads an existing game. Basically takes 
    * existing session data that is stored enternally, and continues

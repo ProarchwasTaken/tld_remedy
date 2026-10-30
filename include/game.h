@@ -71,7 +71,8 @@ public:
   void takeScreenshot();
   void toggleFullscreen();
 
-  static void newGame(SubWeaponID sub_weapon, CompanionID companion);
+  static void newGame(GameMode mode, SubWeaponID sub_weapon, 
+                      CompanionID companion);
   static void saveGame(Session *data, SessionID file_id);
   static bool loadGame(SessionID file_id);
   static void exitGame();

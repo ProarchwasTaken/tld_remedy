@@ -36,6 +36,7 @@ public:
   void prevSelectedLogic(Portrait *portrait);
 
   void informationLerp();
+  void confirmInput();
 
   void draw() override;
 

@@ -1,11 +1,11 @@
 #include <cassert>
-#include <cstring>
 #include <memory>
 #include "enums.h"
 #include "game.h"
 #include "system/sprite_atlas.h"
 #include "menu/panels/weapon.h"
 #include "menu/panels/companion.h"
+#include "menu/panels/setup_confirm.h"
 #include "scenes/setup.h"
 #include <plog/Log.h>
 
@@ -44,117 +44,13 @@ void SetupScene::initPanel() {
       break;
     }
     case SetupPhase::CONFIRMATION: {
+      panel = make_unique<SetupConfirm>(gamemode, sub_weapon, companion);
       break;
     }
   }
 
   assert(panel != nullptr);
   panel_mode = true;
-}
-
-void SetupScene::initPlayer(SubWeaponID weapon_id) {
-  PLOGI << "Initializing Player data...";
-  std::strcpy(player.name, "Mary");
-  player.member_id = PartyMemberID::MARY;
-  player.weapon_id = weapon_id;
-
-  player.life = 7;
-  player.max_life = 15;
-
-  player.init_morale = 10;
-  player.max_morale = 15;
-
-  player.offense = 4;
-  player.defense = 4;
-  player.intimid = 4;
-  player.persist = 4;
-  player.dexterity = 4;
-  player.discipline = 4;
-
-  player.recovery = 1.0;
-  player.resilience = 0.5;
-
-  switch (weapon_id) {
-    case SubWeaponID::KNIFE: {
-      PLOGI << "Applying Knife status changes.";
-      player.dexterity += 2;
-      player.intimid += 2;
-      break;
-    }
-    case SubWeaponID::BAT: {
-      PLOGI << "Applying Bat status changes.";
-      player.init_morale = 5;
-      player.max_morale -= 5;
-
-      player.offense += 5;
-      player.intimid += 2;
-      player.discipline -= 2;
-
-      player.recovery -= 0.15;
-      break;
-    }
-    default: {
-      PLOGE << "Invalid SubWeapon ID!";
-      throw;
-    }
-  }
-}
-
-void SetupScene::initCompanion(CompanionID companion_id) {
-  PLOGI << "Initializing Companion data...";
-
-  switch (companion_id) {
-    case CompanionID::ERWIN: {
-      std::strcpy(companion.name, "Erwin");
-      companion.member_id = PartyMemberID::ERWIN;
-      companion.companion_id = companion_id;
-
-      companion.life = 20;
-      companion.max_life = 20;
-
-      companion.init_morale = 10;
-      companion.max_morale = 15;
-
-      companion.offense = 4;
-      companion.defense = 4;
-      companion.intimid = 6;
-      companion.persist = 6;
-      companion.dexterity = 5;
-      companion.discipline = 5;
-
-      companion.recovery = 1.0;
-      companion.resilience = 0.5;
-      break;
-    }
-    case CompanionID::XANDER: {
-      std::strcpy(companion.name, "Xander");
-      companion.member_id = PartyMemberID::XANDER;
-      companion.companion_id = companion_id;
-
-      companion.life = 30;
-      companion.max_life = 30;
-
-      companion.init_morale = 0;
-      companion.max_morale = 0;
-
-      companion.offense = 12;
-      companion.defense = 8;
-      companion.intimid = 4;
-      companion.persist = 3;
-      companion.dexterity = 4;
-      companion.discipline = 1;
-
-      companion.recovery = 0.35;
-      companion.resilience = 0.75;
-      break;
-    }
-    default: {
-      PLOGE << "Invalid Companion ID!";
-      throw;
-    }
-  }
-
-  PLOGI << "Initialized data for: " << companion.name;
 }
 
 void SetupScene::update() {
@@ -177,8 +73,7 @@ void SetupScene::panelTermination() {
         Game::loadTitleScreen();
       }
       else {
-        SubWeaponID id = static_cast<SubWeaponID>(*w_panel->selected);
-        initPlayer(id);
+        sub_weapon = static_cast<SubWeaponID>(*w_panel->selected);
         phase = SetupPhase::SELECT_COMPANION;
       }
 
@@ -188,6 +83,23 @@ void SetupScene::panelTermination() {
       CompanionPanel *c_panel = static_cast<CompanionPanel*>(panel.get());
       if (c_panel->exiting_out) {
         phase = SetupPhase::SELECT_SUBWEAPON;
+      }
+      else {
+        companion = static_cast<CompanionID>(*c_panel->selected);
+        phase = SetupPhase::CONFIRMATION;
+      }
+
+      break;
+    }
+    case PanelID::SETUP_CONFIRM: {
+      SetupConfirm *sc_panel = static_cast<SetupConfirm*>(panel.get());
+      if (sc_panel->response == PromptOptions::YES) {
+        Game::newGame(gamemode, sub_weapon, companion);
+        Game::menu_sfx.play("menu_select");
+      }
+      else {
+        phase = SetupPhase::SELECT_SUBWEAPON;
+        Game::menu_sfx.play("menu_cancel");
       }
 
       break;

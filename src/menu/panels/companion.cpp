@@ -257,11 +257,7 @@ void CompanionPanel::readyLogic() {
       break;
     }
     case INFORMATION: {
-      bool gamepad = IsGamepadAvailable(0);
-      if (Input::pressed(keybinds->cancel, gamepad)) {
-        menu_state = INFO_OUT;
-        sfx->play("menu_cancel"); 
-      }
+      confirmInput();
 
       int index = static_cast<int>(*selected);
       unique_ptr<Portrait> &portrait = portraits.at(index);
@@ -407,6 +403,18 @@ void CompanionPanel::informationLerp() {
   info_source.height = 144 * percentage;
   icon->source_height = 70 * percentage;
   stats->source.height = 74 * percentage;
+}
+
+void CompanionPanel::confirmInput() {
+  bool gamepad = IsGamepadAvailable(0);
+  if (Input::pressed(keybinds->confirm, gamepad)) {
+    state = PanelState::CLOSING;
+    sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    menu_state = INFO_OUT;
+    sfx->play("menu_cancel"); 
+  }
 }
 
 void CompanionPanel::draw() {
