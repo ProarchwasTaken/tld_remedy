@@ -44,6 +44,7 @@ enum class PanelID {
   STATUS,
   ITEMS,
   TECH,
+  TEXTBOX,
   DIAGNOSE,
   CRAFTING
 };

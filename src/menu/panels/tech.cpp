@@ -1,6 +1,8 @@
 #include <cassert>
 #include <cstddef>
 #include <string>
+#include <memory>
+#include <array>
 #include <raylib.h>
 #include <raymath.h>
 #include "enums.h"
@@ -11,21 +13,21 @@
 #include "utils/menu.h"
 #include "utils/text.h"
 #include "scenes/camp_menu.h"
+#include "menu/panels/text_box.h"
 #include "menu/panels/tech.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::array, std::make_unique;
 
 
 TechsPanel::TechsPanel(Session *session, string *description, 
                        Color *desc_color) 
 {
   id = PanelID::TECH;
-  frame = LoadTexture("graphics/menu/frames/tech.png");
 
   assert(description != NULL);
   this->description = description;
-  *description = "Press 'CONFIRM' to enable scrolling.";
+  *description = "Select a Party Member";
 
   assert(desc_color != NULL);
   this->desc_color = desc_color;
@@ -34,16 +36,16 @@ TechsPanel::TechsPanel(Session *session, string *description,
   options[1] = &session->companion;
 
   selected = options.begin();
-  updateStyleText();
-
-  tech_canvas = LoadRenderTexture(219, 133);
-  updateTechCanvas();
+  setupTech();
 
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 
   camp_atlas = &CampMenuScene::atlas;
   camp_atlas->use();
+
+  med_font = &Game::med_font;
+  med_size = med_font->baseSize;
 
   sfx = &Game::menu_sfx;
   sfx->use();
@@ -53,342 +55,199 @@ TechsPanel::TechsPanel(Session *session, string *description,
 }
 
 TechsPanel::~TechsPanel() {
-  UnloadTexture(frame);
-  UnloadRenderTexture(tech_canvas);
   menu_atlas->release();
   camp_atlas->release();
   sfx->release();
 }
 
-void TechsPanel::updateStyleText() {
-  Character *party_member = *selected;
-  switch (party_member->member_id) {
-    case PartyMemberID::MARY: 
-    case PartyMemberID::ERWIN: {
-      style_text = "Weapon Techniques";
-      break;
-    }
-    case PartyMemberID::XANDER: {
-      style_text = "Animalistic";
-      break;
-    }
+void TechsPanel::setupTech() {
+  assert(selected != NULL);
+
+  for (TechInfo &tech : tech_info) {
+    tech.name.clear();
+    tech.type.clear();
+    tech.desc.clear();
+    tech.category = TechCategory::NONE;
   }
 
-  Font *font = &Game::med_font;
-  style_position = TextUtils::alignRight(style_text.c_str(), {412, 45}, 
-                                         *font, -2, 0);
-}
-
-string TechsPanel::weaponTechInfo(SubWeaponID id) {
-  switch (id) {
-    case SubWeaponID::KNIFE: {
-      return 
-      "<Cleave> - MP Cost: 6\n"
-      "\"We all have to start somewhere.\"\n\n"
-
-      "Mary performs a slash attack that inflicts\n"
-      "an average amount of damage to the first\n"
-      "enemy in front of him. The action itself also\n"
-      "has a shorter windup if canceled into.\n\n"
-
-      "<Piercer> - MP Cost: 8\n"
-      "\"Commit when it counts. \"\n\n"
-
-      "Mary thrusts his knife while propelling\n"
-      "himself forward in the direction he's facing.\n"
-      "It's an attack that's capable of piercing\n"
-      "multiple enemies at once. If used successfuly,\n"
-      "Mary will proceed to brutally yank out the\n"
-      "knife, inflicting more damage to all enemies\n"
-      "who got pierced by the initial attack.\n\n";
-    }
-    case SubWeaponID::BAT: {
-      return
-      "<Swing> - MP Cost: 5\n"
-      "\"One decisive blow, and the battles over.\"\n\n"
-
-      "Mary wind back his baseball bat, and swings\n"
-      "as hard as he can. The attack is great in\n"
-      "power, but slow in terms of speed. During the\n"
-      "action's windup, Mary can freely change the\n"
-      "direction he's currently facing.\n\n"
-
-      "<Hail Mary> - MP Cost: 3\n"
-      "\"When there's love, there's hope...\n"
-      "but a little luck wouldn't hurt.\n\n"
-
-      "Mary tosses a baseball into the air. On it's\n"
-      "own, the projectile wouldn't inflict any\n"
-      "damage if it were to hit an enemy. Rather,\n"
-      "if Mary hits the baseball on it's way down\n"
-      "with Swing, the projectile will be launched\n"
-      "forward; Inflicting damage that scales with\n"
-      "Mary's Offense and Dexterity.\n\n";
-    }
-  }
-}
-
-string TechsPanel::getTechEntry() {
   Character *party_member = *selected;
+  array<TechInfo, 6>::iterator tech = tech_info.begin();
+  tech_disallowed.clear();
 
   switch (party_member->member_id) {
     case PartyMemberID::MARY: {
-      Player *player = static_cast<Player*>(party_member);
-      string text =
-        "--[COMBATANT SUMMARY]--\n"
-        "Mary has to play a very active role to make\n"
-        "sure he and his companion survive unscathed.\n"
-        "Having to guide his allies towards achieving\n"
-        "their shared goal, the role of Leader is\n"
-        "something that requires a great deal of\n"
-        "diligence. Because the moment he falters is\n"
-        "where everything falls apart.\n\n" 
+      Player *mary = static_cast<Player*>(party_member);
+      setupWeaponTech(mary->weapon_id, tech);
+      tech++;
 
-        "--[WEAPON TECHNIQUES]--\n\n" +
+      tech->name = "Ghoststep";
+      tech->type= "Defensive Action";
+      tech->category = TechCategory::ACTION;
+      tech++;
 
-        weaponTechInfo(player->weapon_id) +
+      tech->name = "Evade";
+      tech->type = "Defensive Action";
+      tech->category = TechCategory::ACTION;
+      tech++;
 
-        "--[DEFENSIVE ACTIONS]--\n\n"
+      tech->name = "Humanity";
+      tech->type = "Passive Trait";
+      tech->category = TechCategory::PASSIVE;
+      tech++;
 
-        "<Ghost Step> - HP Cost: Depends on Dexterity\n"
-        "Input: 'DEFENSIVE' + 'LEFT' / 'RIGHT'\n"
-        "\"You can't afford be to be reckless.\"\n\n"
-
-        "Mary dashes forwards or backwards\n"
-        "depending on the input used. When\n"
-        "performing the action, Mary is rendered\n"
-        "intangible to any and all attacks. Only\n"
-        "becoming vulnerable again once he enters end\n"
-        "lag.\n\n"
-
-        "If Mary is in the end lag of any action that\n"
-        "isn't Ghost Step, he could cancel into it.\n"
-        "Mary could also cancel into any action \n"
-        "during the end lag of Ghost Step. Both of\n"
-        "these acts are referred as Ghost Cancelling.\n\n"
-
-        "<Evade> - HP Cost: Depends on Dexterity\n"
-        "Input: 'DEFENSIVE' + 'DOWN'\n"
-        "\"Save your energy, and play the long game.\"\n\n"
-
-        "After a brief windup, Mary braces himself to\n"
-        "dodge the first attack that comes his way.\n"
-        "If successful, the damage Mary would've\n"
-        "taken will instead be converted to Exhaustion\n"
-        "that will deplete overtime.\n\n"
-
-        "After a successful evade, Mary will also be\n"
-        "rendered intangible to all attacks during end\n"
-        "lag, along with being able to cancel Evade\n"
-        "into any action.\n\n"
-
-        "--[PASSIVES]--\n\n"
-
-        "<Humanity>\n"
-        "\"May your spirit always shine through.\"\n\n"
-
-        "Mary's basic attack only inflicts Morale\n"
-        "damage. In return, he gains Morale\n"
-        "proportional to how much damage was dealt.\n"
-        "If Mary isn't Despondent, a percentage of\n"
-        "the Morale gained will be shared with all\n"
-        "other party members.\n\n"
-
-        "<Auto-Evade>\n"
-        "\"All it takes is one hit, so you better learn\n"
-        "how to DODGE.\"\n\n"
-
-        "Mary automatically dodges most attacks at the\n"
-        "cost of losing Morale. The amount lost is\n"
-        "dependent on the victim's Persistence vs.\n"
-        "the assailant's Intimidation.\n\n"
-
-        "If Mary's Morale ends up below 0, he will\n"
-        "become Despondent. During which,\n"
-        "Auto-Evade becomes much easier to bypass.\n\n"
-      ;
-      return text;
+      tech->name = "Auto Evade";
+      tech->type = "Passive Ability";
+      tech->category = TechCategory::PASSIVE;
+      break;
     }
     case PartyMemberID::ERWIN: {
-      string text = 
-        "--[COMBATANT SUMMARY]--\n"
+      tech->name = "Provoke";
+      tech->type = "Light Assist";
+      tech->category = TechCategory::ASSIST;
+      tech++;
 
-        "Erwin's overall gameplan is focused around\n"
-        "relieving pressure rather than inflicting\n"
-        "damage. He prefers to target enemies that\n"
-        "Mary isn't already targeting,\n\n"
+      tech->name = "3rd Party";
+      tech->type = "Heavy Assist";
+      tech->category = TechCategory::ASSIST;
+      tech++;
 
-        "--[ASSISTS]--\n\n"
+      tech->name = "Humanity";
+      tech->type = "Passive Trait";
+      tech->category = TechCategory::PASSIVE;
+      tech++;
 
-        "<Provoke> - MP Cost: 8 | CD: 5s\n"
-        "\"Buying us a little more time. I trust that you\n"
-        "can make every second count.\"\n\n"
-
-        "Erwin performs a taunt that draws the aggro\n"
-        "of all enemies that happen to be targeting\n"
-        "Mary. He also receives intangibility that\n"
-        "lasts until the end of the action.\n\n"
-
-        "<3rd Party> - MP Cost: 10 | CD: 8s\n"
-        "\"The notion of playing 'fair' when your life\n"
-        "is on the line strikes me as foolish.\"\n\n"
-
-        "Erwin runs to the enemy that Mary was\n"
-        "targeting at the time of when the Assist was\n"
-        "called. Once within range, Erwin will perform\n"
-        "a dropkick that inflicts a high amount of\n"
-        "knockback and stun if it hits.\n\n"
-
-        "--[PASSIVES]--\n\n"
-
-        "<Humanity>\n"
-        "\"May your spirit always shine through.\"\n\n"
-
-        "Erwin's basic attack only inflicts Morale\n"
-        "damage. In return, he gains Morale\n"
-        "proportional to how much damage was dealt.\n"
-        "If Erwin isn't Despondent, a percentage of\n"
-        "the Morale gained will be shared with all\n"
-        "other party members.\n\n"
-
-        "<Auto-Evade>\n"
-        "\"All it takes is one hit, so you better learn\n"
-        "how to DODGE.\"\n\n"
-
-        "Erwin automatically dodges most attacks at\n"
-        "the cost of losing Morale. The amount lost is\n"
-        "dependent on the victim's Persistence vs.\n"
-        "the assailant's Intimidation.\n\n"
-
-        "If Erwin's Morale ends up below 0, he will\n"
-        "become Despondent. During which,\n"
-        "Auto-Evade becomes much easier to bypass."
-      ;
-      return text;
+      tech->name = "Auto Evade";
+      tech->type = "Passive Ability";
+      tech->category = TechCategory::PASSIVE;
+      break;
     }
     case PartyMemberID::XANDER: {
-      string text = 
-        "--[COMBATANT SUMMARY]--\n"
+      tech->name = "Tail Whip";
+      tech->type = "Light Assist";
+      tech->category = TechCategory::ASSIST;
+      tech++;
 
-        "Xander plays the self-proclaimed role of\n"
-        "protector to Mary. As a dragon, he is capable\n"
-        "of great feats of strength and durability,\n"
-        "but he is prone to getting worn down through\n"
-        "persistent effort.\n\n"
-        
-        "The years have not been kind to him. His body\n"
-        "is becoming increasingly hard to sustain by\n"
-        "the day. Make sure to provide help when he\n"
-        "needs it.\n\n"
+      tech->name = "Meteor";
+      tech->type = "Heavy Assists";
+      tech->category = TechCategory::ASSIST;
+      tech++;
 
-        "--[ASSISTS]--\n\n"
+      tech->name = "Draconian";
+      tech->type = "Passive Trait";
+      tech->category = TechCategory::PASSIVE;
+      tech++;
 
-        "<Tail Whip> - HP Cost: 8 | CD: 5s\n"
-        "\"Watch your tone.\"\n\n"
+      tech->name = "Protective";
+      tech->type = "Passive Trait";
+      tech->category = TechCategory::PASSIVE;
+      break;
+    }
+  }
 
-        "Xander will move in front of Mary and\n"
-        "proceed to lash his tail with an incredible\n"
-        "amount of force. This attack is capable of\n"
-        "hitting multiple enemies at once, and it's\n"
-        "damage also scales with Xander's Dexterity.\n\n"
-
-        "If Xander is already in front of Mary, and\n"
-        "is a considerable distance away at the time\n"
-        "the assist was called, he will instead\n"
-        "perform the attack in Mary's direction.\n\n"
-
-        "<Steel Wall> - HP Cost: N/A | CD: 8s\n"
-        "\"Get behind me...\"\n\n"
-
-        "Xander will take on a defensive stance for\n"
-        "half a second. While in this stance, Xander's\n"
-        "assist cooldowns will be frozen and any\n"
-        "damage he takes will be reduced by 50%.\n\n"
-
-        "Xander also gains full Stun Immunity to\n"
-        "all attacks.\n\n"
-
-        "The stance timer resets every time Xander\n"
-        "take damage, and it will be frozen for as\n"
-        "long as Mary remains close to him.\n\n"
-
-        "If Xander were to have no Tenacity. The\n"
-        "stance will be broken the next time he\n"
-        "take damage. The same applies to Critical\n"
-        "Life as well.\n\n"
-
-        "<Meteor> - HP Cost: 8 | CD: 10s\n"
-        "\"Kneel.\"\n\n"
-
-        "Xander will clasp his hands together, and\n"
-        "and raise them over his head before.\n"
-        "striking down. Very strong in terms of damage\n"
-        "and stun time.\n\n"
-
-        "This assist is only accessible while\n"
-        "Steel Wall is active, with it temporarily\n"
-        "replacing Tail Whip after one second.\n\n"
-
-
-        "--[PASSIVES]--\n\n"
-
-        "<Draconic>\n"
-        "\"Old habits die hard.\"\n\n"
-
-        "Xander does not possess Morale, nor can\n"
-        "he become Despondent either. Instead, any\n"
-        "Morale damage he sustains will increase\n"
-        "his Entropy; Which drains his life overtime.\n\n"
-
-        "As a trade off, Xander has an innate stun\n"
-        "immunity to all Morale attacks. This effect\n"
-        "will cease to function if Xander gets\n"
-        "staggered, or he's already in hit stun.\n\n"
-
-        "<Protective>\n"
-        "\"Please remain close...\"\n\n"
-
-        "Xander possesses Natural Tenacity;\n"
-        "a secondary HP resource that absorbs a\n"
-        "percentage of any Life damage he sustains.\n"
-        "It will regenerate on its own if Xander\n"
-        "doesn't take any damage for a certain\n"
-        "period of time.\n\n"
-
-        "For as long as Xander has Tenacity, most\n"
-        "Single-Target attacks will prioritize him\n"
-        "over Mary. No matter what.\n"
-      ;
-
-      return text;
+  for (int x = 0; x < 6; x++) {
+    TechInfo *tech = &tech_info.at(x);
+    if (tech->category == TechCategory::NONE) {
+      TechOption option = tech_options.at(x);
+      tech_disallowed.emplace(option);
     }
   }
 }
 
-void TechsPanel::updateTechCanvas() {
-  string text = getTechEntry();
-  Vector2 position = {0, -scroll_y};
-  Font *font = &Game::sm_font;
-  int txt_size = font->baseSize;
+void TechsPanel::setupWeaponTech(SubWeaponID weapon_id, 
+                                 array<TechInfo, 6>::iterator &tech)
+{
+  assert(tech != tech_info.end());
+  switch (weapon_id) {
+    case SubWeaponID::KNIFE: {
+      tech->name = "Cleave";
+      tech->type = "Light Technique";
+      tech->category = TechCategory::SUB_WEAPON;
 
-  float max_height = tech_canvas.texture.height;
-  float height = MeasureTextEx(*font, text.c_str(), txt_size, -3).y;
+      tech++;
+      assert(tech != tech_info.end());
 
-  if (height > max_height) {
-    max_scroll = height - max_height;
-  }
-  else {
-    max_scroll = 0;
-  }
+      tech->name = "Piercer";
+      tech->type = "Heavy Technique";
+      tech->category = TechCategory::SUB_WEAPON;
+      break;
+    }
+    case SubWeaponID::BAT: {
+      tech->name = "Swing";
+      tech->type = "Light Technique";
+      tech->category = TechCategory::SUB_WEAPON;
 
-  SetTextLineSpacing(12);
-  BeginTextureMode(tech_canvas);
-  {
-    ClearBackground(BLACK);
-    DrawTextEx(*font, text.c_str(), position, txt_size, -3, WHITE);
+      tech++;
+      assert(tech != tech_info.end());
+
+      tech->name = "Hail Mary";
+      tech->type = "Heavy Technique";
+      tech->category = TechCategory::SUB_WEAPON;
+      break;
+    }
   }
-  EndTextureMode();
-  SetTextLineSpacing(16);
+}
+
+string TechsPanel::getCategoryName(TechCategory category) {
+  switch (category) {
+    case TechCategory::SUB_WEAPON: {
+      return "Sub-Weapon";
+    }
+    case TechCategory::ASSIST: {
+      return "Assist";
+    }
+    case TechCategory::ACTION: {
+      return "Action";
+    }
+    case TechCategory::PASSIVE: {
+      return "Passive";
+    }
+    default: {
+      assert(category != TechCategory::NONE);
+      return "INVALID";
+    }
+  }
+}
+
+Color TechsPanel::getPrimaryColor(TechCategory category) {
+  switch (category) {
+    case TechCategory::SUB_WEAPON: {
+      return Game::palette[40];
+    }
+    case TechCategory::ASSIST: {
+      return Game::palette[49];
+    }
+    case TechCategory::ACTION: {
+      return Game::palette[48];
+    }
+    case TechCategory::PASSIVE: {
+      return Game::palette[13];
+    }
+    default: {
+      assert(category != TechCategory::NONE);
+      return BLACK;
+    }
+  }
+}
+
+Color TechsPanel::getSecondaryColor(TechCategory category) {
+  switch (category) {
+    case TechCategory::SUB_WEAPON: {
+      return Game::palette[42];
+    }
+    case TechCategory::ASSIST: {
+      return Game::palette[51];
+    }
+    case TechCategory::ACTION: {
+      return Game::palette[50];
+    }
+    case TechCategory::PASSIVE: {
+      return Game::palette[14];
+    }
+    default: {
+      assert(category != TechCategory::NONE);
+      return WHITE;
+    }
+  }
 }
 
 void TechsPanel::update() {
@@ -398,12 +257,29 @@ void TechsPanel::update() {
     return;
   }
 
-  if (!scrolling_mode) {
-    blink_clock += Game::deltaTime();
-    optionNavigation();
-  }
-  else {
-    scrollingInput();
+  switch (menu_state) {
+    case PARTY_MEMBER: {
+      blink_clock += Game::deltaTime();
+      memberNavigation();
+      break;
+    }
+    case TECH_SELECT: {
+      blink_clock += Game::deltaTime();
+      techNavigation();
+      break;
+    }
+    case PANEL: {
+      assert(panel != nullptr);
+      panel->update();
+
+      if (panel->terminate) {
+        *description = "Select an Technique to read\n"
+                       "information about it";
+        menu_state = TECH_SELECT;
+        panel.reset();
+      }
+      break;
+    }
   }
 }
 
@@ -414,37 +290,33 @@ void TechsPanel::heightLerp() {
   else {
     percentage = 1.0 - clock;
   }
-
-  frame_height = 152 * percentage;
 }
 
-void TechsPanel::optionNavigation() {
+void TechsPanel::memberNavigation() {
   bool gamepad = IsGamepadAvailable(0);
 
   if (Input::pressed(keybinds->down, gamepad)) {
     MenuUtils::nextOption(options, selected);
-    updateStyleText();
-    updateTechCanvas();
+    setupTech();
 
     sfx->play("menu_navigate");
-    scroll_y = 0;
     blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->up, gamepad)) {
     MenuUtils::prevOption(options, selected);
-    updateStyleText();
-    updateTechCanvas();
+    setupTech();
 
     sfx->play("menu_navigate");
-    scroll_y = 0;
     blink_clock = 0.0;
   }
   else if (Input::pressed(keybinds->confirm, gamepad)) {
-    *description = "Press 'CANCEL' to disable scrolling.";
+    *description = "Select an Technique to read\n"
+                   "information about it";
     *desc_color = Game::palette[22];
+    menu_state = TECH_SELECT;
+    tech_selected = tech_options.begin();
 
-    scrolling_mode = true;
-    blink_clock = 1.0;
+    blink_clock = 0.0;
     sfx->play("menu_select");
   }
   else if (Input::pressed(keybinds->cancel, gamepad)) {
@@ -453,46 +325,53 @@ void TechsPanel::optionNavigation() {
   }
 }
 
-void TechsPanel::scrollingInput() {
+void TechsPanel::techNavigation() {
   bool gamepad = IsGamepadAvailable(0);
-  if (Input::pressed(keybinds->cancel, gamepad)) {
-    *description = "Press 'CONFIRM' to enable scrolling.";
+
+  if (Input::pressed(keybinds->down, gamepad)) {
+    MenuUtils::nextOption(tech_options, tech_selected, &tech_disallowed);
+    sfx->play("menu_navigate");
+    blink_clock = 0.0;
+  }
+  else if (Input::pressed(keybinds->up, gamepad)) {
+    MenuUtils::prevOption(tech_options, tech_selected, &tech_disallowed);
+    sfx->play("menu_navigate");
+    blink_clock = 0.0;
+  }
+  else if (Input::pressed(keybinds->confirm, gamepad)) {
+    *description = "";
+    createTextbox();
+    sfx->play("menu_select");
+  }
+  else if (Input::pressed(keybinds->cancel, gamepad)) {
+    *description = "Select a Party Member";
     *desc_color = WHITE;
 
-    scrolling_mode = false;
+    menu_state = PARTY_MEMBER;
+    blink_clock = 0.0;
     sfx->play("menu_cancel");
-    return;
-  }
-
-  if (max_scroll <= 0) {
-    return;
-  }
-
-  bool down = Input::down(keybinds->down, gamepad);
-  bool up = Input::down(keybinds->up, gamepad);
-  int direction = down - up;
-
-  if (direction != 0) {
-    scroll_y += (scroll_speed * direction) * Game::deltaTime();
-    scroll_y = Clamp(scroll_y, 0.0, max_scroll);
-    updateTechCanvas();
   }
 }
 
+void TechsPanel::createTextbox() {
+  assert(panel == nullptr && menu_state != PANEL);
+  int index = static_cast<int>(*tech_selected);
+  TechInfo *tech = &tech_info.at(index);
+
+  Vector2 position = {101, 44};
+  panel = make_unique<TextBoxPanel>(position, tech->name, tech->type,
+                                    tech->desc);
+  menu_state = PANEL;
+}
+
 void TechsPanel::draw() {
-  Rectangle source = {0, 0, 224, frame_height};
-  DrawTextureRec(frame, source, frame_position, WHITE);
-
-  if (state == PanelState::READY) {
-    Font *font = &Game::med_font;
-    int txt_size = font->baseSize;
-    DrawTextEx(*font, style_text.c_str(), style_position, txt_size, -2, 
-               WHITE);
-
-    DrawTextureRec(tech_canvas.texture, canvas_source, {194, 60}, WHITE);
-  }
-
   drawOptions();
+  drawTech();
+
+  if (menu_state == PANEL) {
+    assert(panel != nullptr);
+    panel->draw();
+  }
 }
 
 void TechsPanel::drawOptions() {
@@ -515,7 +394,7 @@ void TechsPanel::drawOptions() {
 
     Character *current = *selected;
     if (current->member_id == id) {
-      drawCursor(position);
+      drawCursor(position, menu_state == PARTY_MEMBER);
     }
 
     position = Vector2Add(position, {6, 1});
@@ -523,7 +402,7 @@ void TechsPanel::drawOptions() {
   }
 }
 
-void TechsPanel::drawCursor(Vector2 position) {
+void TechsPanel::drawCursor(Vector2 position, bool blink) {
   if (state != PanelState::READY) {
     return;
   }
@@ -532,9 +411,63 @@ void TechsPanel::drawCursor(Vector2 position) {
   position = Vector2Add(position, {-13, 3});
 
   Color color = WHITE;
-  float sin_a = std::sinf(blink_clock * 2.5);
-  sin_a = (sin_a / 2) + 0.5;
-  color.a = 255 * sin_a;
+
+  if (blink) {
+    float sin_a = std::sinf(blink_clock * 2.5);
+    sin_a = (sin_a / 2) + 0.5;
+    color.a = 255 * sin_a;
+  }
 
   DrawTextureRec(menu_atlas->sheet, *sprite, position, color);
+}
+
+void TechsPanel::drawTech() {
+  Vector2 position = tech_position;
+  Color color;
+  TechCategory current_category = TechCategory::NONE;
+
+  for (TechOption &option : tech_options) {
+    int index = static_cast<int>(option);
+    TechInfo *tech = &tech_info.at(index);
+
+    if (tech->category == TechCategory::NONE) {
+      continue;
+    }
+
+    if (current_category != tech->category) {
+      current_category = tech->category;
+      color = getPrimaryColor(current_category);
+      drawTechCategory(current_category, position, color);
+      position.y += 16;
+    }
+
+    DrawTextureRec(camp_atlas->sheet, camp_atlas->sprites[11], position,
+                   color);
+
+    Vector2 txt_position = Vector2Add(position, {9, 1});
+    DrawTextEx(*med_font, tech->name.c_str(), txt_position, med_size, -2,
+               WHITE);
+
+    if (menu_state == TECH_SELECT && tech_selected == &option) {
+      drawCursor(position, true);
+    }
+
+    position.y += 16;
+  }
+}
+
+void TechsPanel::drawTechCategory(TechCategory category, Vector2 position,
+                                  Color frame_color)
+{
+  position.x -= 50;
+  DrawTextureRec(camp_atlas->sheet, camp_atlas->sprites[10], position,
+                 frame_color);
+
+  Color txt_color = getSecondaryColor(category);
+  string text = getCategoryName(category);
+  Vector2 txt_position = Vector2Add(position, {45, 1});
+  txt_position = TextUtils::alignCenter(text.c_str(), txt_position, 
+                                        *med_font, -2, 0);
+  DrawTextEx(*med_font, text.c_str(), txt_position, med_size, -2, 
+             txt_color);
 }
