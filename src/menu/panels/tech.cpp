@@ -83,63 +83,176 @@ void TechsPanel::setupTech() {
       tech->name = "Ghoststep";
       tech->type= "Defensive Action";
       tech->category = TechCategory::ACTION;
+      tech->desc = 
+        "HP COST: Usually 5.5\n"
+        "INPUT: Press 'DEFENSIVE' while holding\n"
+        "'LEFT' or 'RIGHT' on the D-PAD.\n\n"
+
+        "Mary will dash forwards or backwards\n"
+        "depending on the input used. While dashing,\n"
+        "Mary is rendered intangible to any and all\n"
+        "attacks.";
+
       tech++;
 
       tech->name = "Evade";
       tech->type = "Defensive Action";
       tech->category = TechCategory::ACTION;
+      tech->desc = 
+        "HP COST: Dependent on Mary's Dexterity\n"
+        "INPUT: Press 'DEFENSIVE while holding\n"
+        "'DOWN' on the D-PAD.\n\n"
+
+        "After a brief windup, Mary braces himself\n"
+        "to dodge the first attack that comes his way.\n"
+        "If successful, any damage Mary would've\n"
+        "taken will be converted to Exhaustion.";
       tech++;
 
       tech->name = "Humanity";
       tech->type = "Passive Trait";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "Mary's Attack can only inflict Morale damage.\n"
+        "However, he gains Morale that is proportional\n"
+        "to the damage dealt.\n\n"
+
+        "If Mary isn't Despondent, a percentage of\n"
+        "the Morale gained will be shared with all\n"
+        "other party members.";
       tech++;
 
       tech->name = "Auto Evade";
       tech->type = "Passive Ability";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "Mary will automatically dodge attacks at the\n"
+        "cost of Morale. The amount lost is dependent\n"
+        "on his Persistence vs the Assailant's\n"
+        "Intimidation.\n\n"
+
+        "If Mary's Morale goes below 0, he will become\n"
+        "Despondent. During which, Auto-Evade is\n"
+        "easier to bypass.";
       break;
     }
     case PartyMemberID::ERWIN: {
       tech->name = "Provoke";
       tech->type = "Light Assist";
       tech->category = TechCategory::ASSIST;
+      tech->desc = 
+        "HP COST: 5 | COOLDOWN: 5s\n\n"
+
+        "Erwin performs a taunt that draws the aggro\n"
+        "of every enemy that happens to be targeting\n"
+        "Mary. He also gains intangibility to any and\n"
+        "all attacks for the duration of this action.";
       tech++;
 
       tech->name = "3rd Party";
       tech->type = "Heavy Assist";
       tech->category = TechCategory::ASSIST;
+      tech->desc = 
+        "MP COST: 10 | COOLDOWN: 8s\n"
+        "SCALING: Offense\n\n"
+
+        "Erwin runs to the enemy that Mary was\n"
+        "targeting when the assist was called. Once\n"
+        "they're within range, Erwin will try to\n"
+        "dropkick said enemy.\n\n"
+
+        "If the attack hits, the target will be knocked\n"
+        "back a far distance, and become Vulnerable\n"
+        "for a second or so.";
       tech++;
 
       tech->name = "Humanity";
       tech->type = "Passive Trait";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "Erwin's Attack can only inflict Morale damage.\n"
+        "However, he gains Morale that is proportional\n"
+        "to the damage dealt.\n\n"
+
+        "If Erwin isn't Despondent, a percentage of\n"
+        "the Morale gained will be shared with all\n"
+        "other party members.";
       tech++;
 
       tech->name = "Auto Evade";
       tech->type = "Passive Ability";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "Erwin will automatically dodge attacks at the\n"
+        "cost of Morale. The amount lost is dependent\n"
+        "on his Persistence vs the Assailant's\n"
+        "Intimidation.\n\n"
+
+        "If Erwin's Morale goes below 0, he will become\n"
+        "Despondent. During which, Auto-Evade is\n"
+        "easier to bypass.";
       break;
     }
     case PartyMemberID::XANDER: {
       tech->name = "Tail Whip";
       tech->type = "Light Assist";
       tech->category = TechCategory::ASSIST;
+      tech->desc = 
+        "HP COST: 6 | CD: 10s\n"
+        "SCALING: Offense & Dexterity\n\n"
+
+        "Xander does a little twirl while whipping his\n"
+        "tail in the direction that Mary is facing.\n"
+        "If Mary is too far away, Xander will instead\n"
+        "try to move closer to his position before\n"
+        "proceeding with the action.\n\n"
+
+        "When the attack begins, any unfortunate\n"
+        "enemy who happens to be too close to Xander\n"
+        "will essentially get bodychecked.";
       tech++;
 
       tech->name = "Meteor";
       tech->type = "Heavy Assists";
       tech->category = TechCategory::ASSIST;
+      tech->desc = 
+        "HP COST: 8 | CD: 10s\n"
+        "SCALING: Offense\n\n"
+
+        "Xander raises a single fist, winds it back,\n"
+        "and then proceed to strike down as hard as\n"
+        "he can. It's exactly as deadly as it sounds.\n\n"
+
+        "Easily capable of breaking the bones of\n"
+        "the least resilient; If it hits that is.";
       tech++;
 
       tech->name = "Draconian";
       tech->type = "Passive Trait";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "Xander has an innate stun immunity to all\n"
+        "Morale Attacks. As a trade off, any Morale\n"
+        "damage Xander sustains will increase his\n"
+        "Entropy instead.\n\n"
+
+        "This passive will cease to function if Xander\n"
+        "gets staggered, or if he's already in hitstun.";
       tech++;
 
       tech->name = "Protective";
       tech->type = "Passive Trait";
       tech->category = TechCategory::PASSIVE;
+      tech->desc = 
+        "For as long as Xander has Tenacity, most\n"
+        "attacks will prioritize him over anyone else.\n"
+        "Xander will do anything to protect his friend\n"
+        "from serious injury and he doesn't like to be\n"
+        "too far away from him either.\n\n"
+
+        "On most occasions, the Water Dragon will\n"
+        "often drop whatever he's doing, and rush\n"
+        "towards Mary's position to reunite with him.";
       break;
     }
   }
@@ -162,6 +275,13 @@ void TechsPanel::setupWeaponTech(SubWeaponID weapon_id,
       tech->name = "Cleave";
       tech->type = "Light Technique";
       tech->category = TechCategory::SUB_WEAPON;
+      tech->desc = 
+        "MP COST: 6\n"
+        "SCALING: Offense & Dexterity\n\n"
+
+        "Mary performs a slash attack that will inflict\n"
+        "damage to the first enemy it hits. The action\n"
+        "itself has a shorter windup if canceled into.";
 
       tech++;
       assert(tech != tech_info.end());
@@ -169,12 +289,31 @@ void TechsPanel::setupWeaponTech(SubWeaponID weapon_id,
       tech->name = "Piercer";
       tech->type = "Heavy Technique";
       tech->category = TechCategory::SUB_WEAPON;
+      tech->desc = 
+        "MP COST: 8\n"
+        "SCALING: Offense & Dexterity\n\n"
+
+        "Mary thrusts his knife in the direction he's\n"
+        "facing. The attack is capable of piercing\n"
+        "multiple enemies, and once it hits, Mary will\n"
+        "brutally yank out of knife afterwards;\n"
+        "Dealing even more damage to every enemy who\n"
+        "got pierced by the initial attack.";
       break;
     }
     case SubWeaponID::BAT: {
       tech->name = "Swing";
       tech->type = "Light Technique";
       tech->category = TechCategory::SUB_WEAPON;
+      tech->desc = 
+        "MP COST: 5 | CD: 5s (On Occasion)\n"
+        "SCALING: Offense\n\n"
+
+        "Mary winds back his baseball bat, and swing\n"
+        "as hard as he can. The attack is great in\n"
+        "power, but slow in terms of speed.\n\n"
+        "During the action's windup, Mary is able to\n"
+        "freely change the direction he's facing.";
 
       tech++;
       assert(tech != tech_info.end());
@@ -182,6 +321,16 @@ void TechsPanel::setupWeaponTech(SubWeaponID weapon_id,
       tech->name = "Hail Mary";
       tech->type = "Heavy Technique";
       tech->category = TechCategory::SUB_WEAPON;
+      tech->desc = 
+        "MP COST: 3\n"
+        "SCALING: Offense & Dexterity\n\n"
+
+        "Mary tosses a baseball high into the air. If\n"
+        "the ball gets hit on its way down, most notably\n"
+        "with Swing, then it will be launched forwards.\n"
+        "The projectile itself is actually quite fast,\n"
+        "and it's capable of causing a lot of damage\n"
+        "when used correctly.";
       break;
     }
   }
