@@ -65,12 +65,8 @@ void FieldMap::loadMapGraphics() {
   base = LoadTexture(base_path.c_str());
 
   UnloadTexture(overlay);
-  overlay_available = FileExists(overlay_path.c_str());
-  if (overlay_available) {
-    PLOGD << "Found overlay file.";
-    assert(FileExists(overlay_path.c_str()));
-    overlay = LoadTexture(overlay_path.c_str());
-  }
+  assert(FileExists(overlay_path.c_str()));
+  overlay = LoadTexture(overlay_path.c_str());
 }
 
 void FieldMap::parseMapData(Session *session, string &map_name, 
@@ -515,9 +511,7 @@ void FieldMap::drawMap() {
 }
 
 void FieldMap::drawOverlay() {
-  if (overlay_available) {
-    DrawTexture(overlay, 0, 0, WHITE);
-  }
+  DrawTexture(overlay, 0, 0, WHITE);
 }
 
 void FieldMap::drawCollLines() {

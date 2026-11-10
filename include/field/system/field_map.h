@@ -62,5 +62,4 @@ private:
 
   Texture overlay;
   std::string overlay_path;
-  bool overlay_available = false;
 };
