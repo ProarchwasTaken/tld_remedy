@@ -8,8 +8,18 @@
          "imageheight":448,
          "imagewidth":640,
          "name":"Map Image",
-         "offsetx":0,
-         "offsety":0.402371,
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_17o.png",
+         "imageheight":448,
+         "imagewidth":640,
+         "name":"Overlay",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -208,7 +218,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
+ "nextlayerid":10,
  "nextobjectid":5,
  "orientation":"orthogonal",
  "properties":[

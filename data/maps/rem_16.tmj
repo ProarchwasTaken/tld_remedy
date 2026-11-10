@@ -15,6 +15,18 @@
          "y":0
         }, 
         {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_16o.png",
+         "imageheight":256,
+         "imagewidth":256,
+         "name":"Overlay Image",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "color":"#ffaa00",
          "draworder":"topdown",
          "id":3,
@@ -359,7 +371,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
+ "nextlayerid":10,
  "nextobjectid":11,
  "orientation":"orthogonal",
  "properties":[
