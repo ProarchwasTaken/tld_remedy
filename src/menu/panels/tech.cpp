@@ -575,6 +575,11 @@ void TechsPanel::drawTech() {
   Color color;
   TechCategory current_category = TechCategory::NONE;
 
+  Rectangle sprite = camp_atlas->sprites[11];
+  if (state != PanelState::READY) {
+    sprite.width *= percentage;
+  }
+
   for (TechOption &option : tech_options) {
     int index = static_cast<int>(option);
     TechInfo *tech = &tech_info.at(index);
@@ -590,8 +595,7 @@ void TechsPanel::drawTech() {
       position.y += 16;
     }
 
-    DrawTextureRec(camp_atlas->sheet, camp_atlas->sprites[11], position,
-                   color);
+    DrawTextureRec(camp_atlas->sheet, sprite, position, color);
 
     Vector2 txt_position = Vector2Add(position, {9, 1});
     DrawTextEx(*med_font, tech->name.c_str(), txt_position, med_size, -2,
