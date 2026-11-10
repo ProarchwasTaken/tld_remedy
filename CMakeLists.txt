@@ -305,6 +305,10 @@ if(${BUILD_DEV})
   )
 endif()
 
+if (WIN32 AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/resources.o)
+  message(STATUS "Including resources.o")
+  list(APPEND SOURCE "resources.o")
+endif()
 
 add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCE})
 if(WIN32)

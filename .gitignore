@@ -1,4 +1,5 @@
 log*
+resources.o
 build/
 .cache/
 data/.temp_session
