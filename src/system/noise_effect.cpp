@@ -5,10 +5,12 @@
 #include <plog/Log.h>
 
 
-NoiseEffect::NoiseEffect() {
+NoiseEffect::NoiseEffect(Vector2 position, Vector2 scale) {
+  this->position = position;
+
   for (int x = 0; x < frames.size(); x++) {
     Texture *texture = &frames.at(x);
-    Image noise = GenImageWhiteNoise(426, 240, 0.35);
+    Image noise = GenImageWhiteNoise(scale.x, scale.y, 0.35);
     *texture = LoadTextureFromImage(noise);
     UnloadImage(noise);
   }
@@ -48,5 +50,5 @@ void NoiseEffect::draw() {
 
   Texture *texture = &frames[*anim.current];
   tint.a = 255 * alpha;
-  DrawTexture(*texture, 0, 0, tint);
+  DrawTextureV(*texture, position, tint);
 }

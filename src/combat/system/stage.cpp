@@ -33,7 +33,7 @@ void CombatStage::loadStage(string location) {
 }
 
 void CombatStage::tintStage(Color tint) {
-  PLOGI << "Changing the stage's tint.";
+  PLOGD << "Changing the stage's tint.";
   CombatStage::tint = tint;
   tint_changed = true;
 }

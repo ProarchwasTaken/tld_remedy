@@ -25,6 +25,7 @@ enum class GameState {
   READY,
   TOGGLE_FULLSCREEN,
   SWITCHING_SCENE,
+  QUICK_SWITCH,
   OPEN_CAMPMENU,
   OPEN_RESTMENU,
   INIT_COMBAT,
@@ -36,22 +37,58 @@ enum class GameState {
   SLEEP,
 };
 
+enum class BootMode {
+  DEFAULT,
+  QUICK_LOAD,
+  CUSTOM
+};
+
+struct BootOptions {
+  BootMode mode = BootMode::DEFAULT;
+  SessionID save_file;
+  TroopID troop;
+  SubWeaponID sub_weapon = SubWeaponID::KNIFE;
+  CompanionID companion = CompanionID::ERWIN;
+  std::string map = "db_05";
+};
 
 class Game {
 public:
-  Game(int argc, char *argv[]);
-  void init();
+  void init(int argc, char *argv[]);
+  BootOptions evalutateArgs(int argc, char *argv[]);
+  void setupRaylib();
+  void evaluateOptions(BootOptions &opt);
+  ~Game();
+
   void loadPersonal();
+  void savePersonal();
+
   void setupCanvas();
   void defineColorPalette();
-
-  ~Game();
-  void savePersonal();
 
   void start();
   void topLevelInput();
   void takeScreenshot();
   void toggleFullscreen();
+
+  static void newGame(GameMode mode, SubWeaponID sub_weapon, 
+                      CompanionID companion);
+  static void saveGame(Session *data, SessionID file_id);
+  static bool loadGame(SessionID file_id);
+  static void exitGame();
+
+  static Session validateSession(SessionID file_id);
+  static bool sessionExists(SessionID file_id);
+  static bool sessionExists();
+
+  static std::string getSessionKey(Session *data);
+  static SessionID currentFile() {return current_file;}
+
+  static double playtime() {return session_playtime;}
+  static GameState state() {return game_state;}
+
+  static bool debugInfo() {return debug_info;}
+  static void toggleDebugInfo() {debug_info = !debug_info;}
 
   /* The functionality of this function majorly depends on what state
    * the game is in. Updating the scene, fading the screen, and loading
@@ -60,6 +97,7 @@ public:
   void gameLogic();
   void fadeScreenProcedure();
   void switchSceneProcedure();
+  void quickSwitchProcedure();
   void openCampMenuProcedure();
   void openRestMenuProcedure();
   void initCombatProcedure();
@@ -71,42 +109,33 @@ public:
   void drawScene();
 
   static float deltaTime();
-  static double playtime() {return session_playtime;};
-  static GameState state() {return game_state;}
-
-  static bool debugInfo();
-  static void toggleDebugInfo();
   static void setTimeScale(float number);
 
   static void fullscreenCheck();
-  static void newSession(SubWeaponID sub_weapon, CompanionID companion);
-  static void saveSession(Session *data);
-  static bool loadSession();
-  static bool existingSession();
 
   static void loadTitleScreen();
-
+  static void loadSetupScreen();
   static void openCampMenu(Session *data, 
                            CampMenuOption *shortcut = NULL);
   static void openRestMenu(Session *data);
+
   static void initCombat(Session *data, TroopID id = TroopID::INVALID);
+  static void initCombat(Session *data, TroopID id, int reward);
+
   static std::tuple<TroopID, int> selectRandomTroop(nlohmann::json &pool);
   static int getTroopReward(TroopID troop_id, nlohmann::json &pool);
-  static void initCombat(Session *data, TroopID id, int reward);
+
   static void returnToField();
   static void deathsave();
   static void gameover(std::string reason);
 
   static void fadeout(float seconds);
   static void fadein(float seconds);
-
   static void sleep(float seconds);
 
-  static void exitGame();
-
   static constexpr Vector2 CANVAS_RES = {426, 240};
-  static constexpr unsigned int session_version = 16;
-  static constexpr unsigned int personal_version = 5;
+  static constexpr unsigned int session_version = 19;
+  static constexpr unsigned int personal_version = 6;
   static constexpr float TARGET_FPS = 60.0;
 
   static Settings settings;
@@ -127,11 +156,11 @@ public:
   #else
   static constexpr bool devmode = false;
   #endif // !NDEBUG
-
-  bool quick_load = false;
-  std::string ql_map;
 private:
   static GameState game_state;
+  static SessionID current_file;
+  static HashKeys hash_keys;
+
   static bool EXIT_GAME;
   static bool SKIP_FRAME;
 

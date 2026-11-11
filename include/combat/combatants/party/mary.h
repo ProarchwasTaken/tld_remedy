@@ -17,7 +17,8 @@ class SubWeapon;
 enum class MaryAction {
   NONE = -1,
   ATTACK,
-  GHOST_STEP,
+  GHOST_STEP_FWD,
+  GHOST_STEP_BWD,
   EVADE,
   LIGHT_TECH,
   HEAVY_TECH,
@@ -37,10 +38,10 @@ public:
   void assignSubWeapon(SubWeaponID id);
   void useItem(ItemID item, float use_time, PartyMember *target);
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void damageHandling(TookDamageCBT *event);
+  void onDamageTaken(DamageTakenCBT *event);
 
+  void behavior() override;
   void movementInput(bool gamepad);
   void actionInput(bool gamepad);
   void defensiveActionInput(bool gamepad);
@@ -50,8 +51,10 @@ public:
 
   void update() override;
   void neutralLogic();
-  void bufferTimer();
   void movement();
+
+  void endLogic() override;
+  void bufferTimer();
   void targetLogic();
 
   Animation *getIdleAnim();
@@ -63,13 +66,13 @@ public:
   static SpriteAtlas atlas;
   bool has_moved = false;
   bool moving = true;
+  int moving_x = 0;
 
   const float gs_cost = 4.5;
 private:
   CombatKeybinds *keybinds;
 
   const float default_speed = 68;
-  int moving_x = 0;
   float last_moved = 0.0;
 
   MaryAction buffer = MaryAction::NONE;

@@ -7,11 +7,10 @@
 #include "game.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
-#include "data/combat_event.h"
 #include "data/combatant_event.h"
 #include "utils/text.h"
 #include "system/sprite_atlas.h"
-#include "combat/system/evt_handler.h"
+#include "combat/hud/toasts.h"
 #include "combat/hud/combo.h"
 
 using std::unique_ptr, std::string;
@@ -32,11 +31,11 @@ ComboHud::~ComboHud() {
 }
 
 void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
-  if (event->event_type != CombatantEVT::TOOK_DAMAGE) {
+  if (event->event_type != CombatantEVT::DAMAGE_TAKEN) {
     return;
   }
 
-  TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
+  auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
   Combatant *victim = static_cast<Combatant*>(dmg_event->sender);
 
   bool from_enemy = victim->team == CombatantTeam::ENEMY;
@@ -47,14 +46,18 @@ void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   if (damage_dealt != damage_total) {
     damage_total = 0;
   }
+
   if (dmg_event->damage_type == DamageType::LIFE) {
     damage_dealt += dmg_event->damage_taken;
     damage_total = damage_dealt;
   }
 
-  hit_clock = 0.0;
+  int combo = Enemy::comboCount();
+  if (combo >= 2 && dmg_event->stun_time > 0) {
+    displayed_combo = Enemy::comboCount();
+    state = ACTIVE;
+    hit_clock = 0.0;
 
-  if (dmg_event->stun_time > 0) {
     stun_time = dmg_event->stun_time;
     stun_clock = 0.0;
     end_clock = 0.0;
@@ -62,26 +65,28 @@ void ComboHud::evaluateEvent(unique_ptr<CombatantEvent> &event) {
 }
 
 void ComboHud::update() {
-  if (stun_clock != 1.0) {
-    stunTimer();
+  switch (state) {
+    case ACTIVE: {
+      stunTimer();
+      break;
+    }
+    case FADING: {
+      endTimer();
+      break;
+    }
+    default: {
+      break;
+    }
   }
-  else if (end_clock != 1.0) {
-    endTimer();
-  }
-
-  if (highest_combo > 0) { 
-    highestComboDecay();
+  
+  if (toast_clock < 1.0) {
+    toast_clock += Game::deltaTime() / toast_cooldown;
   }
 }
 
 void ComboHud::stunTimer() {
   stun_clock += Game::deltaTime() / stun_time;
   stun_clock = Clamp(stun_clock, 0.0, 1.0);
-
-  if (stun_clock == 1.0) {
-    damage_dealt = 0;
-    startComboToast();
-  }
 }
 
 void ComboHud::endTimer() {
@@ -89,45 +94,47 @@ void ComboHud::endTimer() {
   end_clock = Clamp(end_clock, 0.0, 1.0);
 
   if (end_clock == 1.0) {
+    state = HIDDEN;
+    displayed_combo = 0;
     damage_total = 0;
   }
 }
 
-void ComboHud::highestComboDecay() {
-  decay_clock += Game::deltaTime() / decay_time;
-
-  if (decay_clock >= 1.0) {
-    highest_combo = 0;
-    decay_clock = 0;
-  }
+void ComboHud::onComboEnd(CombatToasts *toasts) {
+  selectToast(toasts);
+  damage_dealt = 0;
+  previous_combo = displayed_combo;
+  state = FADING;
 }
 
-void ComboHud::startComboToast() {
-  int combo = Enemy::comboCount();
-
+void ComboHud::selectToast(CombatToasts *toasts) {
   string sound_name;
-  if (combo >= 8) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 4);
+  if (displayed_combo >= 8) {
+    toasts->startToast(4);
     sound_name = "combo_fantastic";
   }
-  else if (combo >= 5) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 3); 
+  else if (displayed_combo >= 5) {
+    toasts->startToast(3);
     sound_name = "combo_great";
   }
-  else if (combo >= 3) {
-    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 2); 
+  else if (displayed_combo >= 3) {
+    toasts->startToast(2);
     sound_name = "combo_good";
   }
 
-  if (!sound_name.empty() && combo > highest_combo) {
-    highest_combo = combo;
+  if (sound_name.empty()) {
+    return;
+  }
+
+  bool off_cooldown = toast_clock >= 1.0;
+  if (off_cooldown || displayed_combo > previous_combo) {
     sfx->play(sound_name);
+    toast_clock = 0.0;
   }
 }
 
 void ComboHud::draw() {
-  int combo = Enemy::comboCount();
-  if (combo <= 1 || end_clock == 1.0) {
+  if (state == HIDDEN) {
     return;
   }
 
@@ -142,9 +149,9 @@ void ComboHud::draw() {
   float percentage = 1.0 - stun_clock;
   sprite.width = sprite.width * percentage;
   Vector2 position = Vector2Add(main_position, {1, 1});
-
   DrawTextureRec(atlas.sheet, sprite, position, tint);
-  drawComboCount(combo);
+
+  drawComboCount(displayed_combo);
   drawTotalDamage();
 }
 

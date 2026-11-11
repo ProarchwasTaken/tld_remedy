@@ -10,6 +10,7 @@
 #include "utils/menu.h"
 #include "menu/panels/config.h"
 #include "menu/panels/confirm.h"
+#include "menu/panels/file_select.h"
 #include "scenes/title.h"
 #include <plog/Log.h>
 
@@ -26,13 +27,20 @@ TitleScene::TitleScene() {
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 
-  valid_session = Game::existingSession();
-  if (!valid_session) {
+  if (!Game::sessionExists()) {
+    PLOGI << "Greying out the LOAD GAME because no sessions are " 
+      << "available to load.";
     disallowed.emplace(TitleOption::LOAD_GAME);
+    valid_session = false;
+  }
+  else {
+    valid_session = true;
   }
 
-  Game::bgm->prepare("title");
-  Game::bgm->play();
+  if (Game::bgm->loaded != "title") {
+    Game::bgm->prepare("title");
+    Game::bgm->play();
+  }
   PLOGI << "TitleScene has been initialized.";
 }
 
@@ -87,17 +95,13 @@ void TitleScene::optionNavigation() {
 void TitleScene::selectOption() {
   switch (*selected) {
     case TitleOption::NEW_GAME: {
-      Game::newSession(SubWeaponID::KNIFE, CompanionID::ERWIN);
+      Game::loadSetupScreen();
       break;
     }
     case TitleOption::LOAD_GAME: {
       assert(valid_session);
-      valid_session = Game::loadSession();
-
-      if (!valid_session) {
-        disallowed.emplace(TitleOption::LOAD_GAME); 
-      }
-
+      panel = make_unique<FileSelectPanel>();
+      panel_mode = true;
       break;
     }
     case TitleOption::CONFIG: {

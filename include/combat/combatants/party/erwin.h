@@ -3,10 +3,10 @@
 #include <raylib.h>
 #include "base/combatant.h"
 #include "base/party_member.h"
+#include "base/ai_parameters.h"
 #include "data/session.h"
 #include "data/keybinds.h"
 #include "data/animation.h"
-#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
@@ -32,7 +32,7 @@ enum class ErwinGoals {
  * gamestate, these variables may change.*/
 struct ErwinAI : AIParameters {
   ErwinAI() {
-    attack_distance = 27;
+    attack_distance = 20;
     contest_distance = 96;
     
     attack_cooldown = 0.10;
@@ -49,9 +49,9 @@ struct ErwinAI : AIParameters {
 
 
 /* Erwin is a Companion Combatant of the "Maverick" archetype. Their
- * behavior is designed to make sure the player doesn't get overwhelmed.
- * As such, they tend to be a lot more self-sufficent than other 
- * companions.*/
+ * behavior is designed around creating opportunities for the player to
+ * capitalize on. He is also highly self sufficient as well, but he not
+ * very good in terms of DPS.*/
 class Erwin : public PartyMember {
 public:
   Erwin(Companion *data, Mary *player);
@@ -59,16 +59,33 @@ public:
 
   void setEnabled(bool value) override;
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void warningHandling(WarningCBT *event);
-  void damageHandling(TookDamageCBT *event);
-  void evadeHandling(EvadedAttackCBT *event);
-  bool retaliation(Combatant *assailant, float chance);
+
+  void onWarning(WarningCBT *event);
+
+  /* Determines whether Erwin should acknowledge any given warning event
+   * in the first place.*/
+  bool shouldAcknowledge(WarningCBT *event, bool &from_target, 
+                         bool &in_range);
+
+  /* Very important function that calculate the odds that Erwin will
+   * choose to REACT to the warning after acknowledging it. There are a 
+   * numerous amount of factors that will influence these odds. 
+   * (ie: Distance, time, action type, etc)*/
   float chanceCalculation(WarningCBT *event, bool from_target);
+
+  /* Determines HOW Ewin should react to the warning. Depending on the 
+   * result, he might try to dodge the attack with Ghoststep or Evade.*/
+  void warningReaction(WarningCBT *event, bool from_target, 
+                       bool in_range);
   float getEvadeChance(WarningCBT *event, bool from_target, 
                        bool in_range);
 
+  void onDamageTaken(DamageTakenCBT *event);
+  void onEvade(EvadedAttackCBT *event);
+  bool retaliation(Combatant *assailant, float chance);
+
+  void behavior() override;
   void assistInput();
   bool lightAssistCondition();
   bool heavyAssistCondition();
@@ -91,21 +108,14 @@ public:
   void provoke();
   void thirdparty();
 
-  void setGoal(ErwinGoals goal, float chance);
-
   void update() override;
   void neutralLogic();
 
-  void lookAtPlayer();
   void followPlayer();
   void targetingLogic();
   void retreatingLogic();
   void dodgingLogic();
   void thirdPartyLogic();
-
-  void wait(float time);
-  void wait(float min, float max);
-  void waitTimer();
 
   void movement(float multiplier);
   void animationLogic();
@@ -128,9 +138,12 @@ private:
 
   const float default_speed = 68;
   int moving_x = 0;
+  int prev_dir = 0;
+
   bool has_moved = false;
   bool attempt_evade = false;
 
+  int hp_atk;
   float preferred_plr_distance = 128;
 
   Animation anim_idle = {{0, 1}, 2.0};

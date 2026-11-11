@@ -15,11 +15,15 @@ public:
 
   static int memberCount() {return member_count;}
   static int comboCount() {return combo;} 
+  static void updateStunnedCount();
+
+  void chooseTarget();
 
   void takeDamage(DamageData &data) override;
   void finalIntercept(float &damage, DamageData &data) override;
 
   void enterHitstun(DamageData &data) override;
+  void enterHitstun(float seconds, StunType type, Color tint) override;
   bool counterToastCondition(DamageData &data);
   void exitHitstun() override;
 

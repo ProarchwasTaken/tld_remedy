@@ -4,8 +4,8 @@
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/enemy.h"
+#include "base/ai_parameters.h"
 #include "data/animation.h"
-#include "data/ai_parameters.h"
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "combat/actions/attack.h"
@@ -22,7 +22,7 @@ enum class ServantGoals {
 
 struct ServantAI : AIParameters {
   ServantAI() {
-    attack_distance = 28;
+    attack_distance = 20;
     contest_distance = 128;
 
     attack_cooldown = 0.35;
@@ -48,19 +48,21 @@ public:
   Servant(Vector2 position, Direction direction);
   ~Servant();
 
-  void behavior() override;
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void warningHandling(WarningCBT *event);
-  void damageHandling(TookDamageCBT *event);
-  void retaliation(Combatant *assailant, float chance);
+
+  void onWarning(WarningCBT *event);
+  bool shouldAcknowledge(WarningCBT *event, bool &from_target,
+                         bool &in_range);
   float chanceCalculation(WarningCBT *event, bool from_target, 
                           bool in_range);
+  void warningReaction(WarningCBT *event);
 
+  void onDamageTaken(DamageTakenCBT *event);
+  void retaliation(Combatant *assailant, float chance);
+
+  void behavior() override;
   void rootBehavior();
   void targetingBehavior();
-  void chooseTarget();
-
-  void setGoal(ServantGoals goal, float chance);
 
   void decideAttack();
   void attackMP();
@@ -72,10 +74,6 @@ public:
   void targetingLogic();
   void retreatingLogic();
   void dodgingLogic();
-
-  void wait(float time);
-  void wait(float min, float max);
-  void waitTimer();
 
   void movement();
 
@@ -92,6 +90,7 @@ public:
 private:
   const float default_speed = 60;
   int moving_x = 0;
+  int prev_dir = 0;
   bool has_moved = false;
 
   float anim_move_speed = 0.226;

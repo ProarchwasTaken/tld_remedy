@@ -32,7 +32,6 @@ private:
 
   Session *session;
 
-
   float seq_clock = 0.0;
   float seq_time = 3.0;
 };

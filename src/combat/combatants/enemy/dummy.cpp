@@ -15,17 +15,19 @@ SpriteAtlas Dummy::atlas("combatants", "dummy");
 Dummy::Dummy(Vector2 position, Direction direction) :  
   Enemy("Dummy", EnemyID::DUMMY, position)
 {
-  max_life = 20;
+  max_life = 110;
   life = max_life;
 
-  offense = 8;
+  offense = 10;
   defense = 6;
-  intimid = 6;
-  persist = 6;
+  intimid = 8;
+  persist = 2;
   dexterity = 4;
   discipline = 1;
 
-  resilience = 0.8;
+  resilience = 0.50;
+
+  z_order = 5;
 
   bounding_box.scale = {64, 64};
   bounding_box.offset = {-32, -64};
@@ -36,13 +38,15 @@ Dummy::Dummy(Vector2 position, Direction direction) :
   atlas.use();
 
   sprite = &atlas.sprites[0];
+
+  chooseTarget();
 }
 
 Dummy::~Dummy() {
   atlas.release();
 }
 
-void Dummy::attack() {
+void Dummy::attackMP() {
   RectEx hitbox;
   hitbox.scale = {32, 16};
   hitbox.offset = {-16 + (16.0f * direction), -40};
@@ -50,6 +54,28 @@ void Dummy::attack() {
   unique_ptr<CombatAction> action;
   action = make_unique<Attack>(this, atlas, hitbox, atk_set);
   performAction(action);
+}
+
+void Dummy::attackHP() {
+  RectEx hitbox;
+  hitbox.scale = {32, 16};
+  hitbox.offset = {-16 + (16.0f * direction), -40};
+
+  DamageData data;
+  data.damage_type = DamageType::LIFE;
+  data.calculation = DamageType::LIFE;
+  data.stun_time = 0.5;
+  data.stun_type = StunType::NORMAL;
+  data.knockback = 20.0;
+  data.hit_stop = 0.2;
+  data.assailant = this;
+
+  unique_ptr<CombatAction> action;
+  action = make_unique<Attack>(this, ActionType::OFFENSE_HP, 0.35, 0.05,
+                               0.25, hitbox, data, atlas, atk_set);
+
+  performAction(action);
+  sfx.play("enemy_warning1");
 }
 
 void Dummy::update() {
@@ -60,6 +86,10 @@ void Dummy::update() {
     }
     case CombatantState::ACTION: {
       action->logic();
+
+      if (kb_push_back) {
+        knockbackLogic();
+      }
       break;
     }
     case CombatantState::HIT_STUN: {
@@ -75,15 +105,11 @@ void Dummy::update() {
     }
   }
 
-  statusLogic();
+  endLogic();
 }
 
 void Dummy::draw() {
-  Rectangle final = *sprite;
-  final.width = final.width * direction;
-
-  applyStaggerEffect(final);
-  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
+  drawSprite(&atlas.sheet);
 }
 
 void Dummy::drawDebug() {

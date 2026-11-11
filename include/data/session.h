@@ -53,9 +53,13 @@ struct GameFlag {
 };
 
 struct Session {
-  unsigned int version;
+  unsigned int version = 0;
+  SessionID file_id = UNSAVED;
+  GameMode game_mode = GameMode::INDIFFERENCE;
+
   double playtime = 0.0;
   int supplies = 8;
+  float party_speed = 1.0;
 
   char map_name[16] = "";
   char prev_map1[16] = "";

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <string>
+#include <thread>
 #include <vector>
 #include <memory>
 #include "enums.h"
@@ -27,7 +28,7 @@
  *
  * So instead of being cleared from memory when the game loads a new 
  * scene, the FieldScene will be placed in "reserve" or "shelfed" until 
- * the game eventually returns to it. This is to make sure that important
+ * the game eventually returns to it. This is to make sure important
  * data like the player's session wouldn't become lost, and to also 
  * presevere minor stuff like the player's position on the map. 
  *
@@ -43,17 +44,19 @@ public:
   /* For when the player start a new game. Entirely new Session data
    * will be initialized, and the scene will be poised to load the
    * first map.*/
-  FieldScene(SubWeaponID sub_weapon, CompanionID companion);
+  FieldScene(GameMode mode, SubWeaponID sub_weapon, 
+             CompanionID companion);
 
   /* For when the player loads an existing game. Basically takes 
    * existing session data that is stored enternally, and continues
    * where that session had left off.*/
   FieldScene(Session *session_data);
 
-  /* For directly load a map from startup. Purely meant for debug 
-   * purposes as this constructor can only be ran through the
-   * use of command-line arguments.*/
-  FieldScene(std::string map_name);
+  /* For directly loading a map from startup with specific conditions. 
+   * Purely meant for debug purposes as this constructor can only be ran 
+   * through the use of command-line arguments.*/
+  FieldScene(std::string map_name, SubWeaponID weapon, 
+             CompanionID companion);
   ~FieldScene();
 
   void initPlayerData(SubWeaponID weapon_id);
@@ -71,15 +74,14 @@ public:
    * as to only be called once.*/
   void onSceneReturn(SceneID from);
   void deathsaveProcedure();
-  void updatePartySpeed();
+  float getPartySpeed();
+  void updatePartySpeed(float multiplier);
   void updateInjury(Character &party_member);
 
-  /* The root function for loading the game's maps, and initializing the 
-   * entities for the map as well. Works hand in hand with FieldMap to
-   * make it all possible.*/
-  void mapLoadProcedure(std::string map_name, 
+  void loadMapProcedure(std::string map_name, 
                         std::string *spawn_name = NULL, 
                         bool map_history = true);
+  void loadWrapup();
   void clearMapHistory();
 
   void setupEntities();
@@ -135,8 +137,9 @@ private:
   PlayerActor *player_actor = NULL;
   CompanionActor *companion_actor = NULL;
 
+  std::thread map_loading;
   LoadMapEvent next_map;
-  bool map_ready = false;
+  bool init_load = false;
 
   std::vector<std::unique_ptr<Entity>> entities;
 };

@@ -13,7 +13,7 @@ public:
   void assign(PartyMember *user);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
-  void damageEventHandling(TookDamageCBT *event);
+  void damageEventHandling(DamageTakenCBT *event);
   void update();
   void criticalFlash();
   void demoralizedFlash();
@@ -28,12 +28,13 @@ public:
   void drawLife(Vector2 position);
   void drawLifeGauge(Vector2 position);
   void drawToBeHealed(Vector2 position);
-  void drawLifeText(Vector2 position);
-  void drawTenacityText(Vector2 position);
 
   void drawMorale(Vector2 position);
   void drawMoraleGauge(Vector2 position);
-  void drawMoraleText(Vector2 position);
+  void drawDespondenceGauge(Vector2 position);
+
+  void drawTenacity(Vector2 position);
+  void drawTenacityGauge(Vector2 position);
 
   void drawGauge(int index, Vector2 position, Color color, 
                  float percentage, float exponent = GAUGE_LIFE_EXP);
@@ -55,7 +56,6 @@ private:
   float shake_time = 0.25;
 
   Color life_color;
-  Color life_txt_color;
   bool crit_flash = false;
   float crit_clock = 0.0;
   float crit_time = 0.20;
@@ -66,10 +66,12 @@ private:
   float white_life;
 
   Color morale_color;
-  Color morale_txt_color;
+  float morale_clock = 0.0;
+  float morale_time = 1.0;
+
   bool demo_flash = false;
-  float demo_clock = 0.0;
-  float demo_time = 0.25;
+  float demo_flash_clock = 0.0;
+  float demo_flash_time = 0.50;
 
   float dmg_morale_clock = 1.0;
   float dmg_morale_time = 0.25;

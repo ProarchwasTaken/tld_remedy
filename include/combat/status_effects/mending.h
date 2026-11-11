@@ -24,4 +24,5 @@ public:
 private:
   PartyMember *afflicted;
   float speed;
+  bool interupted = false;
 };

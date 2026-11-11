@@ -38,7 +38,7 @@ private:
   float frame_height = 0;
   float blink_clock = 0;
 
-  std::array<ConfirmOption, 2> options {
+  std::array<ConfirmOption, 2> options = {
     ConfirmOption::YES,
     ConfirmOption::NO
   };

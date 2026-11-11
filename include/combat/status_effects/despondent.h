@@ -19,8 +19,5 @@ public:
 private:
   PartyMember *afflicted;
 
-  int intimid_lost = 0;
-  
-  float delay_clock = 0.0;
-  float delay_time = 5;
+  int intimid_lost = 0; 
 };

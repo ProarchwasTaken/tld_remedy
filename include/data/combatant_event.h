@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "base/entity.h"
 #include "base/combatant.h"
+#include "base/projectile.h"
 #include "base/combat_action.h"
 
 
@@ -11,7 +12,7 @@ struct CombatantEvent {
   CombatantEVT event_type;
 };
 
-struct TookDamageCBT : CombatantEvent {
+struct DamageTakenCBT : CombatantEvent {
   float damage_taken;
   DamageType damage_type;
   CombatantState resulting_state;
@@ -22,7 +23,7 @@ struct TookDamageCBT : CombatantEvent {
   Combatant *assailant;
 };
 
-struct GainedMoraleCBT : CombatantEvent {
+struct MoraleGainedCBT : CombatantEvent {
   float morale_gained;
 };
 
@@ -44,6 +45,13 @@ struct WarningCBT : CombatantEvent {
 
   Combatant *assailant = NULL;
   bool punishable = false;
+};
+
+struct WarningProjCBT : CombatantEvent {
+  Combatant *target;
+  TrajectPoint point;
+  Rectangle intersect;
+  float until_collision = 0.0;
 };
 
 struct EvadedAttackCBT : CombatantEvent {

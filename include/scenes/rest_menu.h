@@ -63,7 +63,7 @@ private:
   Rectangle *plr_sprite;
   Vector2 plr_position;
 
-  Rectangle *com_sprite;
+  Rectangle *com_sprite = NULL;
   Vector2 com_position;
 
   enum {

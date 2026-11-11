@@ -102,7 +102,7 @@ private:
 
   std::array<Character*, 2> party;
   std::array<Character*, 2>::iterator target;
-  TargetReticle reticle;
+  TargetReticle reticle = TargetReticle({104, 54});
 
   std::array<ItemOptions, 3> sub_options = {
     ItemOptions::USE,

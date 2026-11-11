@@ -25,9 +25,10 @@ public:
   virtual void setEnabled(bool value);
 
   void evaluateEvent(std::unique_ptr<CombatantEvent> &event) override;
-  void moraleShare(GainedMoraleCBT *event);
+  void moraleShare(MoraleGainedCBT *event);
 
   void takeDamage(DamageData &data) override;
+  void impDamageProcessing(DamageData &data, bool not_demo, bool in_crit);
   void finalIntercept(float &damage, DamageData &data) override;
 
   void damageLife(float magnitude) override;
@@ -42,7 +43,7 @@ public:
   void clearNonPersistant();
 
   void damageMorale(float magnitude) override;
-  void increaseMorale(float magnitude, bool mp_share) override;
+  void increaseMorale(float magnitude, bool mp_share = true);
 
   void increaseExhaustion(float magnitude);
   void depleteExhaustion();
@@ -58,6 +59,8 @@ public:
   bool deathSavingThrow();
   bool lastOneAlive();
   float applySavePenalties(float base_chance);
+
+  void endLogic() override;
 
   PartyMemberID id;
   bool important = false;
@@ -77,9 +80,8 @@ public:
   static bool for_glory;
 protected:
   bool enabled = true;
+  float default_deplete_delay = 0.5;
 private:
   static int member_count;
-  constexpr static float DEFAULT_DEPLETE_DELAY = 0.5;
-
   SpriteAtlas *atlas;
 };

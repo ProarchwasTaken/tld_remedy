@@ -2,23 +2,26 @@
 #include <cstddef>
 #include <algorithm>
 #include <utility>
+#include <memory>
 #include <set>
 #include "enums.h"
 #include "base/combatant.h"
 #include "base/combat_action.h"
+#include "base/status_effect.h"
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/comparisons.h"
 #include "combat/system/cbt_handler.h"
 #include "combat/combatants/party/erwin.h"
+#include "combat/status_effects/vulnerable.h"
 #include "combat/actions/3rd_party.h"
 #include <plog/Log.h>
 
-using std::set, std::pair;
+using std::set, std::pair, std::make_unique, std::unique_ptr;
 
 
 ThirdParty::ThirdParty(Erwin *user): 
-  CombatAction(ActionID::ERWIN_3RD_PARTY, ActionType::OFFENSE_HP, user, 
+  CombatAction(ActionID::ERWIN_3RDPARTY, ActionType::OFFENSE_HP, user, 
                0.30, 0.10, 0.50)
 {
   name = "3rd Party";
@@ -32,14 +35,14 @@ ThirdParty::ThirdParty(Erwin *user):
   data.damage_type = DamageType::LIFE;
   data.calculation = DamageType::LIFE;
 
-  data.stun_time = 1.0;
+  data.stun_time = 1.5;
   data.stun_type = StunType::NORMAL;
 
-  data.atk_mod = 1.30;
+  data.dmg_floor = user->offense / 2.0;
   data.knockback = 200.0;
 
   data.hit_stop = 0.25;
-  data.force_hitstop = true;
+  data.apply_hitstop = true;
 
   data.assailant = user;
 
@@ -144,8 +147,30 @@ void ThirdParty::inflictDamage(set<pair<float, Combatant*>> &hits) {
   data.hitbox = &hitbox.rect;
   victim->takeDamage(data);
 
+  if (user->state == HIT_STUN) {
+    return;
+  }
+
+  if (victim->state == HIT_STUN) {
+    applyVulnerable(victim);
+  }
+
   attack_connected = true;
   sfx->play("3rdparty_hit");
+}
+
+void ThirdParty::applyVulnerable(Combatant *victim) {
+  for (auto &effect : victim->status) {
+    if (effect->id == StatusID::VULNERABLE) {
+      Vulnerable *vulnerable = static_cast<Vulnerable*>(effect.get());
+      vulnerable->refresh(data.stun_time);
+      return;
+    }
+  }
+
+  unique_ptr<StatusEffect> effect;
+  effect = make_unique<Vulnerable>(victim, data.stun_time);
+  victim->afflictStatus(effect);
 }
 
 void ThirdParty::endLag() {

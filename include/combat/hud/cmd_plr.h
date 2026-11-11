@@ -2,6 +2,7 @@
 #include <string>
 #include <raylib.h>
 #include "data/keybinds.h"
+#include "data/technique.h"
 #include "system/sprite_atlas.h"
 #include "combat/combatants/party/mary.h"
 
@@ -26,8 +27,12 @@ public:
   void draw();
   void drawNamePlate(Font *font, int txt_size);
   void drawCmdFrames();
-  void drawCmdText(const char *text, int frame, Font *font, int txt_size, 
-                   Color color, bool unusable = false);
+  void drawCmdDetails(const char *text, int frame, Font *font, 
+                      int txt_size, Color color, bool unusable = false);
+  void drawCmdDetails(Technique *tech, int frame, Font *font, 
+                      int txt_size, Color color, bool unusable = false);
+  void drawCmdCooldown(Technique *tech, float offset, Font *font,
+                       int txt_size);
 private:
   Mary *player;
   CombatKeybinds *keybinds;

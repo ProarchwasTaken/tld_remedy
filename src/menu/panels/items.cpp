@@ -925,10 +925,13 @@ void ItemsPanel::drawItemUsable(Font *font, int txt_size) {
   string usable;
   switch (*selected) {
     case ItemID::I_BANDAGE:
-    case ItemID::M_SPLINT: 
     case ItemID::S_BANDAGE: 
     case ItemID::FA_KIT: {
       usable = "Always";
+      break;
+    }
+    case ItemID::M_SPLINT: {
+      usable = "In Menu";
       break;
     }
     case ItemID::S_WATER: 

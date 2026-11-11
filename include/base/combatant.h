@@ -20,8 +20,8 @@ template <typename EventType>
 using EventPool = std::vector<std::unique_ptr<EventType>>;
 
 enum CombatantState {
-  ACTION,
   NEUTRAL,
+  ACTION,
   HIT_STUN,
   DEAD
 };
@@ -54,6 +54,7 @@ public:
   Color spriteTint() {return tint;}
 
   float distanceTo(Entity *entity);
+  Direction directionTo(Entity *entity);
 
   virtual void behavior() {};
   virtual void evaluateEvent(std::unique_ptr<CombatantEvent> &event);
@@ -74,29 +75,52 @@ public:
 
   bool useTenacity(float damage, DamageType type);
   float tpDamageCalculation(float damage);
+  float entropySplit(float damage, float split, float &inc_entropy);
 
   virtual void finalIntercept(float &damage, DamageData &data) {};
-  void applyDamage(float damage, DamageData &data);
+  void applyDamage(float damage, DamageType type, float inc_entropy);
 
   virtual void damageLife(float magnitude);
   virtual void increaseLife(float magnitude);
 
+  void increaseEntropy(float magnitude);
+  void lifeDecay();
+
   void damageTenacity(float magnitude);
   void increaseTenacity(float magnitude, float threshold);
+  void regenerateTenacity();
 
-  /* This function (Along with increaseMorale) does nothing. This is 
-   * because, Combatants at their core do not possess Morale attributes.
-   * Rather theses functions are meant to be overwritten by Combatants
-   * who do have those values. The notable example are PartyMembers.*/
+  /* This function does nothing. This is because, Combatants at their core
+   * do not possess Morale attributes. Rather theses functions are meant 
+   * to be overwritten by Combatants who do have those values. The notable
+   * example are PartyMembers.*/
   virtual void damageMorale(float magnitude);
-  virtual void increaseMorale(float magnitude, bool mp_share = true);
 
+  /* Hit Stun is a state that most combatants will enter upon taking
+   * damage. In such a state, they will be unable to do anything the
+   * stun ends.*/
   virtual void enterHitstun(DamageData &data);
+
+  /* This overload forces a combatant to enter hit stun outside the
+   * context of taking damage. The combatant's current action will not be
+   * cleared from memory when this function is called. 
+   *
+   * This is to reduce the risk of clearing an action from memory while 
+   * it is still running it's logic. Which may result in a seqfault. 
+   * Nevertheless,this possibility must always be accounted for when 
+   * running this function.*/
+  virtual void enterHitstun(float seconds, StunType type, Color tint);
+
   void stunLogic();
   void stunTintLerp();
   virtual void exitHitstun();
 
-  void setKnockback(float velocity, float seconds, Direction direction);
+  /* This function decides whether to apply knockback to the victim, or
+   * apply pushback to the assailant. It depends on the circumstance.*/
+  void decideKnockback(DamageData &data);
+  virtual void setKnockback(float velocity, float seconds, 
+                            Direction direction);
+
   void knockbackLogic();
   void applyKnockback(float clock, float minimum = 0.0);
 
@@ -123,7 +147,13 @@ public:
   void statusLogic();
   void removeErasedStatus();
 
+  /* For code that should only be ran at absolute END of a combatant's
+   * update cycle.*/
+  virtual void endLogic();
+
+  void drawSprite(Texture *sheet);
   void applyStaggerEffect(Rectangle &final);
+
   virtual void drawDebug() override;
 
   std::string name;
@@ -137,9 +167,14 @@ public:
 
   float life; 
   float max_life;
+  float entropy = 0;
 
   float tenacity = 0.0;
   float tp_threshold = 0.0;
+  float tp_natural = 0.0;
+
+  float tp_regen_delay = 8.0;
+  float tp_regen_clock = 0.0;
 
   bool targetable = true;
   bool intangible = false;
@@ -155,13 +190,17 @@ public:
   float speed_multiplier = 1.0;
   float recovery = 1.0;
   float resilience = 1.0;
-  int priority = 0;
+
+  int priority = 1;
+  int z_order = 0;
 
   float acceleration = 0.0;
   float accel_rate = 5;
   float decel_rate = 10;
 
   std::unique_ptr<CombatAction> action;
+  bool kb_push_back = false;
+
   Status status;
 
   Color tint = WHITE;
@@ -172,12 +211,14 @@ protected:
 
   float death_time = 1.0;
   float death_clock = 0.0;
+  float dmg_ceiling = 9999;
 private:
   float stun_time = 0;
   float stun_clock = 0.0;
 
   float knockback = 0;
   Direction kb_direction = LEFT;
+
   float kb_time = 0;
   float kb_clock = 0;
 

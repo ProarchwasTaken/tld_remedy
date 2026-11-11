@@ -14,6 +14,12 @@ struct DeleteEntityCB : CombatEvent {
   int entity_id;
 };
 
+struct CreateProjectileCB : CombatEvent {
+  ProjectileID projectile_id;
+  Vector2 position;
+  Combatant *owner;
+};
+
 struct CreateDmgNumCB : CombatEvent {
   Combatant *target;
   DamageType damage_type;

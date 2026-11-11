@@ -109,9 +109,9 @@ keep closing and running the game until it works.
 
 # MacOS Warning
 I have no intentions to maintain an MacOS version of the game. Mostly 
-don't really have access to the proper MacOS envioroment to test of game 
+don't really have access to the proper MacOS environment to test of game 
 on, nor do I have motivation to set something like that up on my non-mac
 laptop.
 
 The game can be compiled for MacOS thanks to a recent contributor though,
-but don't be surprised if there are any issues.
+but as far as I know it's basically untested, so expect issues.

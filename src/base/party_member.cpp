@@ -63,13 +63,31 @@ void PartyMember::setEnabled(bool value) {
 void PartyMember::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   Combatant::evaluateEvent(event);
 
-  if (event->event_type == CombatantEVT::MORALE_GAINED) {
-    auto *mp_event = static_cast<GainedMoraleCBT*>(event.get());
-    moraleShare(mp_event);
+  switch (event->event_type) {
+    case CombatantEVT::DAMAGE_TAKEN: {
+      auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
+      Combatant *assailant = dmg_event->assailant;
+      DamageType dmg_type = dmg_event->damage_type;
+
+      if (assailant == this && dmg_type == DamageType::MORALE) {
+        assert(dmg_event->sender != this);
+        increaseMorale(dmg_event->damage_taken, true);
+      }
+
+      break;
+    }
+    case CombatantEVT::MORALE_GAINED: {
+      auto *mp_event = static_cast<MoraleGainedCBT*>(event.get());
+      moraleShare(mp_event);
+      break;
+    }
+    default: {
+
+    }
   }
 }
 
-void PartyMember::moraleShare(GainedMoraleCBT *event) {
+void PartyMember::moraleShare(MoraleGainedCBT *event) {
   assert(event->sender->entity_type == EntityType::COMBATANT);
   Combatant *sender = static_cast<Combatant*>(event->sender);
 
@@ -89,7 +107,7 @@ void PartyMember::takeDamage(DamageData &data) {
   Combatant::takeDamage(data);
 
   deplete_clock = 0.0;
-  deplete_delay = DEFAULT_DEPLETE_DELAY;
+  deplete_delay = default_deplete_delay;
 
   if (data.damage_type == DamageType::MORALE && state == HIT_STUN) {
     Color tint = Game::palette[42];
@@ -99,26 +117,32 @@ void PartyMember::takeDamage(DamageData &data) {
     );
   }
 
-  if (!important) {
-    return;
+  if (important) {
+    impDamageProcessing(data, not_demoralized, in_critical);
   }
 
-  bool apply_hitstop = false;
+  if (data.apply_hitstop) {
+    Game::sleep(data.hit_stop);
+  }
+}
+
+void PartyMember::impDamageProcessing(DamageData &data, bool not_demo, 
+                                      bool in_crit) {
 
   if (data.damage_type == DamageType::LIFE) {
-    apply_hitstop = true;
+    data.apply_hitstop = true;
   }
 
-  bool became_demoralized = not_demoralized && demoralized;
+  bool became_demoralized = not_demo && demoralized;
   if (became_demoralized) {
     data.hit_stop *= 2;
-    apply_hitstop = true;
+    data.apply_hitstop = true;
     CombatStage::tintStage(Game::palette[40]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 6);
     sfx.play("demoralized");
   }
 
-  bool entered_critical = !in_critical && critical_life;
+  bool entered_critical = !in_crit && critical_life;
   if (entered_critical && state != CombatantState::DEAD) {
     CombatStage::tintStage(Game::palette[32]);
     CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 5);
@@ -126,10 +150,6 @@ void PartyMember::takeDamage(DamageData &data) {
     Game::noise->setTint(Game::palette[32]);
     Game::noise->setAlpha(0.10);
     sfx.play("critical_life");
-  }
-
-  if (apply_hitstop) {
-    Game::sleep(data.hit_stop);
   }
 }
 
@@ -292,7 +312,7 @@ void PartyMember::increaseMorale(float magnitude, bool mp_share) {
   bool eligible = mp_share && !demoralized && memberCount() > 1;
   if (eligible) {
     PLOGD << "'" << name << "' is eligible to trigger MP Share";
-    CombatantHandler::queue<GainedMoraleCBT>(this, 
+    CombatantHandler::queue<MoraleGainedCBT>(this, 
                                              CombatantEVT::MORALE_GAINED, 
                                              magnitude);
   }
@@ -319,7 +339,7 @@ void PartyMember::increaseExhaustion(float magnitude) {
     deplete_delay = 3.0;
   }
   else {
-    deplete_delay = DEFAULT_DEPLETE_DELAY; 
+    deplete_delay = default_deplete_delay; 
   }
 
   deplete_clock = 0.0;
@@ -376,6 +396,10 @@ void PartyMember::depleteInstant() {
 }
 
 void PartyMember::techniqueCooldown() {
+  if (demoralized) {
+    return;
+  }
+
   if (tech1.clock < 1.0) {
     float cooldown = calculateCooldown(tech1.cooldown);
     tech1.clock += Game::deltaTime() / cooldown;
@@ -471,7 +495,7 @@ bool PartyMember::deathSavingThrow() {
     return false;
   }
 
-  float save_chance = 0.20 + resilience;
+  float save_chance = 0.50 + resilience;
   PLOGD << "Base Chance: " << save_chance;
 
   save_chance = applySavePenalties(save_chance);
@@ -548,3 +572,7 @@ float PartyMember::applySavePenalties(float chance) {
   return chance;
 }
 
+void PartyMember::endLogic() {
+  Combatant::endLogic();
+  techniqueCooldown();
+}

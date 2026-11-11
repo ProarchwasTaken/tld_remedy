@@ -16,11 +16,10 @@
 #include "menu/panels/diagnose.h"
 #include "menu/panels/crafting.h"
 #include "menu/panels/confirm.h"
-#include "menu/panels/dialog.h"
+#include "menu/panels/file_select.h"
 #include "scenes/rest_menu.h"
 
-using std::string, std::vector, std::uniform_int_distribution, 
-std::make_unique;
+using std::string, std::uniform_int_distribution, std::make_unique;
 
 
 RestMenuScene::RestMenuScene(Session *session) {
@@ -75,6 +74,12 @@ void RestMenuScene::setupCharacters() {
     case CompanionID::ERWIN: {
       com_sprite = &atlas.sprites[2];
       com_position = {4, -21};
+      break;
+    }
+    case CompanionID::XANDER: {
+      com_sprite = &atlas.sprites[3];
+      com_position = {-35, -55};
+      break;
     }
   }
 }
@@ -237,13 +242,7 @@ void RestMenuScene::selectOption() {
       break;
     }
     case RestMenuOptions::SAVE: {
-      vector<string> dialog = {
-        "Record your progress?\n"
-        "(Existing data will be overwritten.)"
-      };
-
-      Vector2 position = {16, 183};
-      panel = make_unique<DialogPanel>(position, dialog, true);
+      panel = make_unique<FileSelectPanel>(session);
       break;
     }
     case RestMenuOptions::LEAVE: {
@@ -271,24 +270,6 @@ void RestMenuScene::panelTermination() {
         exiting = true;
       }
       break;
-    }
-    case PanelID::DIALOG: {
-      DialogPanel *ptr = static_cast<DialogPanel*>(panel.get());
-
-      if (ptr->selected == NULL) {
-        break;
-      }
-
-      if (*ptr->selected == PromptOptions::YES) {
-        Game::saveSession(session);
-
-        panel.reset();
-
-        vector<string> dialog = {"Progress has been saved."};
-        Vector2 position = {16, 183};
-        panel = make_unique<DialogPanel>(position, dialog);
-        return;
-      }
     }
     default: {
       break;
@@ -365,8 +346,12 @@ void RestMenuScene::drawBackground() {
   { 
     DrawTextureV(background, {-250, -150}, bg_color);
     black_bars.draw();
+
+    if (com_sprite != NULL) {
+      DrawTextureRec(atlas.sheet, *com_sprite, com_position, char_color);
+    }
+
     DrawTextureRec(atlas.sheet, *plr_sprite, plr_position, char_color);
-    DrawTextureRec(atlas.sheet, *com_sprite, com_position, char_color);
   }
   EndMode2D();
 }

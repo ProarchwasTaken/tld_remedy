@@ -1,0 +1,36 @@
+{
+  "sfx": [
+    {
+      "name": "xander_footstep",
+      "filename": "xander/xander_footstep.mp3"
+    },
+    {
+      "name": "xander_roar",
+      "filename": "xander/xander_roar.mp3"
+    },
+    {
+      "name": "xander_growl",
+      "filename": "xander/xander_growl.mp3"
+    },
+    {
+      "name": "xander_handblade",
+      "filename": "xander/xander_handblade.mp3"
+    },
+    {
+      "name": "xander_twirl",
+      "filename": "xander/xander_twirl.mp3"
+    },
+    {
+      "name": "xander_whip",
+      "filename": "xander/xander_whip.mp3"
+    },
+    {
+      "name": "xander_charge",
+      "filename": "xander/xander_charge.mp3"
+    },
+    {
+      "name": "xander_meteor",
+      "filename": "xander/xander_meteor.mp3"
+    }
+  ]
+}

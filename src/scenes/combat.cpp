@@ -14,8 +14,8 @@
 #include "base/entity.h"
 #include "base/combatant.h"
 #include "base/party_member.h"
-#include "base/status_effect.h"
 #include "base/enemy.h"
+#include "base/status_effect.h"
 #include "data/session.h"
 #include "data/combat_event.h"
 #include "data/combatant_event.h"
@@ -39,14 +39,20 @@
 #include "combat/entities/afterimage.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/combatants/party/erwin.h"
+#include "combat/combatants/party/xander.h"
 #include "combat/combatants/enemy/dummy.h"
 #include "combat/combatants/enemy/servant.h"
+#include "combat/projectiles/dummy.h"
+#include "combat/projectiles/baseball.h"
 #include "scenes/combat.h"
 #include <plog/Log.h>
 
 using std::unique_ptr, std::make_unique, std::string, std::vector;
 bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
+
 SpriteAtlas CombatScene::cmd_atlas("hud", "hud_command");
+bool CombatScene::verbose_debug = false;
+
 
 CombatScene::CombatScene(Session *session, TroopID id, int reward, 
                          bool for_glory) {
@@ -152,6 +158,11 @@ void CombatScene::initializeCompanion() {
   switch (data->companion_id) {
     case CompanionID::ERWIN: {
       companion = make_unique<Erwin>(data, player);
+      break;
+    }
+    case CompanionID::XANDER: {
+      companion = make_unique<Xander>(data, player);
+      break;
     }
   }
 
@@ -304,6 +315,7 @@ void CombatScene::update() {
       entity->update();
     }
 
+    Enemy::updateStunnedCount();
     camera.update(player);
     black_bars.update(&camera);
 
@@ -413,10 +425,12 @@ void CombatScene::winProcedure() {
   assert(player != NULL);
   player->depleteInstant();
   player->clearNonPersistant();
+  player->entropy = 0;
 
   if (companion != NULL) {
     companion->depleteInstant();
     companion->clearNonPersistant();
+    companion->entropy = 0;
   }
 
   vector<string> dialog;
@@ -499,6 +513,16 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
       deleteEntity(entity_id);
       break;
     }
+    case CombatEVT::CREATE_PROJECTILE: {
+      PLOGD << "Event detected: CreateProjectileCB";
+      auto *event_data = static_cast<CreateProjectileCB*>(event.get());
+      ProjectileID id = event_data->projectile_id;
+      Vector2 position = event_data->position;
+      Combatant *owner = event_data->owner;
+
+      createProjectile(id, position, owner);
+      break;
+    }
     case CombatEVT::CREATE_DMG_NUM: {
       PLOGD << "Event detected: CreateDmgNumCB";
       auto *event_data = static_cast<CreateDmgNumCB*>(event.get());
@@ -528,6 +552,11 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
 
       auto afterimage = make_unique<AfterImage>(event_data);
       entities.push_back(std::move(afterimage));
+      break;
+    }
+    case CombatEVT::COMBO_BROKEN: {
+      PLOGD << "Event detected: ComboBrokenCB";
+      combo_hud->onComboEnd(toasts.get());
       break;
     }
     case CombatEVT::OPEN_ITEM_HUD: {
@@ -573,6 +602,77 @@ void CombatScene::eventHandling(unique_ptr<CombatEvent> &event) {
   }
 }
 
+void CombatScene::deleteEntity(int entity_id) {
+  vector<unique_ptr<Entity>> temporary;
+
+  for (auto &entity : entities) {
+    if (entity->entity_id != entity_id) {
+      unique_ptr<Entity> temp_entity = nullptr;
+      entity.swap(temp_entity);
+
+      temporary.push_back(std::move(temp_entity));
+      continue;
+    }
+
+    PLOGD << "Found Entity [ID: " << entity_id << "]";
+
+    // Remove this Later!
+    if (dummy == entity.get()) dummy = NULL;
+
+    if (player == entity.get()) {
+      player->targetable = false;
+      player->setEnabled(false);
+      player = NULL;
+
+      plr_hud->assign(player);
+      plr_cmd_hud->assign(player);
+
+      dead_player.swap(entity);
+      assert(entity == nullptr);
+      continue;
+    }
+    else if (companion == entity.get()) {
+      companion->targetable = false;
+      companion->setEnabled(false);
+      companion = NULL;
+
+      com_hud->assign(companion);
+      assist_hud->assign(companion);
+
+      dead_companion.swap(entity);
+      assert(entity == nullptr);
+      continue;
+    }
+
+    entity.reset();
+  }
+
+  entities.clear();
+  temporary.swap(entities);
+}
+
+void CombatScene::createProjectile(ProjectileID id, Vector2 position,
+                                   Combatant *owner)
+{
+  PLOGI << "Attempting to create new projectile...";
+  unique_ptr<Entity> projectile;
+
+  switch (id) {
+    case ProjectileID::DUMMY: {
+      projectile = make_unique<DummyProjectile>(owner, position);
+      break;
+    }
+    case ProjectileID::BASEBALL: {
+      projectile = make_unique<Baseball>(owner, position);
+      break;
+    }
+  }
+
+  if (projectile != nullptr) {
+    entities.push_back(std::move(projectile));
+  }
+}
+
 void CombatScene::dmgNumberHandling(Combatant *target, 
                                     DamageType damage_type,
                                     float damage_taken) 
@@ -600,53 +700,6 @@ void CombatScene::dmgNumberHandling(Combatant *target,
   entities.push_back(std::move(dmg_num));
 }
 
-void CombatScene::deleteEntity(int entity_id) {
-  vector<unique_ptr<Entity>> temporary;
-
-  for (auto &entity : entities) {
-    if (entity->entity_id != entity_id) {
-      unique_ptr<Entity> temp_entity = nullptr;
-      entity.swap(temp_entity);
-
-      temporary.push_back(std::move(temp_entity));
-      continue;
-    }
-
-    PLOGD << "Found Entity [ID: " << entity_id << "]";
-
-    // Remove this Later!
-    if (dummy == entity.get()) dummy = NULL;
-
-    if (player == entity.get()) {
-      player->targetable = false;
-      player = NULL;
-
-      plr_hud->assign(player);
-      plr_cmd_hud->assign(player);
-
-      dead_player.swap(entity);
-      assert(entity == nullptr);
-      continue;
-    }
-    else if (companion == entity.get()) {
-      companion->targetable = false;
-      companion = NULL;
-
-      com_hud->assign(companion);
-      assist_hud->assign(companion);
-
-      dead_companion.swap(entity);
-      assert(entity == nullptr);
-      continue;
-    }
-
-    entity.reset();
-  }
-
-  entities.clear();
-  temporary.swap(entities);
-}
-
 void CombatScene::endCombatProcedure() {
   Player *plr_data = &session->player;
   Companion *com_data = &session->companion;
@@ -654,6 +707,8 @@ void CombatScene::endCombatProcedure() {
   if (player == NULL){
     PLOGI << "Detected that the player is dead.";
     player = static_cast<Mary*>(dead_player.get());
+    // I keep forgetting to account for Exhaustion.
+    player->exhaustion = 0;
 
     PLOGI << "Assuming that a death save was triggered instead of a" <<
       "game over.";
@@ -668,6 +723,7 @@ void CombatScene::endCombatProcedure() {
   if (companion == NULL) {
     PLOGD << "Detected that the companion is dead.";
     companion = static_cast<PartyMember*>(dead_companion.get());
+    companion->exhaustion = 0;
   }
 
   PLOGD << "Updating companion attributes.";
@@ -680,6 +736,8 @@ void CombatScene::endCombatProcedure() {
   Game::bgm->prepare("field");
   Game::bgm->play();
 
+  Game::noise->setTint(WHITE);
+  Game::noise->setAlpha(0);
   Game::returnToField();
 }
 
@@ -687,6 +745,7 @@ void CombatScene::updatePartyAttr(PartyMember *member, Character *data)
 {
   assert(member != NULL);
   member->depleteInstant();
+
   float life = std::ceilf(member->life); 
   data->life = Clamp(life, 1, member->max_life); 
 
@@ -748,7 +807,7 @@ void CombatScene::draw() {
   }
 
   #ifndef NDEBUG
-  if (debug_info) drawDebugInfo();
+  if (debug_info && verbose_debug) drawDebugInfo();
   #endif // !NDEBUG
 }
 
@@ -790,55 +849,41 @@ bool combatAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
     return e1->entity_type > e2->entity_type;
   }
   
-  if (e1->entity_type != EntityType::COMBATANT) {
-    return e1->entity_id < e2->entity_id;
-  }
+  if (e1->entity_type == EntityType::COMBATANT) {
+    Combatant *c1 = static_cast<Combatant*>(e1.get());
+    Combatant *c2 = static_cast<Combatant*>(e2.get());
 
-  Combatant *c1 = static_cast<Combatant*>(e1.get());
-  Combatant *c2 = static_cast<Combatant*>(e2.get());
-
-  if (c1->state != c2->state) {
-    return c1->state > c2->state;
-  }
-
-  if (c1->team != c2->team){
-    return c1->team > c2->team;
-  }
-  
-  if (c1->team == CombatantTeam::PARTY) {
-    PartyMember *p1 = static_cast<PartyMember*>(c1);
-    PartyMember *p2 = static_cast<PartyMember*>(c2);
-
-    return p1->important < p2->important;
+    return c1->z_order < c2->z_order;
   }
   else {
-    return c1->entity_id < c2->entity_id;
+    return e1->entity_id < e2->entity_id; 
   }
 }
 
 #ifndef NDEBUG
 void CombatScene::debugKeybinds() {
   if (dummy != NULL && IsKeyPressed(KEY_SLASH)) {
-    dummy->attack();
+    dummy->attackMP();
+  }
+  else if (dummy != NULL && IsKeyPressed(KEY_RIGHT_CONTROL)) { 
+    dummy->attackHP();
+  }
+  else if (IsKeyPressed(KEY_GRAVE)) {
+    verbose_debug = !verbose_debug;
   }
   else if (companion != NULL && IsKeyPressed(KEY_F4)) {
     bool enabled = companion->isEnabled();
     companion->setEnabled(!enabled);
   }
   else if (player != NULL && IsKeyPressed(KEY_F5)) {
-    float threshold = 0.5;
-    float magnitude = player->life * threshold;
-    player->increaseTenacity(magnitude, threshold);
+    Vector2 position = player->position;
+    position.y -= 48;
+    createProjectile(ProjectileID::DUMMY, position, player);
   }
-  else if (companion != NULL && IsKeyPressed(KEY_F6)) {
-    float threshold = 0.5;
-    float magnitude = companion->life * threshold;
-    companion->increaseTenacity(magnitude, threshold);
-  }
-  else if (companion != NULL && IsKeyPressed(KEY_F7)) {
+  else if (companion != NULL && IsKeyPressed(KEY_F9)) {
     companion->death();
   }
-  else if (IsKeyPressed(KEY_F8)) {
+  else if (IsKeyPressed(KEY_F10)) {
     end_combat = true;
   }
 }
@@ -849,7 +894,7 @@ void CombatScene::drawDebugInfo() {
   
   drawPartyStats(player, {6, 4}, font, text_size);
   if (companion != NULL) {
-    drawPartyStats(companion, {128, 4}, font, text_size);
+    drawPartyStats(companion, {144, 4}, font, text_size);
   }
 
   drawDebugCombo(font, text_size);
@@ -873,8 +918,9 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Life: %02.02f/%02.02f/%02.02f", member->life,
-                    member->max_life, member->exhaustion);
+  text = TextFormat("Life: %02.02f/%02.02f/%02.02f/%02.02f", member->life,
+                    member->max_life, member->exhaustion, 
+                    member->entropy);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
@@ -884,8 +930,9 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
-  text = TextFormat("Tenacity: %01.02f/%01.02f", member->tenacity,
-                    member->tp_threshold);
+  text = TextFormat("Tenacity: %01.02f/%01.02f/%01.02f/%01.02f", 
+                    member->tenacity, member->tp_threshold, 
+                    member->tp_natural, member->tp_regen_clock);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y += spacing;
 
@@ -905,24 +952,6 @@ void CombatScene::drawPartyStats(PartyMember *member, Vector2 position,
   text = TextFormat("Priority: %i", member->priority); 
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   position.y = 228;
-
-  if (member->important) {
-    return;
-  }
-
-  int goal_id;
-  switch (member->id) {
-    case PartyMemberID::ERWIN: {
-      Erwin *erwin = static_cast<Erwin*>(member);
-      goal_id = static_cast<int>(erwin->ai_goal);
-    }
-    default: {
-      assert(member->id != PartyMemberID::MARY);
-    }
-  }
-
-  text = TextFormat("AI Goal: %i", goal_id);
-  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
 }
 
 void CombatScene::drawDebugCombo(Font *font, int text_size) {

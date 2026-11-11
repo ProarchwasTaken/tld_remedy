@@ -42,6 +42,9 @@ KnifeCleave::KnifeCleave(Mary *user):
   data.hit_stop = 0.2;
 
   data.assailant = user;
+
+  atk = user->offense + user->dexterity;
+  data.a_atk = &atk;
   
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(20);
@@ -135,7 +138,7 @@ void KnifeCleave::hitRegistration(set<pair<float, Combatant*>> &hits) {
     if (CheckCollisionRecs(hitbox.rect, combatant->hurtbox.rect)) {
       float distance = user->distanceTo(combatant);
       hits.emplace(std::make_pair(distance, combatant));
-      PLOGD << "Attack hitbox has collided with Combatant [ID: " <<
+      PLOGD << "Cleave hitbox has collided with Combatant [ID: " <<
       combatant->entity_id << "], Distance: " << distance;
     }
   }
@@ -158,6 +161,10 @@ void KnifeCleave::inflictDamage(set<pair<float, Combatant*>> &hits) {
 
   data.hitbox = &hitbox.rect;
   victim->takeDamage(data);
+
+  if (user->state == HIT_STUN) {
+    return;
+  }
 
   end_time = 0.125;
   updateAnimFrameDuration();

@@ -9,6 +9,14 @@
       "filename": "field/pickup.mp3"
     },
     {
+      "name": "save_point",
+      "filename": "field/save_point.mp3"
+    },
+    {
+      "name": "save_point_interact",
+      "filename": "field/save_point_interact.mp3"
+    },
+    {
       "name": "enemy_alert",
       "filename": "field/enemy_alert.mp3"
     },

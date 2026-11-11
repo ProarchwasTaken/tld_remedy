@@ -63,6 +63,8 @@ void Entity::rectExCorrection(RectEx &rect_ex) {
 }
 
 void Entity::drawDebug() {
-  DrawRectangleLinesEx(bounding_box.rect, 1, BLUE);
-  DrawCircleV(position, 1, BLUE);
+  Color color = BLUE;
+  color.a = 64;
+  DrawRectangleLinesEx(bounding_box.rect, 1, color);
+  DrawCircleV(position, 1, WHITE);
 }

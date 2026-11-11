@@ -44,6 +44,10 @@ void Mangled::init(bool hide_text) {
   afflicted->recovery << ", RES: " << afflicted->resilience << "}";
 
   StatusEffect::init(hide_text);
+
+  if (!hide_text) {
+    afflicted->sfx.play("bone_break");
+  }
 }
 
 void Mangled::applyPenalty() {

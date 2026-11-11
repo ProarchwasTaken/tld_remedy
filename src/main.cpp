@@ -31,10 +31,10 @@ void setupLogger() {
 
 int main(int argc, char *argv[]) {
   setupLogger();
-  Game remedy = Game(argc, argv);
+  Game remedy;
 
   PLOGI << "Initializing the game...";
-  remedy.init();
+  remedy.init(argc, argv);
 
   PLOGI << "Starting the game loop.";
   remedy.start();

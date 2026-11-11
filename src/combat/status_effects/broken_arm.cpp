@@ -46,6 +46,10 @@ void BrokenArm::init(bool hide_text) {
   afflicted->intimid << "}";
 
   StatusEffect::init(hide_text);
+
+  if (!hide_text) {
+    afflicted->sfx.play("bone_break");
+  }
 }
 
 void BrokenArm::applyPenalty() {

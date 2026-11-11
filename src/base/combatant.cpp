@@ -83,6 +83,19 @@ float Combatant::distanceTo(Entity *entity) {
   return distance;
 }
 
+Direction Combatant::directionTo(Entity *entity) {
+  assert(entity != NULL);
+  assert(entity != this);
+
+  float difference = position.x - entity->position.x;
+  if (difference > 0) {
+    return Direction::LEFT;
+  }
+  else {
+    return Direction::RIGHT;
+  }
+}
+
 void Combatant::accelerate() {
   if (acceleration == 1.0) {
     return;
@@ -108,6 +121,7 @@ void Combatant::decelerate() {
 }
 
 void Combatant::takeDamage(DamageData &data) {
+  assert(data.assailant != this && data.assailant != NULL);
   if (state == CombatantState::DEAD) {
     return;
   }
@@ -122,19 +136,19 @@ void Combatant::takeDamage(DamageData &data) {
   }
 
   float damage_sustained = damageProcedure(data);
-  setKnockback(data.knockback, data.stun_time, data.assailant->direction);
-  acceleration = 0.0;
+  decideKnockback(data);
 
   if (state != DEAD && data.stun_time != 0) {
     enterHitstun(data);
   }
 
   PLOGD << "Proceeding to queue TookDamage event.";
-  CombatantHandler::queue<TookDamageCBT>(this, CombatantEVT::TOOK_DAMAGE,
-                                         damage_sustained, 
-                                         data.damage_type, state,
-                                         data.stun_time, data.stun_type,
-                                         data.assailant);
+  CombatantHandler::queue<DamageTakenCBT>(this, 
+                                          CombatantEVT::DAMAGE_TAKEN,
+                                          damage_sustained, 
+                                          data.damage_type, state,
+                                          data.stun_time, data.stun_type,
+                                          data.assailant);
 
   PLOGI << "Damage procedure has reached it's conclusion.";
 }
@@ -154,7 +168,7 @@ bool Combatant::preDamageInterception(DamageData &data) {
 }
 
 float Combatant::damageProcedure(DamageData &data) {
-  float damage = Clamp(damageCalculation(data), 0, 9999);
+  float damage = damageCalculation(data);
   PLOGD << "Damage Calculation: " << damage;
 
   if (useTenacity(damage, data.damage_type)) {
@@ -162,8 +176,14 @@ float Combatant::damageProcedure(DamageData &data) {
     PLOGD << "Final Calculation: " << damage << " Life damage.";
   }
 
+  float inc_entropy = 0;
+  if (data.ent_split > 0) {
+    damage = entropySplit(damage, data.ent_split, inc_entropy);
+    PLOGD << "After Entropy Split: " << damage;
+  }
+
   finalIntercept(damage, data);
-  applyDamage(damage, data);
+  applyDamage(damage, data.damage_type, inc_entropy);
   return damage;
 }
 
@@ -200,16 +220,18 @@ float Combatant::damageCalculation(DamageData &data) {
     } 
   }
 
-  float base_damage = data.base_damage;
   int a_atk = *data.a_atk;
-  float atk_mod = data.atk_mod;
-
   int b_def = *data.b_def;
-  float def_mod = data.def_mod;
+  float dmg_floor = data.dmg_floor;
+  float power = data.power;
 
-  PLOGD << "Base Damage: " << base_damage;
+  PLOGD << "Attack Power: " << power;
+  PLOGD << "Damage Floor: " << dmg_floor;
   PLOGD << "Assailant ATK: " << a_atk << " vs. Victim DEF: " << b_def;
-  return (base_damage + (a_atk * atk_mod)) - (b_def * def_mod);
+
+  float result = (a_atk - b_def) * power;
+  result = Clamp(result, dmg_floor, dmg_ceiling);
+  return result;
 }
 
 bool Combatant::useTenacity(float damage, DamageType type) {
@@ -227,10 +249,9 @@ float Combatant::tpDamageCalculation(float damage) {
     persist << ", " << resilience << "}";
 
   float life_damage = damage - (persist * resilience);
-  life_damage = Clamp(life_damage, 0, 9999);
+  life_damage = Clamp(life_damage, 0.5, dmg_ceiling);
 
-  bool not_zero = life_damage != 0;
-  float absorbed = 1 - ((life_damage / damage) * not_zero); 
+  float absorbed = 1 - (life_damage / damage); 
   float tenacity_damage = damage * absorbed;
   damageTenacity(tenacity_damage);
 
@@ -240,8 +261,23 @@ float Combatant::tpDamageCalculation(float damage) {
   return life_damage;
 }
 
-void Combatant::applyDamage(float damage, DamageData &data) {
-  damage_type = data.damage_type;
+float Combatant::entropySplit(float damage, float split, 
+                              float &inc_entropy) 
+{
+  split = Clamp(split, 0.0, 1.0);
+  inc_entropy = damage * split;
+
+  damage = damage - inc_entropy;
+  PLOGI << "Converted " << split * 100 << "percent of damage to "
+    << "possible Entropy.";
+  return damage;
+}
+
+void Combatant::applyDamage(float damage, DamageType type, 
+                            float inc_entropy) 
+{
+  damage_type = type;
+  acceleration = 0.0;
 
   if (damage_type == DamageType::LIFE) {
     PLOGD << "Directing damage towards Combatant's Life.";
@@ -251,19 +287,25 @@ void Combatant::applyDamage(float damage, DamageData &data) {
   else {
     PLOGD << "Directing damage towards Combatant's Morale.";
     damageMorale(damage);
-    data.assailant->increaseMorale(damage);
     sfx.play("damage_mp");
+  }
+
+  if (inc_entropy != 0) {
+    PLOGD << "Attempting to increasing the combatant's Entropy by: " << 
+      inc_entropy;
+    increaseEntropy(inc_entropy);
   }
 
   if (damage != 0) {
     PLOGD << "Sending a request for a DamageNumber to be created.";
     CombatHandler::raise<CreateDmgNumCB>(CombatEVT::CREATE_DMG_NUM,
-                                         this, data.damage_type, damage);
+                                         this, type, damage);
   }
 }
 
 void Combatant::damageLife(float magnitude) {
   life = life - magnitude;
+  tp_regen_clock = 0.0;
   PLOGI << "Life decreased to: " << life;
 
   if (!critical_life && life < max_life * LOW_LIFE_THRESHOLD) {
@@ -287,12 +329,58 @@ void Combatant::increaseLife(float magnitude) {
   }
 }
 
+void Combatant::increaseEntropy(float magnitude) {
+  float crit  = max_life * 0.3001;
+  float flipped = 1.0 - resilience;
+
+  float hard_cap = (max_life - crit) * (0.40 + flipped);
+  PLOGD << "Hard Cap: " << hard_cap;
+
+  float additive = 0;
+  if (life - hard_cap < crit) {
+    PLOGD << "Oncoming Entropy risks putting Combatant in Critical Life";
+    additive = life - hard_cap - crit;
+    PLOGD << "Additive: " << additive;
+  }
+
+  float soft_cap = (hard_cap - entropy) + additive;
+  PLOGD << "Soft Cap: " << soft_cap;
+
+  if (soft_cap < 0) {
+    PLOGI << "No entropy has been added.";
+    return;
+  }
+
+  magnitude = Clamp(magnitude, 0.0, soft_cap);
+  entropy = Clamp(entropy + magnitude, 0.0, max_life);
+  PLOGI << "Combatant: '" << name << "' [ID: " << entity_id << 
+    "] Entropy has been increased by: " << magnitude;
+}
+
+void Combatant::lifeDecay() {
+  float percentage = entropy / max_life;
+  float magnitude = percentage / (resilience * 2);
+  magnitude = Clamp(magnitude, 0.20, 10);
+  magnitude *= Game::deltaTime();
+
+  if (entropy < magnitude) {
+    magnitude = entropy;
+  }
+
+  if (life <= 1) {
+    return;
+  } 
+
+  entropy = Clamp(entropy - magnitude, 0.0, life - 1);
+  life = Clamp(life - magnitude, 1, max_life);
+}
+
 void Combatant::damageTenacity(float magnitude) {
   tenacity = tenacity - magnitude;
 
   if (tenacity <= 0) {
     tenacity = 0;
-    tp_threshold = 0.0;
+    tp_threshold = tp_natural;
   }
 }
 
@@ -302,15 +390,33 @@ void Combatant::increaseTenacity(float magnitude, float threshold) {
     tp_threshold = threshold;
   }
 
-  tenacity = Clamp(tenacity + magnitude, 0, max_life * tp_threshold);
+  float max_tenacity = max_life * tp_threshold;
+  tenacity = Clamp(tenacity + magnitude, 0, max_tenacity);
+}
+
+void Combatant::regenerateTenacity() {
+  if (tp_natural <= 0) {
+    return;
+  }
+
+  if (tenacity / max_life > tp_natural) {
+    return;
+  }
+
+  if (tp_regen_clock < 1.0) {
+    tp_regen_clock += Game::deltaTime() / tp_regen_delay;
+    return;
+  }
+
+  float max_tenacity = max_life * tp_natural;
+  float magnitude = recovery * (max_tenacity * 0.125);
+  magnitude *= Game::deltaTime();
+
+  increaseTenacity(magnitude, tp_natural);
 }
 
 void Combatant::damageMorale(float magnitude) {
   PLOGD << "Combatant does not possess Morale to damage.";
-}
-
-void Combatant::increaseMorale(float magnitude, bool mp_share) {
-  PLOGD << "Combatant does not possess Morale to increase.";
 }
 
 void Combatant::enterHitstun(DamageData &data) {
@@ -321,6 +427,7 @@ void Combatant::enterHitstun(DamageData &data) {
   }
 
   stun_time = data.stun_time * multiplier;
+  stun_type = data.stun_type;
   stun_clock = 0.0;
 
   data.hit_stop *= multiplier;
@@ -340,6 +447,18 @@ void Combatant::enterHitstun(DamageData &data) {
 
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
   " has entered hitstun for: " << stun_time << " seconds.";
+}
+
+void Combatant::enterHitstun(float seconds, StunType type, Color tint) {
+  stun_time = seconds;
+  stun_type = type;
+  stun_clock = 0.0;
+
+  state = CombatantState::HIT_STUN;
+  start_tint = tint;
+
+  PLOGI << "COMBATANT '" << name << "' [ID: " << entity_id << "]"
+    " has forcibly entered hitstun for: " << stun_time << " seconds.";
 }
 
 void Combatant::stunLogic() {
@@ -366,12 +485,38 @@ void Combatant::stunTintLerp() {
 }
 
 void Combatant::exitHitstun() {
+  assert(state == CombatantState::HIT_STUN);
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "]"
   " has exited hit stun.";
   state = CombatantState::NEUTRAL;
   stun_clock = 0.0;
   stun_time = 0;
   knockback = 0;
+
+  if (action != nullptr) {
+    cancelAction();
+  }
+}
+
+void Combatant::decideKnockback(DamageData &data) {
+  Combatant *assailant = data.assailant;
+  bool negate_pushback = data.negate_pushback;
+  int x_direction = data.assailant->direction;
+
+  if (negate_pushback || !Collision::checkX(this, 0.01, x_direction)) {
+    PLOGI << "Proceeding to apply knockback to victim.";
+    Direction kb_dir = static_cast<Direction>(x_direction);
+    setKnockback(data.knockback, data.stun_time, kb_dir);
+    return;
+  }
+  else if (assailant != NULL && assailant->state == ACTION) {
+    PLOGI << "Victim is against the wall. Pushing back assailant";
+    x_direction *= -1;
+    Direction kb_dir = static_cast<Direction>(x_direction);
+
+    assailant->setKnockback(data.knockback, data.stun_time, kb_dir);
+    assailant->kb_push_back = true;
+  }
 }
 
 void Combatant::setKnockback(float velocity, float seconds, 
@@ -400,7 +545,6 @@ void Combatant::applyKnockback(float clock, float minimum) {
 
   if (state != DEAD && Collision::checkX(this, magnitude, kb_direction)) {
     Collision::snapX(this, kb_direction);
-    stun_clock = Clamp(stun_clock, 0.75, 1.0);
   }
   else {
     position.x += magnitude * kb_direction; 
@@ -418,6 +562,7 @@ void Combatant::death() {
 
   knockback = Clamp(knockback * 1.2, 90, 180);
   state = CombatantState::DEAD;
+  targetable = false;
   sfx.play("death");
 }
 
@@ -472,6 +617,8 @@ void Combatant::performAction(unique_ptr<CombatAction> &action) {
 
   this->action.swap(action);
   state = CombatantState::ACTION;
+  kb_push_back = false;
+
   old_action.reset();
   acceleration = 0.0;
 } 
@@ -480,6 +627,7 @@ void Combatant::cancelAction() {
   PLOGI << "COMBATANT: '" << name << "' [ID: " << entity_id << "] action"
   << " has been canceled!";
   action.reset();
+  kb_push_back = false;
 
   if (state != CombatantState::HIT_STUN) {
     state = CombatantState::NEUTRAL;
@@ -543,6 +691,27 @@ void Combatant::removeErasedStatus() {
   temporary.swap(status);
 }
 
+void Combatant::endLogic() {
+  if (entropy != 0) {
+    lifeDecay();
+  }
+
+  regenerateTenacity();
+  statusLogic();
+}
+
+void Combatant::drawSprite(Texture *sheet) {
+  assert(sprite != NULL);
+
+  Rectangle source = *sprite;
+  source.width = source.width * direction;
+
+  Rectangle dest = bounding_box.rect;
+  applyStaggerEffect(dest);
+
+  DrawTexturePro(*sheet, source, dest, {0, 0}, 0, tint);
+}
+
 void Combatant::applyStaggerEffect(Rectangle &final) {
   bool staggered = state == HIT_STUN && stun_type == StunType::STAGGER;
   if (staggered) {
@@ -554,7 +723,10 @@ void Combatant::applyStaggerEffect(Rectangle &final) {
 
 void Combatant::drawDebug() {
   Entity::drawDebug();
-  DrawRectangleLinesEx(hurtbox.rect, 1, RED);
+  Color color = RED;
+  color.a = 64;
+
+  DrawRectangleLinesEx(hurtbox.rect, 1, color);
 
   Font *font = &Game::sm_font;
   int size = font->baseSize;

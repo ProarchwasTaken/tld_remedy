@@ -21,10 +21,12 @@ void SpriteAnimation::play(Animation *&anim, Animation *next, bool loop) {
 
   anim->frame_clock += Game::deltaTime() / anim->frame_duration;
 
-  if (anim->frame_clock < 1.0) {
-    return;
-  }
+  if (anim->frame_clock >= 1.0) {
+    progress(anim, loop);
+  } 
+}
 
+void SpriteAnimation::progress(Animation *&anim, bool loop) {
   anim->frame_clock = 0.0;
   anim->current++;
 

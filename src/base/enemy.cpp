@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cmath>
+#include <random>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
@@ -14,10 +15,35 @@
 #include "base/enemy.h"
 #include <plog/Log.h>
 
-using std::string;
+using std::string, std::uniform_real_distribution;
 int Enemy::member_count = 0;
 int Enemy::stunned = 0;
 int Enemy::combo = 0;
+
+
+void Enemy::updateStunnedCount() {
+  if (member_count == 0) {
+    return;
+  }
+
+  stunned = 0;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team != CombatantTeam::ENEMY) {
+      continue;
+    }
+
+    if (combatant->state == HIT_STUN || combatant->state == DEAD) {
+      stunned++;
+    }
+  }
+
+  if (combo > 0 && stunned == 0) {
+    PLOGI << "Combo has been broken. Score: " << combo;
+    CombatHandler::raise<CombatEvent>(CombatEVT::COMBO_BROKEN);
+    combo = 0;
+  }
+}
 
 
 Enemy::Enemy(string name, EnemyID id, Vector2 position): 
@@ -30,25 +56,68 @@ Enemy::Enemy(string name, EnemyID id, Vector2 position):
 Enemy::~Enemy() {
   member_count--;
   assert(member_count >= 0);
+}
 
-  if (state == DEAD) {
-    assert(stunned > 0);
-    stunned--;
+void Enemy::chooseTarget() {
+  PartyMember *mary = NULL;
+  PartyMember *companion = NULL;
+
+  for (Combatant *combatant : existing_combatants) {
+    if (combatant->team == CombatantTeam::ENEMY) {
+      continue;
+    }
+
+    if (!combatant->targetable || combatant->state == DEAD) {
+      continue;
+    }
+
+    PartyMember *party_member = static_cast<PartyMember*>(combatant);
+    if (party_member->id == PartyMemberID::MARY) {
+      assert(mary == NULL);
+      mary = party_member;
+    }
+    else {
+      assert(companion == NULL);
+      companion = party_member;
+    }
+  }
+
+  if (mary == NULL) {
+    return;
+  }
+
+  if (companion == NULL) {
+    target = mary;
+    return;
+  }
+
+  float m_distance = distanceTo(mary);
+  int m_priority = mary->priority;
+
+  float c_distance = distanceTo(companion);
+  int c_priority = mary->priority;
+
+  float difference = c_distance - m_distance;
+  int p_difference = c_priority - m_priority;
+  float chance = 1.10 + (difference / 200) - (0.10 * p_difference);
+
+  uniform_real_distribution<float> range(0.0, 1.0);
+  float roll = range(Game::RNG);
+  if (roll <= chance) {
+    target = mary;
+  }
+  else {
+    target = companion;
   }
 }
 
 void Enemy::takeDamage(DamageData &data) {
-  if (stunned == 0) {
-    PLOGI << "Reseting Combo Count.";
-    combo = 0;
-  }
-
   if (data.damage_type == DamageType::LIFE) {
-    float percentage = combo / 15.0;
+    float percentage = combo / 10.0;
     percentage = Clamp(percentage, 0.0, 1.0);
 
-    float modifier = 1.0 - std::powf(percentage, 2);
-    data.def_mod = data.def_mod * modifier; 
+    float bonus = std::powf(percentage, 2);
+    data.power = data.power + bonus; 
   }
 
   Combatant::takeDamage(data);
@@ -58,18 +127,18 @@ void Enemy::takeDamage(DamageData &data) {
   }
 
   PartyMember *combatant = static_cast<PartyMember*>(data.assailant);
-  if (!combatant->important && !data.force_hitstop) {
+  if (!combatant->important && !data.apply_hitstop) {
     return;
   }
 
-  if (data.damage_type == DamageType::LIFE) {
+  if (data.hit_stop > 0 && data.damage_type == DamageType::LIFE) {
     Game::sleep(data.hit_stop);
   }
 }
 
 void Enemy::finalIntercept(float &damage, DamageData &data) {
   if (data.damage_type == DamageType::MORALE) {
-    float damage_mod = 1.0 - (combo / 18.0);
+    float damage_mod = 1.0 - (combo / 10.0);
     damage_mod = Clamp(damage_mod, 0.0, 1.0);
 
     damage = damage * damage_mod;
@@ -79,10 +148,6 @@ void Enemy::finalIntercept(float &damage, DamageData &data) {
 
 void Enemy::enterHitstun(DamageData &data) {
   assert(state != DEAD);
-  if (state != HIT_STUN) {
-    stunned = Clamp(stunned + 1, 0, member_count);
-  }
-
   combo++;
   PLOGI << "Combo: " << combo;
 
@@ -94,27 +159,28 @@ void Enemy::enterHitstun(DamageData &data) {
   Combatant::enterHitstun(data);
 }
 
+void Enemy::enterHitstun(float seconds, StunType type, Color tint) {
+  assert(state != DEAD);
+  combo++;
+  PLOGI << "Combo: " << combo;
+
+  Combatant::enterHitstun(seconds, type, tint);
+}
+
 bool Enemy::counterToastCondition(DamageData &data) {
   if (data.assailant == NULL && data.assailant->team == team) {
     return false;
   }
 
   PartyMember *assailant = static_cast<PartyMember*>(data.assailant);
-  return assailant->important || data.force_hitstop;
+  return assailant->important || data.apply_hitstop;
 }
 
 void Enemy::exitHitstun() {
   Combatant::exitHitstun();
-
-  assert(stunned > 0);
-  stunned--;
 }
 
 void Enemy::death() {
-  if (state != HIT_STUN) {
-    stunned++;
-  }
-
   combo++;
   PLOGI << "Combo: " << combo;
 

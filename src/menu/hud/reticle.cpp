@@ -5,7 +5,9 @@
 #include "menu/hud/reticle.h"
 
 
-TargetReticle::TargetReticle() {
+TargetReticle::TargetReticle(Vector2 size) {
+  this->size = size;
+
   menu_atlas = &Game::menu_atlas;
   menu_atlas->use();
 }
@@ -25,16 +27,16 @@ void TargetReticle::draw(Vector2 position, float clock) {
   DrawTexturePro(menu_atlas->sheet, *sprite, dest, {-offset, -offset}, 
                  0, WHITE);
 
-  dest.x += 104;
+  dest.x += size.x;
   DrawTexturePro(menu_atlas->sheet, *sprite, dest, {-offset, -offset}, 
                  90, WHITE);
 
   dest.x = position.x;
-  dest.y += 54;
+  dest.y += size.y;
   DrawTexturePro(menu_atlas->sheet, *sprite, dest, {-offset, -offset}, 
                  -90, WHITE);
 
-  dest.x += 104;
+  dest.x += size.x;
   DrawTexturePro(menu_atlas->sheet, *sprite, dest, {-offset, -offset}, 
                  180, WHITE);
 }

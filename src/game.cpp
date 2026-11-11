@@ -1,5 +1,8 @@
 #include <nlohmann/json.hpp>
+#include <functional>
 #include <string>
+#include <sstream>
+#include <cstring>
 #include <cassert>
 #include <fstream>
 #include <chrono>
@@ -9,12 +12,14 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <memory>
+#include <ios>
 #include "enums.h"
 #include "system/noise_effect.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
 #include "system/music_player.h"
 #include "scenes/title.h"
+#include "scenes/setup.h"
 #include "scenes/field.h"
 #include "scenes/camp_menu.h"
 #include "scenes/rest_menu.h"
@@ -32,6 +37,8 @@ std::string, std::mt19937_64, std::uniform_int_distribution,
 nlohmann::json, nlohmann::basic_json, std::tuple;
 
 GameState Game::game_state = GameState::READY;
+SessionID Game::current_file = SessionID::UNSAVED;
+
 bool Game::EXIT_GAME = false;
 bool Game::SKIP_FRAME = true;
 unique_ptr<Scene> Game::reserve;
@@ -50,6 +57,7 @@ unique_ptr<MusicPlayer> Game::bgm;
 unique_ptr<NoiseEffect> Game::noise;
 
 Settings Game::settings;
+HashKeys Game::hash_keys;
 
 Color Game::screen_tint = WHITE;
 float Game::fade_clock = 0.0;
@@ -63,24 +71,64 @@ float Game::time_scale = 1.0;
 double Game::session_playtime = 0.0;
 bool Game::run_timer = false;
 
-Game::Game(int argc, char *argv[]) {
+
+void Game::init(int argc, char *argv[]) {
+  BootOptions opt = evalutateArgs(argc, argv);
+  loadPersonal();
+  setupRaylib();
+ 
+  system_clock::time_point today = system_clock::now();
+  long seed = system_clock::to_time_t(today);
+  RNG.seed(seed);
+  PLOGD << "RNG Seed: " << seed;
+
+  menu_sfx.use();
+  bgm = make_unique<MusicPlayer>();
+  noise = make_unique<NoiseEffect>((Vector2){0, 0}, CANVAS_RES);
+
+  evaluateOptions(opt);
+  PLOGI << "Time Scale: " << time_scale;
+  PLOGI << "Everything should be good to go!";
+}
+
+BootOptions Game::evalutateArgs(int argc, char *argv[]) {
   PLOGI << "Evaluating command line arguments.";
+  BootOptions boot;
 
   for (int x = 0; x < argc; x++) {
     string arg = argv[x];
+    bool last_arg = x + 1 == argc;
 
-    if (arg == "-m" && x + 1 != argc) {
-      quick_load = true;
-      ql_map = argv[x + 1];
-      PLOGI << "Quick loading map: " << ql_map;
+    if (arg == "-m" && !last_arg) {
+      boot.mode = BootMode::CUSTOM;
+      boot.map = argv[x + 1];
+    }
+    else if (arg == "-l" && !last_arg) {
+      boot.mode = BootMode::QUICK_LOAD;
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+      boot.save_file = static_cast<SessionID>(id);
+    }
+    else if (arg == "-w" && !last_arg) {
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+
+      boot.sub_weapon = static_cast<SubWeaponID>(id);
+    }
+    else if (arg == "-c" && !last_arg) {
+      arg = argv[x + 1];
+      int id = std::stoi(arg);
+
+      boot.companion = static_cast<CompanionID>(id);
     }
   }
+
+  return boot;
 }
 
-void Game::init() {
-  loadPersonal();
+void Game::setupRaylib() {
   InitWindow(window_res.x, window_res.y, 
-             "Project Remedy - v" VERSION " " VER_STAGE);
+             "THT: Remedy - v" VERSION " " VER_STAGE);
   InitAudioDevice();
   SetMasterVolume(settings.master_volume);
   SetTargetFPS(settings.framerate);
@@ -99,26 +147,57 @@ void Game::init() {
   sm_font = LoadFont("graphics/fonts/sm_font.png");
   med_font = LoadFont("graphics/fonts/med_font.png");
   defineColorPalette();
+}
+
+void Game::evaluateOptions(BootOptions &opt) {
+  PLOGI << "Evaluating Boot options...";
+
+  switch (opt.mode) {
+    case BootMode::DEFAULT: {
+      PLOGI << "Booting into the Title Screen.";
+      scene = make_unique<TitleScene>();
+      break;
+    }
+    case BootMode::QUICK_LOAD: {
+      bool successful = loadGame(opt.save_file);
+      if (!successful) {
+        PLOGE << "Failed to load save file! Falling back to default.";
+        opt.mode = BootMode::DEFAULT;
+        evaluateOptions(opt);
+      }
+
+      scene.swap(reserve);
+      game_state = GameState::FADING_IN;
+      break;
+    }
+    case BootMode::CUSTOM: {
+      PLOGI << "Booting into the Field Scene with custom parameters.";
+      scene = make_unique<FieldScene>(opt.map, opt.sub_weapon, 
+                                      opt.companion);
+      run_timer = true;
+      break;
+    }
+  }
+}
+
+Game::~Game() {
+  bgm.reset();
+  noise.reset();
+  scene.reset();
+
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  UnloadRenderTexture(canvas);
+  UnloadFont(sm_font);
+  UnloadFont(med_font);
+  UnloadImagePalette(palette);
+  menu_sfx.release();
+  assert(menu_sfx.users() == 0);
   
-  system_clock::time_point today = system_clock::now();
-  long seed = system_clock::to_time_t(today);
-  RNG.seed(seed);
-  PLOGD << "RNG Seed: " << seed;
-
-  menu_sfx.use();
-  bgm = make_unique<MusicPlayer>();
-  noise = make_unique<NoiseEffect>();
-
-  if (!quick_load) {
-    scene = make_unique<TitleScene>();
-  }
-  else {
-    scene = make_unique<FieldScene>(ql_map);
-    run_timer = true;
-  }
-
-  PLOGI << "Time Scale: " << time_scale;
-  PLOGI << "Everything should be good to go!";
+  savePersonal();
+  PLOGI << "Thanks for playing!";
 }
 
 void Game::loadPersonal() {
@@ -147,38 +226,13 @@ void Game::loadPersonal() {
     return;
   }
 
-
   settings = data.settings;
-  PLOGD << "Master Volume: " << settings.master_volume;
-  PLOGD << "SFX Volume: " << settings.sfx_volume;
-  PLOGD << "BGM Volume: " << settings.bgm_volume;
-  PLOGD << "Fullscreen: " << settings.fullscreen;
-  PLOGD << "Framerate: " << settings.framerate;
+  hash_keys = data.hash_keys;
   PLOGI << "Loaded the player's personal settings.";
 }
 
-Game::~Game() {
-  bgm.reset();
-  noise.reset();
-  scene.reset();
-
-  if (reserve != nullptr) {
-    reserve.reset();
-  }
-
-  UnloadRenderTexture(canvas);
-  UnloadFont(sm_font);
-  UnloadFont(med_font);
-  UnloadImagePalette(palette);
-  menu_sfx.release();
-  assert(menu_sfx.users() == 0);
-  
-  savePersonal();
-  PLOGI << "Thanks for playing!";
-}
-
 void Game::savePersonal() {
-  Personal data = {personal_version, settings};
+  Personal data = {personal_version, hash_keys, settings};
 
   ofstream file;
   file.open("data/personal.data", std::ios::binary);
@@ -272,6 +326,242 @@ void Game::toggleFullscreen() {
   setupCanvas();
 }
 
+void Game::newGame(GameMode mode, SubWeaponID sub_weapon, 
+                   CompanionID companion) 
+{
+  PLOGI << "Starting a new game.";
+  assert(reserve == nullptr);
+
+  bgm->stop();
+  reserve = make_unique<FieldScene>(mode, sub_weapon, companion);
+
+  session_playtime = 0;
+  current_file = UNSAVED;
+  run_timer = true;
+
+  game_state = GameState::SWITCHING_SCENE;
+}
+
+void Game::saveGame(Session *data, SessionID file_id) {
+  assert(file_id != SessionID::UNSAVED);
+  PLOGI << "Saving the player's current session on File " << file_id;
+
+  current_file = file_id;
+  data->file_id = file_id;
+  data->playtime = session_playtime;
+
+  string path;
+  if (file_id != TEMPORARY) {
+    path = "data/session" + std::to_string(file_id) + ".data";
+  }
+  else {
+    path = "data/.temp_session"; 
+  }
+
+  ofstream file;
+  file.open(path, std::ios::binary);
+
+  file.write(reinterpret_cast<char*>(data), sizeof(Session));
+  file.close();
+  PLOGD << "Finished writing to file."; 
+  
+  string result = getSessionKey(data);
+  PLOGD << "Session Key: '" << result << "'";
+
+  switch (file_id) {
+    case FILE1: {
+      std::strcpy(hash_keys.file1, result.c_str());
+      break;
+    }
+    case FILE2: {
+      std::strcpy(hash_keys.file2, result.c_str());
+      break;
+    }
+    case FILE3: {
+      std::strcpy(hash_keys.file3, result.c_str());
+      break;
+    }
+    case TEMPORARY: {
+      std::strcpy(hash_keys.temp, result.c_str());
+      break;
+    }
+    default: {
+    }
+  }
+
+  PLOGI << "Game has been saved.";
+}
+
+bool Game::loadGame(SessionID file_id) {
+  PLOGI << "Attempting to load session " << file_id << " from external " 
+    << "file.";
+
+  Session session;
+  try {
+    session = validateSession(file_id);
+    PLOGI << "Session data has been successfully retrieved.";
+  } 
+  catch (SessionException error_code) {
+    PLOGE << "Attempt to load session has failed!";
+    PLOGE << "Error Code: " << error_code;
+    return false;
+  }
+
+  assert(reserve == nullptr);
+  bgm->stop();
+  reserve = make_unique<FieldScene>(&session);
+
+  session_playtime = session.playtime;
+  current_file = session.file_id;
+  run_timer = true;
+
+  game_state = GameState::SWITCHING_SCENE;
+  return true;
+}
+
+void Game::exitGame() {
+  PLOGI << "Exit function has been called!";
+  EXIT_GAME = true;
+}
+
+Session Game::validateSession(SessionID file_id) {
+  assert(file_id != SessionID::UNSAVED);
+
+  string path;
+  if (file_id != TEMPORARY) {
+    path = "data/session" + std::to_string(file_id) + ".data";
+  }
+  else {
+    path = "data/.temp_session"; 
+  }
+
+  ifstream file;
+  file.open(path, std::ios::binary);
+
+  if (!file.is_open()) {
+    PLOGE << "Existing session data not found!";
+    throw SESSION_NOT_FOUND;
+  }
+
+  Session session;
+  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
+
+  if (file.fail()) {
+    PLOGE << "Reading operation has failed!";
+    file.close();
+    throw SESSION_FAILURE;
+  }
+
+  file.close();
+
+  if (session.version != session_version) {
+    PLOGE << "Loaded session data is outdated!";
+    throw SESSION_OUTDATED;
+  }
+
+  if (session.file_id != file_id) {
+    PLOGE << "File ID does not match!";
+    throw SESSION_MISMATCHED_ID;
+  }
+
+  string session_key = getSessionKey(&session);
+  PLOGD << "Hash key of loaded session: '" << session_key << "'";
+
+  string expected_key;
+  switch (file_id) {
+    case FILE1: {
+      expected_key = hash_keys.file1;
+      break;
+    }
+    case FILE2: {
+      expected_key = hash_keys.file2;
+      break;
+    }
+    case FILE3: {
+      expected_key = hash_keys.file3;
+      break;
+    }
+    case TEMPORARY: {
+      expected_key = hash_keys.temp;
+      break;
+    }
+    default: {
+    }
+  }
+
+  PLOGD << "Expected Session Key: '" << expected_key << "'";
+  if (session_key != expected_key) {
+    PLOGE << "Session key does not match what was expected!";
+    PLOGE << "The loaded session has might've been corrupted or modified" 
+      << "externally.";
+    throw SESSION_CORRUPTED;
+  }
+
+  PLOGI << "Session [ID: " << file_id << "] has been validated.";
+  return session;
+}
+
+bool Game::sessionExists(SessionID file_id) {
+  PLOGI << "Checking if File" << file_id << " exists";
+
+  try {
+    validateSession(FILE1);
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File " << file_id << " is not available.";
+    return false;
+  }
+}
+
+bool Game::sessionExists() {
+  PLOGI << "Searching for any available sessions...";
+
+  try {
+    validateSession(FILE1);
+    PLOGI << "File 1 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File 1 is not available! Error Code: " << error_code;
+  }
+
+  try {
+    validateSession(FILE2);
+    PLOGI << "File 2 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) {
+    PLOGW << "File 2 is not available! Error Code: " << error_code;
+  }
+
+  try {
+    validateSession(FILE3);
+    PLOGI << "File 3 has been detected as a valid session.";
+    return true;
+  } 
+  catch (SessionException error_code) { 
+    PLOGW << "File 3 is not available! Error Code: " << error_code;
+  }
+
+  return false;
+}
+
+string Game::getSessionKey(Session *data) {
+  char *ptr = reinterpret_cast<char*>(data);
+  int size = sizeof(Session);
+
+  std::hash<string> session_hash;
+  string raw(ptr, size);
+
+  std::stringstream stream;
+  stream << std::hex << session_hash(raw);
+
+  string result = stream.str();
+  assert(result.size() <= SAVE_KEY_SIZE);
+  return result;
+}
+
 void Game::gameLogic() {
   if (SKIP_FRAME) {
     PLOGD << "Skipping frame.";
@@ -313,6 +603,10 @@ void Game::gameLogic() {
     }
     case GameState::RETURN_TO_FIELD: {
       returnFieldProcedure();
+      break;
+    }
+    case GameState::QUICK_SWITCH: {
+      quickSwitchProcedure();
       break;
     }
     case GameState::SWITCHING_SCENE: {
@@ -365,6 +659,7 @@ void Game::fadeScreenProcedure() {
 
 void Game::sleepProcedure() {
   sleep_clock += deltaTime() / sleep_time;
+
   if (sleep_clock >= 1.0) {
     PLOGI << "Now returning to normal logic processing.";
     PLOGI << sleep_time;
@@ -382,6 +677,18 @@ void Game::switchSceneProcedure() {
 
   Game::fadein(1.0);
   SKIP_FRAME = true;
+  PLOGI << "Procedure complete.";
+}
+
+void Game::quickSwitchProcedure() {
+  PLOGI << "Quickly switching to loaded scene.";
+  scene.reset();
+
+  assert(reserve != nullptr);
+  scene.swap(reserve);
+
+  SKIP_FRAME = true;
+  game_state = GameState::READY;
   PLOGI << "Procedure complete.";
 }
 
@@ -566,165 +873,19 @@ void Game::drawScene() {
   EndDrawing();
 }
 
+float Game::deltaTime() {
+  return GetFrameTime() * time_scale;
+}
+
+void Game::setTimeScale(float new_scale) {
+  time_scale = new_scale;
+  PLOGI << "Time scale has been changed: " << time_scale;
+}
+
 void Game::fullscreenCheck() {
   if (settings.fullscreen != IsWindowState(FLAG_WINDOW_UNDECORATED)) {
     game_state = GameState::TOGGLE_FULLSCREEN;
   }
-}
-
-void Game::fadeout(float seconds) {
-  switch (game_state) {
-    case GameState::READY:
-    case GameState::SWITCHING_SCENE: {
-      PLOGI << "Fading out the screen.";
-      Game::screen_tint = WHITE;
-      Game::fade_clock = 1.0;
-      Game::fade_time = seconds;
-      game_state = GameState::FADING_OUT;
-      break;
-    }
-    default: {
-      PLOGE << "Function cannot be called in this current gamestate!";
-      return;
-    }
-  }
-}
-
-void Game::fadein(float seconds) {
-  switch (game_state) {
-    case GameState::READY:
-    case GameState::RETURN_TO_FIELD:
-    case GameState::SWITCHING_SCENE: 
-    case GameState::INIT_COMBAT: {
-      PLOGI << "Fading in the screen.";
-      Game::screen_tint = BLACK;
-      Game::fade_clock = 0.0;
-      Game::fade_time = seconds;
-      game_state = GameState::FADING_IN;
-      break;
-    }
-    default: {
-      PLOGE << "Function cannot be called in this current gamestate!";
-      return;
-    }
-  }
-}
-
-void Game::sleep(float seconds) {
-  if (game_state == GameState::GAME_OVER) {
-    return;
-  }
-
-  if (game_state == GameState::DEATH_SAVE) {
-    return;
-  }
-
-  PLOGI << "Pausing game logic for: " << seconds << " seconds";
-  Game::sleep_time = seconds;
-  game_state = GameState::SLEEP;
-}
-
-void Game::exitGame() {
-  PLOGI << "Exit function has been called!";
-  EXIT_GAME = true;
-}
-
-void Game::newSession(SubWeaponID sub_weapon, CompanionID companion) {
-  PLOGI << "Starting a new game.";
-  assert(reserve == nullptr);
-
-  bgm->stop();
-  reserve = make_unique<FieldScene>(sub_weapon, companion);
-
-  session_playtime = 0;
-  run_timer = true;
-
-  game_state = GameState::SWITCHING_SCENE;
-}
-
-void Game::saveSession(Session *data) {
-  PLOGI << "Saving the player's current session.";
-  data->playtime = session_playtime;
-
-  ofstream file;
-  file.open("data/session.data", std::ios::binary);
-  file.write(reinterpret_cast<char*>(data), sizeof(Session));
-
-  file.close();
-  PLOGI << "Session data saved successfully.";
-}
-
-bool Game::loadSession() {
-  PLOGI << "Attempting to load session data.";
-  ifstream file;
-  file.open("data/session.data", std::ios::binary);
-
-  if (!file.is_open()) {
-    PLOGE << "'data/session.data' is not found.";
-    file.close();
-    return false;
-  }
-
-  Session session;
-  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
-
-  if (file.fail()) {
-    PLOGE << "Error opening file!";
-    file.close();
-    return false;
-  }
-
-  file.close();
-
-  PLOGI << "Successfully loaded session data.";
-  PLOGD << "Map Name: " << session.map_name;
-  PLOGD << "Location: " << session.location;
-  PLOGD << "Medical Supplies: " << session.supplies;
-  PLOGD << "Player Life: " << session.player.life;
-  PLOGD << "Status Count: " << session.player.status_count;
-
-  if (session.version != session_version) {
-    PLOGE << "Loaded session data is outdated!";
-    return false;
-  }
-
-  assert(reserve == nullptr);
-  bgm->stop();
-  reserve = make_unique<FieldScene>(&session);
-
-  session_playtime = session.playtime;
-  run_timer = true;
-
-  game_state = GameState::SWITCHING_SCENE;
-  return true;
-}
-
-bool Game::existingSession() {
-  ifstream file;
-  file.open("data/session.data", std::ios::binary);
-
-  if (!file.is_open()) {
-    PLOGI << "Existing session data not found.";
-    return false;
-  }
-
-  Session session;
-  file.read(reinterpret_cast<char*>(&session), sizeof(Session));
-
-  if (file.fail()) {
-    file.close();
-    return false;
-  }
-
-  file.close();
-
-  if (session.version != session_version) {
-    PLOGE << "Loaded session data is outdated!";
-    return false;
-  }
-
-  PLOGI << "Detected existing session data.";
-  return true;
 }
 
 void Game::loadTitleScreen() {
@@ -735,6 +896,21 @@ void Game::loadTitleScreen() {
 
   reserve = make_unique<TitleScene>();
   game_state = GameState::SWITCHING_SCENE;
+
+  session_playtime = 0.0;
+  run_timer = false;
+}
+
+void Game::loadSetupScreen() {
+  PLOGI << "Booting Setup Scene";
+  if (reserve != nullptr) {
+    reserve.reset();
+  }
+
+  reserve = make_unique<SetupScene>();
+  game_state = GameState::QUICK_SWITCH;
+
+  session_playtime = 0.0;
   run_timer = false;
 }
 
@@ -759,6 +935,20 @@ void Game::openRestMenu(Session *data) {
   reserve = make_unique<RestMenuScene>(data);
 
   game_state = GameState::OPEN_RESTMENU;
+  SKIP_FRAME = true;
+}
+
+void Game::initCombat(Session *data, TroopID id, int reward) {
+  PLOGI << "Battle Time! (Forced Style!)";
+  assert(reserve == nullptr);
+
+  reserve = make_unique<CombatScene>(data, id, reward, true);
+  flash_color = WHITE;
+
+  noise->setTint(WHITE);
+  noise->setAlpha(0.10);
+
+  game_state = GameState::INIT_COMBAT;
   SKIP_FRAME = true;
 }
 
@@ -853,20 +1043,6 @@ int Game::getTroopReward(TroopID troop_id, nlohmann::json &pool) {
   return 0;
 }
 
-void Game::initCombat(Session *data, TroopID id, int reward) {
-  PLOGI << "Battle Time! (Forced Style!)";
-  assert(reserve == nullptr);
-
-  reserve = make_unique<CombatScene>(data, id, reward, true);
-  flash_color = WHITE;
-
-  noise->setTint(WHITE);
-  noise->setAlpha(0.10);
-
-  game_state = GameState::INIT_COMBAT;
-  SKIP_FRAME = true;
-}
-
 void Game::returnToField() {
   if (game_state == GameState::RETURN_TO_FIELD) {
     return;
@@ -910,20 +1086,55 @@ void Game::gameover(string reason) {
   run_timer = false;
 }
 
-float Game::deltaTime() {
-  return GetFrameTime() * time_scale;
+void Game::fadeout(float seconds) {
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::SWITCHING_SCENE: {
+      PLOGI << "Fading out the screen.";
+      Game::screen_tint = WHITE;
+      Game::fade_clock = 1.0;
+      Game::fade_time = seconds;
+      game_state = GameState::FADING_OUT;
+      break;
+    }
+    default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
+      return;
+    }
+  }
 }
 
-bool Game::debugInfo() {
-  return debug_info;
+void Game::fadein(float seconds) {
+  switch (game_state) {
+    case GameState::READY:
+    case GameState::RETURN_TO_FIELD:
+    case GameState::SWITCHING_SCENE: 
+    case GameState::INIT_COMBAT: {
+      PLOGI << "Fading in the screen.";
+      Game::screen_tint = BLACK;
+      Game::fade_clock = 0.0;
+      Game::fade_time = seconds;
+      game_state = GameState::FADING_IN;
+      break;
+    }
+    default: {
+      PLOGE << "Function cannot be called in this current gamestate!";
+      return;
+    }
+  }
 }
 
-void Game::toggleDebugInfo() {
-  debug_info = !debug_info;
-  PLOGI << "Debug info has been toggled: " << debug_info;
-}
+void Game::sleep(float seconds) {
+  if (game_state == GameState::GAME_OVER) {
+    return;
+  }
 
-void Game::setTimeScale(float new_scale) {
-  time_scale = new_scale;
-  PLOGI << "Time scale has been changed: " << time_scale;
+  if (game_state == GameState::DEATH_SAVE) {
+    return;
+  }
+
+  PLOGD << "Overwriting previous value: " << Game::sleep_time;
+  PLOGI << "Pausing game logic for: " << seconds << " seconds";
+  Game::sleep_time = seconds;
+  game_state = GameState::SLEEP;
 }

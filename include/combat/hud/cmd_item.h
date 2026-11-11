@@ -60,6 +60,7 @@ private:
   std::array<ItemID, 8>::iterator selected = NULL;
   std::unordered_set<ItemID> disallowed = {
     ItemID::NONE,
+    ItemID::M_SPLINT,
     ItemID::J_BOOK,
     ItemID::J_BROOM,
     ItemID::J_SHIRT,

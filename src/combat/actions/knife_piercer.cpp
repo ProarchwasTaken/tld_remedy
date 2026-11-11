@@ -8,8 +8,10 @@
 #include "data/combatant_event.h"
 #include "utils/animation.h"
 #include "utils/collision.h"
+#include "combat/system/stage.h"
 #include "combat/system/evt_handler.h"
 #include "combat/system/cbt_handler.h"
+#include "combat/status_effects/vulnerable.h"
 #include "combat/sub_weapons/knife.h"
 #include "combat/combatants/party/mary.h"
 #include "combat/actions/knife_piercer.h"
@@ -36,6 +38,10 @@ KnifePiercer::KnifePiercer(Mary *user):
   data.hit_stop = 0.2;
 
   data.assailant = user;
+  data.negate_pushback = true;
+
+  atk = user->offense + user->dexterity;
+  data.a_atk = &atk;
 
   this->atlas = &Mary::atlas;
   user->sprite = &atlas->sprites.at(24);
@@ -78,7 +84,10 @@ void KnifePiercer::windUp() {
 
 void KnifePiercer::action() {
   movement();
-  hitRegistration();
+
+  if (hits.size() < 2) {
+    hitRegistration();
+  }
 }
 
 void KnifePiercer::movement(float percentage) {
@@ -139,9 +148,41 @@ void KnifePiercer::hitRegistration() {
       continue;
     }
 
+    if (user->state == HIT_STUN) {
+      return;
+    }
+
     if (combatant->state != CombatantState::DEAD) {
+      technicalCheck(combatant);
       hits.emplace(combatant);
     }
+  }
+}
+
+void KnifePiercer::technicalCheck(Combatant *hit_enemy) {
+  if (hit_enemy->state != CombatantState::HIT_STUN) {
+    return;
+  }
+
+  Vulnerable *vulnerable = NULL;
+  for (auto &effect : hit_enemy->status) {
+    if (effect->id == StatusID::VULNERABLE) {
+      vulnerable = static_cast<Vulnerable*>(effect.get());
+    }
+  }
+
+  if (vulnerable == NULL) {
+    return;
+  }
+
+  if (vulnerable->effect_time <= 0.50) {
+    return;
+  }
+
+  if (vulnerable->effect_clock < 0.33) {
+    CombatHandler::raise<StartToastCB>(CombatEVT::START_TOAST, 1);
+    CombatStage::tintStage(Game::palette[48]);
+    Combatant::sfx.play("technical");
   }
 }
 
@@ -180,7 +221,7 @@ void KnifePiercer::performSecondHit() {
   assert(!hits.empty());
   data.knockback = 0.0;
   data.stun_time = 0.30;
-  data.atk_mod = 1.0;
+  data.power = 0.80;
 
   for (Combatant *combatant : hits) {
     Rectangle *hurtbox = &combatant->hurtbox.rect;

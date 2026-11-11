@@ -85,13 +85,17 @@ void IncapSequence::setupIncapTexture(CompanionID id) {
   switch (id) {
     case CompanionID::ERWIN: {
       texture = LoadTexture("graphics/cgs/incap_erwin.png");
+      position = {383.0f - texture.width, 207.0f - texture.height};
+      break;
+    }
+    case CompanionID::XANDER: {
+      texture = LoadTexture("graphics/cgs/incap_xander.png");
+      position = {211, 48};
       break;
     }
   }
 
-  position = {383.0f - texture.width, 207.0f - texture.height};
-  tint = WHITE;
-  tint.a = 0;
+  tint = {64, 64, 64, 0};
 }
 
 string IncapSequence::getIncapMessage() {
@@ -185,6 +189,11 @@ void IncapSequence::followUpSequence() {
       }
 
       break;
+    }
+    case CompanionID::XANDER: {
+      // This is temporary! Remove this later!
+      endSequence();
+      return;
     }
   }
 

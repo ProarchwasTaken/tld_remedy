@@ -17,6 +17,7 @@
 #include "utils/collision.h"
 #include "combat/system/evt_handler.h"
 #include "combat/sub_weapons/knife.h"
+#include "combat/sub_weapons/bat.h"
 #include "combat/actions/attack.h"
 #include "combat/actions/ghost_step.h"
 #include "combat/actions/evade.h"
@@ -51,7 +52,9 @@ Mary::Mary(Player *plr):
 
   recovery = plr->recovery;
   resilience = plr->resilience;
+
   accel_rate = 8;
+  z_order = 10;
 
   assignSubWeapon(plr->weapon_id);
   afflictPersistent(plr->status);
@@ -61,8 +64,8 @@ Mary::Mary(Player *plr):
   buffer_lifetime = buffer_lifetime * quotient;
   PLOGD << "Buffer Lifetime: " << buffer_lifetime;
 
-  bounding_box.scale = {64, 64};
-  bounding_box.offset = {-32, -64};
+  bounding_box.scale = {96, 80};
+  bounding_box.offset = {-48, -80};
   hurtbox.scale = {16, 56};
   hurtbox.offset = {-8, -58};
   rectExCorrection(bounding_box, hurtbox);
@@ -93,6 +96,10 @@ void Mary::assignSubWeapon(SubWeaponID id) {
       sub_weapon = make_unique<Knife>(this);
       break;
     }
+    case SubWeaponID::BAT: {
+      sub_weapon = make_unique<Bat>(this);
+      break;
+    }
   }
 }
 
@@ -104,30 +111,16 @@ void Mary::useItem(ItemID item, float use_time, PartyMember *target) {
   item_target = target;
 }
 
-void Mary::behavior() {
-  if (!enabled) {
-    return;
-  }
-
-  bool gamepad = IsGamepadAvailable(0);
-  movementInput(gamepad);
-  actionInput(gamepad);
-
-  if (state == CombatantState::NEUTRAL || canCancel()) {
-    readActionBuffer();
-  }
-}
-
 void Mary::evaluateEvent(unique_ptr<CombatantEvent> &event) {
   PartyMember::evaluateEvent(event);
 
-  if (event->event_type == CombatantEVT::TOOK_DAMAGE) {
-    TookDamageCBT *dmg_event = static_cast<TookDamageCBT*>(event.get());
-    damageHandling(dmg_event);
+  if (event->event_type == CombatantEVT::DAMAGE_TAKEN) {
+    auto *dmg_event = static_cast<DamageTakenCBT*>(event.get());
+    onDamageTaken(dmg_event);
   }
 }
 
-void Mary::damageHandling(TookDamageCBT *event) {
+void Mary::onDamageTaken(DamageTakenCBT *event) {
   Combatant *potential_target = NULL;
   if (event->sender == this) {
     assert(event->assailant != NULL);
@@ -145,13 +138,26 @@ void Mary::damageHandling(TookDamageCBT *event) {
     return;
   }
 
-  PLOGD << "Acknowledging damage event of which the Player Combatant was"
-    " involved in.";
+  PLOGD << "Acknowledging damage event of which the Mary was involved in";
   float distance = distanceTo(potential_target);
   if (distance <= 96) {
     target = potential_target;
     PLOGI << "Now targeting: '" << target->name << "' [ID: " << 
     target->entity_id << "]";
+  }
+}
+
+void Mary::behavior() {
+  if (!enabled) {
+    return;
+  }
+
+  bool gamepad = IsGamepadAvailable(0);
+  movementInput(gamepad);
+  actionInput(gamepad);
+
+  if (state == CombatantState::NEUTRAL || canCancel()) {
+    readActionBuffer();
   }
 }
 
@@ -198,15 +204,18 @@ void Mary::actionInput(bool gamepad) {
 }
 
 void Mary::defensiveActionInput(bool gamepad) {
-  if (moving) {
-    PLOGI << "Sending GhostStep input to buffer.";
-    buffer = MaryAction::GHOST_STEP;
-    return;
+  int direction_x = static_cast<int>(direction);
+  if (moving && moving_x == direction_x) {
+    PLOGI << "Sending GhostStep Forward input to buffer.";
+    buffer = MaryAction::GHOST_STEP_FWD;
+  }
+  else if (moving && moving_x != direction_x) {
+    PLOGI << "Sending GhostStep Backward input to buffer.";
+    buffer = MaryAction::GHOST_STEP_BWD;
   }
   else if (Input::down(keybinds->down, gamepad)) {
     PLOGI << "Sending Evade input to buffer.";
     buffer = MaryAction::EVADE;
-    return;
   }
 }
 
@@ -226,11 +235,15 @@ bool Mary::canCancel(bool ignore_buffer) {
     Evade *evade_action = static_cast<Evade*>(action.get());
     return buffer != MaryAction::EVADE && evade_action->evaded_attack;
   }
-  else if (action_id == ActionID::GHOST_STEP) {
-    return buffer != MaryAction::GHOST_STEP;
+  
+  bool gs_fwd = buffer == MaryAction::GHOST_STEP_FWD;
+  bool gs_bwd = buffer == MaryAction::GHOST_STEP_BWD;
+
+  if (action_id == ActionID::GHOST_STEP) {
+    return !gs_fwd && !gs_bwd; 
   }
   else {
-    return buffer == MaryAction::GHOST_STEP;
+    return gs_fwd || gs_bwd;
   }
 }
 
@@ -257,11 +270,17 @@ void Mary::readActionBuffer() {
       action = make_unique<Attack>(this, atlas, hitbox, atk_set);
       break;
     }
-    case MaryAction::GHOST_STEP: {
+    case MaryAction::GHOST_STEP_FWD: 
+    case MaryAction::GHOST_STEP_BWD: {
+      int direction_x = static_cast<int>(direction);
+      if (buffer == MaryAction::GHOST_STEP_BWD) {
+        direction_x = direction_x * -1;
+      }
+
       if (life > 1) {
         float cost = calculateLifeCost(gs_cost);
         increaseExhaustion(cost);
-        action = make_unique<GhostStep>(this, atlas, moving_x, gs_set);
+        action = make_unique<GhostStep>(this, atlas, direction_x, gs_set);
       }
 
       break;
@@ -331,6 +350,10 @@ void Mary::update() {
     }
     case CombatantState::ACTION: {
       action->logic();
+
+      if (kb_push_back) {
+        knockbackLogic();
+      }
       break;
     }
     case CombatantState::HIT_STUN: {
@@ -353,12 +376,7 @@ void Mary::update() {
     }
   }
 
-  statusLogic();
-  targetLogic();
-
-  if (buffer != MaryAction::NONE) {
-    bufferTimer();
-  }
+  endLogic();
 }
 
 void Mary::neutralLogic() {
@@ -383,6 +401,40 @@ void Mary::neutralLogic() {
 
   SpriteAnimation::play(animation, next_anim, true);
   sprite = &atlas.sprites[*animation->current];
+}
+
+void Mary::movement() {
+  if (!moving && acceleration == 0) {
+    return;
+  }
+
+  if (moving) {
+    direction = static_cast<Direction>(moving_x);
+    accelerate();
+  }
+  else {
+    decelerate();
+  }
+
+  float speed = (default_speed * speed_multiplier) * acceleration;
+  float magnitude = speed * Game::deltaTime();
+
+  if (Collision::checkX(this, magnitude, direction)) {
+    Collision::snapX(this, direction);
+  }
+  else {
+    position.x += magnitude * direction;
+  }
+}
+
+void Mary::endLogic() {
+  targetLogic();
+
+  if (buffer != MaryAction::NONE) {
+    bufferTimer();
+  }
+
+  PartyMember::endLogic();
 }
 
 void Mary::bufferTimer() {
@@ -414,30 +466,6 @@ void Mary::targetLogic() {
   }
 }
 
-void Mary::movement() {
-  if (!moving && acceleration == 0) {
-    return;
-  }
-
-  if (moving) {
-    direction = static_cast<Direction>(moving_x);
-    accelerate();
-  }
-  else {
-    decelerate();
-  }
-
-  float speed = (default_speed * speed_multiplier) * acceleration;
-  float magnitude = speed * Game::deltaTime();
-
-  if (Collision::checkX(this, magnitude, direction)) {
-    Collision::snapX(this, direction);
-  }
-  else {
-    position.x += magnitude * direction;
-  }
-}
-
 Animation *Mary::getIdleAnim() {
   if (!critical_life || last_moved < 0.35) {
     return &anim_idle;
@@ -457,13 +485,7 @@ Rectangle *Mary::getStunSprite() {
 }
 
 void Mary::draw() {
-  assert(sprite != NULL);
-
-  Rectangle final = *sprite;
-  final.width = final.width * direction;
-
-  applyStaggerEffect(final);
-  DrawTexturePro(atlas.sheet, final, bounding_box.rect, {0, 0}, 0, tint);
+  drawSprite(&atlas.sheet);
 }
 
 void Mary::drawDebug() {

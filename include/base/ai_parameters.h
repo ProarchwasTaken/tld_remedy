@@ -1,4 +1,9 @@
 #pragma once
+#include <random>
+#include <raylib.h>
+#include "game.h"
+#include "base/combatant.h"
+#include "data/rect_ex.h"
 
 
 struct Contesting {
@@ -69,5 +74,25 @@ struct AIParameters {
   Retreating retreating;
   Dodging dodging;
   Damaged damaged;
+
+  template<typename GoalEnum>
+  void setGoal(GoalEnum &current, GoalEnum goal, float chance) {
+    std::uniform_real_distribution<float> range(0.0, 1.0);
+    float percentage = range(Game::RNG);
+
+    if (percentage <= chance) {
+      current = goal;
+    }
+  }
+
+  void wait(float seconds);
+  void wait(float min, float max);
+  void waitTimer();
+
+  bool inAttackRange(Combatant *owner, Combatant *target);
+
+  void drawDebug(int ai_goal, Vector2 position, RectEx &bounding_box);
+  void drawDist(Vector2 position, float distance, Color color);
+  void drawTimers(int ai_goal, Vector2 position);
 };
 

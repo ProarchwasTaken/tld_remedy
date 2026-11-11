@@ -10,18 +10,18 @@ struct DamageData {
   float stun_time;
   StunType stun_type;
 
-  float base_damage = 0; 
+  float dmg_floor = 1; 
   float knockback = 0;
   float hit_stop = 0;
-
-  bool intercepted = false;
 
   Combatant *assailant = NULL;
   Rectangle *hitbox = NULL;
   int *a_atk = NULL;
   int *b_def = NULL;
 
-  float atk_mod = 1.20;
-  float def_mod = 0.80;
-  bool force_hitstop = false;
+  float power = 1.0;
+  float ent_split = 0.0;
+  bool apply_hitstop = false;
+  bool negate_pushback = false;
+  bool intercepted = false;
 };

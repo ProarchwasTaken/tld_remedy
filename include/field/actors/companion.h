@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include "enums.h"
 #include "base/actor.h"
+#include "data/rect_ex.h"
 #include "data/animation.h"
 #include "data/actor_event.h"
 #include "system/sprite_atlas.h"
@@ -12,13 +13,15 @@
 
 class CompanionActor : public Actor {
 public:
-  CompanionActor(CompanionID id, Vector2 position, Direction direction);
+  CompanionActor(Vector2 position, Direction direction);
   ~CompanionActor();
-  void setupAtlas(CompanionID id);
+
+  static void setAtlas(CompanionID id);
 
   void evaluateEvent(std::unique_ptr<ActorEvent> &event) override;
 
   void update() override;
+  bool playerObscured();
   bool shouldBeMoving();
   void setIdleSprite();
   void moveAnimation();
@@ -28,8 +31,12 @@ public:
   static SpriteAtlas atlas;
   bool follow_player = true;
 private:
+  static RectEx DEF_BOUNDS;
+  static RectEx DEF_COLLIS;
+
   PlayerActor *plr = NULL;
   bool moving = false;
+  bool obscuring_player = false;
 
   float anim_move_speed = 0.25;
   Animation anim_down = {{0, 1, 2, 1}, anim_move_speed};

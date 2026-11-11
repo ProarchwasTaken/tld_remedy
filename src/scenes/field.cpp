@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <thread>
 #include <raylib.h>
 #include <plog/Log.h>
 #include "enums.h"
@@ -20,6 +21,7 @@
 #include "utils/text.h"
 #include "utils/flag.h"
 #include "menu/panels/dialog.h"
+#include "menu/panels/file_select.h"
 #include "field/system/field_map.h"
 #include "field/system/field_handler.h"
 #include "field/system/actor_handler.h"
@@ -29,7 +31,6 @@
 #include "field/entities/map_trans.h"
 #include "field/entities/pickup.h"
 #include "field/entities/save_point.h"
-#include "field/sequences/save.h"
 #include "field/sequences/rest.h"
 #include "field/sequences/reject.h"
 #include "field/sequences/incap.h"
@@ -48,10 +49,13 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2);
 SoundAtlas FieldScene::sfx("field");
 
 
-FieldScene::FieldScene(SubWeaponID sub_weapon, CompanionID companion) {
+FieldScene::FieldScene(GameMode mode, SubWeaponID sub_weapon, 
+                       CompanionID companion) 
+{
   PLOGI << "Starting a new session.";
   session = make_unique<Session>();
   session->version = Game::session_version;
+  session->game_mode = mode;
 
   initPlayerData(sub_weapon);
   initCompanionData(companion);
@@ -68,13 +72,18 @@ FieldScene::FieldScene(Session *session_data) {
   setup(session->map_name);  
 }
 
-FieldScene::FieldScene(string map_name) {
+FieldScene::FieldScene(string map_name, SubWeaponID weapon, 
+                       CompanionID companion) 
+{
   PLOGI << "Initializing the field scene with the map: " << map_name;
   session = make_unique<Session>();
   session->version = Game::session_version;
 
-  initPlayerData(SubWeaponID::KNIFE);
-  initCompanionData(CompanionID::ERWIN);
+  initPlayerData(weapon);
+  initCompanionData(companion);
+
+  session->player.life = session->player.max_life;
+  session->flags[3].raised = true;
 
   setup(map_name);
 }
@@ -91,6 +100,23 @@ FieldScene::~FieldScene() {
   field.reset();
   session.reset();
 
+  Actor::emotes.release();
+  assert(Actor::emotes.users() == 0);
+
+  PlayerActor::atlas.release();
+  assert(PlayerActor::atlas.users() == 0);
+
+  CompanionActor::atlas.release();
+  assert(CompanionActor::atlas.users() == 0);
+
+  EnemyActor::atlas.release();
+  assert(EnemyActor::atlas.users() == 0);
+
+  Pickup::atlas.release();
+  assert(Pickup::atlas.users() == 0);
+
+  SavePoint::atlas.release();
+  assert(SavePoint::atlas.users() == 0);
   sfx.release();
 
   if (panel != nullptr) {
@@ -111,25 +137,40 @@ void FieldScene::initPlayerData(SubWeaponID weapon_id) {
   player->max_life = 15;
 
   player->init_morale = 10;
-  player->max_morale = 25;
+  player->max_morale = 15;
 
-  player->offense = 6;
+  player->offense = 4;
   player->defense = 4;
-  player->intimid = 6;
+  player->intimid = 4;
   player->persist = 4;
-  player->dexterity = 5;
-  player->discipline = 6;
+  player->dexterity = 4;
+  player->discipline = 4;
 
   player->recovery = 1.0;
-  player->resilience = 0.8;
+  player->resilience = 0.5;
 
   switch (weapon_id) {
     case SubWeaponID::KNIFE: {
-      PLOGI << "Applying Knife status bonuses.";
-      player->offense += 2;
-      player->intimid += 1;
-      player->dexterity += 1;
+      PLOGI << "Applying Knife status changes.";
+      player->dexterity += 2;
+      player->intimid += 2;
       break;
+    }
+    case SubWeaponID::BAT: {
+      PLOGI << "Applying Bat status changes.";
+      player->init_morale = 5;
+      player->max_morale -= 5;
+
+      player->offense += 5;
+      player->intimid += 2;
+      player->discipline -= 2;
+
+      player->recovery -= 0.15;
+      break;
+    }
+    default: {
+      PLOGE << "Invalid SubWeapon ID!";
+      throw;
     }
   }
 }
@@ -148,18 +189,44 @@ void FieldScene::initCompanionData(CompanionID companion_id) {
       companion->max_life = 20;
 
       companion->init_morale = 10;
-      companion->max_morale = 20;
+      companion->max_morale = 15;
 
-      companion->offense = 8;
-      companion->defense = 6;
-      companion->intimid = 7;
-      companion->persist = 5;
+      companion->offense = 4;
+      companion->defense = 4;
+      companion->intimid = 6;
+      companion->persist = 6;
       companion->dexterity = 5;
-      companion->discipline = 7;
+      companion->discipline = 5;
 
       companion->recovery = 1.0;
-      companion->resilience = 0.70;
+      companion->resilience = 0.5;
       break;
+    }
+    case CompanionID::XANDER: {
+      std::strcpy(companion->name, "Xander");
+      companion->member_id = PartyMemberID::XANDER;
+      companion->companion_id = companion_id;
+
+      companion->life = 30;
+      companion->max_life = 30;
+
+      companion->init_morale = 0;
+      companion->max_morale = 0;
+
+      companion->offense = 12;
+      companion->defense = 8;
+      companion->intimid = 4;
+      companion->persist = 3;
+      companion->dexterity = 4;
+      companion->discipline = 1;
+
+      companion->recovery = 0.35;
+      companion->resilience = 0.75;
+      break;
+    }
+    default: {
+      PLOGE << "Invalid Companion ID!";
+      throw;
     }
   }
 
@@ -171,8 +238,17 @@ void FieldScene::setup(string starting_map) {
   scene_id = SceneID::FIELD;
 
   field = make_unique<FieldMap>();
-  mapLoadProcedure(starting_map, NULL, false);
+  loadMapProcedure(starting_map, NULL, false);
+
   PlayerActor::setControllable(true);
+  CompanionActor::setAtlas(session->companion.companion_id);
+
+  Actor::emotes.use();
+  PlayerActor::atlas.use();
+  CompanionActor::atlas.use();
+  EnemyActor::atlas.use();
+  Pickup::atlas.use();
+  SavePoint::atlas.use();
 
   #ifndef NDEBUG
   static CommandSystem command_system;
@@ -190,7 +266,9 @@ void FieldScene::setup(string starting_map) {
 void FieldScene::onSceneReturn(SceneID from) {
   assert(from != scene_id);
   PLOGD << "Running functions for when the game returns to this scene.";
-  updatePartySpeed();
+  float multiplier = getPartySpeed();
+  updatePartySpeed(multiplier);
+
   updateInjury(session->player);
   updateInjury(session->companion);
 
@@ -223,16 +301,14 @@ void FieldScene::deathsaveProcedure() {
   }
 
   PLOGI << "Map Selected: '" << next_map << "'";
-  mapLoadProcedure(next_map, NULL, false);
+  loadMapProcedure(next_map, NULL, false);
   clearMapHistory();
 
   Flag::set(session.get(), FlagID::DEATH_SAVE, false);
   initSequence(SequenceID::INCAP);
 }
 
-void FieldScene::updatePartySpeed() {
-  assert(player_actor != NULL);
-  assert(companion_actor != NULL);
+float FieldScene::getPartySpeed() {
   float speed_penalty = 0;
 
   for (int x = 0; x < STATUS_LIMIT; x++) {
@@ -250,13 +326,19 @@ void FieldScene::updatePartySpeed() {
 
   PLOGD << "Speed Penalty: -%" << speed_penalty * 100;
   float party_speed = 1.0 - speed_penalty;
-  PLOGI << "Party Speed: " << party_speed;
+  return party_speed;
+}
+
+void FieldScene::updatePartySpeed(float multiplier) {
+  assert(player_actor != NULL);
+  assert(companion_actor != NULL);
+  PLOGI << "Party Speed: " << multiplier;
 
   float default_speed = player_actor->default_speed;
-  player_actor->movement_speed = default_speed * party_speed;
+  player_actor->movement_speed = default_speed * multiplier;
 
   default_speed = companion_actor->default_speed;
-  companion_actor->movement_speed = default_speed * party_speed;
+  companion_actor->movement_speed = default_speed * multiplier;
 }
 
 void FieldScene::updateInjury(Character &party_member) {
@@ -304,26 +386,14 @@ void FieldScene::updateInjury(Character &party_member) {
   party_member.injury = injury;
 }
 
-void FieldScene::mapLoadProcedure(string map_name, string *spawn_name,
+void FieldScene::loadMapProcedure(string map_name, string *spawn_name,
                                   bool map_history) 
 {
-  PLOGI << "Running map load procedure";
-  float start_time = GetTime();
-  ActorHandler::clearEvents();
+  PLOGI << "Beginning map load procedure";
 
-  if (!entities.empty()) {
-    Entity::clear(entities);
-    player_actor = NULL;
-    companion_actor = NULL;
-  }
-
-  field->loadMap(*session, map_name, spawn_name);
-  setupEntities();
-  updatePartySpeed();
-
-  updateInjury(session->player);
-  updateInjury(session->companion);
-  camera.target = player_actor->position;
+  PLOGI << "Retrieving external map data on a separate thread.";
+  map_loading = std::thread(&FieldMap::loadMap, field.get(), 
+                            session.get(), map_name, spawn_name);
 
   if (map_history) {
     PLOGI << "Updating map history.";
@@ -332,11 +402,28 @@ void FieldScene::mapLoadProcedure(string map_name, string *spawn_name,
   }
 
   std::strcpy(session->map_name, map_name.c_str());
-  map_ready = true;
 
-  PLOGI << "Procedure complete.";
-  float elapsed_time = GetTime() - start_time;
-  PLOGI << "Load Time: " << elapsed_time;
+  updateInjury(session->player);
+  updateInjury(session->companion);
+  session->party_speed = getPartySpeed();
+}
+
+void FieldScene::loadWrapup() {
+  field->loadMapGraphics();
+  ActorHandler::clearEvents();
+
+  if (!entities.empty()) {
+    Entity::clear(entities);
+    player_actor = NULL;
+    companion_actor = NULL;
+  }
+
+  setupEntities();
+  updatePartySpeed(session->party_speed);
+  camera.target = player_actor->position;
+
+  PLOGI << "Showtime! The map is now loaded, and ready to go!";
+  Game::fadein(0.25);
 }
 
 void FieldScene::clearMapHistory() {
@@ -400,9 +487,7 @@ void FieldScene::setupActor(ActorData *data) {
       break;
     }
     case ActorType::COMPANION: {
-      CompanionID id = session->companion.companion_id;
-
-      entity = make_unique<CompanionActor>(id, position, direction);
+      entity = make_unique<CompanionActor>(position, direction);
       companion_actor = static_cast<CompanionActor*>(entity.get());
       break;
     }
@@ -419,10 +504,9 @@ void FieldScene::setupActor(ActorData *data) {
 }
 
 void FieldScene::update() { 
-  if (!map_ready) {
-    mapLoadProcedure(next_map.map_name, &next_map.spawn_point);
-    Game::fadein(0.25);
-    return;
+  if (map_loading.joinable()) {
+    map_loading.join();
+    loadWrapup();
   }
 
   #ifndef NDEBUG
@@ -464,6 +548,10 @@ void FieldScene::panelTermination() {
 
   if (panel->id == PanelID::DIALOG) {
     dialogHandling();
+  }
+  else if (sequence == nullptr && panel->id == PanelID::FILE_SELECT) {
+    PLOGD << "Detected that FileSelect was closed outside of a sequence.";
+    PlayerActor::setControllable(true);
   }
 
   panel.reset();
@@ -528,6 +616,12 @@ void FieldScene::eventProcessing() {
   }
 
   actor_handler.transferEvents();
+
+  if (init_load) {
+    loadMapProcedure(next_map.map_name, &next_map.spawn_point);
+    Game::fadeout(0.25);
+    init_load = false;
+  }
 }
 
 void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
@@ -542,15 +636,21 @@ void FieldScene::eventHandling(unique_ptr<FieldEvent> &event) {
       PLOGI << "Preparing to load map: '" << map_name << "' at " <<
         "spawnpoint: '" << *spawn_name << "'";
       next_map = *event_data;
-      Game::fadeout(0.25);
-      map_ready = false;
+      init_load = true;
       break;
     }
     case FieldEVT::SAVE_SESSION: {
       PLOGD << "Event Detected: SaveSessionEvent";
 
-      PLOGI << "Saving the session.";
-      Game::saveSession(session.get());
+      PLOGI << "Opening File Select in save mode.";
+      panel = make_unique<FileSelectPanel>(session.get());
+      panel_mode = true;
+
+      if (sequence == nullptr) {
+        PLOGD << "Detected that File Select was opened outside of a " 
+          << "sequence.";
+        PlayerActor::setControllable(false);
+      }
       break;
     }
     case FieldEVT::OPEN_MENU: {
@@ -757,10 +857,6 @@ void FieldScene::initSequence(SequenceID sequence_id) {
       break;
     }
     #endif // !NDEBUG
-    case SequenceID::SAVE: {
-      sequence = make_unique<SaveSequence>();
-      break;
-    }
     case SequenceID::REST: {
       sequence = make_unique<RestSequence>();
       break;
@@ -1101,8 +1197,13 @@ bool fieldAlgorithm(unique_ptr<Entity> &e1, unique_ptr<Entity> &e2) {
   if (e1->entity_type != e2->entity_type) {
     return e1->entity_type > e2->entity_type;
   }
+  else if (e1->position.y != e2->position.y) {
+    return e1->position.y < e2->position.y; 
+  } 
   else {
-    return e1->position.y < e2->position.y;
+    float e1_area = e1->bounding_box.scale.x * e1->bounding_box.scale.y;
+    float e2_area = e2->bounding_box.scale.x * e2->bounding_box.scale.y;
+    return e1_area > e2_area;
   }
 }
 
@@ -1114,9 +1215,15 @@ void FieldScene::drawSessionInfo() {
   float y = 4;
   float spacing = 9;
 
-  string text = TextFormat("Current Map: %s", session->map_name);
+  string text = TextFormat("Session ID: %i", session->file_id);
   Vector2 position = TextUtils::alignRight(text.c_str(), {base_x, y}, 
                                            *font, -3, 0);
+  DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
+  y += spacing;
+
+  text = TextFormat("Current Map: %s", session->map_name);
+  position = TextUtils::alignRight(text.c_str(), {base_x, y}, 
+                                   *font, -3, 0);
   DrawTextEx(*font, text.c_str(), position, text_size, -3, GREEN);
   y += spacing;
 

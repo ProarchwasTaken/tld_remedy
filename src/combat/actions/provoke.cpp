@@ -19,6 +19,7 @@ Provoke::Provoke(Erwin *user):
   this->atlas = &user->atlas;
 
   user->intangible = true;
+  user->priority += 5;
 }
 
 Provoke::~Provoke() {
@@ -37,16 +38,7 @@ void Provoke::drawEnemyAggro() {
     return;
   }
 
-  int aggro_drawn = 0;
-  int limit = (enemy_count + 1) / 2;
-  PLOGD << "Enemies: " << enemy_count << ", Limit: " << limit;
-
   for (Combatant *combatant : Combatant::existing_combatants) {
-    if (aggro_drawn == limit) {
-      PLOGI << "Reached the limit of aggro drawn.";
-      break;
-    }
-
     if (combatant->state == DEAD) {
       continue;
     }
@@ -59,7 +51,6 @@ void Provoke::drawEnemyAggro() {
       PLOGI << "Attracted the aggro of '" << combatant->name << "' [ID: "
         << combatant->entity_id << "]";
       combatant->target = user;
-      aggro_drawn++;
     }
   }
 }
@@ -81,6 +72,7 @@ void Provoke::action() {
   bool end_state = state_clock == 1.0;
   if (end_state) {
     user->intangible = false;
+    user->priority -= 5;
   }
 }
 

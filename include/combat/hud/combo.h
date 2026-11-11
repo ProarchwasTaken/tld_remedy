@@ -4,6 +4,7 @@
 #include "data/combatant_event.h"
 #include "system/sprite_atlas.h"
 #include "system/sound_atlas.h"
+#include "combat/hud/toasts.h"
 
 
 class ComboHud {
@@ -17,8 +18,9 @@ public:
 
   void stunTimer();
   void endTimer();
-  void highestComboDecay();
-  void startComboToast();
+
+  void onComboEnd(CombatToasts *toasts);
+  void selectToast(CombatToasts *toasts);
 
   void draw();
   void drawComboCount(int value);
@@ -30,6 +32,7 @@ private:
 
   Vector2 main_position;
   Color tint = WHITE;
+  enum {HIDDEN, ACTIVE, FADING} state = HIDDEN;
 
   float end_clock = 1.0;
   float end_time = 1.0;
@@ -40,9 +43,11 @@ private:
   float hit_clock = 1.0;
   float hit_time = 0.10;
 
-  int highest_combo = 0;
-  float decay_clock = 0.0;
-  float decay_time = 3.0;
+  int displayed_combo = 0;
+  int previous_combo = 0;
+
+  float toast_clock = 1.0;
+  float toast_cooldown = 3.0;
 
   float damage_dealt = 0.0;
   float damage_total = 0.0;

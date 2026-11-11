@@ -14,8 +14,8 @@ SoundAtlas Knife::sfx("knife");
 
 
 Knife::Knife(Mary *user) : SubWeapon("Knife", SubWeaponID::KNIFE, user) {
-  *tech1 = {"Cleave", TechCostType::MORALE, 3.4};
-  *tech2 = {"Piercer", TechCostType::MORALE, 7.4};
+  *tech1 = {"Cleave", TechCostType::MORALE, 3.0};
+  *tech2 = {"Piercer", TechCostType::MORALE, 5.0};
 
   sfx.use();
   PLOGI << "Knife Sub-Weapon: Initialized.";

@@ -16,19 +16,19 @@ Despondent::Despondent(PartyMember *afflicted) :
   this->afflicted = afflicted;
 
   float intimid = afflicted->intimid;
-  float dec_intimid = std::floorf(intimid * 0.90);
+  float dec_intimid = std::floorf(intimid * 0.75);
   intimid_lost = intimid - dec_intimid;
   PLOGD << "Intimidation to be lost: " << intimid_lost;
 }
 
 void Despondent::init(bool hide_text) {
   afflicted->demoralized = true;
+  afflicted->morale = -afflicted->max_morale;
 
-  PLOGI << "Decreasing afflicted's intimidation by 10%";
+  PLOGI << "Decreasing afflicted's intimidation by 25%";
   afflicted->intimid -= intimid_lost;
 
   PLOGD << "Result: " << afflicted->intimid;
-
   StatusEffect::init(hide_text);
 }
 
@@ -52,21 +52,13 @@ Despondent::~Despondent() {
 void Despondent::intercept(DamageData &data) {
   if (afflicted->state != CombatantState::NEUTRAL) {
     PLOGI << "Afflicted has taken damage while not in Neutral.";
-    data.stun_type = StunType::STAGGER;
     data.calculation = DamageType::LIFE;
     data.damage_type = DamageType::LIFE;
-
-    Combatant::sfx.play("damage_stagger");
-    PLOGD << "Forcing Life damage calculation and Stagger.";
+    PLOGD << "Forcing Life damage calculation.";
   }
 }
 
 void Despondent::logic() {
-  if (delay_clock <= 1.0) {
-    delay_clock += Game::deltaTime() / delay_time;
-    return;
-  }
-
   float init_morale = afflicted->init_morale;
   float recovery = afflicted->recovery;
 
@@ -78,7 +70,9 @@ void Despondent::logic() {
     magnitude = remaining;
   }
 
-  afflicted->morale += magnitude;
+  if (magnitude > 0) {
+    afflicted->morale += magnitude;
+  }
 
   if (afflicted->morale >= init_morale) {
     end = true;

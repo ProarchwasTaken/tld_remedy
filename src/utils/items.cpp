@@ -102,10 +102,10 @@ string ItemUtils::getDescription(ItemID item) {
     }
     case ItemID::M_SPLINT: {
       return
-      "Can fix Broken Arm,\n"
-      "Crippled Leg, and Mangled.\n"
-      "Also cures the Despondent status\n"
-      "ailment in combat.";
+      "Capable of mending the more\n"
+      "grievous injuries like a\n"
+      "Broken Arm, Crippled Leg,\n"
+      "or perhaps even a Mangled Body.";
     }
     case ItemID::S_BANDAGE: {
       return

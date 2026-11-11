@@ -1,8 +1,30 @@
 #pragma once
 
 
+enum SessionID {
+  TEMPORARY = -1,
+  UNSAVED,
+  FILE1,
+  FILE2,
+  FILE3
+};
+
+enum SessionException {
+  SESSION_NOT_FOUND = 605,
+  SESSION_FAILURE,
+  SESSION_OUTDATED,
+  SESSION_MISMATCHED_ID,
+  SESSION_CORRUPTED
+};
+
+enum class GameMode {
+  INDIFFERENCE,
+  REVERENCE
+};
+
 enum class SceneID {
   TITLE,
+  SETUP,
   FIELD,
   CAMP_MENU,
   REST_MENU,
@@ -14,10 +36,15 @@ enum class PanelID {
   CONFIG,
   CONFIRM,
   REMAP,
+  DIALOG,
+  FILE_SELECT,
+  WEAPON,
+  COMPANION,
+  SETUP_CONFIRM,
   STATUS,
   ITEMS,
   TECH,
-  DIALOG,
+  TEXTBOX,
   DIAGNOSE,
   CRAFTING
 };
@@ -29,6 +56,7 @@ enum EntityType {
   MAP_TRANSITION,
   DMG_NUMBER,
   STATUS_TEXT,
+  PROJECTILE,
   COMBATANT,
   AFTERIMAGE
 };
@@ -40,11 +68,13 @@ enum class ActorType {
 };
 
 enum class SubWeaponID {
-  KNIFE
+  KNIFE,
+  BAT
 };
 
 enum class CompanionID {
-  ERWIN
+  ERWIN,
+  XANDER,
 };
 
 enum class FlagID {
@@ -76,26 +106,6 @@ enum class ItemID {
   J_TPAPER,
 };
 
-enum class CombatantTeam {
-  PARTY,
-  ENEMY
-};
-
-enum class PartyMemberID {
-  MARY,
-  ERWIN,
-};
-
-enum class TechCostType {
-  MORALE,
-  LIFE
-};
-
-enum class EnemyID {
-  DUMMY = -1,
-  SERVANT
-};
-
 enum class TroopID {
   INVALID = -1,
   CD_TROOP1,
@@ -111,15 +121,46 @@ enum class TroopID {
   #endif // !NDEBUG
 };
 
+enum class CombatantTeam {
+  PARTY,
+  ENEMY
+};
+
+enum class TechCostType {
+  MORALE,
+  LIFE
+};
+
+enum class PartyMemberID {
+  MARY,
+  ERWIN,
+  XANDER,
+};
+
+enum class EnemyID {
+  DUMMY = -1,
+  SERVANT
+};
+
+enum class ProjectileID {
+  DUMMY = -1,
+  BASEBALL
+};
+
 enum class ActionID {
   ATTACK,
   GHOST_STEP,
   EVADE,
   KNIFE_CLEAVE,
   KNIFE_PIERCER,
+  BAT_SWING,
+  BAT_HAILMARY,
   USE_ITEM,
   ERWIN_PROVOKE,
-  ERWIN_3RD_PARTY
+  ERWIN_3RDPARTY,
+  XANDER_HANDBLADE,
+  XANDER_TAILWHIP,
+  XANDER_METEOR
 };
 
 enum class StatusID {
@@ -186,7 +227,6 @@ enum class ActorEVT {
 };
 
 enum class SequenceID {
-  SAVE,
   REST,
   REJECT,
   INCAP,
@@ -199,10 +239,12 @@ enum class SequenceID {
 };
 
 enum class CombatEVT {
+  DELETE_ENTITY,
+  CREATE_PROJECTILE,
   CREATE_DMG_NUM,
   CREATE_STAT_TXT,
   CREATE_AFTERIMAGE,
-  DELETE_ENTITY,
+  COMBO_BROKEN,
   OPEN_ITEM_HUD,
   REMOVE_ITEM,
   START_TOAST,
@@ -212,11 +254,12 @@ enum class CombatEVT {
 };
 
 enum class CombatantEVT {
-  TOOK_DAMAGE,
+  DAMAGE_TAKEN,
   MORALE_GAINED,
   EFFECT_GAINED,
   EFFECT_LOST,
   WARNING,
+  WARNING_PROJ,
   EVADED_ATTACK
 };
 

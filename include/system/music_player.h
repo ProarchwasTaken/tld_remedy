@@ -25,6 +25,8 @@ public:
   void update();
   void loopingLogic();
   void volumeFading();
+
+  std::string loaded;
 private:
   Music primary;
   StreamState state = StreamState::NEUTRAL;

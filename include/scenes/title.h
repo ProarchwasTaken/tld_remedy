@@ -41,8 +41,7 @@ private:
   };
 
   std::array<TitleOption, 3>::iterator selected = options.begin();
-  float blink_clock = 0.0;
-
-  bool valid_session;
   std::unordered_set<TitleOption> disallowed;
+  float blink_clock = 0.0;
+  bool valid_session;
 };
