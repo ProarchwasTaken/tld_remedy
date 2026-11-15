@@ -6,7 +6,7 @@
          "id":2,
          "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_01.png",
          "imageheight":192,
-         "imagewidth":576,
+         "imagewidth":448,
          "name":"Map Image",
          "opacity":1,
          "type":"imagelayer",
@@ -18,7 +18,7 @@
          "id":9,
          "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_01o.png",
          "imageheight":192,
-         "imagewidth":576,
+         "imagewidth":448,
          "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
@@ -34,7 +34,7 @@
          "objects":[
                 {
                  "height":0,
-                 "id":14,
+                 "id":15,
                  "name":"",
                  "polyline":[
                         {
@@ -42,27 +42,11 @@
                          "y":0
                         }, 
                         {
-                         "x":236,
+                         "x":400,
                          "y":0
                         }, 
                         {
-                         "x":236,
-                         "y":4
-                        }, 
-                        {
-                         "x":276,
-                         "y":4
-                        }, 
-                        {
-                         "x":276,
-                         "y":0
-                        }, 
-                        {
-                         "x":528,
-                         "y":0
-                        }, 
-                        {
-                         "x":528,
+                         "x":400,
                          "y":64
                         }, 
                         {
@@ -84,10 +68,6 @@
                         {
                          "x":0,
                          "y":16
-                        }, 
-                        {
-                         "x":0,
-                         "y":0
                         }],
                  "rotation":0,
                  "type":"",
@@ -129,7 +109,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":288,
+                 "x":224,
                  "y":128
                 }, 
                 {
@@ -153,7 +133,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":288,
+                 "x":224,
                  "y":112
                 }, 
                 {
@@ -201,7 +181,7 @@
                  "type":"rem_01-2",
                  "visible":true,
                  "width":0,
-                 "x":536,
+                 "x":408,
                  "y":128
                 }],
          "opacity":1,
@@ -289,7 +269,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":544,
+                 "x":416,
                  "y":96
                 }],
          "opacity":1,
@@ -337,8 +317,8 @@
                  "type":"Supplies",
                  "visible":true,
                  "width":0,
-                 "x":48,
-                 "y":112
+                 "x":96,
+                 "y":120
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -371,7 +351,7 @@
          "y":0
         }],
  "nextlayerid":10,
- "nextobjectid":15,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "properties":[
         {
@@ -386,5 +366,5 @@
  "tilewidth":16,
  "type":"map",
  "version":"1.10",
- "width":36
+ "width":28
 }
