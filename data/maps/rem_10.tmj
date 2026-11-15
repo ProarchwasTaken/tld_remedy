@@ -6,8 +6,20 @@
          "id":2,
          "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_10.png",
          "imageheight":192,
-         "imagewidth":576,
+         "imagewidth":448,
          "name":"Map Image",
+         "opacity":1,
+         "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "id":9,
+         "image":"..\/..\/..\/..\/Documents\/remedy_assets\/maps\/graphics\/cathedral\/rem_10o.png",
+         "imageheight":192,
+         "imagewidth":448,
+         "name":"Overlay Image",
          "opacity":1,
          "type":"imagelayer",
          "visible":true,
@@ -26,19 +38,19 @@
                  "name":"",
                  "polyline":[
                         {
-                         "x":0,
+                         "x":-128,
                          "y":0
                         }, 
                         {
-                         "x":0,
+                         "x":-128,
                          "y":32
                         }, 
                         {
-                         "x":-16,
+                         "x":-144,
                          "y":32
                         }, 
                         {
-                         "x":-16,
+                         "x":-144,
                          "y":48
                         }, 
                         {
@@ -50,31 +62,31 @@
                          "y":-16
                         }, 
                         {
-                         "x":-128,
+                         "x":-192,
                          "y":-16
                         }, 
                         {
-                         "x":-128,
+                         "x":-192,
                          "y":-32
                         }, 
                         {
-                         "x":-96,
+                         "x":-160,
                          "y":-32
                         }, 
                         {
-                         "x":-96,
+                         "x":-160,
                          "y":-16
                         }, 
                         {
-                         "x":-16,
+                         "x":-144,
                          "y":-16
                         }, 
                         {
-                         "x":-16,
+                         "x":-144,
                          "y":0
                         }, 
                         {
-                         "x":0,
+                         "x":-128,
                          "y":0
                         }],
                  "rotation":0,
@@ -117,7 +129,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":464,
+                 "x":320,
                  "y":128
                 }, 
                 {
@@ -141,7 +153,7 @@
                  "type":"initial",
                  "visible":true,
                  "width":0,
-                 "x":480,
+                 "x":336,
                  "y":128
                 }, 
                 {
@@ -165,7 +177,7 @@
                  "type":"rem_10-1",
                  "visible":true,
                  "width":0,
-                 "x":536,
+                 "x":408,
                  "y":128
                 }, 
                 {
@@ -189,7 +201,7 @@
                  "type":"rem_10-2",
                  "visible":true,
                  "width":0,
-                 "x":448,
+                 "x":384,
                  "y":104
                 }, 
                 {
@@ -263,7 +275,7 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":544,
+                 "x":416,
                  "y":112
                 }, 
                 {
@@ -301,7 +313,7 @@
                  "type":"",
                  "visible":true,
                  "width":32,
-                 "x":432,
+                 "x":368,
                  "y":80
                 }, 
                 {
@@ -384,7 +396,7 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":9,
+ "nextlayerid":10,
  "nextobjectid":13,
  "orientation":"orthogonal",
  "properties":[
@@ -400,5 +412,5 @@
  "tilewidth":16,
  "type":"map",
  "version":"1.10",
- "width":36
+ "width":28
 }
