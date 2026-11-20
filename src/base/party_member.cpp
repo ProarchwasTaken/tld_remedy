@@ -495,7 +495,7 @@ bool PartyMember::deathSavingThrow() {
     return false;
   }
 
-  float save_chance = 0.50 + resilience;
+  float save_chance = 0.80 + resilience;
   PLOGD << "Base Chance: " << save_chance;
 
   save_chance = applySavePenalties(save_chance);
@@ -546,11 +546,6 @@ float PartyMember::applySavePenalties(float chance) {
     switch (effect->id) {
       case StatusID::BROKEN_ARM: 
       case StatusID::CRIPPLED_LEG: {
-        chance -= 0.10;
-        break;
-      }
-      case StatusID::BLEEDING:
-      case StatusID::DESPONDENT: {
         chance -= 0.15;
         break;
       }
@@ -559,13 +554,18 @@ float PartyMember::applySavePenalties(float chance) {
         chance -= 0.20;
         break;
       }
+      case StatusID::BLEEDING:
+      case StatusID::DESPONDENT: {
+        chance -= 0.25;
+        break;
+      }
       default: {
         assert(effect->id != StatusID::NONE);
       }
     }
   }
 
-  if (persistent >= 2) {
+  if (persistent > 2) {
     chance = chance / persistent;
   }
 
