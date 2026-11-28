@@ -78,7 +78,7 @@ void RestMenuScene::setupCharacters() {
     }
     case CompanionID::XANDER: {
       com_sprite = &atlas.sprites[3];
-      com_position = {-35, -55};
+      com_position = {-44, -54};
       break;
     }
   }
